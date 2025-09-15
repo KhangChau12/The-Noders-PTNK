@@ -1,0 +1,181 @@
+'use client'
+
+import { createContext, useContext, useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase'
+import { auth } from '@/lib/auth'
+import { AuthContextType, AuthUser, AuthSession } from '@/types/auth'
+import { Profile } from '@/types/database'
+
+const AuthContext = createContext<AuthContextType | null>(null)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [session, setSession] = useState<AuthSession | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let isMounted = true
+    let profileRequestInProgress = false
+
+    // Helper function to fetch profile safely
+    const fetchProfile = async (userId: string, setLoadingState = true) => {
+      if (profileRequestInProgress) return null
+
+      profileRequestInProgress = true
+      if (setLoadingState) setProfileLoading(true)
+
+      try {
+        const userProfile = await auth.getProfile(userId)
+        if (isMounted) {
+          if (userProfile) {
+            setProfile(userProfile)
+          } else {
+            setProfile(null)
+          }
+        }
+        return userProfile
+      } catch (error) {
+        console.error('Error loading profile:', error)
+        if (isMounted) setProfile(null)
+        return null
+      } finally {
+        profileRequestInProgress = false
+        if (isMounted && setLoadingState) setProfileLoading(false)
+      }
+    }
+
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (!isMounted) return
+
+        if (error) {
+          console.error('AuthProvider: Error getting session:', error)
+          setLoading(false)
+          return
+        }
+
+        if (session?.user) {
+          setUser(session.user as AuthUser)
+          setSession(session as AuthSession)
+          await fetchProfile(session.user.id)
+        } else {
+          setUser(null)
+          setSession(null)
+          setProfile(null)
+        }
+      } catch (error) {
+        console.error('AuthProvider: Error in getInitialSession:', error)
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    getInitialSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!isMounted) return
+
+        try {
+          if (session?.user) {
+            setUser(session.user as AuthUser)
+            setSession(session as AuthSession)
+            await fetchProfile(session.user.id, false)
+          } else {
+            setUser(null)
+            setSession(null)
+            setProfile(null)
+          }
+        } catch (error) {
+          console.error('Error in auth state change:', error)
+        }
+
+        if (isMounted) setLoading(false)
+      }
+    )
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const signIn = async (email: string, password: string) => {
+    const result = await auth.signIn(email, password)
+    return result
+  }
+
+  const signOut = async () => {
+    try {
+      // Clear all auth data first
+      await auth.clearAllAuthData()
+
+      // Then sign out from Supabase
+      await auth.signOut()
+
+      // Clear local state
+      setUser(null)
+      setSession(null)
+      setProfile(null)
+
+      // Force page reload to clear any remaining cache
+      window.location.href = '/login'
+    } catch (error) {
+      console.error('Error during signOut:', error)
+      // Force clear even if error occurs
+      setUser(null)
+      setSession(null)
+      setProfile(null)
+      window.location.href = '/login'
+    }
+  }
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return { error: 'Not authenticated' }
+
+    const result = await auth.updateProfile(user.id, updates)
+    if (result.profile) {
+      setProfile(result.profile)
+    }
+    return result
+  }
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    return await auth.changePassword(currentPassword, newPassword)
+  }
+
+  const isAdmin = profile?.role === 'admin'
+
+  const value: AuthContextType = {
+    user,
+    profile,
+    session,
+    loading,
+    signIn,
+    signOut,
+    updateProfile,
+    changePassword,
+    isAdmin,
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}

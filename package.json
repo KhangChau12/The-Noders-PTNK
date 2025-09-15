@@ -1,0 +1,38 @@
+{
+  "name": "ai-agent-club",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/auth-ui-react": "^0.4.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "clsx": "^2.0.0",
+    "dotenv": "^17.2.2",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^0.294.0",
+    "marked": "^16.2.1",
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-player": "^2.13.0",
+    "recharts": "^2.8.0",
+    "tailwind-merge": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.0.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,285 @@
+===========================================
+    AI AGENT CLUB - REAL INFORMATION FORM
+===========================================
+
+Instructions: Điền thông tin thực tế của câu lạc bộ vào các [BLANK] bên dưới.
+Sau khi điền xong, Claude sẽ dùng form này để update toàn bộ code với thông tin thật.
+
+===========================================
+SECTION 1: CLUB BASIC INFORMATION
+===========================================
+
+1.1 TÊN CÂULẠC BỘ
+Current example: "AI Agent Club"
+Your club name: [____________________________]
+
+1.2 SLOGAN/TAGLINE CHÍNH
+Current example: "Building Tomorrow's Intelligence"
+Your tagline: [____________________________]
+
+1.3 MÔ TẢ CÂULẠC BỘ NGẮN (1-2 câu)
+Current example: "A portfolio website for the AI Agent Workshop Club"
+Your description: [____________________________]
+
+1.4 MÔ TẢ DÀI CHO TRANG CHỦ (2-3 câu)
+Current example: "We're a community of passionate developers, researchers, and innovators exploring the frontiers of artificial intelligence through collaborative projects."
+Your long description: [____________________________]
+
+1.5 CÂU CHUYỆN VỀ WORKSHOP BAN ĐẦU (2-3 câu)
+Current example: "Interested in AI, machine learning, or collaborative development? We'd love to have you join our growing community of innovators."
+Your origin story: [____________________________]
+
+===========================================
+SECTION 2: CONTACT & SOCIAL LINKS
+===========================================
+
+2.1 EMAIL LIÊN HỆ
+Current example: Not specified
+Your email: phuckhangtdn@gmail.com
+
+2.2 FACEBOOK PAGE
+Current example: Not specified
+Your Facebook: [____________________________]
+
+===========================================
+SECTION 3: CLUB STATISTICS (Real Numbers)
+===========================================
+
+3.1 SỐ THÀNH VIÊN HIỆN TẠI
+Current example: "25+"
+Your member count: [____________________________]
+
+3.2 SỐ DỰ ÁN ĐÃ HOÀN THÀNH
+Current example: "12+"
+Your project count: [____________________________]
+
+3.3 SỐ CÔNG NGHỆ/TECH STACK USED
+Current example: "20+"
+Your tech count: [____________________________]
+
+3.4 SỐ WORKSHOP/EVENT ĐÃ TỔ CHỨC
+Current example: "8+"
+Your workshop count: [____________________________]
+
+===========================================
+SECTION 4: FEATURED PROJECTS (3-6 projects)
+===========================================
+
+PROJECT 1:
+---------
+Title: [____________________________]
+Current example: "Smart Chat Assistant"
+
+Description (1-2 sentences): [____________________________]
+Current example: "AI-powered chatbot with natural language processing"
+
+Tech Stack (comma separated): [____________________________]
+Current example: "Python, OpenAI, FastAPI"
+
+Status: [Active/Completed/Archived]
+
+GitHub URL (if public): [____________________________]
+
+Video Demo URL (YouTube/Vimeo, if available): [____________________________]
+
+Thumbnail Image URL: [____________________________]
+
+PROJECT 2:
+---------
+Title: [____________________________]
+Description: [____________________________]
+Tech Stack: [____________________________]
+Status: [____________________________]
+GitHub URL: [____________________________]
+Video Demo URL: [____________________________]
+Thumbnail Image URL: [____________________________]
+
+PROJECT 3:
+---------
+Title: [____________________________]
+Description: [____________________________]
+Tech Stack: [____________________________]
+Status: [____________________________]
+GitHub URL: [____________________________]
+Video Demo URL: [____________________________]
+Thumbnail Image URL: [____________________________]
+
+[Add more projects if needed - copy format above]
+
+===========================================
+SECTION 5: CORE TEAM MEMBERS (4-8 people)
+===========================================
+
+MEMBER 1 (Should be Admin):
+--------------------------
+Full Name: [____________________________]
+Username (for website): [____________________________]
+Current example: "admin_dev"
+
+Role in Club: [____________________________]
+Current example: "Admin User (Dev)" or "Founder" or "President"
+
+Bio (2-3 sentences): [____________________________]
+Current example: "Development admin account for testing. Passionate about AI and community building."
+
+Skills (comma separated): [____________________________]
+Current example: "Python, Machine Learning, Leadership, Project Management, React, Node.js"
+
+Avatar Image URL: [____________________________]
+GitHub (optional): [____________________________]
+LinkedIn (optional): [____________________________]
+Twitter (optional): [____________________________]
+Facebook (optional): [____________________________]
+Website (optional): [____________________________]
+
+MEMBER 2:
+---------
+Full Name: [____________________________]
+Username: [____________________________]
+Role in Club: [____________________________]
+Bio: [____________________________]
+Skills: [____________________________]
+Avatar Image URL: [____________________________]
+GitHub (optional): [____________________________]
+LinkedIn (optional): [____________________________]
+Twitter (optional): [____________________________]
+Facebook (optional): [____________________________]
+Website (optional): [____________________________]
+
+MEMBER 3:
+---------
+Full Name: [____________________________]
+Username: [____________________________]
+Role in Club: [____________________________]
+Bio: [____________________________]
+Skills: [____________________________]
+Avatar Image URL: [____________________________]
+GitHub (optional): [____________________________]
+LinkedIn (optional): [____________________________]
+Twitter (optional): [____________________________]
+Facebook (optional): [____________________________]
+Website (optional): [____________________________]
+
+MEMBER 4:
+---------
+Full Name: [____________________________]
+Username: [____________________________]
+Role in Club: [____________________________]
+Bio: [____________________________]
+Skills: [____________________________]
+Avatar Image URL: [____________________________]
+GitHub (optional): [____________________________]
+LinkedIn (optional): [____________________________]
+Twitter (optional): [____________________________]
+Facebook (optional): [____________________________]
+Website (optional): [____________________________]
+
+[Add more members if needed - copy format above]
+
+===========================================
+SECTION 6: PROJECT CONTRIBUTIONS
+===========================================
+
+Instructions: Đối với mỗi project ở Section 4, list ra ai đóng góp và % đóng góp
+
+PROJECT 1 CONTRIBUTIONS:
+-----------------------
+Member 1 - [Full Name]: [___%] - Role: [____________________________]
+Current example: "Alice Johnson: 40% - Role: Project Lead"
+
+Member 2 - [Full Name]: [___%] - Role: [____________________________]
+Member 3 - [Full Name]: [___%] - Role: [____________________________]
+[Add more contributors as needed]
+
+PROJECT 2 CONTRIBUTIONS:
+-----------------------
+Member 1 - [Full Name]: [___%] - Role: [____________________________]
+Member 2 - [Full Name]: [___%] - Role: [____________________________]
+Member 3 - [Full Name]: [___%] - Role: [____________________________]
+
+PROJECT 3 CONTRIBUTIONS:
+-----------------------
+Member 1 - [Full Name]: [___%] - Role: [____________________________]
+Member 2 - [Full Name]: [___%] - Role: [____________________________]
+Member 3 - [Full Name]: [___%] - Role: [____________________________]
+
+===========================================
+SECTION 7: FEATURES & WHAT WE DO
+===========================================
+
+7.1 FEATURE 1 TITLE
+Current example: "AI Innovation"
+Your feature 1: [____________________________]
+
+7.1 FEATURE 1 DESCRIPTION
+Current example: "Exploring cutting-edge AI technologies and building intelligent solutions."
+Your description: [____________________________]
+
+7.2 FEATURE 2 TITLE
+Current example: "Collaborative Development"
+Your feature 2: [____________________________]
+
+7.2 FEATURE 2 DESCRIPTION
+Current example: "Working together on projects using modern tech stacks and best practices."
+Your description: [____________________________]
+
+7.3 FEATURE 3 TITLE
+Current example: "Knowledge Sharing"
+Your feature 3: [____________________________]
+
+7.3 FEATURE 3 DESCRIPTION
+Current example: "Learning from each other and growing together as a community."
+Your description: [____________________________]
+
+7.4 FEATURE 4 TITLE
+Current example: "Rapid Prototyping"
+Your feature 4: [____________________________]
+
+7.4 FEATURE 4 DESCRIPTION
+Current example: "Quickly turning ideas into working prototypes and MVPs."
+Your description: [____________________________]
+
+===========================================
+SECTION 8: VISUAL ASSETS
+===========================================
+
+8.1 CLUB LOGO URL
+Current: Generated placeholder
+Your logo URL: [____________________________]
+
+8.2 CLUB FAVICON URL
+Current: Default Next.js
+Your favicon URL: [____________________________]
+
+8.3 DEFAULT AVATAR COLOR SCHEME
+Current: Blue (#2563EB)
+Your preferred color: [____________________________]
+
+===========================================
+SECTION 9: ADDITIONAL PAGES CONTENT
+===========================================
+
+9.1 ABOUT US PAGE CONTENT (if different from description above)
+[____________________________]
+
+9.2 JOIN US CALL-TO-ACTION TEXT
+Current example: "Interested in joining? We'd love to have you join our growing community"
+Your CTA: [____________________________]
+
+9.3 CONTACT INFORMATION
+Current: Generic
+Your contact info: [____________________________]
+
+===========================================
+END OF FORM
+===========================================
+
+INSTRUCTIONS FOR CLAUDE:
+After I fill this form, use the information to:
+1. Update all hardcoded strings in the codebase
+2. Generate proper database migration with real data
+3. Update constants, configs, and content
+4. Create realistic sample data matching the theme
+5. Ensure all placeholder content is replaced with real information
+
+===========================================
