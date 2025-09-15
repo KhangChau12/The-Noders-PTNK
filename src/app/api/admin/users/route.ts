@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', currentUser.id)
-      .single()
+      .single() as { data: { role: string } | null }
 
     if (!currentProfile || currentProfile.role !== 'admin') {
       return NextResponse.json(
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     // Get all profiles using admin client
     const { data: profiles, error: profilesError } = await adminSupabase
       .from('profiles')
-      .select('*')
+      .select('*') as { data: any[] | null, error: any }
 
     if (profilesError) {
       return NextResponse.json(
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', currentUser.id)
-      .single()
+      .single() as { data: { role: string } | null }
 
     if (!currentProfile || currentProfile.role !== 'admin') {
       return NextResponse.json(

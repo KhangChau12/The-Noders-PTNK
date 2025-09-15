@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
@@ -43,6 +44,7 @@ interface Project {
 }
 
 function ProjectManagementPage() {
+  const { session } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -89,7 +91,7 @@ function ProjectManagementPage() {
       const { project, error } = await projectQueries.updateProject(projectId, {
         status: newStatus,
         updated_at: new Date().toISOString()
-      })
+      }, session)
 
       if (!error && project) {
         // Update local state
@@ -113,7 +115,7 @@ function ProjectManagementPage() {
 
     try {
       setUpdatingProjectId(projectId)
-      const { error } = await projectQueries.deleteProject(projectId)
+      const { error } = await projectQueries.deleteProject(projectId, session)
 
       if (!error) {
         await fetchProjects() // Refresh list

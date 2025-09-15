@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', currentUser.id)
-      .single()
+      .single() as { data: { role: string } | null, error: any }
 
     if (profileError) {
       console.error('CreateUser API: Error fetching user profile:', profileError.message)
@@ -210,7 +210,7 @@ export async function POST(request: NextRequest) {
 
     const { data: newProfile, error: profileInsertError } = await adminClient
       .from('profiles')
-      .insert(profileInsertData)
+      .insert(profileInsertData as any)
       .select()
       .single()
 

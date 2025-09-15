@@ -147,7 +147,7 @@ export async function POST(
     const { data: currentContributors } = await supabase
       .from('project_contributors')
       .select('contribution_percentage')
-      .eq('project_id', projectId)
+      .eq('project_id', projectId) as { data: any[] | null }
 
     const totalPercentage = (currentContributors || [])
       .reduce((sum, c) => sum + (c.contribution_percentage || 0), 0) + contribution_percentage
@@ -167,7 +167,7 @@ export async function POST(
         user_id,
         contribution_percentage,
         role_in_project
-      })
+      } as any)
       .select(`
         id,
         contribution_percentage,
@@ -275,7 +275,7 @@ export async function PUT(
     }
 
     // Update contributor
-    const { data: updatedContributor, error: updateError } = await supabase
+    const { data: updatedContributor, error: updateError } = await (supabase as any)
       .from('project_contributors')
       .update(updateData)
       .eq('id', contributor_id)
@@ -368,7 +368,7 @@ export async function DELETE(
       .select('user_id')
       .eq('id', contributorId)
       .eq('project_id', projectId)
-      .single()
+      .single() as { data: { user_id: string } | null }
 
     if (!contributor) {
       return NextResponse.json(

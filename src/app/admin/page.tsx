@@ -12,8 +12,8 @@ import Link from 'next/link'
 
 function AdminDashboardContent() {
   // Manual loading state
-  const [members, setMembers] = useState([])
-  const [projects, setProjects] = useState([])
+  const [members, setMembers] = useState<any[]>([])
+  const [projects, setProjects] = useState<any[]>([])
   const [membersLoading, setMembersLoading] = useState(false)
   const [projectsLoading, setProjectsLoading] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
