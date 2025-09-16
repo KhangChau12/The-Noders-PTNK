@@ -122,15 +122,15 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
               What We Do
             </h2>
-            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
               Our club focuses on hands-on learning, collaboration, and innovation in the AI space.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <Card key={index} className="text-center hover-lift">
-                <CardContent className="pt-6">
+                <CardContent className="pt-2">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-blue/20 rounded-full mb-4 text-primary-blue">
                     {feature.icon}
                   </div>
@@ -154,7 +154,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Recent Projects
             </h2>
-            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
               Check out some of our latest innovations and collaborative efforts.
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {recentProjects.map((project, index) => (
               <Card key={index} variant="hover" className="hover-lift">
-                <CardContent className="p-6">
+                <CardContent className="p-1">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold text-text-primary">
                       {project.title}
@@ -214,7 +214,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Latest News & Updates
             </h2>
-            <p className="text-text-secondary max-w-2xl mx-auto">
+            <p className="text-text-secondary max-w-3xl mx-auto">
               Stay up to date with our latest announcements, project showcases, and community highlights.
             </p>
           </div>
@@ -226,7 +226,7 @@ export default function HomePage() {
                 <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 flex items-center justify-center">
                   <Newspaper className="w-12 h-12 text-primary-blue" />
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="pt-4">
                   <Badge variant="primary" size="sm" className="mb-2">Announcement</Badge>
                   <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
                     AI Agent Club Launches Advanced ML Workshop Series
@@ -257,7 +257,7 @@ export default function HomePage() {
                 <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-success/20 to-accent-cyan/20 flex items-center justify-center">
                   <User className="w-12 h-12 text-success" />
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="pt-4">
                   <Badge variant="success" size="sm" className="mb-2">Member Spotlight</Badge>
                   <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
                     Alice Johnson: From Beginner to AI Expert

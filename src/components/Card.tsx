@@ -40,7 +40,7 @@ function Card({ className, variant = 'default', padding = 'md', ...props }: Card
 function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-col space-y-1.5', className)}
+      className={cn('mb-4 flex flex-col space-y-1.5', className)}
       {...props}
     />
   )

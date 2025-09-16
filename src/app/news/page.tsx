@@ -73,7 +73,7 @@ function NewsCard({ post, featured = false }: { post: NewsPost; featured?: boole
           </div>
         )}
 
-        <CardContent className="p-6">
+        <CardContent className="p-2">
           <div className="flex items-center gap-4 text-xs text-text-tertiary mb-3">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
@@ -304,8 +304,8 @@ export default function NewsPage() {
               ))}
             </div>
           </div>
-        ) : posts.length === 0 ? (
-          <Card className="text-center py-12">
+        ) : (!loading && posts.length === 0) ? (
+          <Card className="text-center py-12 mb-4">
             <CardContent>
               <div className="text-6xl mb-4 opacity-50">📰</div>
               <h3 className="text-xl font-semibold text-text-primary mb-2">

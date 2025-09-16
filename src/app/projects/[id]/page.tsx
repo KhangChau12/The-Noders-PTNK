@@ -240,7 +240,7 @@ export default function ProjectDetailPage() {
               </div>
 
               {project.description && (
-                <p className="text-lg text-text-secondary mb-6">
+                <p className="text-lg text-text-secondary">
                   {project.description}
                 </p>
               )}

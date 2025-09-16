@@ -197,9 +197,9 @@ function DashboardContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="-mb-2 -mt-2">
                   {userStats.recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between py-3 border-b border-dark-border last:border-b-0">
+                    <div key={index} className="flex items-center justify-between py-4 border-b border-dark-border last:border-b-0">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-primary-blue/20 rounded-full flex items-center justify-center">
                           {activity.type === 'contribution' && <Award className="w-4 h-4 text-primary-blue" />}

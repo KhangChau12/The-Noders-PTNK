@@ -103,7 +103,7 @@ export default function ProjectsPage() {
           {/* Expanded Filters */}
           {showFilters && (
             <Card className="mt-4">
-              <CardContent className="p-4">
+              <CardContent className="">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Status Filter */}
                   <div>

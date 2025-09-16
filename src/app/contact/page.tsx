@@ -213,7 +213,7 @@ export default function ContactPage() {
                 </h3>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-3 bg-dark-surface rounded-lg">
+                <div className="py-1 bg-dark-surface rounded-lg">
                   <h4 className="font-medium text-text-primary text-sm mb-1">
                     How can I join the club?
                   </h4>
@@ -222,7 +222,7 @@ export default function ContactPage() {
                   </p>
                 </div>
 
-                <div className="p-3 bg-dark-surface rounded-lg">
+                <div className="py-1 bg-dark-surface rounded-lg">
                   <h4 className="font-medium text-text-primary text-sm mb-1">
                     Can I contribute to projects?
                   </h4>
@@ -231,7 +231,7 @@ export default function ContactPage() {
                   </p>
                 </div>
 
-                <div className="p-3 bg-dark-surface rounded-lg">
+                <div className="py-1 bg-dark-surface rounded-lg">
                   <h4 className="font-medium text-text-primary text-sm mb-1">
                     Do you offer mentorship?
                   </h4>
@@ -298,13 +298,13 @@ export default function ContactPage() {
                             key={option.value}
                             type="button"
                             onClick={() => handleChange('subject', option.value)}
-                            className={`p-3 rounded-lg border transition-colors text-left ${
+                            className={`px-3 py-2 flex items-center gap-2 rounded-lg border transition-colors text-left ${
                               formData.subject === option.value
                                 ? 'border-primary-blue bg-primary-blue/10'
                                 : 'border-dark-border hover:border-dark-border/60'
                             }`}
                           >
-                            <Icon className={`w-4 h-4 mb-2 ${
+                            <Icon className={`w-4 h-4 ${
                               formData.subject === option.value ? 'text-primary-blue' : 'text-text-tertiary'
                             }`} />
                             <p className={`text-sm font-medium ${

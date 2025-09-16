@@ -117,7 +117,7 @@ export default function MembersPage() {
                 return (
                   <Link key={member.id} href={`/members/${member.username}`}>
                     <Card variant="interactive" className="h-full hover-lift">
-                      <CardContent className="p-6 text-center">
+                      <CardContent className="p-2 text-center">
                         {/* Avatar */}
                         <div className="relative mx-auto mb-4 flex justify-center">
                           <Avatar
@@ -125,8 +125,8 @@ export default function MembersPage() {
                             size="xl"
                           />
                           {member.role === 'admin' && (
-                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-primary-blue rounded-full flex items-center justify-center">
-                              <Award className="w-3 h-3 text-white" />
+                            <div className="absolute -top-1 -right-1 w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center">
+                              <Award className="w-5 h-5 text-white" />
                             </div>
                           )}
                         </div>

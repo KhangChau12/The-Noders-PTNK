@@ -105,9 +105,9 @@ export function LoginForm() {
           <div className="mt-6 text-center">
             <p className="text-sm text-text-secondary">
               Don't have an account?{' '}
-              <span className="text-primary-blue">
+              <a href={"/contact"} className="text-primary-blue">
                 Contact an admin to get access
-              </span>
+              </a>
             </p>
           </div>
         </CardContent>
