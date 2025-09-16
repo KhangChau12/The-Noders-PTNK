@@ -5,6 +5,7 @@ import { Badge } from '@/components/Badge'
 import { SITE_CONFIG } from '@/lib/constants'
 import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper } from 'lucide-react'
 
+
 export default function HomePage() {
   const features = [
     {
