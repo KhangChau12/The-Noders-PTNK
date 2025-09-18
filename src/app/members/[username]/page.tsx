@@ -216,7 +216,7 @@ function ActivityTimeline({ member }: ActivityTimelineProps) {
       description: 'Added natural language processing features'
     },
     {
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toDateString(),
+      date: new Date(member.created_at).toDateString(),
       type: 'join',
       title: 'Joined AI Agent Club',
       description: `Welcome ${member.full_name || member.username} to the team!`

@@ -379,6 +379,8 @@ export const memberQueries = {
       return { members: null, error }
     }
 
+    
+
     // For now, return without project contributions to prevent N+1
     // TODO: Optimize with proper JOIN queries later
     const membersWithProjects = data.map(member => ({

@@ -55,6 +55,7 @@ export interface ProjectContributor {
   contribution_percentage: number
   role_in_project: string | null
   created_at: string
+  description: string
 }
 
 export interface SocialLinks {
