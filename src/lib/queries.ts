@@ -315,17 +315,17 @@ export const projectQueries = {
   // Get project statistics
   async getProjectStats() {
     const supabase = createClient()
-    
+
     const { data: projects } = await supabase
       .from('projects')
       .select('status, tech_stack')
-    
+
     if (!projects) return null
-    
+
     const total_projects = projects.length
     const active_projects = projects.filter(p => p.status === 'active').length
     const archived_projects = projects.filter(p => p.status === 'archived').length
-    
+
     // Count technology usage
     const techCount: Record<string, number> = {}
     projects.forEach(project => {
@@ -333,12 +333,12 @@ export const projectQueries = {
         techCount[tech] = (techCount[tech] || 0) + 1
       })
     })
-    
+
     const popular_technologies = Object.entries(techCount)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
-    
+
     return {
       total_projects,
       active_projects,
@@ -379,14 +379,14 @@ export const memberQueries = {
       return { members: null, error }
     }
 
-    
+
 
     // For now, return without project contributions to prevent N+1
     // TODO: Optimize with proper JOIN queries later
     const membersWithProjects = data.map(member => ({
       ...member,
       contributed_projects: [],
-      created_projects: []
+      created_projects: [],
     }))
 
     return { members: membersWithProjects, error: null }
@@ -417,8 +417,8 @@ export const memberQueries = {
     return {
       member: {
         ...member,
-        contributed_projects: contributions || [],
-        created_projects: [] // Keep simple for now
+        contributed_projects: contributions?.filter(a => !a || a.role_in_project !== 'Creator') || [],
+        created_projects: contributions?.filter(a => a && a.role_in_project === 'Creator') || [] // Keep simple for now
       },
       error: null
     }
@@ -427,17 +427,17 @@ export const memberQueries = {
   // Get member statistics
   async getMemberStats() {
     const supabase = createClient()
-    
+
     const { data: profiles } = await supabase
       .from('profiles')
       .select('role, skills, created_at')
-    
+
     if (!profiles) return null
-    
+
     const total_members = profiles.length
     const total_admins = profiles.filter(p => p.role === 'admin').length
     const total_regular_members = total_members - total_admins
-    
+
     // Count skills
     const skillCount: Record<string, number> = {}
     profiles.forEach(profile => {
@@ -445,19 +445,19 @@ export const memberQueries = {
         skillCount[skill] = (skillCount[skill] || 0) + 1
       })
     })
-    
+
     const most_common_skills = Object.entries(skillCount)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
-    
+
     // Recent members (last 30 days)
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    const recent_members = profiles.filter(p => 
+    const recent_members = profiles.filter(p =>
       new Date(p.created_at) > thirtyDaysAgo
     ).length
-    
+
     return {
       total_members,
       total_admins,

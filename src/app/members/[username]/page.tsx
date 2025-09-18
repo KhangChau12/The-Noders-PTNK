@@ -90,8 +90,8 @@ interface ProjectHistoryProps {
 }
 
 function ProjectHistory({ projects, username }: ProjectHistoryProps) {
-  const contributedProjects = projects.filter(p => p.project)
-  const createdProjects = projects.filter(p => !p.project)
+  const contributedProjects = projects.filter(p => p.role_in_project !== 'Creator')
+  const createdProjects = projects.filter(p => p.role_in_project === 'Creator')
 
   return (
     <div className="space-y-6">
@@ -164,21 +164,21 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
             {createdProjects.slice(0, 3).map((project, index) => (
               <Link
                 key={index}
-                href={`/projects/${project.id}`}
-                className="block p-4 rounded-lg bg-dark-surface hover:bg-dark-border transition-colors"
+                href={`/projects/${project.project_id}`}
+                className="block px-4 py-3 rounded-lg bg-dark-surface border hover:bg-dark-border transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <h5 className="font-medium text-text-primary mb-1">
-                      {project.title}
+                      {project.projects.title}
                     </h5>
                     <p className="text-sm text-text-secondary mb-2 line-clamp-2">
-                      {project.description}
+                      {project.projects.description}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-text-tertiary">
                       <span>Project Lead</span>
                       <Badge variant="secondary" size="sm">
-                        {project.status}
+                        {project.projects.status}
                       </Badge>
                     </div>
                   </div>
@@ -207,14 +207,24 @@ interface ActivityTimelineProps {
 }
 
 function ActivityTimeline({ member }: ActivityTimelineProps) {
-  // Mock timeline data (in real app, this would come from database)
   const timelineItems = [
-    {
-      date: new Date().toDateString(),
-      type: 'project',
-      title: 'Contributed to AI Chat Assistant',
-      description: 'Added natural language processing features'
-    },
+    // Map from member.created_projects as bonus timeline items
+    ...(Array.isArray(member.contributed_projects)
+      ? member.contributed_projects.map((project: any) => ({
+          date: new Date(project.created_at).toDateString(),
+          type: 'project',
+          title: `Created project ${project.projects.title}`,
+          description: project.description || ''
+        }))
+      : []),
+    ...(Array.isArray(member.created_projects)
+      ? member.created_projects.map((project: any) => ({
+          date: new Date(project.created_at).toDateString(),
+          type: 'project',
+          title: `Created project ${project.projects.title}`,
+          description: project.description || ''
+        }))
+      : []),
     {
       date: new Date(member.created_at).toDateString(),
       type: 'join',
@@ -222,6 +232,9 @@ function ActivityTimeline({ member }: ActivityTimelineProps) {
       description: `Welcome ${member.full_name || member.username} to the team!`
     }
   ]
+
+  // Sort timelineItems by date descending (most recent first)
+  timelineItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="space-y-6">
@@ -250,7 +263,9 @@ export default function MemberProfilePage() {
   const router = useRouter()
   const username = params.username as string
 
-  const { member, loading, error } = useMember(username)
+  const { member, loading, error } = useMember(username);
+
+  console.log(member);
 
   if (loading) {
     return (

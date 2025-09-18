@@ -264,21 +264,21 @@ function AdminDashboardContent() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="">
                   <Link href="/admin/users">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
+                    <Button variant="secondary" size="sm" className="mb-2 w-full justify-start">
                       <Users className="w-4 h-4 mr-2" />
                       Manage Members
                     </Button>
                   </Link>
                   <Link href="/admin/projects">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
+                    <Button variant="secondary" size="sm" className="mb-2 w-full justify-start">
                       <FileText className="w-4 h-4 mr-2" />
                       Manage Projects
                     </Button>
                   </Link>
                   <Link href="/admin/settings">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
+                    <Button variant="secondary" size="sm" className="mb-2 w-full justify-start">
                       <Settings className="w-4 h-4 mr-2" />
                       System Settings
                     </Button>
@@ -328,9 +328,9 @@ function AdminDashboardContent() {
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="">
                   {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-4 py-3 border-b border-dark-border last:border-b-0">
+                    <div key={index} className="flex items-center space-x-4 py-4 border-b border-dark-border last:border-b-0">
                       <div className="w-8 h-8 bg-primary-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
                         {activity.type === 'member_joined' && <Users className="w-4 h-4 text-primary-blue" />}
                         {activity.type === 'project_created' && <FileText className="w-4 h-4 text-accent-green" />}
