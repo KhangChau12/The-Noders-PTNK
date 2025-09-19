@@ -10,9 +10,13 @@ import { getInitials } from '@/lib/utils'
 import { Avatar } from '@/components/Avatar'
 import { User, Settings, FileText, Calendar, Award, Mail, Facebook } from 'lucide-react'
 import Link from 'next/link'
+import { useMember } from '@/lib/hooks'
 
 function DashboardContent() {
   const { user, profile, loading } = useAuth()
+  const {member} = useMember(profile?.username || '') || null;
+
+  console.log(member);
 
   if (loading) {
     return (
@@ -47,12 +51,24 @@ function DashboardContent() {
   
   // Mock data for demonstration
   const userStats = {
-    projectsContributed: 5,
-    totalContribution: 87,
+    projectsContributed: member?.contributed_projects.length,
+    totalContribution: member?.contributed_projects && member.contributed_projects.length > 0
+      ? (
+          member.contributed_projects.reduce(
+            (sum, contrib) => sum + (contrib.contribution_percentage || 0),
+            0
+          ) / member.contributed_projects.length
+        )
+      : 0,
     recentActivity: [
-      { type: 'contribution', project: 'AI Chat Assistant', percentage: 25, date: '2 days ago' },
-      { type: 'joined', project: 'ML Model Trainer', date: '1 week ago' },
-      { type: 'created', project: 'Portfolio Website', date: '2 weeks ago' }
+      ...(member?.contributed_projects?.map(contrib => ({
+        type: contrib.role_in_project === 'Creator' ? 'created' : 'contribution',
+        project: contrib.projects.title || 'Unknown Project',
+        percentage: contrib.contribution_percentage || 0,
+        date: contrib.projects?.created_at
+          ? Math.floor((Date.now() - new Date(contrib.projects.created_at).getTime()) / (1000 * 60 * 60 * 24)) + ' day' + (Math.floor((Date.now() - new Date(contrib.projects.created_at).getTime()) / (1000 * 60 * 60 * 24)) != 1 && 's') + ' ago'
+          : 'Unknown date'
+      })) || []),
     ]
   }
 

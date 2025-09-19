@@ -78,5 +78,4 @@ export interface ProfileWithProjects extends Profile {
   contributed_projects: (ProjectContributor & {
     project: Project
   })[]
-  created_projects: Project[]
 }

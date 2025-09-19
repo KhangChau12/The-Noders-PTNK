@@ -303,7 +303,7 @@ export default function MemberProfilePage() {
 
   // Use CSS Avatar component instead of external image
   const socialLinks = member.social_links || {}
-  const totalProjects = (member.contributed_projects?.length || 0) + (member.created_projects?.length || 0)
+  const totalProjects = (member.contributed_projects?.length || 0);
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -476,13 +476,13 @@ export default function MemberProfilePage() {
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">Contributions</span>
                   <span className="font-semibold text-text-primary">
-                    {member.contributed_projects?.length || 0}
+                  {member.contributed_projects?.filter(a => a.role_in_project !== 'Creator').length || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">Created Projects</span>
                   <span className="font-semibold text-text-primary">
-                    {member.created_projects?.length || 0}
+                    {member.contributed_projects?.filter(a => a.role_in_project === 'Creator').length || 0}
                   </span>
                 </div>
               </CardContent>
@@ -499,7 +499,7 @@ export default function MemberProfilePage() {
               <CardContent>
                 {totalProjects > 0 ? (
                   <ProjectHistory
-                    projects={[...(member.contributed_projects || []), ...(member.created_projects || [])]}
+                    projects={member.contributed_projects}
                     username={member.username}
                   />
                 ) : (

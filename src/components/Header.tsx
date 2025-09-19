@@ -135,7 +135,7 @@ export function Header() {
                       </Link>
                     )}
                     <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                      <div className="flex items-center space-x-2 text-sm font-medium text-text-secondary hover:text-primary-blue px-2 py-1">
+                      <div className="flex items-center space-x-2 text-sm font-medium mt-2 text-text-secondary hover:text-primary-blue px-2 py-1">
                         <User className="w-4 h-4" />
                         <span>Dashboard</span>
                       </div>

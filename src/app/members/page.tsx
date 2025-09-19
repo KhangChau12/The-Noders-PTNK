@@ -112,7 +112,7 @@ export default function MembersPage() {
               {members.map((member) => {
                 // Use CSS Avatar component instead of external image
                 const socialLinks = member.social_links || {}
-                const projectCount = (member.contributed_projects?.length || 0) + (member.created_projects?.length || 0)
+                const projectCount = (member.contributed_projects?.length || 0)
                 
                 return (
                   <Link key={member.id} href={`/members/${member.username}`}>

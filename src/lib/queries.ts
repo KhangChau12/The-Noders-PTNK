@@ -386,7 +386,6 @@ export const memberQueries = {
     const membersWithProjects = data.map(member => ({
       ...member,
       contributed_projects: [],
-      created_projects: [],
     }))
 
     return { members: membersWithProjects, error: null }
@@ -417,8 +416,7 @@ export const memberQueries = {
     return {
       member: {
         ...member,
-        contributed_projects: contributions?.filter(a => !a || a.role_in_project !== 'Creator') || [],
-        created_projects: contributions?.filter(a => a && a.role_in_project === 'Creator') || [] // Keep simple for now
+        contributed_projects: contributions || [],
       },
       error: null
     }
