@@ -1,5 +1,5 @@
 import { createClient, clearSupabaseAuth } from './supabase'
-import { AuthUser, AuthSession, CreateMemberData } from '@/types/auth'
+import { CreateMemberData } from '@/types/auth'
 import { Profile } from '@/types/database'
 
 // Profile cache to prevent duplicate requests
@@ -27,30 +27,49 @@ export const auth = {
   // Clear all authentication data from browser storage
   async clearAllAuthData() {
     try {
-      // Clear localStorage
-      const keysToRemove = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
-          keysToRemove.push(key)
-        }
-      }
-      keysToRemove.forEach(key => localStorage.removeItem(key))
+      console.log('Clearing all auth data...')
 
-      // Clear sessionStorage
-      const sessionKeysToRemove = []
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const key = sessionStorage.key(i)
-        if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
-          sessionKeysToRemove.push(key)
+      // Clear localStorage completely
+      if (typeof window !== 'undefined') {
+        const keysToRemove = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
+            keysToRemove.push(key)
+          }
         }
+        keysToRemove.forEach(key => {
+          console.log('Removing localStorage key:', key)
+          localStorage.removeItem(key)
+        })
+
+        // Clear sessionStorage
+        const sessionKeysToRemove = []
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i)
+          if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
+            sessionKeysToRemove.push(key)
+          }
+        }
+        sessionKeysToRemove.forEach(key => {
+          console.log('Removing sessionStorage key:', key)
+          sessionStorage.removeItem(key)
+        })
+
+        // Clear all cookies (if any)
+        document.cookie.split(";").forEach((c) => {
+          const eqPos = c.indexOf("=")
+          const name = eqPos > -1 ? c.substring(0, eqPos) : c
+          if (name.trim().includes('sb-') || name.trim().includes('supabase') || name.trim().includes('auth')) {
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+          }
+        })
       }
-      sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key))
 
       // Clear Supabase instance
       clearSupabaseAuth()
 
-      console.log('Cleared auth data from browser storage')
+      console.log('Successfully cleared all auth data')
     } catch (error) {
       console.error('Error clearing auth data:', error)
     }
@@ -92,7 +111,7 @@ export const auth = {
         return false
       }
 
-      return profile?.role === 'admin'
+      return (profile as any)?.role === 'admin'
     } catch (error) {
       console.error('Error in isAdmin:', error)
       return false
@@ -162,9 +181,16 @@ export const auth = {
   // Update user profile
   async updateProfile(userId: string, updates: Partial<Profile>) {
     const supabase = createClient()
-    const { data, error } = await supabase
+
+    // Prepare update data with proper typing
+    const updateData = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    }
+
+    const { data, error } = await (supabase as any)
       .from('profiles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq('id', userId)
       .select()
       .single()
@@ -219,9 +245,7 @@ export const auth = {
   },
 
   // Create member account (admin only)
-  async createMember(memberData: CreateMemberData, adminUserId: string) {
-    const supabase = createClient()
-
+  async createMember(_memberData: CreateMemberData, adminUserId: string) {
     // Check if current user is admin
     const isAdmin = await auth.isAdmin(adminUserId)
     if (!isAdmin) {

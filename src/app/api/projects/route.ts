@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
     const {
       title,
       description,
+      details,
       thumbnail_url,
       video_url,
       repo_url,
@@ -129,6 +130,7 @@ export async function POST(request: NextRequest) {
       .insert({
         title,
         description,
+        details: details || null,
         thumbnail_url: thumbnail_url || null,
         video_url: video_url || null,
         repo_url: repo_url || null,

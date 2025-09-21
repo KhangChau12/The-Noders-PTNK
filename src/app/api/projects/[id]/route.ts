@@ -125,7 +125,7 @@ export async function PUT(
     // Parse request body
     const updates = await request.json()
     const allowedFields = [
-      'title', 'description', 'thumbnail_url', 'video_url',
+      'title', 'description', 'details', 'thumbnail_url', 'video_url',
       'repo_url', 'demo_url', 'tech_stack', 'status'
     ]
 
@@ -235,7 +235,7 @@ export async function DELETE(
       )
     }
 
-    if (project.created_by !== user.id) {
+    if ((project as any).created_by !== user.id) {
       return NextResponse.json(
         { success: false, error: 'Only project creators can delete projects' },
         { status: 403 }

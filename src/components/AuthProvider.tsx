@@ -114,16 +114,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear all auth data first
-      await auth.clearAllAuthData()
+      console.log('Starting signOut process...')
 
-      // Then sign out from Supabase
-      await auth.signOut()
-
-      // Clear local state
+      // Clear local state first
       setUser(null)
       setSession(null)
       setProfile(null)
+
+      // Sign out from Supabase
+      const supabase = createClient()
+      const { error } = await supabase.auth.signOut()
+
+      if (error) {
+        console.error('Supabase signOut error:', error)
+      }
+
+      // Clear all auth data
+      await auth.clearAllAuthData()
+
+      console.log('SignOut completed, redirecting...')
 
       // Force page reload to clear any remaining cache
       window.location.href = '/login'
@@ -133,6 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
       setSession(null)
       setProfile(null)
+
+      // Still try to redirect
       window.location.href = '/login'
     }
   }
