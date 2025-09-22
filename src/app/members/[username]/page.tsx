@@ -228,7 +228,7 @@ function ActivityTimeline({ member }: ActivityTimelineProps) {
     {
       date: new Date(member.created_at).toDateString(),
       type: 'join',
-      title: 'Joined AI Agent Club',
+      title: 'Joined The Noders PTNK',
       description: `Welcome ${member.full_name || member.username} to the team!`
     }
   ]

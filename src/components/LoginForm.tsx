@@ -57,7 +57,7 @@ export function LoginForm() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to access your AI Agent Club dashboard
+            Sign in to access your The Noders PTNK dashboard
           </CardDescription>
         </CardHeader>
         

@@ -59,7 +59,7 @@ function SystemSettingsPage() {
     {
       id: '1',
       key: 'site_name',
-      value: 'AI Agent Club',
+      value: 'The Noders PTNK',
       description: 'The name of your organization',
       category: 'general',
       type: 'text',

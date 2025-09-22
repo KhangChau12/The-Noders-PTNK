@@ -50,7 +50,7 @@ export default function ProjectsPage() {
             Our Projects
           </h1>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            Explore the innovative projects created by our AI Agent Club members. 
+            Explore the innovative projects created by our The Noders PTNK members. 
             From machine learning models to web applications, discover our collaborative work.
           </p>
         </div>

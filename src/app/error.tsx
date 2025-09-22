@@ -85,7 +85,7 @@ export default function Error({ error, reset }: ErrorProps) {
                 size="sm"
               >
                 <a
-                  href="mailto:phuckhangtdn@gmail.com?subject=AI Agent Club - Error Report"
+                  href="mailto:phuckhangtdn@gmail.com?subject=The Noders PTNK - Error Report"
                   className="text-primary-blue hover:text-primary-blue/80"
                 >
                   Report Issue

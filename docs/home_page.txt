@@ -1,0 +1,68 @@
+HOME PAGE CONTENT FOR THE NODERS PTNK
+
+=== HERO SECTION ===
+Main Title: "The Noders PTNK"
+Slogan: "Connecting Minds, Creating Intelligence"
+Description: We are a technology club at Pho Thong Nang Khieu High School, connecting passionate minds in AI and technology. Just like nodes in a neural network collaborate to create powerful artificial intelligence, we believe that connecting our members will forge an outstanding developer community.
+
+=== STATS (temporary - will load from database later) ===
+- Active Members: 15+
+- Active Projects: 8+
+- Posts Shared: 25+
+- Workshops Held: 6+
+
+=== MAIN ACTIVITIES (4 features) ===
+1. AI Innovation & Workshops
+   - Organizing workshops at school to spread AI and technology knowledge to more students
+   - Icon: Brain
+
+2. Practical Tech Solutions
+   - Building practical technology products, especially AI tools to support student learning
+   - Icon: Code
+
+3. Knowledge Sharing
+   - Writing and sharing tech posts for the community to learn, explore and share together
+   - Icon: Users
+
+4. Community Building
+   - Connecting young developers at PTNK into a strong learning and development community
+   - Icon: Zap
+
+=== RECENT PROJECTS (temporary - will load from database) ===
+1. PTNK Study Assistant
+   - Description: AI chatbot supporting PTNK students' learning
+   - Tech: ['Python', 'OpenAI API', 'FastAPI']
+   - Status: 'Active'
+
+2. Tech Blog Platform
+   - Description: Knowledge sharing platform for our club's tech content
+   - Tech: ['Next.js', 'TypeScript', 'Supabase']
+   - Status: 'Active'
+
+3. Workshop Management System
+   - Description: System for managing and registering workshops for students
+   - Tech: ['React', 'Node.js', 'MongoDB']
+   - Status: 'In Progress'
+
+=== SAMPLE NEWS (will be replaced with database) ===
+1. "The Noders PTNK Launches AI Fundamentals Workshop Series"
+   - Date: This month
+   - Type: Announcement
+
+2. "Success Story: From Zero to Hero in Programming"
+   - Date: Last week
+   - Type: Member Spotlight
+
+=== CALL TO ACTION ===
+Title: "Join The Noders Community"
+Description: Passionate about AI, web/app development, or technology in general? Join us in connecting to create amazing things together!
+
+Buttons:
+- "Learn More" (link to /members)
+- "Contact Us" (link to /contact)
+
+=== TECHNICAL NOTES ===
+- Change "Technologies Used" to "Posts Shared" in stats section
+- All statistics and projects will be loaded from database later
+- Keep current structure and UI, only change text content
+- Slogan explains "Noders" meaning: sounds like "Coders" + represents nodes in neural networks connecting to create power

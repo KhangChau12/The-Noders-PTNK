@@ -10,50 +10,50 @@ export default function HomePage() {
   const features = [
     {
       icon: <Brain className="w-8 h-8" />,
-      title: 'AI Innovation',
-      description: 'Exploring cutting-edge AI technologies and building intelligent solutions.'
+      title: 'AI Innovation & Workshops',
+      description: 'Organizing workshops at school to spread AI and technology knowledge to more students.'
     },
     {
       icon: <Code className="w-8 h-8" />,
-      title: 'Collaborative Development',
-      description: 'Working together on projects using modern tech stacks and best practices.'
+      title: 'Practical Tech Solutions',
+      description: 'Building practical technology products, especially AI tools to support student learning.'
     },
     {
       icon: <Users className="w-8 h-8" />,
       title: 'Knowledge Sharing',
-      description: 'Learning from each other and growing together as a community.'
+      description: 'Writing and sharing tech posts for the community to learn, explore and share together.'
     },
     {
       icon: <Zap className="w-8 h-8" />,
-      title: 'Rapid Prototyping',
-      description: 'Quickly turning ideas into working prototypes and MVPs.'
+      title: 'Community Building',
+      description: 'Connecting young developers at PTNK into a strong learning and development community.'
     }
   ]
 
   const stats = [
-    { label: 'Active Projects', value: '12+' },
-    { label: 'Club Members', value: '25+' },
-    { label: 'Technologies Used', value: '20+' },
-    { label: 'Workshops Held', value: '8+' }
+    { label: 'Active Projects', value: '8+' },
+    { label: 'Active Members', value: '15+' },
+    { label: 'Posts Shared', value: '25+' },
+    { label: 'Workshops Held', value: '6+' }
   ]
 
   const recentProjects = [
     {
-      title: 'Smart Chat Assistant',
-      description: 'AI-powered chatbot with natural language processing',
-      tech: ['Python', 'OpenAI', 'FastAPI'],
+      title: 'PTNK Study Assistant',
+      description: 'AI chatbot supporting PTNK students\' learning',
+      tech: ['Python', 'OpenAI API', 'FastAPI'],
       status: 'Active'
     },
     {
-      title: 'Project Portfolio Manager',
-      description: 'Web platform for showcasing team projects and contributions',
+      title: 'Tech Blog Platform',
+      description: 'Knowledge sharing platform for our club\'s tech content',
       tech: ['Next.js', 'TypeScript', 'Supabase'],
       status: 'Active'
     },
     {
-      title: 'ML Model Trainer',
-      description: 'User-friendly interface for training machine learning models',
-      tech: ['React', 'Python', 'TensorFlow'],
+      title: 'Workshop Management System',
+      description: 'System for managing and registering workshops for students',
+      tech: ['React', 'Node.js', 'MongoDB'],
       status: 'In Progress'
     }
   ]
@@ -61,22 +61,26 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold mb-4">
               <span className="gradient-text">
-                AI Agent Club
-              </span>
-              <br />
-              <span className="text-text-primary">
-                Building Tomorrow's Intelligence
+                THE NODERS PTNK
               </span>
             </h1>
-            
-            <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
-              We're a community of passionate developers, researchers, and innovators 
-              exploring the frontiers of artificial intelligence through collaborative projects.
+
+            <p className="text-lg text-text-secondary mb-3">
+              Technology Club at PTNK
+            </p>
+
+            <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-text-primary">
+              Connecting Minds • Creating Intelligence
+            </h2>
+
+            <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
+              Where innovation meets collaboration at Pho Thong Nang Khieu High School.
+              Just like nodes in a neural network collaborate to create powerful intelligence, we connect to build an outstanding developer community.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -97,20 +101,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
-        <div className="container mx-auto">
+      {/* Stats Section - Clean Professional */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-dark-surface/40 to-primary-blue/5 relative">
+        <div className="container mx-auto relative">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary-blue mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-text-secondary text-sm md:text-base">
-                  {stat.label}
+              <div key={index} className="text-center group">
+                <div className="relative bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 border border-dark-border/50 rounded-xl p-6 hover:border-primary-blue/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/10">
+                  <div className="text-3xl md:text-4xl font-bold font-mono bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent mb-2">
+                    {stat.value}
+                  </div>
+                  <div className="text-text-secondary text-sm md:text-base font-medium">
+                    {stat.label}
+                  </div>
                 </div>
               </div>
             ))}
+          </div>
+          {/* Subtle geometric background */}
+          <div className="absolute inset-0 pointer-events-none opacity-5">
+            <svg className="w-full h-full">
+              <defs>
+                <pattern id="grid" patternUnits="userSpaceOnUse" width="60" height="60">
+                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="1" className="text-primary-blue"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)"/>
+            </svg>
           </div>
         </div>
       </section>
@@ -129,18 +146,24 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover-lift">
-                <CardContent className="pt-2">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-blue/20 rounded-full mb-4 text-primary-blue">
+              <Card key={index} className="text-center hover-lift group relative overflow-hidden">
+                <CardContent className="p-6 relative z-10">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl mb-4 text-primary-blue group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold text-text-primary mb-2">
+                  <h3 className="text-xl font-semibold text-text-primary mb-3 font-mono">
                     {feature.title}
                   </h3>
-                  <p className="text-text-secondary">
+                  <p className="text-text-secondary leading-relaxed">
                     {feature.description}
                   </p>
                 </CardContent>
+                {/* Terminal-style border effect */}
+                <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/30 rounded-lg transition-all duration-300"></div>
+                {/* Circuit pattern background */}
+                <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
+                  <div className="w-full h-full bg-gradient-to-br from-primary-blue/10 to-transparent"></div>
+                </div>
               </Card>
             ))}
           </div>
@@ -161,37 +184,52 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {recentProjects.map((project, index) => (
-              <Card key={index} variant="hover" className="hover-lift">
-                <CardContent className="p-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-text-primary">
+              <Card key={index} variant="hover" className="hover-lift group relative overflow-hidden">
+                <CardContent className="p-6 relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
                       {project.title}
                     </h3>
-                    <Badge 
+                    <Badge
                       variant={project.status === 'Active' ? 'success' : 'warning'}
                       size="sm"
+                      className="font-mono text-xs"
                     >
                       {project.status}
                     </Badge>
                   </div>
-                  
-                  <p className="text-text-secondary mb-4 text-sm">
+
+                  <p className="text-text-secondary mb-4 text-sm leading-relaxed">
                     {project.description}
                   </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tech.map((tech, techIndex) => (
-                      <Badge key={techIndex} variant="tech" size="sm">
-                        {tech}
-                      </Badge>
-                    ))}
+
+                  {/* Tech stack with terminal styling */}
+                  <div className="bg-dark-surface/50 border border-dark-border/30 rounded-lg p-3 mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((tech, techIndex) => (
+                        <span key={techIndex} className="px-2 py-1 bg-primary-blue/10 text-accent-cyan text-xs font-mono rounded border border-primary-blue/20">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-2 text-text-tertiary">
-                    <Github className="w-4 h-4" />
-                    <ExternalLink className="w-4 h-4" />
+
+                  {/* Interactive GitHub/External links */}
+                  <div className="flex items-center space-x-3">
+                    <button className="flex items-center space-x-1 text-text-tertiary hover:text-primary-blue transition-colors duration-200 group/btn">
+                      <Github className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
+                      <span className="text-xs font-mono">code</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-text-tertiary hover:text-accent-cyan transition-colors duration-200 group/btn">
+                      <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
+                      <span className="text-xs font-mono">demo</span>
+                    </button>
                   </div>
                 </CardContent>
+                {/* Glitch effect background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Terminal border */}
+                <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/20 rounded-lg transition-all duration-300"></div>
               </Card>
             ))}
           </div>
@@ -221,20 +259,21 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             {/* Featured News Items */}
-            <Card variant="interactive" className="hover-lift">
+            {/* Clean news announcement */}
+            <Card variant="interactive" className="hover-lift group">
               <Link href="/news/1">
-                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 flex items-center justify-center">
-                  <Newspaper className="w-12 h-12 text-primary-blue" />
+                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
+                  <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <CardContent className="pt-4">
-                  <Badge variant="primary" size="sm" className="mb-2">Announcement</Badge>
+                <CardContent className="p-6">
+                  <Badge variant="primary" size="sm" className="mb-3">Announcement</Badge>
                   <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                    AI Agent Club Launches Advanced ML Workshop Series
+                    The Noders PTNK Launches AI Fundamentals Workshop Series
                   </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                    We are excited to announce our comprehensive ML workshop series designed for both beginners and advanced practitioners.
+                  <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
+                    We are excited to announce our comprehensive AI workshop series designed to spread technology knowledge to PTNK students.
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-3">
+                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       Jan 15, 2024
@@ -246,26 +285,27 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-primary-blue text-sm font-medium">Read More</span>
-                    <ArrowRight className="w-4 h-4 text-primary-blue" />
+                    <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </CardContent>
               </Link>
             </Card>
 
-            <Card variant="interactive" className="hover-lift">
+            {/* Member spotlight */}
+            <Card variant="interactive" className="hover-lift group">
               <Link href="/news/2">
-                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-success/20 to-accent-cyan/20 flex items-center justify-center">
-                  <User className="w-12 h-12 text-success" />
+                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-success/10 to-accent-cyan/5 flex items-center justify-center">
+                  <User className="w-12 h-12 text-success group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <CardContent className="pt-4">
-                  <Badge variant="success" size="sm" className="mb-2">Member Spotlight</Badge>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                    Alice Johnson: From Beginner to AI Expert
+                <CardContent className="p-6">
+                  <Badge variant="success" size="sm" className="mb-3">Member Spotlight</Badge>
+                  <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-success transition-colors">
+                    Success Story: From Zero to Hero in Programming
                   </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                    Learn how Alice transformed from a coding newbie to leading our most complex AI projects in just 8 months.
+                  <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
+                    Discover how our club members transform from beginners to confident developers through collaborative learning and practice.
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-3">
+                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       Jan 12, 2024
@@ -276,28 +316,29 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-primary-blue text-sm font-medium">Read More</span>
-                    <ArrowRight className="w-4 h-4 text-primary-blue" />
+                    <span className="text-success text-sm font-medium">Read More</span>
+                    <ArrowRight className="w-4 h-4 text-success group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </CardContent>
               </Link>
             </Card>
 
-            <Card variant="interactive" className="hover-lift">
+            {/* View all news CTA */}
+            <Card variant="interactive" className="hover-lift group">
               <Link href="/news">
                 <CardContent className="p-8 text-center h-full flex flex-col justify-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
                     <Newspaper className="w-8 h-8 text-primary-blue" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-primary mb-2">
                     View All News
                   </h3>
-                  <p className="text-text-secondary text-sm mb-4">
+                  <p className="text-text-secondary text-sm mb-4 leading-relaxed">
                     Discover more stories, updates, and insights from our community
                   </p>
-                  <div className="flex items-center justify-center gap-2 text-primary-blue">
+                  <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
                     <span className="text-sm font-medium">Browse All Posts</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </CardContent>
               </Link>
@@ -312,11 +353,11 @@ export default function HomePage() {
           <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
             <CardContent className="p-12">
               <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-                Join Our Community
+                Join The Noders Community
               </h2>
               <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
-                Interested in AI, machine learning, or collaborative development? 
-                We'd love to have you join our growing community of innovators.
+                Passionate about AI, web/app development, or technology in general?
+                Join us in connecting to create amazing things together!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/members">

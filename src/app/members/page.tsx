@@ -42,7 +42,7 @@ export default function MembersPage() {
             Meet Our Team
           </h1>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            Get to know the passionate individuals behind our AI Agent Club. 
+            Get to know the passionate individuals behind The Noders PTNK.
             Our diverse team brings together expertise from various fields to create amazing projects.
           </p>
         </div>

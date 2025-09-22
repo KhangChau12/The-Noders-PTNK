@@ -66,7 +66,7 @@ export default function ContactPage() {
           access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY || 'YOUR_WEB3FORMS_ACCESS_KEY',
           name: formData.name,
           email: formData.email,
-          subject: `AI Agent Club - ${subjectOptions.find(s => s.value === formData.subject)?.label}`,
+          subject: `The Noders PTNK - ${subjectOptions.find(s => s.value === formData.subject)?.label}`,
           message: `Subject: ${subjectOptions.find(s => s.value === formData.subject)?.label}\n\nFrom: ${formData.name} (${formData.email})\n\nMessage:\n${formData.message}`,
           to: 'phuckhangtdn@gmail.com'
         })
@@ -102,7 +102,7 @@ export default function ContactPage() {
               </h1>
 
               <p className="text-text-secondary text-lg mb-8">
-                Thank you for reaching out to AI Agent Club. We've received your message
+                Thank you for reaching out to The Noders PTNK. We've received your message
                 and will get back to you within 24 hours.
               </p>
 
@@ -188,7 +188,7 @@ export default function ContactPage() {
                       rel="noopener noreferrer"
                       className="text-text-secondary hover:text-primary-blue transition-colors"
                     >
-                      AI Agent Club
+                      The Noders PTNK
                     </a>
                   </div>
                 </div>

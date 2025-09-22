@@ -182,7 +182,7 @@ export default function NewsPage() {
           </h1>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
             Stay updated with the latest announcements, project showcases, member spotlights,
-            and insights from the AI Agent Club community.
+            and insights from The Noders PTNK community.
           </p>
         </div>
 

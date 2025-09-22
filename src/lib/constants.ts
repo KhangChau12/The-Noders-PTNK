@@ -1,8 +1,8 @@
 export const SITE_CONFIG = {
-  name: 'AI Agent Club',
-  description: 'A portfolio website for the AI Agent Workshop Club',
+  name: 'The Noders PTNK',
+  description: 'A portfolio website for The Noders PTNK technology club',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-  tagline: 'Building Tomorrow\'s Intelligence',
+  tagline: 'Connecting Minds, Creating Intelligence',
 }
 
 export const NAVIGATION_ITEMS = [
