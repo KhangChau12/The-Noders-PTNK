@@ -79,7 +79,7 @@ export default function HomePage() {
             </h2>
 
             <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-              Where innovation meets collaboration at Pho Thong Nang Khieu High School.
+              Where innovation meets collaboration at VNUHCM High School for the Gifted.
               Just like nodes in a neural network collaborate to create powerful intelligence, we connect to build an outstanding developer community.
             </p>
             
