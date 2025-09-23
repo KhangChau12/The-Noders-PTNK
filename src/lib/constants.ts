@@ -44,7 +44,7 @@ export const TECH_STACK_COLORS = {
   'Prisma': '#2D3748',
   'Docker': '#2496ED',
   'AWS': '#FF9900',
-  'Vercel': '#000000',
+  'Vercel': '#FFFFFF',
   'Vue.js': '#4FC08D',
   'Angular': '#DD0031',
   'Svelte': '#FF3E00',

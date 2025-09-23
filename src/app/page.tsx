@@ -185,15 +185,15 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {recentProjects.map((project, index) => (
               <Card key={index} variant="hover" className="hover-lift group relative overflow-hidden">
-                <CardContent className="p-6 relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
+                <CardContent className="relative z-10">
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300 w-[70%]">
                       {project.title}
                     </h3>
                     <Badge
                       variant={project.status === 'Active' ? 'success' : 'warning'}
                       size="sm"
-                      className="font-mono text-xs"
+                      className="font-mono text-xs mt-1"
                     >
                       {project.status}
                     </Badge>
@@ -265,7 +265,7 @@ export default function HomePage() {
                 <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
                   <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="pt-6">
                   <Badge variant="primary" size="sm" className="mb-3">Announcement</Badge>
                   <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
                     The Noders PTNK Launches AI Fundamentals Workshop Series
@@ -297,7 +297,7 @@ export default function HomePage() {
                 <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-success/10 to-accent-cyan/5 flex items-center justify-center">
                   <User className="w-12 h-12 text-success group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="pt-6">
                   <Badge variant="success" size="sm" className="mb-3">Member Spotlight</Badge>
                   <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-success transition-colors">
                     Success Story: From Zero to Hero in Programming

@@ -358,7 +358,7 @@ export const memberQueries = {
     // Add limit to prevent massive queries
     let query = supabase
       .from('profiles')
-      .select('*')
+      .select('username')
       .limit(50) // Limit to prevent overload
 
     if (filters.role && filters.role !== 'all') {
@@ -383,10 +383,9 @@ export const memberQueries = {
 
     // For now, return without project contributions to prevent N+1
     // TODO: Optimize with proper JOIN queries later
-    const membersWithProjects = data.map(member => ({
-      ...member,
-      contributed_projects: [],
-    }))
+    const membersWithProjects = await Promise.all(
+      data.map(m => this.getMember(m.username).then(res => res.member))
+    )
 
     return { members: membersWithProjects, error: null }
   },
