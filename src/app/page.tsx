@@ -11,7 +11,7 @@ export default function HomePage() {
     {
       icon: <Brain className="w-8 h-8" />,
       title: 'AI Innovation & Workshops',
-      description: 'Organizing workshops at school to spread AI and technology knowledge to more students.'
+      description: 'Organizing workshops at our school to spread AI and technology knowledge to more students.'
     },
     {
       icon: <Code className="w-8 h-8" />,
@@ -40,7 +40,7 @@ export default function HomePage() {
   const recentProjects = [
     {
       title: 'PTNK Study Assistant',
-      description: 'AI chatbot supporting PTNK students\' learning',
+      description: 'AI chatbot supporting VNU High School for the Gifted students\' learning',
       tech: ['Python', 'OpenAI API', 'FastAPI'],
       status: 'Active'
     },
@@ -52,7 +52,7 @@ export default function HomePage() {
     },
     {
       title: 'Workshop Management System',
-      description: 'System for managing and registering workshops for students',
+      description: 'System for managing and registering workshops for our students',
       tech: ['React', 'Node.js', 'MongoDB'],
       status: 'In Progress'
     }
@@ -79,15 +79,21 @@ export default function HomePage() {
             </h2>
 
             <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-              Where innovation meets collaboration at Pho Thong Nang Khieu High School.
+              Where innovation meets collaboration at VNU High School for the Gifted.
               Just like nodes in a neural network collaborate to create powerful intelligence, we connect to build an outstanding developer community.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/projects">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Explore Projects
+              <Link href="/contest">
+                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90">
+                  Join AI Challenge 2025
                   <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/projects">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  Explore Projects
+                  <Code className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link href="/members">
@@ -271,7 +277,7 @@ export default function HomePage() {
                     The Noders PTNK Launches AI Fundamentals Workshop Series
                   </h3>
                   <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                    We are excited to announce our comprehensive AI workshop series designed to spread technology knowledge to PTNK students.
+                    We are excited to announce our comprehensive AI workshop series designed to spread technology knowledge to VNU High School for the Gifted students.
                   </p>
                   <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
                     <div className="flex items-center gap-1">

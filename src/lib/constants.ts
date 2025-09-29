@@ -9,6 +9,7 @@ export const NAVIGATION_ITEMS = [
   { name: 'Home', href: '/' },
   { name: 'Projects', href: '/projects' },
   { name: 'Members', href: '/members' },
+  { name: 'Contest', href: '/contest' },
   { name: 'News', href: '/news' },
   { name: 'Contact', href: '/contact' },
 ]

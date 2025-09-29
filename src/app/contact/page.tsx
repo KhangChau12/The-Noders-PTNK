@@ -66,8 +66,27 @@ export default function ContactPage() {
           access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY || 'YOUR_WEB3FORMS_ACCESS_KEY',
           name: formData.name,
           email: formData.email,
-          subject: `The Noders PTNK - ${subjectOptions.find(s => s.value === formData.subject)?.label}`,
-          message: `Subject: ${subjectOptions.find(s => s.value === formData.subject)?.label}\n\nFrom: ${formData.name} (${formData.email})\n\nMessage:\n${formData.message}`,
+          subject: `🔔 The Noders PTNK - ${subjectOptions.find(s => s.value === formData.subject)?.label}`,
+          message: `
+═══════════════════════════════════════
+🌟 NEW MESSAGE FROM THE NODERS PTNK WEBSITE
+═══════════════════════════════════════
+
+📋 INQUIRY TYPE: ${subjectOptions.find(s => s.value === formData.subject)?.label}
+
+👤 CONTACT INFORMATION:
+   Name: ${formData.name}
+   Email: ${formData.email}
+
+💬 MESSAGE:
+${formData.message}
+
+═══════════════════════════════════════
+📧 Sent via The Noders PTNK Contact Form
+🌐 Website: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}
+⏰ Timestamp: ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}
+═══════════════════════════════════════
+          `.trim(),
           to: 'phuckhangtdn@gmail.com'
         })
       })
