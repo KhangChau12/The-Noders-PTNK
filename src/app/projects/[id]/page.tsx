@@ -398,7 +398,8 @@ export default function ProjectDetailPage() {
                       >
                         <div className="relative">
                           <Avatar
-                            name={profile?.avatar_url ? null : profile?.full_name}
+                            name={profile?.full_name}
+                            src={profile?.avatar_url}
                             size="md"
                           />
                           {profile?.role === 'admin' && (

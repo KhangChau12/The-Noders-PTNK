@@ -99,7 +99,8 @@ function DashboardContent() {
                 <div className="text-center mb-6">
                   <div className="mx-auto mb-4 flex justify-center">
                     <Avatar
-                      name={profile.avatar_url ? null : profile.full_name}
+                      name={profile.full_name}
+                      src={profile.avatar_url}
                       size="xl"
                     />
                   </div>

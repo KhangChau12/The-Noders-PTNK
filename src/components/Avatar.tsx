@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 
 interface AvatarProps {
   name?: string | null
+  src?: string | null
   size?: 'sm' | 'md' | 'lg' | 'xl'
   className?: string
   showBorder?: boolean
@@ -18,6 +19,7 @@ const sizeClasses = {
 
 export function Avatar({
   name,
+  src,
   size = 'md',
   className,
   showBorder = false
@@ -60,15 +62,23 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full font-medium text-white',
+        'flex items-center justify-center rounded-full font-medium text-white relative overflow-hidden',
         'transition-all duration-200 hover:scale-105',
-        bgColor,
+        !src && bgColor,
         sizeClasses[size],
         showBorder && 'ring-2 ring-white ring-offset-2',
         className
       )}
     >
-      {initials}
+      {src ? (
+        <img
+          src={src}
+          alt={name || 'Avatar'}
+          className="w-full h-full object-cover rounded-full"
+        />
+      ) : (
+        initials
+      )}
     </div>
   )
 }

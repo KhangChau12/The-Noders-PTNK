@@ -328,7 +328,8 @@ export default function MemberProfilePage() {
                 {/* Avatar */}
                 <div className="relative mx-auto mb-6 flex justify-center">
                   <Avatar
-                    name={member.avatar_url ? null : member.full_name}
+                    name={member.full_name}
+                    src={member.avatar_url}
                     size="xl"
                     className="w-32 h-32"
                   />

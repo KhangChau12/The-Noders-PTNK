@@ -286,7 +286,8 @@ function ProfileEditPage() {
                     {/* Avatar */}
                     <div className="mx-auto mb-4 flex justify-center">
                       <Avatar
-                        name={formData.avatar_url ? null : formData.full_name}
+                        name={formData.full_name}
+                        src={formData.avatar_url}
                         size="xl"
                       />
                     </div>

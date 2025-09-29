@@ -121,7 +121,8 @@ export default function MembersPage() {
                         {/* Avatar */}
                         <div className="relative mx-auto mb-4 flex justify-center">
                           <Avatar
-                            name={member.avatar_url ? null : member.full_name}
+                            name={member.full_name}
+                            src={member.avatar_url}
                             size="xl"
                           />
                           {member.role === 'admin' && (
