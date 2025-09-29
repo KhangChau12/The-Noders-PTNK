@@ -17,9 +17,7 @@ function AdminDashboardContent() {
   const [membersLoading, setMembersLoading] = useState(false)
   const [projectsLoading, setProjectsLoading] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
-
-  // Debug logging
-  console.log('AdminDashboard render:', { membersLoading, projectsLoading, dataLoaded })
+  const [initialLoading, setInitialLoading] = useState(true)
 
   // Manual reload functions
   const handleLoadMembers = async () => {
@@ -30,7 +28,7 @@ function AdminDashboardContent() {
         setMembers(fetchedMembers)
       }
     } catch (error) {
-      console.error('Error loading members:', error)
+      // Silently handle error
     } finally {
       setMembersLoading(false)
     }
@@ -44,7 +42,7 @@ function AdminDashboardContent() {
         setProjects(fetchedProjects)
       }
     } catch (error) {
-      console.error('Error loading projects:', error)
+      // Silently handle error
     } finally {
       setProjectsLoading(false)
     }
@@ -52,26 +50,81 @@ function AdminDashboardContent() {
 
   const handleReloadAll = async () => {
     try {
-      setDataLoaded(true)
       await Promise.all([
         handleLoadMembers(),
         handleLoadProjects()
       ])
+      setDataLoaded(true)
     } catch (error) {
-      console.error('Error loading data:', error)
+      setDataLoaded(false)
+    } finally {
+      setInitialLoading(false)
     }
   }
 
   // Auto-load data on component mount
   useEffect(() => {
-    if (!dataLoaded) {
-      handleReloadAll()
+    let mounted = true
+
+    const loadMembers = async () => {
+      setMembersLoading(true)
+      try {
+        const { members: fetchedMembers, error } = await memberQueries.getMembers()
+        if (!error && fetchedMembers && mounted) {
+          setMembers(fetchedMembers)
+        }
+      } catch (error) {
+        // Silently handle error
+      } finally {
+        if (mounted) setMembersLoading(false)
+      }
     }
-  }, [])
+
+    const loadProjects = async () => {
+      setProjectsLoading(true)
+      try {
+        const { projects: fetchedProjects, error } = await projectQueries.getProjects()
+        if (!error && fetchedProjects && mounted) {
+          setProjects(fetchedProjects)
+        }
+      } catch (error) {
+        // Silently handle error
+      } finally {
+        if (mounted) setProjectsLoading(false)
+      }
+    }
+
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          loadMembers(),
+          loadProjects()
+        ])
+        if (mounted) {
+          setDataLoaded(true)
+        }
+      } catch (error) {
+        // Silently handle error
+        if (mounted) {
+          setDataLoaded(false)
+        }
+      } finally {
+        if (mounted) {
+          setInitialLoading(false)
+        }
+      }
+    }
+
+    loadData()
+
+    return () => {
+      mounted = false
+    }
+  }, []) // Chỉ chạy 1 lần khi mount
 
   const loading = membersLoading || projectsLoading
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loading size="lg" text="Loading admin dashboard..." />

@@ -10,9 +10,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const offset = parseInt(searchParams.get('offset') || '0')
 
+    // Use anonymous client for public project listing
     const supabase = createClient()
 
-    // Build query with full relationships
+    // Build query with full relationships including thumbnail image
     let query = supabase
       .from('projects')
       .select(`
@@ -26,6 +27,14 @@ export async function GET(request: NextRequest) {
           contribution_percentage,
           role_in_project,
           profiles(username, full_name, avatar_url)
+        ),
+        thumbnail_image:images(
+          id,
+          filename,
+          public_url,
+          width,
+          height,
+          alt_text
         )
       `)
 
@@ -48,6 +57,7 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       )
     }
+
 
     return NextResponse.json({
       success: true,
@@ -94,6 +104,7 @@ export async function POST(request: NextRequest) {
       description,
       details,
       thumbnail_url,
+      thumbnail_image_id,
       video_url,
       repo_url,
       demo_url,
@@ -132,6 +143,7 @@ export async function POST(request: NextRequest) {
         description,
         details: details || null,
         thumbnail_url: thumbnail_url || null,
+        thumbnail_image_id: thumbnail_image_id || null,
         video_url: video_url || null,
         repo_url: repo_url || null,
         demo_url: demo_url || null,

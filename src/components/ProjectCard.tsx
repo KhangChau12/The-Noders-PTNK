@@ -14,14 +14,16 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, showStats = true }: ProjectCardProps) {
+  const thumbnailSrc = project.thumbnail_image?.public_url || project.thumbnail_url
+
   return (
     <Link href={`/projects/${project.id}`}>
       <Card variant="interactive" padding="none" className="group overflow-hidden">
         {/* Thumbnail */}
         <div className="relative aspect-video bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
           <PlaceholderImage
-            src={project.thumbnail_url}
-            alt={project.title}
+            src={thumbnailSrc}
+            alt={project.thumbnail_image?.alt_text || project.title}
             fill
             className="transition-transform duration-300 group-hover:scale-105"
             text="No Image"

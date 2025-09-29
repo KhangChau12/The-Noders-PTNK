@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 // Helper function to check if user can modify project
 async function canUserModifyProject(supabase: any, projectId: string, userId: string): Promise<{ canModify: boolean, isOwner: boolean, error?: string }> {
@@ -31,59 +33,7 @@ async function canUserModifyProject(supabase: any, projectId: string, userId: st
   return { canModify: !!contributor, isOwner: false }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params
-    const supabase = createClient()
-
-    const { data: project, error } = await supabase
-      .from('projects')
-      .select(`
-        *,
-        created_by_profile:profiles!projects_created_by_fkey(
-          id,
-          username,
-          full_name,
-          avatar_url
-        ),
-        project_contributors(
-          id,
-          contribution_percentage,
-          role_in_project,
-          profiles(
-            id,
-            username,
-            full_name,
-            avatar_url
-          )
-        )
-      `)
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: 'Project not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      project
-    })
-
-  } catch (error) {
-    console.error('Error fetching project:', error)
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
+// GET method removed - now using direct database queries in queries.ts
 
 export async function PUT(
   request: NextRequest,
@@ -125,7 +75,7 @@ export async function PUT(
     // Parse request body
     const updates = await request.json()
     const allowedFields = [
-      'title', 'description', 'details', 'thumbnail_url', 'video_url',
+      'title', 'description', 'details', 'thumbnail_url', 'thumbnail_image_id', 'video_url',
       'repo_url', 'demo_url', 'tech_stack', 'status'
     ]
 

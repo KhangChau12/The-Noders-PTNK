@@ -8,6 +8,7 @@ import { Input } from '@/components/Input'
 import { Badge } from '@/components/Badge'
 import { ClickableBadge } from '@/components/ClickableBadge'
 import { RichTextEditor } from '@/components/RichTextEditor'
+import { ImageUpload } from '@/components/ImageUpload'
 import { projectQueries } from '@/lib/queries'
 import {
   Plus,
@@ -75,6 +76,7 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
   })
 
   const [formData, setFormData] = useState<ProjectFormData>(getInitialFormData())
+  const [thumbnailImage, setThumbnailImage] = useState<any>(null)
 
   // Load project data when editProject changes
   useEffect(() => {
@@ -95,8 +97,16 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
           role_in_project: c.role_in_project
         })) || []
       })
+
+      // Set thumbnail image if exists
+      if (editProject.thumbnail_image) {
+        setThumbnailImage(editProject.thumbnail_image)
+      } else {
+        setThumbnailImage(null)
+      }
     } else if (mode === 'create') {
       setFormData(getInitialFormData())
+      setThumbnailImage(null)
     }
   }, [editProject, mode])
 
@@ -216,6 +226,8 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
         video_url: formData.video_url.trim() || null,
         repo_url: formData.repo_url.trim() || null,
         demo_url: formData.demo_url.trim() || null,
+        // Add thumbnail image ID if uploaded
+        thumbnail_image_id: thumbnailImage?.id || null,
         // For this demo, we'll skip the contributors API integration
         contributors: []
       }
@@ -341,18 +353,19 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-3">
-                <Upload className="w-4 h-4 inline mr-1" />
-                Thumbnail Image URL
-              </label>
-              <Input
-                type="url"
-                value={formData.thumbnail_url}
-                onChange={(e) => handleChange('thumbnail_url', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
+            <ImageUpload
+              value={thumbnailImage}
+              onChange={(imageData) => {
+                setThumbnailImage(imageData)
+                if (imageData) {
+                  handleChange('thumbnail_url', imageData.public_url)
+                } else {
+                  handleChange('thumbnail_url', '')
+                }
+              }}
+              usage="project_thumbnail"
+              placeholder="Upload project thumbnail"
+            />
 
             <div>
               <label className="block text-sm font-medium text-text-primary mb-3">

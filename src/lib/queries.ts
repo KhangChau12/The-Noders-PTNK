@@ -52,6 +52,14 @@ export const projectQueries = {
           contribution_percentage,
           role_in_project,
           profiles(username, full_name, avatar_url)
+        ),
+        thumbnail_image:images!projects_thumbnail_image_id_fkey(
+          id,
+          filename,
+          public_url,
+          width,
+          height,
+          alt_text
         )
       `)
       .limit(20)
@@ -74,19 +82,51 @@ export const projectQueries = {
     return { projects: data, error: null }
   },
 
-  // Get single project by ID (uses new API)
-  async getProject(id: string) {
-    try {
-      const response = await fetch(`/api/projects/${id}`)
-      const result = await response.json()
+  // Get single project by ID (direct database query like dashboard)
+  async getProject(id: string, session?: any) {
+    const supabase = createClient()
 
-      if (!result.success) {
-        return { project: null, error: { message: result.error } }
+    try {
+      const { data: project, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          created_by_profile:profiles!projects_created_by_fkey(
+            id,
+            username,
+            full_name,
+            avatar_url
+          ),
+          project_contributors(
+            id,
+            contribution_percentage,
+            role_in_project,
+            profiles(
+              id,
+              username,
+              full_name,
+              avatar_url
+            )
+          ),
+          thumbnail_image:images(
+            id,
+            filename,
+            public_url,
+            width,
+            height,
+            alt_text
+          )
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        return { project: null, error }
       }
 
-      return { project: result.project, error: null }
+      return { project, error: null }
     } catch (error) {
-      return { project: null, error: { message: 'Network error occurred' } }
+      return { project: null, error }
     }
   },
 

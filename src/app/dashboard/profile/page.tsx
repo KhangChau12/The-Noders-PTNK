@@ -11,6 +11,7 @@ import { Input } from '@/components/Input'
 import { Loading } from '@/components/Loading'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Avatar } from '@/components/Avatar'
+import { ImageUpload } from '@/components/ImageUpload'
 import { UpdateProfileData } from '@/types/member'
 import {
   ArrowLeft,
@@ -172,6 +173,8 @@ function ProfileEditPage() {
     avatar_url: profile?.avatar_url || '',
     social_links: profile?.social_links || {}
   })
+
+  const [avatarImage, setAvatarImage] = useState<any>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -397,21 +400,19 @@ function ProfileEditPage() {
                       </p>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        Avatar URL (Optional)
-                      </label>
-                      <Input
-                        type="url"
-                        placeholder="https://example.com/avatar.jpg"
-                        value={formData.avatar_url || ''}
-                        onChange={(e) => handleChange('avatar_url', e.target.value)}
-                        icon={<Upload className="w-4 h-4" />}
-                      />
-                      <p className="text-xs text-text-tertiary mt-1">
-                        Leave empty to use auto-generated avatar
-                      </p>
-                    </div>
+                    <ImageUpload
+                      value={avatarImage}
+                      onChange={(imageData) => {
+                        setAvatarImage(imageData)
+                        if (imageData) {
+                          handleChange('avatar_url', imageData.public_url)
+                        } else {
+                          handleChange('avatar_url', '')
+                        }
+                      }}
+                      usage="avatar"
+                      placeholder="Upload your avatar"
+                    />
                   </CardContent>
                 </Card>
 
