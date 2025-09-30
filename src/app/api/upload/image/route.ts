@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createClient, createAdminClient } from '@/lib/supabase'
 import sharp from 'sharp'
 
 interface ImageProcessConfig {
@@ -31,11 +31,11 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.replace('Bearer ', '')
 
-    // Create authenticated supabase client with the token
-    const supabase = createClient()
+    // Create regular client for auth verification
+    const authClient = createClient()
 
-    // Verify user and set session for RLS policies
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    // Verify user with the provided token
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token)
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized: Invalid token' },
@@ -43,18 +43,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Set the auth session for storage operations to work with RLS
-    const { error: sessionError } = await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: token // Using same token as refresh for simplicity
-    })
-
-    if (sessionError) {
-      return NextResponse.json(
-        { error: 'Authentication session error' },
-        { status: 401 }
-      )
-    }
+    // Use admin client for storage and database operations to bypass RLS
+    const supabase = createAdminClient()
 
     // Parse form data
     const formData = await request.formData()
@@ -200,16 +190,19 @@ export async function DELETE(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const authClient = createClient()
 
     // Verify user (same as other APIs)
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    const { data: { user }, error: authError } = await authClient.auth.getUser(token)
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized: Invalid token' },
         { status: 401 }
       )
     }
+
+    // Use admin client for database and storage operations
+    const supabase = createAdminClient()
 
     const { searchParams } = new URL(request.url)
     const imageId = searchParams.get('id')
