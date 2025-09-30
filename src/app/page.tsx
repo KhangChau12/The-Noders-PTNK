@@ -16,6 +16,23 @@ interface Stats {
   workshopsHeld: number
 }
 
+interface Project {
+  id: string
+  title: string
+  description: string
+  tech_stack: string[]
+  status: string
+  repo_url?: string
+  demo_url?: string
+  created_at: string
+  contributors: any[]
+  created_by_profile?: {
+    username: string
+    full_name: string
+    avatar_url?: string
+  }
+}
+
 export default function HomePage() {
   const [stats, setStats] = useState<Stats>({
     activeProjects: 0,
@@ -24,6 +41,8 @@ export default function HomePage() {
     workshopsHeld: 0
   })
   const [statsLoading, setStatsLoading] = useState(true)
+  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [projectsLoading, setProjectsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchStats() {
@@ -47,7 +66,24 @@ export default function HomePage() {
       }
     }
 
+    async function fetchRecentProjects() {
+      try {
+        const response = await fetch('/api/projects/recent')
+        if (response.ok) {
+          const data = await response.json()
+          setRecentProjects(data.projects || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch recent projects:', error)
+        // Fallback to empty array
+        setRecentProjects([])
+      } finally {
+        setProjectsLoading(false)
+      }
+    }
+
     fetchStats()
+    fetchRecentProjects()
   }, [])
   const features = [
     {
@@ -79,26 +115,17 @@ export default function HomePage() {
     { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' }
   ]
 
-  const recentProjects = [
-    {
-      title: 'PTNK Study Assistant',
-      description: 'AI chatbot supporting VNU High School for the Gifted students\' learning',
-      tech: ['Python', 'OpenAI API', 'FastAPI'],
-      status: 'Active'
-    },
-    {
-      title: 'Tech Blog Platform',
-      description: 'Knowledge sharing platform for our club\'s tech content',
-      tech: ['Next.js', 'TypeScript', 'Supabase'],
-      status: 'Active'
-    },
-    {
-      title: 'Workshop Management System',
-      description: 'System for managing and registering workshops for our students',
-      tech: ['React', 'Node.js', 'MongoDB'],
-      status: 'In Progress'
+  // Helper function to get project status badge variant
+  const getStatusVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'success'
+      case 'archived':
+        return 'default'
+      default:
+        return 'warning'
     }
-  ]
+  }
 
   return (
     <div className="min-h-screen">
@@ -247,65 +274,134 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recentProjects.map((project, index) => (
-              <Card key={index} variant="hover" className="hover-lift group relative overflow-hidden">
-                <CardContent className="p-6 relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
-                      {project.title}
-                    </h3>
-                    <Badge
-                      variant={project.status === 'Active' ? 'success' : 'warning'}
-                      size="sm"
-                      className="font-mono text-xs"
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-
-                  <p className="text-text-secondary mb-4 text-sm leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  {/* Tech stack with terminal styling */}
-                  <div className="bg-dark-surface/50 border border-dark-border/30 rounded-lg p-3 mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech, techIndex) => (
-                        <span key={techIndex} className="px-2 py-1 bg-primary-blue/10 text-accent-cyan text-xs font-mono rounded border border-primary-blue/20">
-                          {tech}
-                        </span>
-                      ))}
+            {projectsLoading ? (
+              // Loading state
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-dark-surface rounded mb-4"></div>
+                    <div className="h-3 bg-dark-surface rounded mb-2"></div>
+                    <div className="h-3 bg-dark-surface rounded w-3/4 mb-4"></div>
+                    <div className="flex gap-2 mb-4">
+                      <div className="h-6 w-16 bg-dark-surface rounded"></div>
+                      <div className="h-6 w-20 bg-dark-surface rounded"></div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <>
+                {recentProjects.map((project, index) => (
+                  <Card key={project.id} variant="hover" className="hover-lift group relative overflow-hidden">
+                    <Link href={`/projects/${project.id}`}>
+                      <CardContent className="p-6 relative z-10 cursor-pointer">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
+                            {project.title}
+                          </h3>
+                          <Badge
+                            variant={getStatusVariant(project.status)}
+                            size="sm"
+                            className="font-mono text-xs"
+                          >
+                            {project.status}
+                          </Badge>
+                        </div>
 
-                  {/* Interactive GitHub/External links */}
-                  <div className="flex items-center space-x-3">
-                    <button className="flex items-center space-x-1 text-text-tertiary hover:text-primary-blue transition-colors duration-200 group/btn">
-                      <Github className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                      <span className="text-xs font-mono">code</span>
-                    </button>
-                    <button className="flex items-center space-x-1 text-text-tertiary hover:text-accent-cyan transition-colors duration-200 group/btn">
-                      <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                      <span className="text-xs font-mono">demo</span>
-                    </button>
-                  </div>
-                </CardContent>
-                {/* Glitch effect background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                {/* Terminal border */}
-                <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/20 rounded-lg transition-all duration-300"></div>
-              </Card>
-            ))}
+                        <p className="text-text-secondary mb-4 text-sm leading-relaxed">
+                          {project.description || 'No description available'}
+                        </p>
+
+                        {/* Tech stack with terminal styling */}
+                        <div className="bg-dark-surface/50 border border-dark-border/30 rounded-lg p-3 mb-4">
+                          <div className="flex flex-wrap gap-2">
+                            {project.tech_stack?.map((tech, techIndex) => (
+                              <span key={techIndex} className="px-2 py-1 bg-primary-blue/10 text-accent-cyan text-xs font-mono rounded border border-primary-blue/20">
+                                {tech}
+                              </span>
+                            )) || (
+                              <span className="text-text-tertiary text-xs font-mono">No tech stack specified</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Interactive GitHub/External links */}
+                        <div className="flex items-center space-x-3">
+                          {project.repo_url && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                window.open(project.repo_url, '_blank', 'noopener,noreferrer')
+                              }}
+                              className="flex items-center space-x-1 text-text-tertiary hover:text-primary-blue transition-colors duration-200 group/btn z-10"
+                            >
+                              <Github className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
+                              <span className="text-xs font-mono">code</span>
+                            </button>
+                          )}
+                          {project.demo_url && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                window.open(project.demo_url, '_blank', 'noopener,noreferrer')
+                              }}
+                              className="flex items-center space-x-1 text-text-tertiary hover:text-accent-cyan transition-colors duration-200 group/btn z-10"
+                            >
+                              <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
+                              <span className="text-xs font-mono">demo</span>
+                            </button>
+                          )}
+                          {!project.repo_url && !project.demo_url && (
+                            <span className="text-text-tertiary text-xs font-mono">Links coming soon</span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Link>
+                    {/* Glitch effect background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Terminal border */}
+                    <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/20 rounded-lg transition-all duration-300"></div>
+                  </Card>
+                ))}
+
+                {/* Show "View All Projects" card if less than 3 projects */}
+                {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
+                  <Card key={`viewall-${index}`} variant="interactive" className="hover-lift group">
+                    <Link href="/projects">
+                      <CardContent className="p-8 text-center h-full flex flex-col justify-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
+                          <Code className="w-8 h-8 text-primary-blue" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-text-primary mb-2">
+                          View All Projects
+                        </h3>
+                        <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                          Discover more of our innovative projects and technical achievements
+                        </p>
+                        <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
+                          <span className="text-sm font-medium">Browse Projects</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                      </CardContent>
+                    </Link>
+                  </Card>
+                ))}
+              </>
+            )}
           </div>
-          
-          <div className="text-center mt-12">
-            <Link href="/projects">
-              <Button variant="secondary" size="lg">
-                View All Projects
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
+
+          {recentProjects.length >= 3 && (
+            <div className="text-center mt-12">
+              <Link href="/projects">
+                <Button variant="secondary" size="lg">
+                  View All Projects
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
