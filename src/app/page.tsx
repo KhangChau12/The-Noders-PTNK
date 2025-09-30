@@ -1,12 +1,54 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
+import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
 import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper } from 'lucide-react'
 
+interface Stats {
+  activeProjects: number
+  activeMembers: number
+  postsShared: number
+  workshopsHeld: number
+}
 
 export default function HomePage() {
+  const [stats, setStats] = useState<Stats>({
+    activeProjects: 0,
+    activeMembers: 0,
+    postsShared: 0,
+    workshopsHeld: 0
+  })
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats')
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error)
+        // Fallback to default values
+        setStats({
+          activeProjects: 8,
+          activeMembers: 15,
+          postsShared: 25,
+          workshopsHeld: 1
+        })
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
   const features = [
     {
       icon: <Brain className="w-8 h-8" />,
@@ -30,11 +72,11 @@ export default function HomePage() {
     }
   ]
 
-  const stats = [
-    { label: 'Active Projects', value: '8+' },
-    { label: 'Active Members', value: '15+' },
-    { label: 'Posts Shared', value: '25+' },
-    { label: 'Workshops Held', value: '6+' }
+  const statsDisplay = [
+    { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
+    { label: 'Active Members', value: stats.activeMembers, key: 'activeMembers' },
+    { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared' },
+    { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' }
   ]
 
   const recentProjects = [
@@ -107,15 +149,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section - Clean Professional */}
+      {/* Stats Section - Our Journey So Far */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-dark-surface/40 to-primary-blue/5 relative">
         <div className="container mx-auto relative">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+              Our Journey So Far
+            </h2>
+            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+              From innovative projects to growing community, here's what we've achieved together
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center group">
+            {statsDisplay.map((stat, index) => (
+              <div key={stat.key} className="text-center group">
                 <div className="relative bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 border border-dark-border/50 rounded-xl p-6 hover:border-primary-blue/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/10">
                   <div className="text-3xl md:text-4xl font-bold font-mono bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent mb-2">
-                    {stat.value}
+                    {!statsLoading ? (
+                      <CounterAnimation
+                        end={stat.value}
+                        suffix={stat.key === 'workshopsHeld' ? '+' : '+'}
+                      />
+                    ) : (
+                      <span className="animate-pulse">0+</span>
+                    )}
                   </div>
                   <div className="text-text-secondary text-sm md:text-base font-medium">
                     {stat.label}
