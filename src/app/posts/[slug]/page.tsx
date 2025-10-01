@@ -45,14 +45,30 @@ function CategoryBadge({ category }: { category: Post['category'] }) {
   return <Badge variant={variant}>{label}</Badge>
 }
 
+// Helper to add target="_blank" to all links in HTML
+function processLinksInHTML(html: string): string {
+  return html.replace(
+    /<a\s+([^>]*href=["'][^"']*["'][^>]*)>/gi,
+    (match, attributes) => {
+      // Check if target attribute already exists
+      if (/target=/i.test(attributes)) {
+        return match
+      }
+      // Add target="_blank" and rel="noopener noreferrer"
+      return `<a ${attributes} target="_blank" rel="noopener noreferrer">`
+    }
+  )
+}
+
 function RenderBlock({ block }: { block: PostBlock }) {
   switch (block.type) {
     case 'text':
       const textContent = block.content as { html: string; word_count: number }
+      const processedHTML = processLinksInHTML(textContent.html)
       return (
         <div
           className="prose prose-invert max-w-none mb-8"
-          dangerouslySetInnerHTML={{ __html: textContent.html }}
+          dangerouslySetInnerHTML={{ __html: processedHTML }}
         />
       )
 

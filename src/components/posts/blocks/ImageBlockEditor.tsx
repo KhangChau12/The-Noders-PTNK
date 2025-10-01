@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
@@ -8,6 +8,7 @@ import { Image as ImageIcon, Trash2, GripVertical, Check, X, Upload } from 'luci
 
 interface ImageBlockEditorProps {
   content?: { image_id: string; caption?: string; alt_text?: string }
+  image?: { id: string; public_url: string; alt_text?: string }
   onSave: (content: { image_id: string; caption?: string; alt_text?: string }) => void
   onDelete: () => void
   onCancel?: () => void
@@ -15,12 +16,19 @@ interface ImageBlockEditorProps {
   session: any
 }
 
-export function ImageBlockEditor({ content, onSave, onDelete, onCancel, isNew, session }: ImageBlockEditorProps) {
+export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, isNew, session }: ImageBlockEditorProps) {
   const [imageId, setImageId] = useState(content?.image_id || '')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [caption, setCaption] = useState(content?.caption || '')
   const [altText, setAltText] = useState(content?.alt_text || '')
   const [uploading, setUploading] = useState(false)
+
+  // Load existing image on mount
+  useEffect(() => {
+    if (image?.public_url) {
+      setImageUrl(image.public_url)
+    }
+  }, [image])
 
   const isValid = imageId.length > 0
 

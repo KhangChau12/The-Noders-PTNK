@@ -110,6 +110,48 @@ export function getInitials(name: string | null) {
     .toUpperCase()
 }
 
+/**
+ * Calculate reading time based on word count
+ * Average reading speed: 200 words per minute
+ * Adds padding for images (12 seconds per image)
+ * @param blocks - Array of post blocks
+ * @returns Reading time in minutes (minimum 1)
+ */
+export function calculateReadingTime(blocks: any[]): number {
+  if (!blocks || blocks.length === 0) return 1
+
+  let totalWords = 0
+  let imageCount = 0
+
+  blocks.forEach(block => {
+    if (block.type === 'text') {
+      // Strip HTML tags and count words
+      const textContent = block.content?.html || ''
+      const plainText = textContent.replace(/<[^>]*>/g, ' ').trim()
+      const words = plainText.split(/\s+/).filter(w => w.length > 0)
+      totalWords += words.length
+    } else if (block.type === 'quote') {
+      // Count words in quote
+      const quoteText = block.content?.quote || ''
+      const words = quoteText.split(/\s+/).filter(w => w.length > 0)
+      totalWords += words.length
+    } else if (block.type === 'image') {
+      // Each image adds ~12 seconds (0.2 minutes) to reading time
+      imageCount++
+    }
+    // YouTube videos are not counted towards reading time
+  })
+
+  // Calculate reading time
+  // 200 words per minute + 12 seconds (0.2 min) per image
+  const readingMinutes = totalWords / 200
+  const imageMinutes = imageCount * 0.2
+  const totalMinutes = readingMinutes + imageMinutes
+
+  // Round to nearest minute, minimum 1
+  return Math.max(1, Math.round(totalMinutes))
+}
+
 export function calculateProjectStats(contributors: any[]) {
   const totalContribution = contributors.reduce(
     (sum, c) => sum + (c.contribution_percentage || 0), 

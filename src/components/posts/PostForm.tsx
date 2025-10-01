@@ -31,6 +31,16 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
 
+  // Load existing thumbnail on mount
+  useEffect(() => {
+    if (post) {
+      const existingUrl = (post as any).thumbnail_image?.public_url || (post as any).thumbnail_url
+      if (existingUrl) {
+        setThumbnailUrl(existingUrl)
+      }
+    }
+  }, [post])
+
   const titleLength = title.length
   const summaryLength = summary.length
   const titleValid = titleLength <= 100

@@ -11,7 +11,8 @@ import { PostForm } from '@/components/posts/PostForm'
 import { BlockEditor } from '@/components/posts/BlockEditor'
 import { postQueries } from '@/lib/queries'
 import { Post, PostBlock } from '@/types/database'
-import { ArrowLeft, Eye, Send, Save, Archive } from 'lucide-react'
+import { calculateReadingTime } from '@/lib/utils'
+import { ArrowLeft, Eye, Send, Save, Archive, Clock } from 'lucide-react'
 import Link from 'next/link'
 
 function EditPostPage() {
@@ -91,9 +92,12 @@ function EditPostPage() {
     try {
       setSaving(true)
 
+      // If post is published, calculate and update reading time
+      const updates: any = { status: 'draft' }
+
       const { error } = await postQueries.updatePost(
         postId,
-        { status: 'draft' },
+        updates,
         session
       )
 
@@ -101,6 +105,36 @@ function EditPostPage() {
         alert('Failed to save draft: ' + error.message)
       } else {
         alert('Draft saved successfully!')
+        fetchPost()
+      }
+    } catch (err) {
+      alert('Network error occurred')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveChanges = async () => {
+    if (!post) return
+
+    try {
+      setSaving(true)
+
+      // Calculate reading time when saving published post
+      const readingTime = calculateReadingTime(blocks)
+
+      const { error } = await postQueries.updatePost(
+        postId,
+        {
+          reading_time: readingTime
+        },
+        session
+      )
+
+      if (error) {
+        alert('Failed to save changes: ' + error.message)
+      } else {
+        alert('Reading time updated successfully!')
         fetchPost()
       }
     } catch (err) {
@@ -138,9 +172,15 @@ function EditPostPage() {
     try {
       setPublishing(true)
 
+      // Calculate reading time before publishing
+      const readingTime = calculateReadingTime(blocks)
+
       const { error } = await postQueries.updatePost(
         postId,
-        { status: 'published' },
+        {
+          status: 'published',
+          reading_time: readingTime
+        },
         session
       )
 
@@ -247,19 +287,34 @@ function EditPostPage() {
                 )}
 
                 {post.status === 'published' ? (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleSaveDraft}
-                    disabled={saving}
-                  >
-                    {saving ? 'Saving...' : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Unpublish
-                      </>
-                    )}
-                  </Button>
+                  <>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleSaveChanges}
+                      disabled={saving || post.reading_time === calculateReadingTime(blocks)}
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                          <Clock className="w-4 h-4 mr-2" />
+                          Update Reading Time
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleSaveDraft}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving...' : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Unpublish
+                        </>
+                      )}
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button
@@ -336,14 +391,27 @@ function EditPostPage() {
                 <span className="text-text-tertiary">
                   Upvotes: <strong className="text-text-primary">{post.upvote_count}</strong>
                 </span>
-                <span className="text-text-tertiary">
-                  Reading time: <strong className="text-text-primary">{post.reading_time} min</strong>
-                </span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary-blue" />
+                  <span className="text-text-tertiary">
+                    Reading time: <strong className="text-primary-blue">{calculateReadingTime(blocks)} min</strong>
+                    {post.reading_time !== calculateReadingTime(blocks) && (
+                      <span className="ml-1 text-xs text-text-tertiary">
+                        (saved: {post.reading_time} min)
+                      </span>
+                    )}
+                  </span>
+                </div>
               </div>
               <span className="text-text-tertiary">
                 Last updated: {new Date(post.updated_at).toLocaleString()}
               </span>
             </div>
+            {post.reading_time !== calculateReadingTime(blocks) && (
+              <div className="mt-2 text-xs text-warning flex items-center gap-1">
+                <span>⚠️ Reading time has changed. Publish to update.</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

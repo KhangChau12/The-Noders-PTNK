@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/Card'
 import { Button } from '@/components/Button'
+import { RichTextEditor } from '@/components/RichTextEditor'
 import { Type, Trash2, GripVertical, Check, X } from 'lucide-react'
 
 interface TextBlockEditorProps {
@@ -18,8 +19,8 @@ function countWords(text: string): number {
 }
 
 export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: TextBlockEditorProps) {
-  const [text, setText] = useState(content?.html || '')
-  const wordCount = countWords(text.replace(/<[^>]*>/g, ''))
+  const [html, setHtml] = useState(content?.html || '')
+  const wordCount = countWords(html.replace(/<[^>]*>/g, ''))
   const isValid = wordCount > 0 && wordCount <= 800
 
   const handleSave = () => {
@@ -27,14 +28,6 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
       alert('Text must be between 1 and 800 words')
       return
     }
-
-    // Simple HTML conversion (for demo - in production use a proper rich text editor)
-    const html = text
-      .split('\n\n')
-      .map(para => para.trim())
-      .filter(para => para.length > 0)
-      .map(para => `<p>${para}</p>`)
-      .join('\n')
 
     onSave({ html, word_count: wordCount })
   }
@@ -60,12 +53,10 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
           </div>
         </div>
 
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Write your content here... (Plain text will be converted to paragraphs)"
-          rows={8}
-          className="w-full px-4 py-3 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+        <RichTextEditor
+          value={html}
+          onChange={setHtml}
+          placeholder="Write your content here... Use the toolbar to format text with bold, italic, headers, colors and more."
         />
 
         <div className="flex items-center justify-between mt-3">

@@ -16,9 +16,11 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('*', { count: 'exact', head: true })
 
-    // For posts, we'll use a simple count for now since we don't have a posts table yet
-    // You can replace this with actual posts count when you have the table
-    const postsCount = 25 // This will be replaced with real count later
+    // Get published posts count
+    const { count: postsCount } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'published')
 
     // For workshops, we'll set to 1 as requested
     const workshopsCount = 1
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
     const stats = {
       activeProjects: projectsCount || 0,
       activeMembers: membersCount || 0,
-      postsShared: postsCount,
+      postsShared: postsCount || 0,
       workshopsHeld: workshopsCount
     }
 

@@ -11,6 +11,17 @@
   }
 }
 
+/* Prose link styling */
+.prose a {
+  color: #2563EB;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.prose a:hover {
+  color: #06B6D4;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

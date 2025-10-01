@@ -154,6 +154,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           <ImageBlockEditor
             key={block.id}
             content={block.content as any}
+            image={(block as any).image}
             onSave={(content) => handleUpdateBlock(block.id, content)}
             onDelete={() => handleDeleteBlock(block.id)}
             session={session}
