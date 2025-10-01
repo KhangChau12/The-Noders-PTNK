@@ -1,5 +1,5 @@
 import { createClient } from './supabase'
-import { Project, Profile, ProjectContributor } from '@/types/database'
+import { Project, Profile, ProjectContributor, Post, PostBlock } from '@/types/database'
 import { ProjectFilters, MemberFilters } from '@/types/project'
 
 // Project queries using new API endpoints
@@ -502,6 +502,331 @@ export const memberQueries = {
       total_regular_members,
       most_common_skills,
       recent_members
+    }
+  }
+}
+
+// =====================================================
+// POST QUERIES
+// =====================================================
+
+export const postQueries = {
+  // Get all posts with filtering
+  async getPosts(filters: {
+    category?: string
+    status?: string
+    author?: string
+    search?: string
+    sort_by?: string
+    limit?: number
+    offset?: number
+  } = {}) {
+    try {
+      const params = new URLSearchParams()
+
+      if (filters.category) params.append('category', filters.category)
+      if (filters.status) params.append('status', filters.status)
+      if (filters.author) params.append('author', filters.author)
+      if (filters.search) params.append('search', filters.search)
+      if (filters.sort_by) params.append('sort_by', filters.sort_by)
+      if (filters.limit) params.append('limit', filters.limit.toString())
+      if (filters.offset) params.append('offset', filters.offset.toString())
+
+      const response = await fetch(`/api/posts?${params}`)
+      const result = await response.json()
+
+      if (!result.success) {
+        return { posts: null, error: { message: result.error } }
+      }
+
+      return { posts: result.posts, total: result.total, pagination: result.pagination, error: null }
+    } catch (error) {
+      return { posts: null, total: 0, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Get single post by ID
+  async getPost(id: string, session?: any) {
+    try {
+      const headers: any = {}
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch(`/api/posts/${id}`, { headers })
+      const result = await response.json()
+
+      if (!result.success) {
+        return { post: null, error: { message: result.error } }
+      }
+
+      return {
+        post: result.post,
+        blocks: result.blocks,
+        relatedPosts: result.related_posts,
+        userHasUpvoted: result.user_has_upvoted,
+        error: null
+      }
+    } catch (error) {
+      return { post: null, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Create new post
+  async createPost(postData: {
+    title: string
+    summary: string
+    thumbnail_image_id?: string
+    category: string
+    slug?: string
+  }, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { post: null, error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(postData)
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { post: null, error: { message: result.error } }
+      }
+
+      return { post: result.post, error: null }
+    } catch (error) {
+      return { post: null, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Update post
+  async updatePost(id: string, updates: any, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { post: null, error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch(`/api/posts/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(updates)
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { post: null, error: { message: result.error } }
+      }
+
+      return { post: result.post, error: null }
+    } catch (error) {
+      return { post: null, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Delete post
+  async deletePost(id: string, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch(`/api/posts/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { error: { message: result.error } }
+      }
+
+      return { error: null }
+    } catch (error) {
+      return { error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Get user's posts
+  async getUserPosts(userId: string) {
+    const supabase = createClient()
+
+    const { data: posts, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('author_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (error || !posts) {
+      return { posts: [], error }
+    }
+
+    return { posts, error: null }
+  },
+
+  // Block management
+  async getBlocks(postId: string) {
+    try {
+      const response = await fetch(`/api/posts/${postId}/blocks`)
+      const result = await response.json()
+
+      if (!result.success) {
+        return { blocks: [], error: { message: result.error } }
+      }
+
+      return { blocks: result.blocks, error: null }
+    } catch (error) {
+      return { blocks: [], error: { message: 'Network error occurred' } }
+    }
+  },
+
+  async addBlock(postId: string, blockData: {
+    type: string
+    content: any
+    order_index: number
+  }, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { block: null, error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch(`/api/posts/${postId}/blocks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(blockData)
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { block: null, error: { message: result.error } }
+      }
+
+      return { block: result.block, error: null }
+    } catch (error) {
+      return { block: null, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  async updateBlock(postId: string, blockId: string, updates: any, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { block: null, error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch(`/api/posts/${postId}/blocks/${blockId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(updates)
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { block: null, error: { message: result.error } }
+      }
+
+      return { block: result.block, error: null }
+    } catch (error) {
+      return { block: null, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  async deleteBlock(postId: string, blockId: string, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch(`/api/posts/${postId}/blocks/${blockId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { error: { message: result.error } }
+      }
+
+      return { error: null }
+    } catch (error) {
+      return { error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Upvote management
+  async toggleUpvote(postId: string, session: any) {
+    try {
+      if (!session?.access_token) {
+        return { error: { message: 'Authentication required' } }
+      }
+
+      const response = await fetch(`/api/posts/${postId}/upvote`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        return { error: { message: result.error } }
+      }
+
+      return {
+        upvoted: result.upvoted,
+        upvoteCount: result.upvote_count,
+        error: null
+      }
+    } catch (error) {
+      return { error: { message: 'Network error occurred' } }
+    }
+  },
+
+  async getUpvoteStatus(postId: string, session?: any) {
+    try {
+      const headers: any = {}
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch(`/api/posts/${postId}/upvote`, { headers })
+      const result = await response.json()
+
+      if (!result.success) {
+        return { error: { message: result.error } }
+      }
+
+      return {
+        upvoteCount: result.upvote_count,
+        userHasUpvoted: result.user_has_upvoted,
+        error: null
+      }
+    } catch (error) {
+      return { error: { message: 'Network error occurred' } }
     }
   }
 }

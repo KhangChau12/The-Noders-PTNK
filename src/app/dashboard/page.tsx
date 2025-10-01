@@ -8,7 +8,7 @@ import { Badge } from '@/components/Badge'
 import { Loading } from '@/components/Loading'
 import { getInitials } from '@/lib/utils'
 import { Avatar } from '@/components/Avatar'
-import { User, Settings, FileText, Calendar, Award, Mail, Facebook } from 'lucide-react'
+import { User, Settings, FileText, Calendar, Award, Mail, Facebook, PenSquare } from 'lucide-react'
 import Link from 'next/link'
 import { useMember } from '@/lib/hooks'
 
@@ -239,45 +239,42 @@ function DashboardContent() {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* My Content */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>My Content</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Link href="/dashboard/projects">
-                    <Button variant="primary" className="w-full justify-start">
-                      <FileText className="w-4 h-4 mr-2" />
-                      My Projects
-                    </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Link href="/dashboard/projects" className="group">
+                    <div className="p-6 rounded-xl border-2 border-dark-border bg-dark-surface hover:border-primary-blue hover:bg-primary-blue/5 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-12 h-12 rounded-lg bg-primary-blue/10 flex items-center justify-center group-hover:bg-primary-blue/20 transition-colors">
+                          <FileText className="w-6 h-6 text-primary-blue" />
+                        </div>
+                        <span className="text-2xl font-bold text-text-primary">
+                          {userStats.projectsContributed || 0}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-1">My Projects</h3>
+                      <p className="text-sm text-text-secondary">Manage and track your projects</p>
+                    </div>
                   </Link>
-                  <Link href="/projects">
-                    <Button variant="secondary" className="w-full justify-start">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Browse Projects
-                    </Button>
+
+                  <Link href="/dashboard/posts" className="group">
+                    <div className="p-6 rounded-xl border-2 border-dark-border bg-dark-surface hover:border-accent-cyan hover:bg-accent-cyan/5 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-12 h-12 rounded-lg bg-accent-cyan/10 flex items-center justify-center group-hover:bg-accent-cyan/20 transition-colors">
+                          <PenSquare className="w-6 h-6 text-accent-cyan" />
+                        </div>
+                        <span className="text-2xl font-bold text-text-primary">
+                          {/* Could add post count here if available */}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-1">My Posts</h3>
+                      <p className="text-sm text-text-secondary">Write and publish your content</p>
+                    </div>
                   </Link>
-                  <Link href="/members">
-                    <Button variant="secondary" className="w-full justify-start">
-                      <User className="w-4 h-4 mr-2" />
-                      View Members
-                    </Button>
-                  </Link>
-                  <Link href="/dashboard/profile">
-                    <Button variant="secondary" className="w-full justify-start">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Update Profile
-                    </Button>
-                  </Link>
-                  {profile.role === 'admin' && (
-                    <Link href="/admin">
-                      <Button variant="primary" className="w-full justify-start">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Admin Panel
-                      </Button>
-                    </Link>
-                  )}
                 </div>
               </CardContent>
             </Card>
