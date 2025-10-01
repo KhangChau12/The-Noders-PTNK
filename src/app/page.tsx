@@ -33,6 +33,20 @@ interface Project {
   }
 }
 
+interface NewsPost {
+  id: string
+  title: string
+  summary: string
+  slug: string
+  category: string
+  reading_time: number
+  published_at: string
+  author?: {
+    username: string
+    full_name: string
+  }
+}
+
 export default function HomePage() {
   const [stats, setStats] = useState<Stats>({
     activeProjects: 0,
@@ -43,6 +57,8 @@ export default function HomePage() {
   const [statsLoading, setStatsLoading] = useState(true)
   const [recentProjects, setRecentProjects] = useState<Project[]>([])
   const [projectsLoading, setProjectsLoading] = useState(true)
+  const [recentPosts, setRecentPosts] = useState<NewsPost[]>([])
+  const [postsLoading, setPostsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchStats() {
@@ -82,8 +98,24 @@ export default function HomePage() {
       }
     }
 
+    async function fetchRecentPosts() {
+      try {
+        const response = await fetch('/api/posts?status=published&limit=2')
+        if (response.ok) {
+          const data = await response.json()
+          setRecentPosts(data.posts || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch recent posts:', error)
+        setRecentPosts([])
+      } finally {
+        setPostsLoading(false)
+      }
+    }
+
     fetchStats()
     fetchRecentProjects()
+    fetchRecentPosts()
   }, [])
   const features = [
     {
@@ -127,10 +159,30 @@ export default function HomePage() {
     }
   }
 
+  // Helper function to get post category badge variant
+  const getCategoryBadgeVariant = (category: string) => {
+    switch (category) {
+      case 'News':
+        return 'primary'
+      case 'Member Spotlight':
+        return 'success'
+      case 'Community Activities':
+        return 'warning'
+      default:
+        return 'secondary'
+    }
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-12 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-4">
@@ -417,92 +469,82 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-            {/* Featured News Items */}
-            {/* Clean news announcement */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/news/1">
-                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
-                  <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
-                </div>
-                <CardContent className="p-6">
-                  <Badge variant="primary" size="sm" className="mb-3">Announcement</Badge>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                    The Noders PTNK Launches AI Fundamentals Workshop Series
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                    We are excited to announce our comprehensive AI workshop series designed to spread technology knowledge to VNU High School for the Gifted students.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Jan 15, 2024
+          <div className={`grid gap-8 mb-8 ${recentPosts.length === 1 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+            {postsLoading ? (
+              // Loading state
+              Array.from({ length: 2 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <div className="aspect-video bg-dark-surface rounded-t-lg"></div>
+                  <CardContent className="p-6">
+                    <div className="h-5 bg-dark-surface rounded w-20 mb-3"></div>
+                    <div className="h-6 bg-dark-surface rounded mb-2"></div>
+                    <div className="h-4 bg-dark-surface rounded mb-4"></div>
+                    <div className="flex gap-4 mb-4">
+                      <div className="h-4 bg-dark-surface rounded w-24"></div>
+                      <div className="h-4 bg-dark-surface rounded w-20"></div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      5 min read
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-primary-blue text-sm font-medium">Read More</span>
-                    <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <>
+                {recentPosts.map((post) => (
+                  <Card key={post.id} variant="interactive" className="hover-lift group">
+                    <Link href={`/posts/${post.slug}`}>
+                      <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
+                        <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
+                      </div>
+                      <CardContent className="p-6">
+                        <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
+                          {post.category}
+                        </Badge>
+                        <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                          {post.title || 'Untitled Post'}
+                        </h3>
+                        <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
+                          {post.summary || 'No summary available'}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {formatDate(post.published_at)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {post.reading_time} min read
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-primary-blue text-sm font-medium">Read More</span>
+                          <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                      </CardContent>
+                    </Link>
+                  </Card>
+                ))}
 
-            {/* Member spotlight */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/news/2">
-                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-success/10 to-accent-cyan/5 flex items-center justify-center">
-                  <User className="w-12 h-12 text-success group-hover:scale-105 transition-transform duration-300" />
-                </div>
-                <CardContent className="p-6">
-                  <Badge variant="success" size="sm" className="mb-3">Member Spotlight</Badge>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-success transition-colors">
-                    Success Story: From Zero to Hero in Programming
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                    Discover how our club members transform from beginners to confident developers through collaborative learning and practice.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Jan 12, 2024
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      7 min read
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-success text-sm font-medium">Read More</span>
-                    <ArrowRight className="w-4 h-4 text-success group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
-
-            {/* View all news CTA */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/news">
-                <CardContent className="p-8 text-center h-full flex flex-col justify-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                    <Newspaper className="w-8 h-8 text-primary-blue" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2">
-                    View All News
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 leading-relaxed">
-                    Discover more stories, updates, and insights from our community
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
-                    <span className="text-sm font-medium">Browse All Posts</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
+                {/* View all posts CTA */}
+                <Card variant="interactive" className="hover-lift group">
+                  <Link href="/posts">
+                    <CardContent className="p-8 text-center h-full flex flex-col justify-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
+                        <Newspaper className="w-8 h-8 text-primary-blue" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-2">
+                        View All Posts
+                      </h3>
+                      <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                        Discover more stories, updates, and insights from our community
+                      </p>
+                      <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
+                        <span className="text-sm font-medium">Browse All Posts</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
+              </>
+            )}
           </div>
         </div>
       </section>
