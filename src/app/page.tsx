@@ -1,17 +1,127 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
+import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
 import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper } from 'lucide-react'
 
+interface Stats {
+  activeProjects: number
+  activeMembers: number
+  postsShared: number
+  workshopsHeld: number
+}
+
+interface Project {
+  id: string
+  title: string
+  description: string
+  tech_stack: string[]
+  status: string
+  repo_url?: string
+  demo_url?: string
+  created_at: string
+  contributors: any[]
+  created_by_profile?: {
+    username: string
+    full_name: string
+    avatar_url?: string
+  }
+}
+
+interface NewsPost {
+  id: string
+  title: string
+  summary: string
+  slug: string
+  category: string
+  reading_time: number
+  published_at: string
+  author?: {
+    username: string
+    full_name: string
+  }
+}
 
 export default function HomePage() {
+  const [stats, setStats] = useState<Stats>({
+    activeProjects: 0,
+    activeMembers: 0,
+    postsShared: 0,
+    workshopsHeld: 0
+  })
+  const [statsLoading, setStatsLoading] = useState(true)
+  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [projectsLoading, setProjectsLoading] = useState(true)
+  const [recentPosts, setRecentPosts] = useState<NewsPost[]>([])
+  const [postsLoading, setPostsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats')
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error)
+        // Fallback to default values
+        setStats({
+          activeProjects: 8,
+          activeMembers: 15,
+          postsShared: 25,
+          workshopsHeld: 1
+        })
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    async function fetchRecentProjects() {
+      try {
+        const response = await fetch('/api/projects/recent')
+        if (response.ok) {
+          const data = await response.json()
+          setRecentProjects(data.projects || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch recent projects:', error)
+        // Fallback to empty array
+        setRecentProjects([])
+      } finally {
+        setProjectsLoading(false)
+      }
+    }
+
+    async function fetchRecentPosts() {
+      try {
+        const response = await fetch('/api/posts?status=published&limit=2')
+        if (response.ok) {
+          const data = await response.json()
+          setRecentPosts(data.posts || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch recent posts:', error)
+        setRecentPosts([])
+      } finally {
+        setPostsLoading(false)
+      }
+    }
+
+    fetchStats()
+    fetchRecentProjects()
+    fetchRecentPosts()
+  }, [])
   const features = [
     {
       icon: <Brain className="w-8 h-8" />,
       title: 'AI Innovation & Workshops',
-      description: 'Organizing workshops at school to spread AI and technology knowledge to more students.'
+      description: 'Organizing workshops at our school to spread AI and technology knowledge to more students.'
     },
     {
       icon: <Code className="w-8 h-8" />,
@@ -30,38 +140,49 @@ export default function HomePage() {
     }
   ]
 
-  const stats = [
-    { label: 'Active Projects', value: '8+' },
-    { label: 'Active Members', value: '15+' },
-    { label: 'Posts Shared', value: '25+' },
-    { label: 'Workshops Held', value: '6+' }
+  const statsDisplay = [
+    { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
+    { label: 'Active Members', value: stats.activeMembers, key: 'activeMembers' },
+    { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared' },
+    { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' }
   ]
 
-  const recentProjects = [
-    {
-      title: 'PTNK Study Assistant',
-      description: 'AI chatbot supporting PTNK students\' learning',
-      tech: ['Python', 'OpenAI API', 'FastAPI'],
-      status: 'Active'
-    },
-    {
-      title: 'Tech Blog Platform',
-      description: 'Knowledge sharing platform for our club\'s tech content',
-      tech: ['Next.js', 'TypeScript', 'Supabase'],
-      status: 'Active'
-    },
-    {
-      title: 'Workshop Management System',
-      description: 'System for managing and registering workshops for students',
-      tech: ['React', 'Node.js', 'MongoDB'],
-      status: 'In Progress'
+  // Helper function to get project status badge variant
+  const getStatusVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'success'
+      case 'archived':
+        return 'default'
+      default:
+        return 'warning'
     }
-  ]
+  }
+
+  // Helper function to get post category badge variant
+  const getCategoryBadgeVariant = (category: string) => {
+    switch (category) {
+      case 'News':
+        return 'primary'
+      case 'Member Spotlight':
+        return 'success'
+      case 'Community Activities':
+        return 'warning'
+      default:
+        return 'secondary'
+    }
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-12 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-4">
@@ -84,10 +205,16 @@ export default function HomePage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/projects">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Explore Projects
+              <Link href="/contest">
+                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90">
+                  Join AI Challenge 2025
                   <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/projects">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  Explore Projects
+                  <Code className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link href="/members">
@@ -101,15 +228,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section - Clean Professional */}
+      {/* Stats Section - Our Journey So Far */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-dark-surface/40 to-primary-blue/5 relative">
         <div className="container mx-auto relative">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+              Our Journey So Far
+            </h2>
+            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+              From innovative projects to growing community, here's what we've achieved together
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center group">
+            {statsDisplay.map((stat, index) => (
+              <div key={stat.key} className="text-center group">
                 <div className="relative bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 border border-dark-border/50 rounded-xl p-6 hover:border-primary-blue/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/10">
                   <div className="text-3xl md:text-4xl font-bold font-mono bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent mb-2">
-                    {stat.value}
+                    {!statsLoading ? (
+                      <CounterAnimation
+                        end={stat.value}
+                        suffix={stat.key === 'workshopsHeld' ? '+' : '+'}
+                      />
+                    ) : (
+                      <span className="animate-pulse">0+</span>
+                    )}
                   </div>
                   <div className="text-text-secondary text-sm md:text-base font-medium">
                     {stat.label}
@@ -183,65 +326,134 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recentProjects.map((project, index) => (
-              <Card key={index} variant="hover" className="hover-lift group relative overflow-hidden">
-                <CardContent className="relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300 w-[70%]">
-                      {project.title}
-                    </h3>
-                    <Badge
-                      variant={project.status === 'Active' ? 'success' : 'warning'}
-                      size="sm"
-                      className="font-mono text-xs mt-1"
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-
-                  <p className="text-text-secondary mb-4 text-sm leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  {/* Tech stack with terminal styling */}
-                  <div className="bg-dark-surface/50 border border-dark-border/30 rounded-lg p-3 mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech, techIndex) => (
-                        <span key={techIndex} className="px-2 py-1 bg-primary-blue/10 text-accent-cyan text-xs font-mono rounded border border-primary-blue/20">
-                          {tech}
-                        </span>
-                      ))}
+            {projectsLoading ? (
+              // Loading state
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-dark-surface rounded mb-4"></div>
+                    <div className="h-3 bg-dark-surface rounded mb-2"></div>
+                    <div className="h-3 bg-dark-surface rounded w-3/4 mb-4"></div>
+                    <div className="flex gap-2 mb-4">
+                      <div className="h-6 w-16 bg-dark-surface rounded"></div>
+                      <div className="h-6 w-20 bg-dark-surface rounded"></div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <>
+                {recentProjects.map((project, index) => (
+                  <Card key={project.id} variant="hover" className="hover-lift group relative overflow-hidden">
+                    <Link href={`/projects/${project.id}`}>
+                      <CardContent className="p-6 relative z-10 cursor-pointer">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
+                            {project.title}
+                          </h3>
+                          <Badge
+                            variant={getStatusVariant(project.status)}
+                            size="sm"
+                            className="font-mono text-xs"
+                          >
+                            {project.status}
+                          </Badge>
+                        </div>
 
-                  {/* Interactive GitHub/External links */}
-                  <div className="flex items-center space-x-3">
-                    <button className="flex items-center space-x-1 text-text-tertiary hover:text-primary-blue transition-colors duration-200 group/btn">
-                      <Github className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                      <span className="text-xs font-mono">code</span>
-                    </button>
-                    <button className="flex items-center space-x-1 text-text-tertiary hover:text-accent-cyan transition-colors duration-200 group/btn">
-                      <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                      <span className="text-xs font-mono">demo</span>
-                    </button>
-                  </div>
-                </CardContent>
-                {/* Glitch effect background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                {/* Terminal border */}
-                <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/20 rounded-lg transition-all duration-300"></div>
-              </Card>
-            ))}
+                        <p className="text-text-secondary mb-4 text-sm leading-relaxed">
+                          {project.description || 'No description available'}
+                        </p>
+
+                        {/* Tech stack with terminal styling */}
+                        <div className="bg-dark-surface/50 border border-dark-border/30 rounded-lg p-3 mb-4">
+                          <div className="flex flex-wrap gap-2">
+                            {project.tech_stack?.map((tech, techIndex) => (
+                              <span key={techIndex} className="px-2 py-1 bg-primary-blue/10 text-accent-cyan text-xs font-mono rounded border border-primary-blue/20">
+                                {tech}
+                              </span>
+                            )) || (
+                              <span className="text-text-tertiary text-xs font-mono">No tech stack specified</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Interactive GitHub/External links */}
+                        <div className="flex items-center space-x-3">
+                          {project.repo_url && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                window.open(project.repo_url, '_blank', 'noopener,noreferrer')
+                              }}
+                              className="flex items-center space-x-1 text-text-tertiary hover:text-primary-blue transition-colors duration-200 group/btn z-10"
+                            >
+                              <Github className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
+                              <span className="text-xs font-mono">code</span>
+                            </button>
+                          )}
+                          {project.demo_url && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                window.open(project.demo_url, '_blank', 'noopener,noreferrer')
+                              }}
+                              className="flex items-center space-x-1 text-text-tertiary hover:text-accent-cyan transition-colors duration-200 group/btn z-10"
+                            >
+                              <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
+                              <span className="text-xs font-mono">demo</span>
+                            </button>
+                          )}
+                          {!project.repo_url && !project.demo_url && (
+                            <span className="text-text-tertiary text-xs font-mono">Links coming soon</span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Link>
+                    {/* Glitch effect background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Terminal border */}
+                    <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/20 rounded-lg transition-all duration-300"></div>
+                  </Card>
+                ))}
+
+                {/* Show "View All Projects" card if less than 3 projects */}
+                {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
+                  <Card key={`viewall-${index}`} variant="interactive" className="hover-lift group">
+                    <Link href="/projects">
+                      <CardContent className="p-8 text-center h-full flex flex-col justify-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
+                          <Code className="w-8 h-8 text-primary-blue" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-text-primary mb-2">
+                          View All Projects
+                        </h3>
+                        <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                          Discover more of our innovative projects and technical achievements
+                        </p>
+                        <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
+                          <span className="text-sm font-medium">Browse Projects</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                      </CardContent>
+                    </Link>
+                  </Card>
+                ))}
+              </>
+            )}
           </div>
-          
-          <div className="text-center mt-12">
-            <Link href="/projects">
-              <Button variant="secondary" size="lg">
-                View All Projects
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
+
+          {recentProjects.length >= 3 && (
+            <div className="text-center mt-12">
+              <Link href="/projects">
+                <Button variant="secondary" size="lg">
+                  View All Projects
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -257,92 +469,82 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-            {/* Featured News Items */}
-            {/* Clean news announcement */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/news/1">
-                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
-                  <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
-                </div>
-                <CardContent className="pt-6">
-                  <Badge variant="primary" size="sm" className="mb-3">Announcement</Badge>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                    The Noders PTNK Launches AI Fundamentals Workshop Series
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                    We are excited to announce our comprehensive AI workshop series designed to spread technology knowledge to PTNK students.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Jan 15, 2024
+          <div className={`grid gap-8 mb-8 ${recentPosts.length === 1 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+            {postsLoading ? (
+              // Loading state
+              Array.from({ length: 2 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <div className="aspect-video bg-dark-surface rounded-t-lg"></div>
+                  <CardContent className="p-6">
+                    <div className="h-5 bg-dark-surface rounded w-20 mb-3"></div>
+                    <div className="h-6 bg-dark-surface rounded mb-2"></div>
+                    <div className="h-4 bg-dark-surface rounded mb-4"></div>
+                    <div className="flex gap-4 mb-4">
+                      <div className="h-4 bg-dark-surface rounded w-24"></div>
+                      <div className="h-4 bg-dark-surface rounded w-20"></div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      5 min read
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-primary-blue text-sm font-medium">Read More</span>
-                    <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <>
+                {recentPosts.map((post) => (
+                  <Card key={post.id} variant="interactive" className="hover-lift group">
+                    <Link href={`/posts/${post.slug}`}>
+                      <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
+                        <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
+                      </div>
+                      <CardContent className="p-6">
+                        <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
+                          {post.category}
+                        </Badge>
+                        <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                          {post.title || 'Untitled Post'}
+                        </h3>
+                        <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
+                          {post.summary || 'No summary available'}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {formatDate(post.published_at)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {post.reading_time} min read
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-primary-blue text-sm font-medium">Read More</span>
+                          <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                      </CardContent>
+                    </Link>
+                  </Card>
+                ))}
 
-            {/* Member spotlight */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/news/2">
-                <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-success/10 to-accent-cyan/5 flex items-center justify-center">
-                  <User className="w-12 h-12 text-success group-hover:scale-105 transition-transform duration-300" />
-                </div>
-                <CardContent className="pt-6">
-                  <Badge variant="success" size="sm" className="mb-3">Member Spotlight</Badge>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-success transition-colors">
-                    Success Story: From Zero to Hero in Programming
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                    Discover how our club members transform from beginners to confident developers through collaborative learning and practice.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Jan 12, 2024
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      7 min read
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-success text-sm font-medium">Read More</span>
-                    <ArrowRight className="w-4 h-4 text-success group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
-
-            {/* View all news CTA */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/news">
-                <CardContent className="p-8 text-center h-full flex flex-col justify-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                    <Newspaper className="w-8 h-8 text-primary-blue" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2">
-                    View All News
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 leading-relaxed">
-                    Discover more stories, updates, and insights from our community
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
-                    <span className="text-sm font-medium">Browse All Posts</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
+                {/* View all posts CTA */}
+                <Card variant="interactive" className="hover-lift group">
+                  <Link href="/posts">
+                    <CardContent className="p-8 text-center h-full flex flex-col justify-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
+                        <Newspaper className="w-8 h-8 text-primary-blue" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-text-primary mb-2">
+                        View All Posts
+                      </h3>
+                      <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                        Discover more stories, updates, and insights from our community
+                      </p>
+                      <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
+                        <span className="text-sm font-medium">Browse All Posts</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
+              </>
+            )}
           </div>
         </div>
       </section>

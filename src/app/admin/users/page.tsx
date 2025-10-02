@@ -677,7 +677,8 @@ function UserManagementPage() {
                             <td className="py-4">
                               <div className="flex items-center gap-3">
                                 <Avatar
-                                  name={profile?.avatar_url ? null : profile?.full_name}
+                                  name={profile?.full_name}
+                                  src={profile?.avatar_url}
                                   size="md"
                                 />
                                 <div>

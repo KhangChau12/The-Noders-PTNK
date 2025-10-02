@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Card, CardContent, CardHeader } from '@/components/Card'
+import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
-import { NewsPost } from '@/lib/posts'
+import { Post } from '@/types/database'
 import {
   Search,
   Calendar,
@@ -15,78 +14,108 @@ import {
   ArrowRight,
   TrendingUp,
   Users,
-  Code,
   Lightbulb,
   Award,
   BookOpen,
   Clock,
   Filter,
-  Share2
+  ThumbsUp,
+  Eye
 } from 'lucide-react'
 
 const categories = [
   { id: 'all', name: 'All Posts', icon: BookOpen, color: 'text-text-primary' },
-  { id: 'announcement', name: 'Announcements', icon: TrendingUp, color: 'text-primary-blue' },
-  { id: 'project', name: 'Projects', icon: Code, color: 'text-accent-cyan' },
-  { id: 'member-spotlight', name: 'Member Spotlight', icon: Award, color: 'text-success' },
-  { id: 'technical', name: 'Technical', icon: Lightbulb, color: 'text-warning' },
-  { id: 'event', name: 'Events', icon: Users, color: 'text-accent-purple' }
+  { id: 'News', name: 'News', icon: TrendingUp, color: 'text-primary-blue' },
+  { id: 'You may want to know', name: 'You May Want to Know', icon: Lightbulb, color: 'text-warning' },
+  { id: 'Member Spotlight', name: 'Member Spotlight', icon: Award, color: 'text-success' },
+  { id: 'Community Activities', name: 'Community Activities', icon: Users, color: 'text-accent-purple' }
 ]
 
-function CategoryBadge({ category }: { category: NewsPost['category'] }) {
+interface PostWithAuthor extends Post {
+  author?: {
+    id: string
+    username: string
+    full_name: string
+    avatar_url: string | null
+  }
+  thumbnail_image?: {
+    public_url: string
+  }
+}
+
+function CategoryBadge({ category }: { category: Post['category'] }) {
   const config = {
-    announcement: { label: 'Announcement', variant: 'primary' as const },
-    project: { label: 'Project', variant: 'secondary' as const },
-    'member-spotlight': { label: 'Member Spotlight', variant: 'success' as const },
-    technical: { label: 'Technical', variant: 'tech' as const },
-    event: { label: 'Event', variant: 'warning' as const }
+    'News': { label: 'News', variant: 'primary' as const },
+    'You may want to know': { label: 'Educational', variant: 'tech' as const },
+    'Member Spotlight': { label: 'Member Spotlight', variant: 'success' as const },
+    'Community Activities': { label: 'Activities', variant: 'warning' as const }
   }
 
   const { label, variant } = config[category]
   return <Badge variant={variant} size="sm">{label}</Badge>
 }
 
-function NewsCard({ post, featured = false }: { post: NewsPost; featured?: boolean }) {
+function PostCard({ post, featured = false }: { post: PostWithAuthor; featured?: boolean }) {
   const cardClass = featured
     ? "bg-gradient-to-br from-primary-blue/5 to-accent-cyan/5 border-primary-blue/20"
     : ""
 
+  const thumbnailSrc = post.thumbnail_image?.public_url || post.thumbnail_url
+
   return (
     <Card variant="interactive" className={`h-full hover-lift ${cardClass}`}>
-      <Link href={`/news/${post.id}`}>
-        {post.image && (
-          <div className="aspect-video relative overflow-hidden rounded-t-lg">
-            <Image
-              src={post.image}
-              alt={post.title}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
+      <Link href={`/posts/${post.slug}`}>
+        <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+          {thumbnailSrc ? (
+            <img
+              src={thumbnailSrc}
+              alt={post.thumbnail_image?.alt_text || post.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            {featured && (
-              <div className="absolute top-4 left-4">
-                <Badge variant="primary" size="sm">Featured</Badge>
-              </div>
-            )}
-            <div className="absolute top-4 right-4">
-              <CategoryBadge category={post.category} />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
+              <svg
+                className="w-12 h-12 mb-2 opacity-60"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                />
+              </svg>
+              <span className="text-sm font-medium">No Image</span>
             </div>
+          )}
+          {featured && (
+            <div className="absolute top-4 left-4">
+              <Badge variant="primary" size="sm">Featured</Badge>
+            </div>
+          )}
+          <div className="absolute top-4 right-4">
+            <CategoryBadge category={post.category} />
           </div>
-        )}
+        </div>
 
-        <CardContent className="p-2">
+        <CardContent className="p-6">
           <div className="flex items-center gap-4 text-xs text-text-tertiary mb-3">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {new Date(post.date).toLocaleDateString()}
+              {new Date(post.created_at).toLocaleDateString()}
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              {post.readTime} min read
+              {post.reading_time} min
             </div>
-            <div className="flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {post.author}
-            </div>
+            {post.author && (
+              <div className="flex items-center gap-1">
+                <User className="w-3 h-3" />
+                {post.author.full_name}
+              </div>
+            )}
           </div>
 
           <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
@@ -94,29 +123,23 @@ function NewsCard({ post, featured = false }: { post: NewsPost; featured?: boole
           </h3>
 
           <p className="text-text-secondary text-sm mb-4 line-clamp-3">
-            {post.excerpt}
+            {post.summary}
           </p>
 
-          <div className="flex flex-wrap gap-1 mb-4">
-            {post.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="secondary" size="sm">
-                {tag}
-              </Badge>
-            ))}
-            {post.tags.length > 3 && (
-              <Badge variant="secondary" size="sm">
-                +{post.tags.length - 3}
-              </Badge>
-            )}
+          <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
+            <div className="flex items-center gap-1">
+              <Eye className="w-3 h-3" />
+              {post.view_count} views
+            </div>
+            <div className="flex items-center gap-1">
+              <ThumbsUp className="w-3 h-3" />
+              {post.upvote_count} upvotes
+            </div>
           </div>
 
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="sm" className="p-0 h-auto">
               Read More <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
-
-            <Button variant="ghost" size="sm" className="p-2 h-auto">
-              <Share2 className="w-3 h-3" />
             </Button>
           </div>
         </CardContent>
@@ -125,15 +148,14 @@ function NewsCard({ post, featured = false }: { post: NewsPost; featured?: boole
   )
 }
 
-export default function NewsPage() {
+export default function PostsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showFilters, setShowFilters] = useState(false)
-  const [posts, setPosts] = useState<NewsPost[]>([])
+  const [posts, setPosts] = useState<PostWithAuthor[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch posts from API
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -164,7 +186,6 @@ export default function NewsPage() {
       }
     }
 
-    // Debounce search to avoid too many API calls
     const timeoutId = setTimeout(fetchPosts, 300)
     return () => clearTimeout(timeoutId)
   }, [searchTerm, selectedCategory])
@@ -178,28 +199,26 @@ export default function NewsPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
-            News & Updates
+            Posts & Updates
           </h1>
           <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            Stay updated with the latest announcements, project showcases, member spotlights,
-            and insights from The Noders PTNK community.
+            Stay updated with the latest news, educational content, member spotlights,
+            and community activities from The Noders PTNK.
           </p>
         </div>
 
         {/* Search and Filters */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">
-            {/* Search */}
             <div className="w-full lg:w-96">
               <Input
-                placeholder="Search news and updates..."
+                placeholder="Search posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 icon={<Search className="w-4 h-4" />}
               />
             </div>
 
-            {/* Filter Toggle (Mobile) */}
             <Button
               variant="secondary"
               onClick={() => setShowFilters(!showFilters)}
@@ -286,7 +305,7 @@ export default function NewsPage() {
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {featuredPosts.map((post) => (
-                <NewsCard key={post.id} post={post} featured />
+                <PostCard key={post.id} post={post} featured />
               ))}
             </div>
           </div>
@@ -300,7 +319,7 @@ export default function NewsPage() {
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {regularPosts.map((post) => (
-                <NewsCard key={post.id} post={post} />
+                <PostCard key={post.id} post={post} />
               ))}
             </div>
           </div>
@@ -312,47 +331,23 @@ export default function NewsPage() {
                 No posts found
               </h3>
               <p className="text-text-secondary mb-6">
-                Try adjusting your search criteria or filters.
+                {selectedCategory !== 'all' || searchTerm
+                  ? 'Try adjusting your search criteria or filters.'
+                  : 'No posts have been published yet. Check back soon!'}
               </p>
-              <Button
-                onClick={() => {
-                  setSearchTerm('')
-                  setSelectedCategory('all')
-                }}
-              >
-                Clear Filters
-              </Button>
+              {(selectedCategory !== 'all' || searchTerm) && (
+                <Button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setSelectedCategory('all')
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : null}
-
-        {/* Newsletter Signup */}
-        <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-          <CardContent className="text-center p-8">
-            <h3 className="text-2xl font-bold text-text-primary mb-4">
-              Stay In The Loop
-            </h3>
-            <p className="text-text-secondary mb-6 max-w-2xl mx-auto">
-              Get the latest news, project updates, and insights delivered directly to your inbox.
-              Be the first to know about our newest developments and opportunities.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="your.email@example.com"
-                className="flex-1"
-              />
-              <Button>
-                Subscribe
-              </Button>
-            </div>
-
-            <p className="text-text-tertiary text-sm mt-4">
-              We respect your privacy. Unsubscribe at any time.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

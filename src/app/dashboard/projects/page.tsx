@@ -72,11 +72,9 @@ function MemberProjectsPage() {
       setLoading(true)
       setError(null)
 
-      console.log('Fetching projects for user:', user.id)
       const { createdProjects, contributedProjects, error } = await projectQueries.getUserProjects(user.id)
 
       if (error) {
-        console.error('Error loading user projects:', error)
         setError(error.message)
         setCreatedProjects([])
         setContributedProjects([])
@@ -85,7 +83,6 @@ function MemberProjectsPage() {
         setContributedProjects(contributedProjects || [])
       }
     } catch (err) {
-      console.error('Exception in fetchUserProjects:', err)
       setError('Failed to load projects')
       setCreatedProjects([])
       setContributedProjects([])
@@ -211,15 +208,14 @@ function MemberProjectsPage() {
 
           {isOwner && (
             <div className="flex items-center gap-2">
-              <a href={`/dashboard/projects/${project.id}/edit`}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  title="Edit Project"
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-              </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditingProject(project)}
+                title="Edit Project"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

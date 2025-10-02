@@ -65,12 +65,16 @@ export function useAuth() {
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: 'Not authenticated' }
-    
+
     const result = await auth.updateProfile(user.id, updates)
     if (result.profile) {
       setProfile(result.profile)
     }
     return result
+  }
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    return await auth.changePassword(currentPassword, newPassword)
   }
 
   const isAdmin = profile?.role === 'admin'
@@ -83,6 +87,7 @@ export function useAuth() {
     signIn,
     signOut,
     updateProfile,
+    changePassword,
     isAdmin,
   }
 }

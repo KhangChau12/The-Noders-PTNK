@@ -9,7 +9,8 @@
       "Bash(grep:*)",
       "Bash(curl:*)",
       "Bash(npm run build:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

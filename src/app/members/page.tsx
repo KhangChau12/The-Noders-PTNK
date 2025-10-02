@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useMembers } from '@/lib/hooks'
@@ -14,6 +14,32 @@ import { getInitials } from '@/lib/utils'
 import { Avatar } from '@/components/Avatar'
 import { ClickableBadge } from '@/components/ClickableBadge'
 import { Search, Users, Mail, Facebook, Award } from 'lucide-react'
+
+// Component to fetch and display member's post count
+function MemberPostCount({ memberId }: { memberId: string }) {
+  const [postsCount, setPostsCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    const fetchPostsCount = async () => {
+      try {
+        const response = await fetch(`/api/posts?author=${memberId}&status=all`)
+        const data = await response.json()
+        if (data.success && data.posts) {
+          setPostsCount(data.posts.length)
+        }
+      } catch (error) {
+        console.error('Error fetching posts count:', error)
+        setPostsCount(0)
+      }
+    }
+
+    fetchPostsCount()
+  }, [memberId])
+
+  if (postsCount === null) return <span>...</span>
+
+  return <span>{postsCount}</span>
+}
 
 export default function MembersPage() {
   const [filters, setFilters] = useState<MemberFilters>({
@@ -122,7 +148,8 @@ export default function MembersPage() {
                         {/* Avatar */}
                         <div className="relative mx-auto mb-4 flex justify-center">
                           <Avatar
-                            name={member.avatar_url ? null : member.full_name}
+                            name={member.full_name}
+                            src={member.avatar_url}
                             size="xl"
                           />
                           {member.role === 'admin' && (
@@ -153,30 +180,21 @@ export default function MembersPage() {
                             {member.bio}
                           </p>
                         )}
-                        
-                        {/* Skills */}
-                        {member.skills && member.skills.length > 0 && (
-                          <div className="mb-4">
-                            <div className="flex flex-wrap gap-1 justify-center">
-                              {member.skills.slice(0, 3).map((skill, index) => (
-                                <Badge key={index} variant="tech" size="sm">
-                                  {skill}
-                                </Badge>
-                              ))}
-                              {member.skills.length > 3 && (
-                                <Badge variant="secondary" size="sm">
-                                  +{member.skills.length - 3}
-                                </Badge>
-                              )}
+
+                        {/* Stats Grid */}
+                        <div className="mb-4 grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-primary-blue">
+                              {projectCount}
                             </div>
+                            <div className="text-xs text-text-tertiary">Projects</div>
                           </div>
-                        )}
-                        
-                        {/* Project Count */}
-                        <div className="mb-4">
-                          <p className="text-sm text-text-tertiary">
-                            {projectCount} project{projectCount !== 1 ? 's' : ''}
-                          </p>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-primary-blue">
+                              <MemberPostCount memberId={member.id} />
+                            </div>
+                            <div className="text-xs text-text-tertiary">Posts</div>
+                          </div>
                         </div>
                         
                         {/* Contact Links */}

@@ -9,7 +9,8 @@ export const NAVIGATION_ITEMS = [
   { name: 'Home', href: '/' },
   { name: 'Projects', href: '/projects' },
   { name: 'Members', href: '/members' },
-  { name: 'News', href: '/news' },
+  { name: 'Contest', href: '/contest' },
+  { name: 'Posts', href: '/posts' },
   { name: 'Contact', href: '/contact' },
 ]
 
@@ -26,6 +27,37 @@ export const USER_ROLES = {
 export const PROJECT_STATUS = {
   ACTIVE: 'active',
   ARCHIVED: 'archived',
+} as const
+
+export const POST_STATUS = {
+  DRAFT: 'draft',
+  PUBLISHED: 'published',
+  ARCHIVED: 'archived',
+} as const
+
+export const POST_CATEGORIES = [
+  'News',
+  'You may want to know',
+  'Member Spotlight',
+  'Community Activities',
+] as const
+
+export const BLOCK_TYPES = {
+  TEXT: 'text',
+  QUOTE: 'quote',
+  IMAGE: 'image',
+  YOUTUBE: 'youtube',
+} as const
+
+export const POST_CONSTRAINTS = {
+  MAX_TITLE_LENGTH: 100,
+  MAX_SUMMARY_LENGTH: 300,
+  MAX_TEXT_WORDS: 800,
+  MAX_IMAGE_BLOCKS: 5,
+  MAX_RELATED_POSTS: 2,
+  MIN_BLOCKS: 1,
+  MAX_BLOCKS: 15,
+  NO_CONSECUTIVE_TEXT: true,
 } as const
 
 export const TECH_STACK_COLORS = {

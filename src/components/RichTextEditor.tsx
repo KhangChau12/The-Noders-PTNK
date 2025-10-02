@@ -14,7 +14,8 @@ import {
   Quote,
   Undo,
   Redo,
-  Type
+  Type,
+  Link as LinkIcon
 } from 'lucide-react'
 import { Button } from '@/components/Button'
 
@@ -32,6 +33,13 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
       editorRef.current.innerHTML = value || ''
+
+      // Ensure all existing links open in new tab
+      const links = editorRef.current.querySelectorAll('a[href]')
+      links.forEach((link: any) => {
+        link.setAttribute('target', '_blank')
+        link.setAttribute('rel', 'noopener noreferrer')
+      })
     }
   }, [value])
 
@@ -55,6 +63,47 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
       document.execCommand('insertHTML', false, text)
       onChange(editorRef.current.innerHTML)
     }
+  }
+
+  const handleCreateLink = () => {
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) {
+      alert('Please select text to create a link')
+      return
+    }
+
+    const selectedText = selection.toString()
+    if (!selectedText) {
+      alert('Please select text to create a link')
+      return
+    }
+
+    const url = prompt('Enter URL:', 'https://')
+    if (!url) return
+
+    // Validate URL
+    try {
+      new URL(url)
+    } catch {
+      alert('Please enter a valid URL')
+      return
+    }
+
+    executeCommand('createLink', url)
+
+    // Set target="_blank" and rel for security on newly created links
+    setTimeout(() => {
+      if (editorRef.current) {
+        const links = editorRef.current.querySelectorAll('a[href]')
+        links.forEach((link: any) => {
+          if (!link.hasAttribute('target')) {
+            link.setAttribute('target', '_blank')
+            link.setAttribute('rel', 'noopener noreferrer')
+          }
+        })
+        onChange(editorRef.current.innerHTML)
+      }
+    }, 10)
   }
 
   const formatButtons = [
@@ -112,6 +161,16 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
               <btn.icon className="w-4 h-4" />
             </Button>
           ))}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleCreateLink}
+            title="Insert Link (Select text first)"
+            className="p-2 h-8 w-8"
+          >
+            <LinkIcon className="w-4 h-4" />
+          </Button>
         </div>
 
         <div className="w-px h-6 bg-dark-border mx-2" />
@@ -263,6 +322,15 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
         }
         [contenteditable] strike {
           text-decoration: line-through;
+        }
+        [contenteditable] a {
+          color: #2563EB;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+        [contenteditable] a:hover {
+          color: #06B6D4;
+          text-decoration: underline;
         }
       `}</style>
     </div>
