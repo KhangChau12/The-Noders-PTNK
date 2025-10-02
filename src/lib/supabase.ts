@@ -18,8 +18,8 @@ export const createClient = () => {
 
     supabaseInstance = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
       auth: {
-        // Use sessionStorage to auto-clear when browser/tab closes
-        storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
+        // Use localStorage to persist session across browser restarts
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: false
