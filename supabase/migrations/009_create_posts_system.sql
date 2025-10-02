@@ -1,8 +1,3 @@
--- Migration: Create Posts Management System
--- Description: Creates posts, post_blocks, and post_upvotes tables with RLS policies
--- Author: Claude Code
--- Date: 2025-09-30
-
 -- =====================================================
 -- 1. DROP EXISTING TABLES (for clean migration)
 -- =====================================================

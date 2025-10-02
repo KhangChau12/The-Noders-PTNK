@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/Card'
@@ -169,10 +169,28 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [upvoting, setUpvoting] = useState(false)
+  const [showAuthMessage, setShowAuthMessage] = useState(false)
+  const viewCountIncrementedRef = useRef<string | null>(null)
 
   useEffect(() => {
     fetchPost()
-  }, [slug, session])
+  }, [slug])
+
+  // Separate effect to increment view count only once per post
+  useEffect(() => {
+    const incrementViewCount = async () => {
+      if (post && post.status === 'published' && viewCountIncrementedRef.current !== post.id) {
+        viewCountIncrementedRef.current = post.id
+        try {
+          await fetch(`/api/posts/${post.id}/view`, { method: 'POST' })
+        } catch (err) {
+          console.error('Failed to increment view count:', err)
+        }
+      }
+    }
+
+    incrementViewCount()
+  }, [post?.id, post?.status])
 
   const fetchPost = async () => {
     try {
@@ -212,7 +230,7 @@ export default function PostDetailPage() {
       setBlocks(postBlocks || [])
       setRelatedPosts(related || [])
       setUserHasUpvoted(upvoted || false)
-      setUpvoteCount(fullPost.upvote_count)
+      setUpvoteCount(fullPost?.upvote_count || 0)
 
     } catch (err) {
       setError('Failed to load post')
@@ -224,7 +242,8 @@ export default function PostDetailPage() {
 
   const handleUpvote = async () => {
     if (!session) {
-      alert('Please sign in to upvote')
+      setShowAuthMessage(true)
+      setTimeout(() => setShowAuthMessage(false), 5000)
       return
     }
 
@@ -235,13 +254,13 @@ export default function PostDetailPage() {
       const { upvoted, upvoteCount: newCount, error } = await postQueries.toggleUpvote(post.id, session)
 
       if (error) {
-        alert('Failed to upvote: ' + error.message)
+        setError('Failed to upvote: ' + error.message)
       } else {
         setUserHasUpvoted(upvoted || false)
         setUpvoteCount(newCount || 0)
       }
     } catch (err) {
-      alert('Network error occurred')
+      setError('Network error occurred')
     } finally {
       setUpvoting(false)
     }
@@ -363,6 +382,21 @@ export default function PostDetailPage() {
               </Card>
             )}
           </div>
+
+          {/* Auth Message */}
+          {showAuthMessage && (
+            <Card className="mb-6 bg-warning/10 border-warning/30">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
+                  <div>
+                    <p className="text-text-primary font-medium">Authentication Required</p>
+                    <p className="text-text-secondary text-sm">You must be a member of the community to upvote posts.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Footer Actions */}
           <div className="flex items-center justify-between py-6 border-t border-dark-border">
