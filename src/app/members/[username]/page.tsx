@@ -9,6 +9,7 @@ import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
 import { Loading } from '@/components/Loading'
 import { Avatar } from '@/components/Avatar'
+import { useState, useEffect } from 'react'
 import {
   ArrowLeft,
   Mail,
@@ -264,8 +265,31 @@ export default function MemberProfilePage() {
   const username = params.username as string
 
   const { member, loading, error } = useMember(username);
+  const [postsCount, setPostsCount] = useState(0)
+  const [postsLoading, setPostsLoading] = useState(true)
 
   console.log(member);
+
+  // Fetch member's posts count
+  useEffect(() => {
+    const fetchMemberPosts = async () => {
+      if (!member?.id) return
+
+      try {
+        const response = await fetch(`/api/posts?author=${member.id}&status=all`)
+        const data = await response.json()
+        if (data.success && data.posts) {
+          setPostsCount(data.posts.length)
+        }
+      } catch (error) {
+        console.error('Error fetching member posts:', error)
+      } finally {
+        setPostsLoading(false)
+      }
+    }
+
+    fetchMemberPosts()
+  }, [member?.id])
 
   if (loading) {
     return (
@@ -366,9 +390,9 @@ export default function MemberProfilePage() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-blue">
-                      {member.skills?.length || 0}
+                      {postsLoading ? '...' : postsCount}
                     </div>
-                    <div className="text-xs text-text-tertiary">Skills</div>
+                    <div className="text-xs text-text-tertiary">Posts</div>
                   </div>
                 </div>
 
@@ -475,9 +499,9 @@ export default function MemberProfilePage() {
                   <span className="font-semibold text-text-primary">{totalProjects}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Contributions</span>
+                  <span className="text-text-secondary">Posts Written</span>
                   <span className="font-semibold text-text-primary">
-                  {member.contributed_projects?.filter(a => a.role_in_project !== 'Creator').length || 0}
+                    {postsLoading ? '...' : postsCount}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

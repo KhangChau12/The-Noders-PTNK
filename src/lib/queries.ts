@@ -419,13 +419,23 @@ export const memberQueries = {
       return { members: null, error }
     }
 
+    // Fetch project contributions count for all members in one query
+    const memberIds = data.map(m => m.id)
+    const { data: contributions } = await supabase
+      .from('project_contributors')
+      .select('user_id')
+      .in('user_id', memberIds)
 
+    // Count contributions per member
+    const contributionCounts: Record<string, number> = {}
+    contributions?.forEach(contrib => {
+      contributionCounts[contrib.user_id] = (contributionCounts[contrib.user_id] || 0) + 1
+    })
 
-    // For now, return without project contributions to prevent N+1
-    // TODO: Optimize with proper JOIN queries later
+    // Map members with their contribution count
     const membersWithProjects = data.map(member => ({
       ...member,
-      contributed_projects: [],
+      contributed_projects: Array(contributionCounts[member.id] || 0).fill({}), // Fake array with correct length
     }))
 
     return { members: membersWithProjects, error: null }
