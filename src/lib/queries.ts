@@ -398,7 +398,7 @@ export const memberQueries = {
     // Add limit to prevent massive queries
     let query = supabase
       .from('profiles')
-      .select('username')
+      .select('*')
       .limit(50) // Limit to prevent overload
 
     if (filters.role && filters.role !== 'all') {
