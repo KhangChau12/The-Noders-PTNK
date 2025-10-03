@@ -22,9 +22,25 @@ export const createClient = () => {
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: false
+        detectSessionInUrl: false,
+        // Add storage event listener to detect session changes across tabs
+        storageKey: 'sb-auth-token'
       }
     })
+
+    // Add error listener to detect auth failures
+    if (typeof window !== 'undefined') {
+      supabaseInstance.auth.onAuthStateChange((event, session) => {
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Supabase: Token refreshed successfully')
+        } else if (event === 'SIGNED_OUT') {
+          console.log('Supabase: User signed out')
+          resetSupabaseInstance()
+        } else if (event === 'USER_UPDATED') {
+          console.log('Supabase: User updated')
+        }
+      })
+    }
   }
 
   return supabaseInstance

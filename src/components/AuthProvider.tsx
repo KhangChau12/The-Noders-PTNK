@@ -56,6 +56,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
           console.error('AuthProvider: Error getting session:', error)
+          // Clear potentially corrupted session data
+          await auth.clearAllAuthData()
+          setUser(null)
+          setSession(null)
+          setProfile(null)
           setLoading(false)
           return
         }
@@ -63,7 +68,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setUser(session.user as AuthUser)
           setSession(session as AuthSession)
-          await fetchProfile(session.user.id)
+
+          // Fetch profile with timeout
+          try {
+            await Promise.race([
+              fetchProfile(session.user.id),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+              )
+            ])
+          } catch (profileError) {
+            console.error('AuthProvider: Profile fetch failed:', profileError)
+            // Continue anyway, just without profile data
+            setProfile(null)
+          }
         } else {
           setUser(null)
           setSession(null)
@@ -71,6 +89,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('AuthProvider: Error in getInitialSession:', error)
+        // Clear corrupted data on any error
+        await auth.clearAllAuthData()
+        setUser(null)
+        setSession(null)
+        setProfile(null)
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -83,11 +106,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         if (!isMounted) return
 
+        console.log('AuthProvider: Auth state changed:', event)
+
         try {
           if (session?.user) {
             setUser(session.user as AuthUser)
             setSession(session as AuthSession)
-            await fetchProfile(session.user.id, false)
+
+            // Fetch profile with timeout
+            try {
+              await Promise.race([
+                fetchProfile(session.user.id, false),
+                new Promise((_, reject) =>
+                  setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+                )
+              ])
+            } catch (profileError) {
+              console.error('AuthProvider: Profile fetch failed on auth change:', profileError)
+              setProfile(null)
+            }
           } else {
             setUser(null)
             setSession(null)
@@ -95,6 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } catch (error) {
           console.error('Error in auth state change:', error)
+          setUser(null)
+          setSession(null)
+          setProfile(null)
         }
 
         if (isMounted) setLoading(false)
