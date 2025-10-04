@@ -199,7 +199,7 @@ export default function HomePage() {
               Connecting Minds • Creating Intelligence
             </h2>
 
-            <p className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
               Where innovation meets collaboration at VNUHCM High School for the Gifted.
               Just like nodes in a neural network collaborate to create powerful intelligence, we connect to build an outstanding developer community.
             </p>
@@ -235,7 +235,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Our Journey So Far
             </h2>
-            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
               From innovative projects to growing community, here's what we've achieved together
             </p>
           </div>
@@ -290,7 +290,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <Card key={index} className="text-center hover-lift group relative overflow-hidden">
-                <CardContent className="p-6 relative z-10">
+                <CardContent className="p-2 relative z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl mb-4 text-primary-blue group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
                     {feature.icon}
                   </div>
@@ -330,7 +330,7 @@ export default function HomePage() {
               // Loading state
               Array.from({ length: 3 }).map((_, index) => (
                 <Card key={index} className="animate-pulse">
-                  <CardContent className="p-6">
+                  <CardContent className="">
                     <div className="h-4 bg-dark-surface rounded mb-4"></div>
                     <div className="h-3 bg-dark-surface rounded mb-2"></div>
                     <div className="h-3 bg-dark-surface rounded w-3/4 mb-4"></div>
@@ -346,7 +346,7 @@ export default function HomePage() {
                 {recentProjects.map((project, index) => (
                   <Card key={project.id} variant="hover" className="hover-lift group relative overflow-hidden">
                     <Link href={`/projects/${project.id}`}>
-                      <CardContent className="p-6 relative z-10 cursor-pointer">
+                      <CardContent className="relative z-10 cursor-pointer">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
                             {project.title}
@@ -422,7 +422,7 @@ export default function HomePage() {
                 {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
                   <Card key={`viewall-${index}`} variant="interactive" className="hover-lift group">
                     <Link href="/projects">
-                      <CardContent className="p-8 text-center h-full flex flex-col justify-center">
+                      <CardContent className="p-2 text-center h-full flex flex-col justify-center">
                         <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
                           <Code className="w-8 h-8 text-primary-blue" />
                         </div>
@@ -494,7 +494,7 @@ export default function HomePage() {
                       <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
                         <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
                       </div>
-                      <CardContent className="p-6">
+                      <CardContent className="pt-4">
                         <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
                           {post.category}
                         </Badge>
@@ -557,7 +557,7 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
                 Join The Noders Community
               </h2>
-              <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
+              <p className="text-text-secondary text-lg mb-8 max-w-3xl mx-auto">
                 Passionate about AI, web/app development, or technology in general?
                 Join us in connecting to create amazing things together!
               </p>

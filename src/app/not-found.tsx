@@ -8,7 +8,7 @@ import { Home, ArrowLeft } from 'lucide-react'
 export default function NotFound() {
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <div className="container mx-auto max-w-2xl">
+      <div className="container mx-auto max-w-3xl">
         <Card className="text-center">
           <CardContent className="p-12">
             {/* 404 Animation */}

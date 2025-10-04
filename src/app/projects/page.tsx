@@ -49,7 +49,7 @@ export default function ProjectsPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
             Our Projects
           </h1>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+          <p className="text-text-secondary text-lg max-w-3xl mx-auto">
             Explore the innovative projects created by our The Noders PTNK members. 
             From machine learning models to web applications, discover our collaborative work.
           </p>

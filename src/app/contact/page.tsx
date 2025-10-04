@@ -109,7 +109,7 @@ ${formData.message}
   if (success) {
     return (
       <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-2xl">
+        <div className="container mx-auto max-w-3xl">
           <Card className="text-center">
             <CardContent className="p-12">
               <div className="mx-auto w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mb-6">
@@ -163,7 +163,7 @@ ${formData.message}
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
             Contact Us
           </h1>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+          <p className="text-text-secondary text-lg max-w-3xl mx-auto">
             Have a question, want to join our club, or interested in collaboration?
             We'd love to hear from you!
           </p>
@@ -400,7 +400,7 @@ ${formData.message}
               <h3 className="text-xl font-semibold text-text-primary mb-4">
                 Join Our Community
               </h3>
-              <p className="text-text-secondary mb-6 max-w-2xl mx-auto">
+              <p className="text-text-secondary mb-6 max-w-3xl mx-auto">
                 Whether you're a beginner or an expert, we welcome everyone who's passionate
                 about AI and wants to learn, share, and build amazing projects together.
               </p>

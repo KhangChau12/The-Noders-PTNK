@@ -201,7 +201,7 @@ export default function PostsPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
             Posts & Updates
           </h1>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+          <p className="text-text-secondary text-lg max-w-3xl mx-auto">
             Stay updated with the latest news, educational content, member spotlights,
             and community activities from The Noders PTNK.
           </p>
