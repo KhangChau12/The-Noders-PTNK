@@ -262,16 +262,16 @@ export default function ProjectDetailPage() {
                 </a>
               </Button>
             )}
-            {project.video_url && (
+            {project.demo_url && (
               <Button asChild variant="secondary">
                 <a
-                  href={project.video_url}
+                  href={project.demo_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Watch Demo
+                  Use Product
                 </a>
               </Button>
             )}
