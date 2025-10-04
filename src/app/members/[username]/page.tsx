@@ -24,7 +24,6 @@ import {
   TrendingUp,
   Users,
   Code,
-  Star,
   ExternalLink
 } from 'lucide-react'
 
@@ -35,37 +34,21 @@ interface SkillChartProps {
 function SkillChart({ skills }: SkillChartProps) {
   if (!skills || skills.length === 0) return null
 
-  // Mock skill levels (in real app, this would come from database)
-  const skillsWithLevels = skills.map((skill, index) => ({
+  const skillsWithCategories = skills.map((skill, index) => ({
     name: skill,
-    level: Math.floor(Math.random() * 5) + 1, // 1-5 stars
     category: getSkillCategory(skill)
   }))
 
   return (
-    <div className="space-y-4">
-      {skillsWithLevels.map((skill, index) => (
-        <div key={index} className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Badge variant="tech" size="sm">
-              {skill.name}
-            </Badge>
-            <span className="text-xs text-text-tertiary capitalize">
-              {skill.category}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 ${
-                  i < skill.level
-                    ? 'text-yellow-500 fill-yellow-500'
-                    : 'text-dark-border'
-                }`}
-              />
-            ))}
-          </div>
+    <div className="flex flex-wrap gap-2">
+      {skillsWithCategories.map((skill, index) => (
+        <div key={index} className="flex items-center gap-2">
+          <Badge variant="tech" size="sm">
+            {skill.name}
+          </Badge>
+          <span className="text-xs text-text-tertiary capitalize">
+            {skill.category}
+          </span>
         </div>
       ))}
     </div>
