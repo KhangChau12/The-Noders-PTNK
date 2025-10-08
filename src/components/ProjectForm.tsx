@@ -10,6 +10,9 @@ import { ClickableBadge } from '@/components/ClickableBadge'
 import { RichTextEditor } from '@/components/RichTextEditor'
 import { ImageUpload } from '@/components/ImageUpload'
 import { projectQueries } from '@/lib/queries'
+import { createClient, createAdminClient } from '@/lib/supabase'
+const supabase = createClient();
+
 import {
   Plus,
   X,
@@ -77,6 +80,28 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
 
   const [formData, setFormData] = useState<ProjectFormData>(getInitialFormData())
   const [thumbnailImage, setThumbnailImage] = useState<any>(null)
+  const [members, setMembers] = useState<string[]>([]);
+  const [membersView, setMembersView] = useState<string[]>([]);
+  const [listView, setListView] = useState<boolean>(false);
+
+  // Fetch all member usernames from an API endpoint when the form mounts
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setMembersView([]);
+
+      const { data } = await supabase.from('profiles').select('username');
+      if (data) {
+        const usernames = data.map((profile) => profile.username);
+        setMembers(usernames);
+        setMembersView(usernames);
+      }
+    }
+
+    fetchMembers()
+  }, [])
+
+  // Utility to get all member usernames (can be used elsewhere in the component)
+  const getAllMemberUsernames = () => members
 
   // Load project data when editProject changes
   useEffect(() => {
@@ -460,11 +485,32 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
-                placeholder="Username"
-                value={newContributor.username}
-                onChange={(e) => setNewContributor(prev => ({ ...prev, username: e.target.value }))}
-              />
+              <div className='flex flex-col'>
+                <Input
+                  placeholder="Username"
+                  value={newContributor.username}
+                  onChange={(e) => {
+                    setNewContributor(prev => ({ ...prev, username: e.target.value }));
+                    setMembersView(members.filter(m => m.toLowerCase().indexOf(e.target.value.toLowerCase()) >= 0));
+                    console.log(membersView);
+                  }}
+                  onFocus={() => setListView(true)}
+                  onBlur={() => setListView(false)}
+                />
+                {listView && <div className="mt-1 max-h-32 overflow-y-auto bg-dark-surface border border-dark-border rounded-md">
+                  {membersView.length === 0 && (
+                    <div className="p-2 text-sm text-text-tertiary">No members found</div>
+                  )}
+                  {membersView.map((member) => (
+                    <div key={member}
+                      className="px-3 py-2 hover:bg-dark-border/50 cursor-pointer text-sm text-text-primary"
+                      onClick={() => {setNewContributor(prev => ({ ...prev, username: member })); setMembersView(members); setListView(false);}}
+                    >
+                      {member}
+                    </div>
+                  ))}
+                </div>}
+              </div>
               <Input
                 type="number"
                 placeholder="Contribution %"
@@ -477,7 +523,7 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                 <select
                   value={newContributor.role_in_project}
                   onChange={(e) => setNewContributor(prev => ({ ...prev, role_in_project: e.target.value }))}
-                  className="flex-1 px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50"
+                  className="h-10 px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50"
                 >
                   {PROJECT_ROLES.map(role => (
                     <option key={role} value={role}>{role}</option>
@@ -605,23 +651,21 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
             {steps.map((step, index) => (
               <div key={index} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1 px-2">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 shadow-md ${
-                    index === currentStep
-                      ? 'bg-gradient-to-r from-primary-blue to-accent-blue text-white scale-110 shadow-primary-blue/30'
-                      : index < currentStep
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 shadow-md ${index === currentStep
+                    ? 'bg-gradient-to-r from-primary-blue to-accent-blue text-white scale-110 shadow-primary-blue/30'
+                    : index < currentStep
                       ? 'bg-gradient-to-r from-accent-green to-emerald-500 text-white shadow-accent-green/30'
                       : 'bg-dark-surface border border-dark-border text-text-tertiary hover:border-primary-blue/30 hover:text-text-secondary'
-                  }`}>
+                    }`}>
                     {index < currentStep ? <CheckCircle className="w-5 h-5" /> : index + 1}
                   </div>
                   <div className="text-center mt-3 max-w-[120px]">
-                    <div className={`font-medium text-sm leading-tight ${
-                      index === currentStep
-                        ? 'text-primary-blue'
-                        : index < currentStep
+                    <div className={`font-medium text-sm leading-tight ${index === currentStep
+                      ? 'text-primary-blue'
+                      : index < currentStep
                         ? 'text-accent-green'
                         : 'text-text-tertiary'
-                    }`}>
+                      }`}>
                       {step.title}
                     </div>
                     <div className="text-text-tertiary text-xs mt-1.5 leading-relaxed">
@@ -630,9 +674,8 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                   </div>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`h-px flex-1 mx-6 transition-all duration-300 ${
-                    index < currentStep ? 'bg-gradient-to-r from-accent-green to-emerald-500' : 'bg-dark-border'
-                  }`} />
+                  <div className={`h-px flex-1 mx-6 transition-all duration-300 ${index < currentStep ? 'bg-gradient-to-r from-accent-green to-emerald-500' : 'bg-dark-border'
+                    }`} />
                 )}
               </div>
             ))}

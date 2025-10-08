@@ -93,7 +93,15 @@ function EditPostPage() {
       setSaving(true)
 
       // If post is published, calculate and update reading time
-      const updates: any = { status: 'draft' }
+      const updates: any = {
+        status: 'draft',
+        title: post.title || 'Untitled Post',
+        summary: post.summary || '',
+        category: post.category || 'News',
+        thumbnail_image_id: post.thumbnail_image_id || null,
+      }
+
+      console.log('Saving draft with updates:', updates);
 
       const { error } = await postQueries.updatePost(
         postId,
@@ -264,8 +272,8 @@ function EditPostPage() {
                   <Badge
                     variant={
                       post.status === 'published' ? 'success' :
-                      post.status === 'draft' ? 'secondary' :
-                      'default'
+                        post.status === 'draft' ? 'secondary' :
+                          'default'
                     }
                   >
                     {post.status}

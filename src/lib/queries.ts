@@ -634,6 +634,8 @@ export const postQueries = {
 
       const result = await response.json()
 
+      console.log(result);
+
       if (!result.success) {
         return { post: null, error: { message: result.error } }
       }
