@@ -49,9 +49,10 @@ export const projectQueries = {
           avatar_url
         ),
         project_contributors(
+          id,
           contribution_percentage,
           role_in_project,
-          profiles(username, full_name, avatar_url)
+          profiles(id, username, full_name, avatar_url)
         ),
         thumbnail_image:images!projects_thumbnail_image_id_fkey(
           id,
@@ -79,7 +80,13 @@ export const projectQueries = {
       return { projects: null, error }
     }
 
-    return { projects: data, error: null }
+    // Map project_contributors to contributors for consistency
+    const projectsWithContributors = data.map(project => ({
+      ...project,
+      contributors: project.project_contributors || []
+    }))
+
+    return { projects: projectsWithContributors, error: null }
   },
 
   // Get single project by ID (direct database query like dashboard)
@@ -124,7 +131,13 @@ export const projectQueries = {
         return { project: null, error }
       }
 
-      return { project, error: null }
+      // Map project_contributors to contributors for consistency with UI
+      const projectWithContributors = {
+        ...project,
+        contributors: project.project_contributors || []
+      }
+
+      return { project: projectWithContributors, error: null }
     } catch (error) {
       return { project: null, error }
     }
@@ -216,10 +229,18 @@ export const projectQueries = {
   async getUserProjects(userId: string) {
     const supabase = createClient()
 
-    // Get projects created by user (simplified to avoid relationship errors)
+    // Get projects created by user with contributors
     const { data: createdProjects, error: createdError } = await supabase
       .from('projects')
-      .select('*')
+      .select(`
+        *,
+        project_contributors(
+          id,
+          contribution_percentage,
+          role_in_project,
+          profiles(id, username, full_name, avatar_url)
+        )
+      `)
       .eq('created_by', userId)
       .order('created_at', { ascending: false })
 
@@ -227,23 +248,38 @@ export const projectQueries = {
       return { createdProjects: [], contributedProjects: [], error: createdError }
     }
 
-    // Get projects user contributed to (simplified)
+    // Map project_contributors to contributors
+    const createdProjectsWithContributors = createdProjects?.map(project => ({
+      ...project,
+      contributors: project.project_contributors || []
+    })) || []
+
+    // Get projects user contributed to
     const { data: contributedData, error: contributedError } = await supabase
       .from('project_contributors')
       .select(`
         contribution_percentage,
         role_in_project,
-        projects(*)
+        projects(
+          *,
+          project_contributors(
+            id,
+            contribution_percentage,
+            role_in_project,
+            profiles(id, username, full_name, avatar_url)
+          )
+        )
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
     if (contributedError) {
-      return { createdProjects: createdProjects || [], contributedProjects: [], error: contributedError }
+      return { createdProjects: createdProjectsWithContributors, contributedProjects: [], error: contributedError }
     }
 
     const contributedProjects = contributedData?.map(item => ({
       ...item.projects,
+      contributors: item.projects.project_contributors || [],
       user_contribution: {
         contribution_percentage: item.contribution_percentage,
         role_in_project: item.role_in_project
@@ -251,7 +287,7 @@ export const projectQueries = {
     })) || []
 
     return {
-      createdProjects: createdProjects || [],
+      createdProjects: createdProjectsWithContributors,
       contributedProjects,
       error: null
     }

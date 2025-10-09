@@ -154,8 +154,7 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
   const [newTech, setNewTech] = useState('')
   const [newContributor, setNewContributor] = useState({
     username: '',
-    contribution_percentage: 0,
-    role_in_project: 'Contributor'
+    contribution_percentage: 0
   })
 
   const steps = [
@@ -215,21 +214,38 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
     }
   }
 
-  const addContributor = () => {
-    if (newContributor.username.trim() && newContributor.contribution_percentage >= 0) {
-      // In a real app, you'd search for users by username
+  const addContributor = async () => {
+    if (newContributor.username.trim() && newContributor.contribution_percentage > 0) {
+      // Find user ID from username
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', newContributor.username)
+        .single()
+
+      if (!userProfile) {
+        alert('User not found')
+        return
+      }
+
+      // Check if user is already a contributor
+      const isDuplicate = formData.contributors.some(c => c.user_id === userProfile.id)
+      if (isDuplicate) {
+        alert('This user is already a contributor')
+        return
+      }
+
       const contributor = {
-        user_id: 'temp-' + Date.now(), // Temporary ID
+        user_id: userProfile.id,
         username: newContributor.username,
         contribution_percentage: newContributor.contribution_percentage,
-        role_in_project: newContributor.role_in_project
+        role_in_project: 'Contributor'
       }
 
       handleChange('contributors', [...formData.contributors, contributor])
       setNewContributor({
         username: '',
-        contribution_percentage: 0,
-        role_in_project: 'Contributor'
+        contribution_percentage: 0
       })
     }
   }
@@ -253,9 +269,11 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
         demo_url: formData.demo_url.trim() || null,
         // Add thumbnail image ID if uploaded
         thumbnail_image_id: thumbnailImage?.id || null,
-        // For this demo, we'll skip the contributors API integration
-        contributors: []
+        // Include contributors
+        contributors: formData.contributors
       }
+
+      console.log('Submitting project with contributors:', projectData.contributors)
 
       let result
       if (mode === 'edit' && editProject) {
@@ -476,23 +494,17 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
       case 3: // Contributors
         return (
           <div className="space-y-6">
-            <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-              <p className="text-sm text-warning">
-                <AlertCircle className="w-4 h-4 inline mr-1" />
-                Note: Contributor management is simplified for this demo.
-                In production, you would search and invite real users.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-4">
               <div className='flex flex-col'>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Username
+                </label>
                 <Input
-                  placeholder="Username"
+                  placeholder="Select member..."
                   value={newContributor.username}
                   onChange={(e) => {
                     setNewContributor(prev => ({ ...prev, username: e.target.value }));
                     setMembersView(members.filter(m => m.toLowerCase().indexOf(e.target.value.toLowerCase()) >= 0));
-                    console.log(membersView);
                   }}
                   onFocus={() => setListView(true)}
                   onBlur={() => setListView(false)}
@@ -504,40 +516,48 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                   {membersView.map((member) => (
                     <div key={member}
                       className="px-3 py-2 hover:bg-dark-border/50 cursor-pointer text-sm text-text-primary"
-                      onClick={() => {setNewContributor(prev => ({ ...prev, username: member })); setMembersView(members); setListView(false);}}
+                      onMouseDown={() => {setNewContributor(prev => ({ ...prev, username: member })); setMembersView(members); setListView(false);}}
                     >
                       {member}
                     </div>
                   ))}
                 </div>}
               </div>
-              <Input
-                type="number"
-                placeholder="Contribution %"
-                min="0"
-                max="100"
-                value={newContributor.contribution_percentage}
-                onChange={(e) => setNewContributor(prev => ({ ...prev, contribution_percentage: parseInt(e.target.value) || 0 }))}
-              />
-              <div className="flex gap-2">
-                <select
-                  value={newContributor.role_in_project}
-                  onChange={(e) => setNewContributor(prev => ({ ...prev, role_in_project: e.target.value }))}
-                  className="h-10 px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50"
-                >
-                  {PROJECT_ROLES.map(role => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
-                </select>
-                <Button
-                  type="button"
-                  onClick={addContributor}
-                  variant="secondary"
-                  size="sm"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
+
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Contribution: {newContributor.contribution_percentage}%
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={newContributor.contribution_percentage}
+                  onChange={(e) => setNewContributor(prev => ({ ...prev, contribution_percentage: parseInt(e.target.value) }))}
+                  className="w-full h-3 rounded-lg appearance-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, #2563EB 0%, #2563EB ${newContributor.contribution_percentage}%, #1E293B ${newContributor.contribution_percentage}%, #1E293B 100%)`
+                  }}
+                />
+                <div className="flex justify-between text-xs text-text-tertiary mt-1">
+                  <span>0%</span>
+                  <span>50%</span>
+                  <span>100%</span>
+                </div>
               </div>
+
+              <Button
+                type="button"
+                onClick={addContributor}
+                variant="secondary"
+                size="sm"
+                disabled={!newContributor.username.trim() || newContributor.contribution_percentage === 0}
+                className="w-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Contributor
+              </Button>
             </div>
 
             {formData.contributors.length > 0 && (
@@ -548,10 +568,17 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                 <div className="space-y-2">
                   {formData.contributors.map((contributor, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-dark-surface rounded-lg">
-                      <div>
+                      <div className="flex items-center gap-3 flex-1">
                         <span className="font-medium text-text-primary">@{contributor.username}</span>
-                        <span className="text-text-secondary ml-2">• {contributor.role_in_project}</span>
-                        <Badge variant="primary" size="sm" className="ml-2">
+                        <div className="flex-1 max-w-xs">
+                          <div className="w-full bg-dark-border rounded-full h-2">
+                            <div
+                              className="bg-primary-blue h-2 rounded-full transition-all"
+                              style={{ width: `${contributor.contribution_percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                        <Badge variant="primary" size="sm">
                           {contributor.contribution_percentage}%
                         </Badge>
                       </div>
@@ -615,7 +642,7 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                 <div className="space-y-1">
                   {formData.contributors.map((contributor, index) => (
                     <p key={index} className="text-sm text-text-secondary">
-                      @{contributor.username} - {contributor.role_in_project} ({contributor.contribution_percentage}%)
+                      @{contributor.username} - {contributor.contribution_percentage}% contribution
                     </p>
                   ))}
                 </div>

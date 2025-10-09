@@ -135,27 +135,31 @@ export function useProject(id: string) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      if (!id) return
-      
-      setLoading(true)
-      const { project, error } = await projectQueries.getProject(id)
-      
-      if (error) {
-        setError(error.message)
-      } else {
-        setProject(project)
-        setError(null)
-      }
-      
-      setLoading(false)
+  const fetchProject = async () => {
+    if (!id) return
+
+    setLoading(true)
+    const { project, error } = await projectQueries.getProject(id)
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setProject(project)
+      setError(null)
     }
 
+    setLoading(false)
+  }
+
+  useEffect(() => {
     fetchProject()
   }, [id])
 
-  return { project, loading, error }
+  const refetch = async () => {
+    await fetchProject()
+  }
+
+  return { project, loading, error, refetch }
 }
 
 // Members hook

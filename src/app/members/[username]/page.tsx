@@ -88,7 +88,8 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
           </h4>
           <div className="space-y-4">
             {contributedProjects.slice(0, 3).map((contribution, index) => {
-              const project = contribution.project
+              const project = contribution.projects || contribution.project
+              if (!project) return null
               return (
                 <Link
                   key={index}
@@ -104,8 +105,15 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
                         {project.description}
                       </p>
                       <div className="flex items-center gap-4 text-xs text-text-tertiary">
-                        <span>{contribution.role_in_project}</span>
-                        <span>{contribution.contribution_percentage}% contribution</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-dark-border rounded-full h-1.5">
+                            <div
+                              className="bg-primary-blue h-1.5 rounded-full transition-all"
+                              style={{ width: `${contribution.contribution_percentage}%` }}
+                            />
+                          </div>
+                          <span>{contribution.contribution_percentage}%</span>
+                        </div>
                         <Badge variant="secondary" size="sm">
                           {project.status}
                         </Badge>
@@ -145,40 +153,44 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
             Created Projects ({createdProjects.length})
           </h4>
           <div className="space-y-4">
-            {createdProjects.slice(0, 3).map((project, index) => (
-              <Link
-                key={index}
-                href={`/projects/${project.project_id}`}
-                className="block px-4 py-3 rounded-lg bg-dark-surface border hover:bg-dark-border transition-colors"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h5 className="font-medium text-text-primary mb-1">
-                      {project.projects.title}
-                    </h5>
-                    <p className="text-sm text-text-secondary mb-2 line-clamp-2">
-                      {project.projects.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-text-tertiary">
-                      <span>Project Lead</span>
-                      <Badge variant="secondary" size="sm">
-                        {project.projects.status}
-                      </Badge>
+            {createdProjects.slice(0, 3).map((contribution, index) => {
+              const project = contribution.projects || contribution.project
+              if (!project) return null
+              return (
+                <Link
+                  key={index}
+                  href={`/projects/${project.id}`}
+                  className="block px-4 py-3 rounded-lg bg-dark-surface border hover:bg-dark-border transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h5 className="font-medium text-text-primary mb-1">
+                        {project.title}
+                      </h5>
+                      <p className="text-sm text-text-secondary mb-2 line-clamp-2">
+                        {project.description}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-text-tertiary">
+                        <span>Project Lead</span>
+                        <Badge variant="secondary" size="sm">
+                          {project.status}
+                        </Badge>
+                      </div>
                     </div>
+                    {project.thumbnail_url && (
+                      <div className="w-16 h-12 relative rounded overflow-hidden flex-shrink-0">
+                        <Image
+                          src={project.thumbnail_url}
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
                   </div>
-                  {project.thumbnail_url && (
-                    <div className="w-16 h-12 relative rounded overflow-hidden flex-shrink-0">
-                      <Image
-                        src={project.thumbnail_url}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

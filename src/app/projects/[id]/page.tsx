@@ -209,9 +209,6 @@ export default function ProjectDetailPage() {
     )
   }
 
-  // Mock gallery images (in real app, this would come from database)
-  const galleryImages = project.thumbnail_url ? [project.thumbnail_url] : []
-
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
@@ -283,9 +280,6 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-2 space-y-8">
             {/* Video Demo */}
             <VideoPlayer videoUrl={project.video_url} title={project.title} />
-
-            {/* Image Gallery */}
-            <ImageGallery images={galleryImages} title={project.title} />
 
             {/* Tech Stack */}
             {project.tech_stack && project.tech_stack.length > 0 && (
@@ -413,9 +407,17 @@ export default function ProjectDetailPage() {
                           <p className="font-medium text-text-primary text-sm">
                             {profile?.full_name || profile?.username}
                           </p>
-                          <p className="text-xs text-text-tertiary">
-                            {contributor.role_in_project} • {contributor.contribution_percentage}%
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex-1 max-w-[100px] bg-dark-border rounded-full h-1.5">
+                              <div
+                                className="bg-primary-blue h-1.5 rounded-full transition-all"
+                                style={{ width: `${contributor.contribution_percentage}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-text-tertiary">
+                              {contributor.contribution_percentage}%
+                            </p>
+                          </div>
                         </div>
                       </Link>
                     )

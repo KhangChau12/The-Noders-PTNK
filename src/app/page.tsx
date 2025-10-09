@@ -344,78 +344,99 @@ export default function HomePage() {
             ) : (
               <>
                 {recentProjects.map((project, index) => (
-                  <Card key={project.id} variant="hover" className="hover-lift group relative overflow-hidden">
-                    <Link href={`/projects/${project.id}`}>
-                      <CardContent className="relative z-10 cursor-pointer">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-text-primary font-mono group-hover:text-primary-blue transition-colors duration-300">
-                            {project.title}
-                          </h3>
+                  <Link key={project.id} href={`/projects/${project.id}`} className="block group">
+                    <div className="relative overflow-hidden rounded-xl bg-dark-surface border border-dark-border hover:border-primary-blue/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-blue/10 h-full">
+                      {/* Thumbnail Image */}
+                      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
+                        {project.thumbnail_image?.public_url || project.thumbnail_url ? (
+                          <img
+                            src={project.thumbnail_image?.public_url || project.thumbnail_url}
+                            alt={project.thumbnail_image?.alt_text || project.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
+                            <div className="text-center">
+                              <Code className="w-16 h-16 text-primary-blue/40 mx-auto mb-2" />
+                              <p className="text-xs text-text-tertiary font-mono">No preview</p>
+                            </div>
+                          </div>
+                        )}
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* Status badge */}
+                        <div className="absolute top-3 right-3">
                           <Badge
                             variant={getStatusVariant(project.status)}
                             size="sm"
-                            className="font-mono text-xs"
+                            className="backdrop-blur-sm bg-dark-bg/80 font-mono text-xs shadow-lg"
                           >
                             {project.status}
                           </Badge>
                         </div>
+                      </div>
 
-                        <p className="text-text-secondary mb-4 text-sm leading-relaxed">
-                          {project.description || 'No description available'}
-                        </p>
+                      {/* Content */}
+                      <div className="p-5">
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300 line-clamp-1">
+                          {project.title}
+                        </h3>
 
-                        {/* Tech stack with terminal styling */}
-                        <div className="bg-dark-surface/50 border border-dark-border/30 rounded-lg p-3 mb-4">
-                          <div className="flex flex-wrap gap-2">
-                            {project.tech_stack?.map((tech, techIndex) => (
-                              <span key={techIndex} className="px-2 py-1 bg-primary-blue/10 text-accent-cyan text-xs font-mono rounded border border-primary-blue/20">
-                                {tech}
-                              </span>
-                            )) || (
-                              <span className="text-text-tertiary text-xs font-mono">No tech stack specified</span>
-                            )}
+                        {/* Contributors */}
+                        {project.contributors && project.contributors.length > 0 ? (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-3">
+                                {project.contributors.slice(0, 4).map((contributor, idx) => {
+                                  const profile = contributor.profiles || contributor.profile
+                                  const initial = (profile?.full_name?.[0] || profile?.username?.[0] || '?').toUpperCase()
+                                  const colors = ['bg-primary-blue', 'bg-accent-cyan', 'bg-purple-500', 'bg-pink-500']
+                                  return (
+                                    <div
+                                      key={contributor.id || idx}
+                                      className={`w-9 h-9 rounded-full ${colors[idx % colors.length]} flex items-center justify-center text-sm text-white font-semibold border-2 border-dark-surface ring-2 ring-dark-bg transition-transform group-hover:scale-110`}
+                                      title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
+                                    >
+                                      {initial}
+                                    </div>
+                                  )
+                                })}
+                                {project.contributors.length > 4 && (
+                                  <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center text-xs text-text-secondary font-semibold border-2 border-dark-surface ring-2 ring-dark-bg">
+                                    +{project.contributors.length - 4}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-sm text-text-tertiary">
+                                <Users className="w-4 h-4 inline mr-1" />
+                                {project.contributors.length}
+                              </div>
+                            </div>
+
+                            {/* View details indicator */}
+                            <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <ArrowRight className="w-5 h-5" />
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm text-text-tertiary">
+                              <Users className="w-4 h-4 inline mr-1" />
+                              No contributors yet
+                            </div>
+                            <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <ArrowRight className="w-5 h-5" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-                        {/* Interactive GitHub/External links */}
-                        <div className="flex items-center space-x-3">
-                          {project.repo_url && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                window.open(project.repo_url, '_blank', 'noopener,noreferrer')
-                              }}
-                              className="flex items-center space-x-1 text-text-tertiary hover:text-primary-blue transition-colors duration-200 group/btn z-10"
-                            >
-                              <Github className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                              <span className="text-xs font-mono">code</span>
-                            </button>
-                          )}
-                          {project.demo_url && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                window.open(project.demo_url, '_blank', 'noopener,noreferrer')
-                              }}
-                              className="flex items-center space-x-1 text-text-tertiary hover:text-accent-cyan transition-colors duration-200 group/btn z-10"
-                            >
-                              <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-200" />
-                              <span className="text-xs font-mono">demo</span>
-                            </button>
-                          )}
-                          {!project.repo_url && !project.demo_url && (
-                            <span className="text-text-tertiary text-xs font-mono">Links coming soon</span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Link>
-                    {/* Glitch effect background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    {/* Terminal border */}
-                    <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/20 rounded-lg transition-all duration-300"></div>
-                  </Card>
+                      {/* Hover border glow effect */}
+                      <div className="absolute inset-0 rounded-xl border-2 border-primary-blue/0 group-hover:border-primary-blue/20 transition-all duration-300 pointer-events-none" />
+                    </div>
+                  </Link>
                 ))}
 
                 {/* Show "View All Projects" card if less than 3 projects */}

@@ -58,11 +58,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Map project_contributors to contributors for consistency
+    const projectsWithContributors = projects?.map(project => ({
+      ...project,
+      contributors: project.project_contributors || []
+    })) || []
 
     return NextResponse.json({
       success: true,
-      projects: projects || [],
-      total: projects?.length || 0
+      projects: projectsWithContributors,
+      total: projectsWithContributors.length
     })
 
   } catch (error) {

@@ -98,19 +98,22 @@ export function ProjectCard({ project, showStats = true }: ProjectCardProps) {
               
               {/* Contribution visualization */}
               <div className="space-y-2">
-                {project.contributors.slice(0, 3).map((contributor) => (
-                  <div key={contributor.id} className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-primary-blue rounded-full flex items-center justify-center text-xs text-white font-medium">
-                      {getInitials(contributor.profile.full_name)}
+                {project.contributors.slice(0, 3).map((contributor) => {
+                  const profile = contributor.profiles || contributor.profile
+                  return (
+                    <div key={contributor.id} className="flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-primary-blue rounded-full flex items-center justify-center text-xs text-white font-medium">
+                        {getInitials(profile?.full_name || profile?.username)}
+                      </div>
+                      <span className="text-sm text-text-secondary flex-1">
+                        {profile?.full_name || profile?.username}
+                      </span>
+                      <span className="text-xs text-text-tertiary">
+                        {contributor.contribution_percentage}%
+                      </span>
                     </div>
-                    <span className="text-sm text-text-secondary flex-1">
-                      {contributor.profile.full_name || contributor.profile.username}
-                    </span>
-                    <span className="text-xs text-text-tertiary">
-                      {contributor.contribution_percentage}%
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
                 
                 {project.contributors.length > 3 && (
                   <p className="text-xs text-text-tertiary">

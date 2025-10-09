@@ -149,12 +149,18 @@ function MemberProjectsPage() {
           </p>
         )}
 
-        {/* Role badge for contributed projects */}
+        {/* Contribution percentage for contributed projects */}
         {!isOwner && project.user_contribution && (
-          <div className="mb-3">
-            <Badge variant="tech" size="sm">
-              {project.user_contribution.role_in_project}
-            </Badge>
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex-1 max-w-[120px] bg-dark-border rounded-full h-2">
+              <div
+                className="bg-primary-blue h-2 rounded-full transition-all"
+                style={{ width: `${project.user_contribution.contribution_percentage}%` }}
+              />
+            </div>
+            <span className="text-xs text-text-tertiary">
+              {project.user_contribution.contribution_percentage}% contribution
+            </span>
           </div>
         )}
 
@@ -177,7 +183,7 @@ function MemberProjectsPage() {
         {/* Contributors info */}
         <div className="flex items-center text-sm text-text-tertiary mb-4">
           <Users className="w-4 h-4 mr-1" />
-          {project.project_contributors?.length || 0} contributors
+          {project.contributors?.length || 0} contributors
           <Calendar className="w-4 h-4 ml-4 mr-1" />
           {new Date(project.created_at).toLocaleDateString()}
         </div>

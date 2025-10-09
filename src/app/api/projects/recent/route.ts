@@ -16,15 +16,23 @@ export async function GET(request: NextRequest) {
           avatar_url
         ),
         project_contributors(
-          *,
-          profile:profiles(
+          id,
+          contribution_percentage,
+          role_in_project,
+          profiles(
+            id,
             username,
             full_name,
             avatar_url
           )
+        ),
+        thumbnail_image:images(
+          id,
+          public_url,
+          alt_text
         )
       `)
-      .eq('status', 'active')
+      .in('status', ['active', 'completed'])
       .order('created_at', { ascending: false })
       .limit(3)
 
@@ -41,13 +49,18 @@ export async function GET(request: NextRequest) {
       id: project.id,
       title: project.title,
       description: project.description,
+      details: project.details,
       tech_stack: project.tech_stack || [],
       status: project.status,
       repo_url: project.repo_url,
       demo_url: project.demo_url,
+      thumbnail_url: project.thumbnail_url,
+      video_url: project.video_url,
       created_at: project.created_at,
+      updated_at: project.updated_at,
       contributors: project.project_contributors || [],
-      created_by_profile: project.created_by_profile
+      created_by_profile: project.created_by_profile,
+      thumbnail_image: project.thumbnail_image
     })) || []
 
     return NextResponse.json({

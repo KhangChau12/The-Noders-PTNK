@@ -74,6 +74,7 @@ export async function PUT(
 
     // Parse request body
     const updates = await request.json()
+    const { contributors, ...otherUpdates } = updates
     const allowedFields = [
       'title', 'description', 'details', 'thumbnail_url', 'thumbnail_image_id', 'video_url',
       'repo_url', 'demo_url', 'tech_stack', 'status'
@@ -81,9 +82,9 @@ export async function PUT(
 
     // Filter only allowed fields
     const projectUpdates: any = {}
-    Object.keys(updates).forEach(key => {
+    Object.keys(otherUpdates).forEach(key => {
       if (allowedFields.includes(key)) {
-        projectUpdates[key] = updates[key]
+        projectUpdates[key] = otherUpdates[key]
       }
     })
 
@@ -126,6 +127,45 @@ export async function PUT(
         { success: false, error: 'Failed to update project: ' + updateError.message },
         { status: 500 }
       )
+    }
+
+    // Update contributors if provided (only owners can do this)
+    if (isOwner && contributors && Array.isArray(contributors)) {
+      // Delete existing contributors (except creator)
+      await supabase
+        .from('project_contributors')
+        .delete()
+        .eq('project_id', id)
+        .neq('role_in_project', 'Creator')
+
+      // Add new contributors
+      if (contributors.length > 0) {
+        const contributorData = contributors.map((c: any) => ({
+          project_id: id,
+          user_id: c.user_id,
+          contribution_percentage: c.contribution_percentage || 0,
+          role_in_project: c.role_in_project || 'Contributor'
+        }))
+
+        const { error: contributorError } = await supabase
+          .from('project_contributors')
+          .insert(contributorData)
+
+        if (contributorError) {
+          console.error('Error updating contributors:', contributorError)
+          // Don't fail the entire request if contributors fail
+        }
+      }
+
+      // Update creator's contribution percentage
+      const totalContribPercentage = contributors.reduce((sum: number, c: any) => sum + (c.contribution_percentage || 0), 0)
+      const creatorPercentage = Math.max(0, 100 - totalContribPercentage)
+
+      await supabase
+        .from('project_contributors')
+        .update({ contribution_percentage: creatorPercentage })
+        .eq('project_id', id)
+        .eq('role_in_project', 'Creator')
     }
 
     return NextResponse.json({
