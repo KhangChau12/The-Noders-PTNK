@@ -44,7 +44,7 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const titleLength = title.length
   const summaryLength = summary.length
   const titleValid = titleLength <= 100
-  const summaryValid = summaryLength <= 300
+  const summaryValid = summaryLength <= 500
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -136,16 +136,16 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="Write a brief summary..."
-              maxLength={300}
+              maxLength={500}
               rows={3}
               className="w-full px-4 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
             />
             <div className="flex justify-between mt-1">
               <p className={`text-xs ${summaryValid ? 'text-text-tertiary' : 'text-error'}`}>
-                {summaryLength}/300 characters
+                {summaryLength}/500 characters
               </p>
               {!summaryValid && (
-                <p className="text-xs text-error">Max 300 characters</p>
+                <p className="text-xs text-error">Max 500 characters</p>
               )}
             </div>
           </div>

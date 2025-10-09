@@ -57,6 +57,15 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
     }
   }
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault()
+    const text = e.clipboardData.getData('text/plain')
+    document.execCommand('insertText', false, text)
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML)
+    }
+  }
+
   const insertText = (text: string) => {
     if (editorRef.current) {
       editorRef.current.focus()
@@ -261,6 +270,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
           ref={editorRef}
           contentEditable
           onInput={handleInput}
+          onPaste={handlePaste}
           onFocus={() => setIsEditorFocused(true)}
           onBlur={() => setIsEditorFocused(false)}
           className={`min-h-[200px] p-6 text-text-primary focus:outline-none rounded-b-xl prose prose-invert max-w-none ${

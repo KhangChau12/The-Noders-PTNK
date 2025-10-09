@@ -21,11 +21,12 @@ function countWords(text: string): number {
 export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: TextBlockEditorProps) {
   const [html, setHtml] = useState(content?.html || '')
   const wordCount = countWords(html.replace(/<[^>]*>/g, ''))
-  const isValid = wordCount > 0 && wordCount <= 800
+  const isValid = wordCount > 0 && wordCount <= 200
+  const hasChanges = html !== (content?.html || '')
 
   const handleSave = () => {
     if (!isValid) {
-      alert('Text must be between 1 and 800 words')
+      alert('Text must be between 1 and 200 words')
       return
     }
 
@@ -61,8 +62,8 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
 
         <div className="flex items-center justify-between mt-3">
           <p className={`text-sm ${isValid ? 'text-text-tertiary' : 'text-error'}`}>
-            {wordCount}/800 words
-            {wordCount > 800 && ' - Exceeds maximum'}
+            {wordCount}/200 words
+            {wordCount > 200 && ' - Exceeds maximum'}
           </p>
 
           {isNew && (
@@ -73,7 +74,7 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
           )}
         </div>
 
-        {!isNew && wordCount !== content?.word_count && (
+        {!isNew && hasChanges && (
           <div className="mt-2">
             <Button size="sm" onClick={handleSave} disabled={!isValid}>
               Save Changes
