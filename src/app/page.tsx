@@ -182,8 +182,174 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto text-center">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background Decorations - Neural Network Pattern */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Left Network */}
+          <svg className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/4 w-[400px] h-[400px] md:w-[700px] md:h-[700px] opacity-30 md:opacity-40 animate-pulse" style={{ animationDuration: '8s' }}>
+            <defs>
+              <filter id="glow-left">
+                <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="node-glow-left">
+                <feGaussianBlur stdDeviation="25" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <radialGradient id="node-gradient-left">
+                <stop offset="0%" stopColor="rgba(96, 165, 250, 0.6)" />
+                <stop offset="30%" stopColor="rgba(96, 165, 250, 0.3)" />
+                <stop offset="60%" stopColor="rgba(59, 130, 246, 0.1)" />
+                <stop offset="100%" stopColor="rgba(59, 130, 246, 0)" />
+              </radialGradient>
+            </defs>
+
+            {/* Cluster 1: Top-left area */}
+            <line x1="120" y1="80" x2="200" y2="120" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="200" y1="120" x2="280" y2="100" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="120" y1="80" x2="180" y2="180" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-left)" />
+
+            {/* Cluster 2: Middle-left area */}
+            <line x1="80" y1="250" x2="180" y2="180" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="80" y1="250" x2="160" y2="320" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="180" y1="180" x2="280" y2="250" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-left)" />
+
+            {/* Cluster 3: Center area */}
+            <line x1="280" y1="250" x2="380" y2="220" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="280" y1="250" x2="360" y2="340" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="200" y1="120" x2="280" y2="250" stroke="rgba(59, 130, 246, 0.4)" strokeWidth="1.5" filter="url(#glow-left)" />
+            <line x1="380" y1="220" x2="280" y2="100" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-left)" />
+
+            {/* Cluster 4: Bottom area */}
+            <line x1="160" y1="320" x2="240" y2="420" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="240" y1="420" x2="360" y2="340" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-left)" />
+            <line x1="360" y1="340" x2="460" y2="380" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-left)" />
+
+            {/* Inter-cluster connections */}
+            <line x1="380" y1="220" x2="460" y2="380" stroke="rgba(59, 130, 246, 0.3)" strokeWidth="1" filter="url(#glow-left)" />
+            <line x1="160" y1="320" x2="280" y2="250" stroke="rgba(59, 130, 246, 0.4)" strokeWidth="1.5" filter="url(#glow-left)" />
+
+            {/* Node glows (background) */}
+            <circle cx="120" cy="80" r="40" fill="url(#node-gradient-left)" opacity="0.5" filter="url(#node-glow-left)" />
+            <circle cx="200" cy="120" r="50" fill="url(#node-gradient-left)" opacity="0.6" filter="url(#node-glow-left)" />
+            <circle cx="280" cy="100" r="40" fill="url(#node-gradient-left)" opacity="0.5" filter="url(#node-glow-left)" />
+            <circle cx="80" cy="250" r="40" fill="url(#node-gradient-left)" opacity="0.5" filter="url(#node-glow-left)" />
+            <circle cx="180" cy="180" r="50" fill="url(#node-gradient-left)" opacity="0.6" filter="url(#node-glow-left)" />
+            <circle cx="160" cy="320" r="40" fill="url(#node-gradient-left)" opacity="0.5" filter="url(#node-glow-left)" />
+            <circle cx="280" cy="250" r="60" fill="url(#node-gradient-left)" opacity="0.7" filter="url(#node-glow-left)" />
+            <circle cx="380" cy="220" r="50" fill="url(#node-gradient-left)" opacity="0.6" filter="url(#node-glow-left)" />
+            <circle cx="240" cy="420" r="50" fill="url(#node-gradient-left)" opacity="0.6" filter="url(#node-glow-left)" />
+            <circle cx="360" cy="340" r="50" fill="url(#node-gradient-left)" opacity="0.6" filter="url(#node-glow-left)" />
+            <circle cx="460" cy="380" r="40" fill="url(#node-gradient-left)" opacity="0.5" filter="url(#node-glow-left)" />
+
+            {/* Nodes (foreground) */}
+            <circle cx="120" cy="80" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-left)" />
+            <circle cx="200" cy="120" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-left)" />
+            <circle cx="280" cy="100" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-left)" />
+            <circle cx="80" cy="250" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-left)" />
+            <circle cx="180" cy="180" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-left)" />
+            <circle cx="160" cy="320" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-left)" />
+            <circle cx="280" cy="250" r="7" fill="rgba(59, 130, 246, 1)" filter="url(#glow-left)" />
+            <circle cx="380" cy="220" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-left)" />
+            <circle cx="240" cy="420" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-left)" />
+            <circle cx="360" cy="340" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-left)" />
+            <circle cx="460" cy="380" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-left)" />
+          </svg>
+
+          {/* Right Network */}
+          <svg className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 w-[400px] h-[400px] md:w-[700px] md:h-[700px] opacity-30 md:opacity-40 animate-pulse" style={{ animationDuration: '8s', animationDelay: '4s' }}>
+            <defs>
+              <filter id="glow-right">
+                <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="node-glow-right">
+                <feGaussianBlur stdDeviation="25" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <radialGradient id="node-gradient-right">
+                <stop offset="0%" stopColor="rgba(96, 165, 250, 0.6)" />
+                <stop offset="30%" stopColor="rgba(96, 165, 250, 0.3)" />
+                <stop offset="60%" stopColor="rgba(59, 130, 246, 0.1)" />
+                <stop offset="100%" stopColor="rgba(59, 130, 246, 0)" />
+              </radialGradient>
+            </defs>
+
+            {/* Cluster 1: Top-right area */}
+            <line x1="480" y1="80" x2="400" y2="120" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="400" y1="120" x2="320" y2="100" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="480" y1="80" x2="420" y2="180" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-right)" />
+
+            {/* Cluster 2: Middle-right area */}
+            <line x1="520" y1="250" x2="420" y2="180" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="520" y1="250" x2="440" y2="320" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="420" y1="180" x2="320" y2="250" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-right)" />
+
+            {/* Cluster 3: Center area */}
+            <line x1="320" y1="250" x2="220" y2="220" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="320" y1="250" x2="240" y2="340" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="400" y1="120" x2="320" y2="250" stroke="rgba(59, 130, 246, 0.4)" strokeWidth="1.5" filter="url(#glow-right)" />
+            <line x1="220" y1="220" x2="320" y2="100" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-right)" />
+
+            {/* Cluster 4: Bottom area */}
+            <line x1="440" y1="320" x2="360" y2="420" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="360" y1="420" x2="240" y2="340" stroke="rgba(59, 130, 246, 0.6)" strokeWidth="2" filter="url(#glow-right)" />
+            <line x1="240" y1="340" x2="140" y2="380" stroke="rgba(59, 130, 246, 0.5)" strokeWidth="1.5" filter="url(#glow-right)" />
+
+            {/* Inter-cluster connections */}
+            <line x1="220" y1="220" x2="140" y2="380" stroke="rgba(59, 130, 246, 0.3)" strokeWidth="1" filter="url(#glow-right)" />
+            <line x1="440" y1="320" x2="320" y2="250" stroke="rgba(59, 130, 246, 0.4)" strokeWidth="1.5" filter="url(#glow-right)" />
+
+            {/* Node glows (background) */}
+            <circle cx="480" cy="80" r="40" fill="url(#node-gradient-right)" opacity="0.5" filter="url(#node-glow-right)" />
+            <circle cx="400" cy="120" r="50" fill="url(#node-gradient-right)" opacity="0.6" filter="url(#node-glow-right)" />
+            <circle cx="320" cy="100" r="40" fill="url(#node-gradient-right)" opacity="0.5" filter="url(#node-glow-right)" />
+            <circle cx="520" cy="250" r="40" fill="url(#node-gradient-right)" opacity="0.5" filter="url(#node-glow-right)" />
+            <circle cx="420" cy="180" r="50" fill="url(#node-gradient-right)" opacity="0.6" filter="url(#node-glow-right)" />
+            <circle cx="440" cy="320" r="40" fill="url(#node-gradient-right)" opacity="0.5" filter="url(#node-glow-right)" />
+            <circle cx="320" cy="250" r="60" fill="url(#node-gradient-right)" opacity="0.7" filter="url(#node-glow-right)" />
+            <circle cx="220" cy="220" r="50" fill="url(#node-gradient-right)" opacity="0.6" filter="url(#node-glow-right)" />
+            <circle cx="360" cy="420" r="50" fill="url(#node-gradient-right)" opacity="0.6" filter="url(#node-glow-right)" />
+            <circle cx="240" cy="340" r="50" fill="url(#node-gradient-right)" opacity="0.6" filter="url(#node-glow-right)" />
+            <circle cx="140" cy="380" r="40" fill="url(#node-gradient-right)" opacity="0.5" filter="url(#node-glow-right)" />
+
+            {/* Nodes (foreground) */}
+            <circle cx="480" cy="80" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-right)" />
+            <circle cx="400" cy="120" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-right)" />
+            <circle cx="320" cy="100" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-right)" />
+            <circle cx="520" cy="250" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-right)" />
+            <circle cx="420" cy="180" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-right)" />
+            <circle cx="440" cy="320" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-right)" />
+            <circle cx="320" cy="250" r="7" fill="rgba(59, 130, 246, 1)" filter="url(#glow-right)" />
+            <circle cx="220" cy="220" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-right)" />
+            <circle cx="360" cy="420" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-right)" />
+            <circle cx="240" cy="340" r="6" fill="rgba(59, 130, 246, 1)" filter="url(#glow-right)" />
+            <circle cx="140" cy="380" r="5" fill="rgba(96, 165, 250, 1)" filter="url(#glow-right)" />
+          </svg>
+
+          {/* Center Glow Background */}
+          <div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[1200px] md:h-[1200px] opacity-20 md:opacity-30"
+            style={{
+              background: 'radial-gradient(circle, rgba(96, 165, 250, 0.5) 0%, rgba(59, 130, 246, 0.3) 40%, transparent 70%)',
+              filter: 'blur(100px)'
+            }}
+          />
+        </div>
+
+        <div className="container mx-auto text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-4">
               <span className="gradient-text">
@@ -203,7 +369,7 @@ export default function HomePage() {
               Where innovation meets collaboration at VNUHCM High School for the Gifted.
               Just like nodes in a neural network collaborate to create powerful intelligence, we connect to build an outstanding developer community.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contest">
                 <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90">
