@@ -1,23 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { ownershipCache, createOwnershipKey } from '@/lib/cache'
 
-// Helper to verify post ownership
+// Helper to verify post ownership with caching
 async function verifyPostOwnership(supabase: any, postId: string, userId: string) {
+  // Check cache first
+  const cacheKey = createOwnershipKey(postId, userId)
+  const cached = ownershipCache.get(cacheKey)
+  if (cached !== null) {
+    return cached
+  }
+
+  // Not in cache, query database
   const { data: post, error } = await supabase
     .from('posts')
     .select('author_id')
     .eq('id', postId)
     .single()
 
+  let result: { authorized: boolean; error?: string }
+
   if (error || !post) {
-    return { authorized: false, error: 'Post not found' }
+    result = { authorized: false, error: 'Post not found' }
+  } else if (post.author_id !== userId) {
+    result = { authorized: false, error: 'You do not have permission to modify this post' }
+  } else {
+    result = { authorized: true }
   }
 
-  if (post.author_id !== userId) {
-    return { authorized: false, error: 'You do not have permission to modify this post' }
-  }
-
-  return { authorized: true }
+  // Cache the result
+  ownershipCache.set(cacheKey, result)
+  return result
 }
 
 // GET /api/posts/[id]/blocks - Get all blocks for a post
@@ -152,13 +165,18 @@ export async function POST(
       }
     }
 
-    // Check total blocks count constraint (max 15)
-    const { count: totalBlocks } = await supabase
+    // Fetch all blocks in a single query for validation
+    const { data: existingBlocks } = await supabase
       .from('post_blocks')
-      .select('*', { count: 'exact', head: true })
+      .select('type, order_index')
       .eq('post_id', postId)
+      .order('order_index', { ascending: true })
 
-    if ((totalBlocks || 0) >= 15) {
+    const totalBlocks = existingBlocks?.length || 0
+    const imageCount = existingBlocks?.filter(b => b.type === 'image').length || 0
+
+    // Check total blocks count constraint (max 15)
+    if (totalBlocks >= 15) {
       return NextResponse.json(
         { success: false, error: 'Maximum 15 blocks allowed per post' },
         { status: 400 }
@@ -166,31 +184,17 @@ export async function POST(
     }
 
     // Check image block count constraint (max 5)
-    if (type === 'image') {
-      const { count: imageCount } = await supabase
-        .from('post_blocks')
-        .select('*', { count: 'exact', head: true })
-        .eq('post_id', postId)
-        .eq('type', 'image')
-
-      if ((imageCount || 0) >= 5) {
-        return NextResponse.json(
-          { success: false, error: 'Maximum 5 image blocks allowed per post' },
-          { status: 400 }
-        )
-      }
+    if (type === 'image' && imageCount >= 5) {
+      return NextResponse.json(
+        { success: false, error: 'Maximum 5 image blocks allowed per post' },
+        { status: 400 }
+      )
     }
 
     // Check consecutive text blocks constraint
-    if (type === 'text' && order_index > 0) {
-      const { data: previousBlock } = await supabase
-        .from('post_blocks')
-        .select('type')
-        .eq('post_id', postId)
-        .eq('order_index', order_index - 1)
-        .single()
-
-      if (previousBlock && previousBlock.type === 'text') {
+    if (type === 'text' && existingBlocks && existingBlocks.length > 0) {
+      const lastBlock = existingBlocks[existingBlocks.length - 1]
+      if (lastBlock.type === 'text') {
         return NextResponse.json(
           { success: false, error: 'Cannot add consecutive text blocks. Please insert a different block type between text blocks.' },
           { status: 400 }

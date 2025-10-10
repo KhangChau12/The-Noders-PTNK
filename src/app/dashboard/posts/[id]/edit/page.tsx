@@ -73,16 +73,24 @@ function EditPostPage() {
     try {
       setSaving(true)
 
+      // Optimistic update
+      if (post) {
+        setPost({ ...post, ...data })
+      }
+
       const { post: updatedPost, error } = await postQueries.updatePost(postId, data, session)
 
       if (error) {
         alert('Failed to update post: ' + error.message)
+        // Rollback on error
+        fetchPost()
       } else if (updatedPost) {
         setPost(updatedPost)
         alert('Post information updated!')
       }
     } catch (err) {
       alert('Network error occurred')
+      fetchPost()
     } finally {
       setSaving(false)
     }
@@ -105,7 +113,10 @@ function EditPostPage() {
 
       console.log('Saving draft with updates:', updates);
 
-      const { error } = await postQueries.updatePost(
+      // Optimistic update
+      setPost({ ...post, ...updates })
+
+      const { post: updatedPost, error } = await postQueries.updatePost(
         postId,
         updates,
         session
@@ -113,12 +124,14 @@ function EditPostPage() {
 
       if (error) {
         alert('Failed to save draft: ' + error.message)
-      } else {
+        fetchPost() // Rollback on error
+      } else if (updatedPost) {
+        setPost(updatedPost)
         alert('Draft saved successfully!')
-        fetchPost()
       }
     } catch (err) {
       alert('Network error occurred')
+      fetchPost()
     } finally {
       setSaving(false)
     }
@@ -133,7 +146,10 @@ function EditPostPage() {
       // Calculate reading time when saving published post
       const readingTime = calculateReadingTime(blocks)
 
-      const { error } = await postQueries.updatePost(
+      // Optimistic update
+      setPost({ ...post, reading_time: readingTime })
+
+      const { post: updatedPost, error } = await postQueries.updatePost(
         postId,
         {
           reading_time: readingTime
@@ -143,12 +159,14 @@ function EditPostPage() {
 
       if (error) {
         alert('Failed to save changes: ' + error.message)
-      } else {
+        fetchPost() // Rollback on error
+      } else if (updatedPost) {
+        setPost(updatedPost)
         alert('Reading time updated successfully!')
-        fetchPost()
       }
     } catch (err) {
       alert('Network error occurred')
+      fetchPost()
     } finally {
       setSaving(false)
     }
@@ -185,7 +203,10 @@ function EditPostPage() {
       // Calculate reading time before publishing
       const readingTime = calculateReadingTime(blocks)
 
-      const { error } = await postQueries.updatePost(
+      // Optimistic update
+      setPost({ ...post, status: 'published', reading_time: readingTime })
+
+      const { post: updatedPost, error } = await postQueries.updatePost(
         postId,
         {
           status: 'published',
@@ -196,12 +217,14 @@ function EditPostPage() {
 
       if (error) {
         alert('Failed to publish post: ' + error.message)
-      } else {
+        fetchPost() // Rollback on error
+      } else if (updatedPost) {
+        setPost(updatedPost)
         alert('Post published successfully!')
-        fetchPost()
       }
     } catch (err) {
       alert('Network error occurred')
+      fetchPost()
     } finally {
       setPublishing(false)
     }
@@ -311,7 +334,12 @@ function EditPostPage() {
             <BlockEditor
               blocks={blocks}
               postId={postId}
-              onBlocksChange={fetchPost}
+              onBlocksChange={(updatedBlocks) => {
+                // Update blocks locally instead of refetching
+                if (updatedBlocks) {
+                  setBlocks(updatedBlocks)
+                }
+              }}
               session={session}
             />
           </div>

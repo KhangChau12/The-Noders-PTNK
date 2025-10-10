@@ -1,23 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { ownershipCache, createOwnershipKey } from '@/lib/cache'
 
-// Helper to verify post ownership
+// Helper to verify post ownership with caching
 async function verifyPostOwnership(supabase: any, postId: string, userId: string) {
+  // Check cache first
+  const cacheKey = createOwnershipKey(postId, userId)
+  const cached = ownershipCache.get(cacheKey)
+  if (cached !== null) {
+    return cached
+  }
+
+  // Not in cache, query database
   const { data: post, error } = await supabase
     .from('posts')
     .select('author_id')
     .eq('id', postId)
     .single()
 
+  let result: { authorized: boolean; error?: string }
+
   if (error || !post) {
-    return { authorized: false, error: 'Post not found' }
+    result = { authorized: false, error: 'Post not found' }
+  } else if (post.author_id !== userId) {
+    result = { authorized: false, error: 'You do not have permission to modify this post' }
+  } else {
+    result = { authorized: true }
   }
 
-  if (post.author_id !== userId) {
-    return { authorized: false, error: 'You do not have permission to modify this post' }
-  }
-
-  return { authorized: true }
+  // Cache the result
+  ownershipCache.set(cacheKey, result)
+  return result
 }
 
 // PUT /api/posts/[id]/blocks/[blockId] - Update block

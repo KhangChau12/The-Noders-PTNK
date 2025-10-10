@@ -58,29 +58,30 @@ export async function GET(
       .eq('post_id', id)
       .order('order_index', { ascending: true })
 
-    // Fetch images for image blocks
+    // Fetch images for image blocks efficiently (single query)
     const imageIds = blocks
-      ?.filter(b => b.type === 'image')
+      ?.filter(b => b.type === 'image' && b.content)
       .map(b => (b.content as any).image_id)
       .filter(Boolean) || []
 
-    let images: any[] = []
+    // Create a Map for O(1) lookup instead of array.find()
+    const imageMap = new Map()
     if (imageIds.length > 0) {
       const { data: imageData } = await supabase
         .from('images')
         .select('id, public_url, alt_text, width, height')
         .in('id', imageIds)
-      images = imageData || []
+
+      imageData?.forEach(img => imageMap.set(img.id, img))
     }
 
-    // Add image data to blocks
+    // Add image data to blocks using Map for faster lookup
     const blocksWithImages = blocks?.map(block => {
-      if (block.type === 'image') {
+      if (block.type === 'image' && block.content) {
         const imageId = (block.content as any).image_id
-        const imageData = images.find(img => img.id === imageId)
         return {
           ...block,
-          image: imageData
+          image: imageMap.get(imageId) || null
         }
       }
       return block

@@ -12,7 +12,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(mkdir:*)",
       "Bash(cp:*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
