@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
@@ -97,10 +98,13 @@ function RenderBlock({ block }: { block: PostBlock }) {
         <div className="mb-8">
           <div className="aspect-video relative overflow-hidden rounded-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
             {blockImage?.public_url ? (
-              <img
+              <Image
                 src={blockImage.public_url}
                 alt={imageContent.alt_text || blockImage.alt_text || 'Post image'}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
@@ -197,40 +201,32 @@ export default function PostDetailPage() {
       setLoading(true)
       setError(null)
 
-      // First, get post by slug (with auth if available)
-      const headers: any = {}
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
+      // Single optimized API call - get post by slug with all details
+      const response = await postQueries.getPostBySlug(slug, session)
+
+      if (response.error) {
+        setError(response.error.message)
+        return
       }
 
-      const response = await fetch(`/api/posts?slug=${slug}`, { headers })
-      const data = await response.json()
-
-      if (!data.success || data.posts.length === 0) {
+      if (!response.post) {
         setError('Post not found')
         return
       }
 
-      const foundPost = data.posts[0]
-      if (!foundPost) {
-        setError('Post not found')
-        return
+      setPost(response.post)
+      setBlocks(response.blocks || [])
+      setUserHasUpvoted(response.userHasUpvoted || false)
+      setUpvoteCount(response.post?.upvote_count || 0)
+
+      // Lazy load related posts after main content
+      if (response.post?.id) {
+        postQueries.getRelatedPosts(response.post.id, response.post.category, session)
+          .then(related => {
+            setRelatedPosts(related || [])
+          })
+          .catch(err => console.error('Failed to load related posts:', err))
       }
-
-      // Get full post details with blocks
-      const { post: fullPost, blocks: postBlocks, relatedPosts: related, userHasUpvoted: upvoted, error: detailError } =
-        await postQueries.getPost(foundPost.id, session)
-
-      if (detailError) {
-        setError(detailError.message)
-        return
-      }
-
-      setPost(fullPost)
-      setBlocks(postBlocks || [])
-      setRelatedPosts(related || [])
-      setUserHasUpvoted(upvoted || false)
-      setUpvoteCount(fullPost?.upvote_count || 0)
 
     } catch (err) {
       setError('Failed to load post')
@@ -320,10 +316,13 @@ export default function PostDetailPage() {
           {/* Thumbnail */}
           {thumbnailSrc && (
             <div className="aspect-video relative overflow-hidden rounded-lg mb-8 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-              <img
+              <Image
                 src={thumbnailSrc}
                 alt={post.thumbnail_image?.alt_text || post.title}
-                className="w-full h-full object-cover"
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
               />
             </div>
           )}

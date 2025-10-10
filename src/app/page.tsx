@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
@@ -523,10 +524,13 @@ export default function HomePage() {
                       {/* Thumbnail Image */}
                       <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
                         {project.thumbnail_image?.public_url || project.thumbnail_url ? (
-                          <img
+                          <Image
                             src={project.thumbnail_image?.public_url || project.thumbnail_url}
                             alt={project.thumbnail_image?.alt_text || project.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
@@ -688,10 +692,13 @@ export default function HomePage() {
                     <Link href={`/posts/${post.slug}`}>
                       <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
                         {post.thumbnail_image?.public_url ? (
-                          <img
+                          <Image
                             src={post.thumbnail_image.public_url}
                             alt={post.thumbnail_image.alt_text || post.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

@@ -618,6 +618,67 @@ export const postQueries = {
     }
   },
 
+  // Get single post by slug (optimized - single API call)
+  async getPostBySlug(slug: string, session?: any) {
+    try {
+      const headers: any = {}
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      // Get post by slug
+      const response = await fetch(`/api/posts?slug=${slug}`, { headers })
+      const data = await response.json()
+
+      if (!data.success || data.posts.length === 0) {
+        return { post: null, error: { message: 'Post not found' } }
+      }
+
+      const foundPost = data.posts[0]
+
+      // Get full details with blocks
+      const detailResponse = await fetch(`/api/posts/${foundPost.id}`, { headers })
+      const detailResult = await detailResponse.json()
+
+      if (!detailResult.success) {
+        return { post: null, error: { message: detailResult.error } }
+      }
+
+      return {
+        post: detailResult.post,
+        blocks: detailResult.blocks,
+        userHasUpvoted: detailResult.user_has_upvoted,
+        error: null
+      }
+    } catch (error) {
+      return { post: null, error: { message: 'Network error occurred' } }
+    }
+  },
+
+  // Get related posts (lazy loaded separately)
+  async getRelatedPosts(postId: string, category: string, session?: any) {
+    try {
+      const supabase = createClient()
+
+      const { data, error } = await supabase
+        .from('posts')
+        .select('id, title, summary, slug, category, reading_time, published_at, author_id')
+        .eq('status', 'published')
+        .eq('category', category)
+        .neq('id', postId)
+        .limit(2)
+        .order('published_at', { ascending: false })
+
+      if (error) {
+        return []
+      }
+
+      return data || []
+    } catch (error) {
+      return []
+    }
+  },
+
   // Create new post
   async createPost(postData: {
     title: string

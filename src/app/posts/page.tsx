@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -99,10 +100,13 @@ function PostCard({
       <Link href={`/posts/${post.slug}`}>
         <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
           {thumbnailSrc ? (
-            <img
+            <Image
               src={thumbnailSrc}
               alt={post.thumbnail_image?.alt_text || post.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
