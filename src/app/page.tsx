@@ -45,6 +45,14 @@ interface NewsPost {
     username: string
     full_name: string
   }
+  thumbnail_image?: {
+    id: string
+    filename: string
+    public_url: string
+    width: number
+    height: number
+    alt_text?: string
+  }
 }
 
 export default function HomePage() {
@@ -678,8 +686,20 @@ export default function HomePage() {
                 {recentPosts.map((post) => (
                   <Card key={post.id} variant="interactive" className="hover-lift group">
                     <Link href={`/posts/${post.slug}`}>
-                      <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 flex items-center justify-center">
-                        <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
+                      <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
+                        {post.thumbnail_image?.public_url ? (
+                          <img
+                            src={post.thumbnail_image.public_url}
+                            alt={post.thumbnail_image.alt_text || post.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
+                          </div>
+                        )}
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
                       <CardContent className="pt-4">
                         <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
