@@ -3,6 +3,8 @@
 import { useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
 import { Button } from '@/components/Button'
+import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { PostBlock } from '@/types/database'
 import { TextBlockEditor } from './blocks/TextBlockEditor'
 import { QuoteBlockEditor } from './blocks/QuoteBlockEditor'
@@ -18,6 +20,8 @@ interface BlockEditorProps {
 }
 
 export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEditorProps) {
+  const { showToast } = useToast()
+  const { confirm } = useConfirm()
   const [addingBlockType, setAddingBlockType] = useState<string | null>(null)
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null)
   const [localBlocks, setLocalBlocks] = useState<PostBlock[]>(blocks)
@@ -80,7 +84,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     // Client-side validation
     const validation = validateBlock(type, content)
     if (!validation.valid) {
-      alert(validation.error)
+      showToast('error', validation.error)
       return
     }
 
@@ -138,7 +142,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           newSet.delete(tempId)
           return newSet
         })
-        alert('Failed to add block: ' + result.error)
+        showToast('error', 'Failed to add block: ' + result.error)
         setAddingBlockType(type) // Re-open form
       }
     } catch (error) {
@@ -149,7 +153,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         newSet.delete(tempId)
         return newSet
       })
-      alert('Error adding block')
+      showToast('error', 'Error adding block. Please try again.')
       console.error('Add block error:', error)
       setAddingBlockType(type)
     }
@@ -201,7 +205,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           newSet.delete(blockId)
           return newSet
         })
-        alert('Failed to update block: ' + result.error)
+        showToast('error', 'Failed to update block: ' + result.error)
       }
     } catch (error) {
       // Rollback on error
@@ -213,7 +217,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         newSet.delete(blockId)
         return newSet
       })
-      alert('Error updating block')
+      showToast('error', 'Error updating block. Please try again.')
       console.error('Update block error:', error)
     } finally {
       setSavingBlockId(null)
@@ -221,7 +225,15 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   }
 
   const handleDeleteBlock = async (blockId: string) => {
-    if (!confirm('Are you sure you want to delete this block?')) {
+    const confirmed = await confirm({
+      title: 'Delete Block',
+      message: 'Are you sure you want to delete this block? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger'
+    })
+
+    if (!confirmed) {
       return
     }
 
@@ -260,7 +272,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           newSet.delete(blockId)
           return newSet
         })
-        alert('Failed to delete block: ' + result.error)
+        showToast('error', 'Failed to delete block: ' + result.error)
       }
     } catch (error) {
       // Rollback on error
@@ -270,7 +282,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         newSet.delete(blockId)
         return newSet
       })
-      alert('Error deleting block')
+      showToast('error', 'Error deleting block. Please try again.')
       console.error('Delete block error:', error)
     }
   }

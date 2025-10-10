@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { useAuth } from '@/components/AuthProvider'
+import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Button } from '@/components/Button'
 import { Badge } from '@/components/Badge'
 import { Loading } from '@/components/Loading'
@@ -19,6 +21,8 @@ function EditPostPage() {
   const params = useParams()
   const router = useRouter()
   const { session, user } = useAuth()
+  const { showToast } = useToast()
+  const { confirm } = useConfirm()
   const postId = params.id as string
 
   const [post, setPost] = useState<Post | null>(null)
@@ -40,7 +44,7 @@ function EditPostPage() {
       const { post: fetchedPost, blocks: fetchedBlocks, error } = await postQueries.getPost(postId, session)
 
       if (error) {
-        alert('Failed to load post: ' + error.message)
+        showToast('error', 'Failed to load post: ' + error.message)
         router.push('/dashboard/posts')
         return
       }
@@ -49,7 +53,7 @@ function EditPostPage() {
       // Note: user might not be loaded immediately on first render after redirect
       // If user is not loaded yet, skip permission check (ProtectedRoute will handle auth)
       if (fetchedPost && user && fetchedPost.author_id !== user.id) {
-        alert('You do not have permission to edit this post')
+        showToast('error', 'You do not have permission to edit this post')
         router.push('/dashboard/posts')
         return
       }
@@ -57,7 +61,7 @@ function EditPostPage() {
       setPost(fetchedPost)
       setBlocks(fetchedBlocks || [])
     } catch (err) {
-      alert('Error loading post')
+      showToast('error', 'Error loading post. Please try again.')
       console.error('Fetch error:', err)
     } finally {
       setLoading(false)
@@ -81,15 +85,15 @@ function EditPostPage() {
       const { post: updatedPost, error } = await postQueries.updatePost(postId, data, session)
 
       if (error) {
-        alert('Failed to update post: ' + error.message)
+        showToast('error', 'Failed to update post: ' + error.message)
         // Rollback on error
         fetchPost()
       } else if (updatedPost) {
         setPost(updatedPost)
-        alert('Post information updated!')
+        showToast('success', 'Post information updated successfully!')
       }
     } catch (err) {
-      alert('Network error occurred')
+      showToast('error', 'Network error occurred. Please try again.')
       fetchPost()
     } finally {
       setSaving(false)
@@ -123,14 +127,14 @@ function EditPostPage() {
       )
 
       if (error) {
-        alert('Failed to save draft: ' + error.message)
+        showToast('error', 'Failed to save draft: ' + error.message)
         fetchPost() // Rollback on error
       } else if (updatedPost) {
         setPost(updatedPost)
-        alert('Draft saved successfully!')
+        showToast('success', 'Draft saved successfully!')
       }
     } catch (err) {
-      alert('Network error occurred')
+      showToast('error', 'Network error occurred. Please try again.')
       fetchPost()
     } finally {
       setSaving(false)
@@ -158,14 +162,14 @@ function EditPostPage() {
       )
 
       if (error) {
-        alert('Failed to save changes: ' + error.message)
+        showToast('error', 'Failed to save changes: ' + error.message)
         fetchPost() // Rollback on error
       } else if (updatedPost) {
         setPost(updatedPost)
-        alert('Reading time updated successfully!')
+        showToast('success', 'Reading time updated successfully!')
       }
     } catch (err) {
-      alert('Network error occurred')
+      showToast('error', 'Network error occurred. Please try again.')
       fetchPost()
     } finally {
       setSaving(false)
@@ -177,22 +181,30 @@ function EditPostPage() {
 
     // Validate required fields before publishing
     if (!post.title || post.title.trim() === '' || post.title === 'Untitled Post') {
-      alert('Please add a title before publishing')
+      showToast('warning', 'Please add a title before publishing')
       return
     }
 
     if (!post.summary || post.summary.trim() === '') {
-      alert('Please add a summary before publishing')
+      showToast('warning', 'Please add a summary before publishing')
       return
     }
 
     if (!post.category) {
-      alert('Please select a category before publishing')
+      showToast('warning', 'Please select a category before publishing')
       return
     }
 
     if (blocks.length === 0) {
-      if (!confirm('This post has no content blocks. Publish anyway?')) {
+      const confirmed = await confirm({
+        title: 'Publish Empty Post?',
+        message: 'This post has no content blocks. Are you sure you want to publish it?',
+        confirmText: 'Publish Anyway',
+        cancelText: 'Cancel',
+        variant: 'warning'
+      })
+
+      if (!confirmed) {
         return
       }
     }
@@ -216,14 +228,14 @@ function EditPostPage() {
       )
 
       if (error) {
-        alert('Failed to publish post: ' + error.message)
+        showToast('error', 'Failed to publish post: ' + error.message)
         fetchPost() // Rollback on error
       } else if (updatedPost) {
         setPost(updatedPost)
-        alert('Post published successfully!')
+        showToast('success', 'Post published successfully! 🎉')
       }
     } catch (err) {
-      alert('Network error occurred')
+      showToast('error', 'Network error occurred. Please try again.')
       fetchPost()
     } finally {
       setPublishing(false)
@@ -233,7 +245,15 @@ function EditPostPage() {
   const handleArchive = async () => {
     if (!post) return
 
-    if (!confirm('Are you sure you want to archive this post?')) {
+    const confirmed = await confirm({
+      title: 'Archive Post',
+      message: 'Are you sure you want to archive this post? You can restore it later.',
+      confirmText: 'Archive',
+      cancelText: 'Cancel',
+      variant: 'warning'
+    })
+
+    if (!confirmed) {
       return
     }
 
@@ -245,13 +265,13 @@ function EditPostPage() {
       )
 
       if (error) {
-        alert('Failed to archive post: ' + error.message)
+        showToast('error', 'Failed to archive post: ' + error.message)
       } else {
-        alert('Post archived!')
+        showToast('success', 'Post archived successfully!')
         router.push('/dashboard/posts')
       }
     } catch (err) {
-      alert('Network error occurred')
+      showToast('error', 'Network error occurred. Please try again.')
     }
   }
 

@@ -89,52 +89,45 @@ export const projectQueries = {
     return { projects: projectsWithContributors, error: null }
   },
 
-  // Get single project by ID (direct database query like dashboard)
+  // Get single project by ID - Optimized version
   async getProject(id: string, session?: any) {
     const supabase = createClient()
 
     try {
-      const { data: project, error } = await supabase
+      // Fetch project basic info first (fast)
+      const { data: project, error: projectError } = await supabase
         .from('projects')
-        .select(`
-          *,
-          created_by_profile:profiles!projects_created_by_fkey(
-            id,
-            username,
-            full_name,
-            avatar_url
-          ),
-          project_contributors(
-            id,
-            contribution_percentage,
-            role_in_project,
-            profiles(
-              id,
-              username,
-              full_name,
-              avatar_url
-            )
-          ),
-          thumbnail_image:images(
-            id,
-            filename,
-            public_url,
-            width,
-            height,
-            alt_text
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single()
 
-      if (error) {
-        return { project: null, error }
+      if (projectError || !project) {
+        return { project: null, error: projectError }
       }
 
-      // Map project_contributors to contributors for consistency with UI
+      // Fetch contributors with profiles in parallel (only if needed for display)
+      const { data: contributors } = await supabase
+        .from('project_contributors')
+        .select(`
+          id,
+          contribution_percentage,
+          role_in_project,
+          profiles(
+            id,
+            username,
+            full_name,
+            avatar_url,
+            role
+          )
+        `)
+        .eq('project_id', id)
+        .order('contribution_percentage', { ascending: false })
+
+      // Combine data
       const projectWithContributors = {
         ...project,
-        contributors: project.project_contributors || []
+        contributors: contributors || [],
+        project_contributors: contributors || []
       }
 
       return { project: projectWithContributors, error: null }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProjects } from '@/lib/hooks'
 import { ProjectCard } from '@/components/ProjectCard'
 import { Button } from '@/components/Button'
@@ -20,13 +20,23 @@ export default function ProjectsPage() {
     sort_by: 'created_at',
     sort_order: 'desc'
   })
+  const [searchInput, setSearchInput] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showFilters, setShowFilters] = useState(false)
-  
+
   const { projects, loading, error } = useProjects(filters)
 
+  // Debounce search input to reduce API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: searchInput }))
+    }, 500) // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
   const handleSearchChange = (value: string) => {
-    setFilters(prev => ({ ...prev, search: value }))
+    setSearchInput(value)
   }
 
   const handleStatusFilter = (status: string) => {
@@ -65,7 +75,7 @@ export default function ProjectsPage() {
             <div className="w-full lg:w-96">
               <Input
                 placeholder="Search projects..."
-                value={filters.search || ''}
+                value={searchInput}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 icon={<Search className="w-4 h-4" />}
               />

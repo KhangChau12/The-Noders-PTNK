@@ -98,23 +98,26 @@ export function useProjects(filters: ProjectFilters = {}) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Serialize filters to prevent unnecessary re-renders from object reference changes
+  const filterKey = JSON.stringify(filters)
+
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true)
       const { projects, error } = await projectQueries.getProjects(filters)
-      
+
       if (error) {
         setError(error.message)
       } else {
         setProjects(projects || [])
         setError(null)
       }
-      
+
       setLoading(false)
     }
 
     fetchProjects()
-  }, [filters])
+  }, [filterKey]) // Use serialized key instead of filters object
 
   const refetch = async () => {
     const { projects, error } = await projectQueries.getProjects(filters)
