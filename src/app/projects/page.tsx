@@ -10,6 +10,7 @@ import { Loading, SkeletonProject } from '@/components/Loading'
 import { Card, CardContent } from '@/components/Card'
 import { ProjectFilters } from '@/types/project'
 import { FILTER_OPTIONS } from '@/lib/constants'
+import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import { Search, Filter, Grid, List } from 'lucide-react'
 
 export default function ProjectsPage() {
@@ -42,8 +43,10 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto">
+    <>
+      <NeuralNetworkBackground />
+      <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 z-10">
+        <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
@@ -214,6 +217,7 @@ export default function ProjectsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

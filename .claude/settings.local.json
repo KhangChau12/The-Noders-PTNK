@@ -11,7 +11,8 @@
       "Bash(npm run build:*)",
       "mcp__ide__getDiagnostics",
       "Bash(mkdir:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(npx prettier:*)"
     ],
     "deny": [],
     "ask": []
