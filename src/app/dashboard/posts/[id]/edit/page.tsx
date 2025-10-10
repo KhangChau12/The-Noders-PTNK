@@ -28,10 +28,11 @@ function EditPostPage() {
   const [publishing, setPublishing] = useState(false)
 
   useEffect(() => {
-    if (postId) {
+    // Wait for both postId and user to be available before fetching
+    if (postId && user) {
       fetchPost()
     }
-  }, [postId])
+  }, [postId, user])
 
   const fetchPost = async () => {
     try {
@@ -45,11 +46,17 @@ function EditPostPage() {
         return
       }
 
-      // Check if user owns this post
-      if (fetchedPost && fetchedPost.author_id !== user?.id) {
-        alert('You do not have permission to edit this post')
-        router.push('/dashboard/posts')
-        return
+      // Check if user owns this post - only check if both user and post are loaded
+      if (fetchedPost && user) {
+        const authorId = fetchedPost.author_id
+        const userId = user.id
+
+        if (authorId !== userId) {
+          console.error('Permission denied:', { authorId, userId })
+          alert('You do not have permission to edit this post')
+          router.push('/dashboard/posts')
+          return
+        }
       }
 
       setPost(fetchedPost)
@@ -284,16 +291,48 @@ function EditPostPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                {post.status === 'published' && (
-                  <Link href={`/posts/${post.slug}`} target="_blank">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Live
-                    </Button>
-                  </Link>
-                )}
+              {post.status === 'published' && (
+                <Link href={`/posts/${post.slug}`} target="_blank">
+                  <Button variant="ghost" size="sm">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Live
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
 
+          {/* Content */}
+          <div className="space-y-6">
+            {/* Post Information */}
+            <PostForm
+              post={post}
+              onSave={handleUpdateInfo}
+              saving={saving}
+              session={session}
+            />
+
+            {/* Blocks Editor */}
+            <BlockEditor
+              blocks={blocks}
+              postId={postId}
+              onBlocksChange={fetchPost}
+              session={session}
+            />
+          </div>
+
+          {/* Action Buttons - Sticky at bottom */}
+          <div className="sticky bottom-0 z-10 mt-8 p-4 bg-dark-surface/95 backdrop-blur-sm rounded-lg border border-dark-border shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-text-tertiary">
+                <Clock className="w-4 h-4" />
+                <span>Reading time: <strong className="text-primary-blue">{calculateReadingTime(blocks)} min</strong></span>
+                {post.reading_time !== calculateReadingTime(blocks) && (
+                  <span className="text-xs text-warning">⚠️ Changed</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
                 {post.status === 'published' ? (
                   <>
                     <Button
@@ -368,25 +407,6 @@ function EditPostPage() {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Content */}
-          <div className="space-y-6">
-            {/* Post Information */}
-            <PostForm
-              post={post}
-              onSave={handleUpdateInfo}
-              saving={saving}
-              session={session}
-            />
-
-            {/* Blocks Editor */}
-            <BlockEditor
-              blocks={blocks}
-              postId={postId}
-              onBlocksChange={fetchPost}
-              session={session}
-            />
           </div>
 
           {/* Stats */}
