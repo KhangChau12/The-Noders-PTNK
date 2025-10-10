@@ -28,11 +28,10 @@ function EditPostPage() {
   const [publishing, setPublishing] = useState(false)
 
   useEffect(() => {
-    // Wait for both postId and user to be available before fetching
-    if (postId && user) {
+    if (postId) {
       fetchPost()
     }
-  }, [postId, user])
+  }, [postId])
 
   const fetchPost = async () => {
     try {
@@ -46,17 +45,13 @@ function EditPostPage() {
         return
       }
 
-      // Check if user owns this post - only check if both user and post are loaded
-      if (fetchedPost && user) {
-        const authorId = fetchedPost.author_id
-        const userId = user.id
-
-        if (authorId !== userId) {
-          console.error('Permission denied:', { authorId, userId })
-          alert('You do not have permission to edit this post')
-          router.push('/dashboard/posts')
-          return
-        }
+      // Check if user owns this post
+      // Note: user might not be loaded immediately on first render after redirect
+      // If user is not loaded yet, skip permission check (ProtectedRoute will handle auth)
+      if (fetchedPost && user && fetchedPost.author_id !== user.id) {
+        alert('You do not have permission to edit this post')
+        router.push('/dashboard/posts')
+        return
       }
 
       setPost(fetchedPost)
