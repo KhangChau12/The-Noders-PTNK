@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   keywords: ['AI', 'Machine Learning', 'Workshop', 'Club', 'Projects', 'Portfolio'],
   authors: [{ name: SITE_CONFIG.name }],
   creator: SITE_CONFIG.name,
+  verification: {
+    google: 'C_XZICiFp6a496BsWT2-tAY_NEVaBNCnY4drwerjuaU',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

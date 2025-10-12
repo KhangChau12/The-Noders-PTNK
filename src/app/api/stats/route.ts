@@ -32,7 +32,13 @@ export async function GET(request: NextRequest) {
       workshopsHeld: workshopsCount
     }
 
-    return NextResponse.json(stats)
+    return NextResponse.json(stats, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
   } catch (error) {
     console.error('Error fetching stats:', error)
     return NextResponse.json(

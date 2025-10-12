@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
+import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 import {
   Trophy,
   Calendar,
@@ -22,10 +24,12 @@ import {
   Zap
 } from 'lucide-react'
 
-export const metadata = {
+export const metadata: Metadata = generateSEOMetadata({
   title: 'PTNK AI Challenge 2025',
-  description: 'Join our exciting AI challenge to build IELTS Writing scoring models'
-}
+  description: 'Join The Noders PTNK AI Challenge 2025! Build AI models for IELTS Writing scoring. Cash prizes up to 1,000,000 VNĐ. Two-week competition for VNU High School students.',
+  keywords: ['AI challenge', 'IELTS scoring', 'machine learning contest', 'student competition', 'AI competition Vietnam', 'PTNK challenge'],
+  url: '/contest',
+})
 
 export default function ContestPage() {
   const timeline = [

@@ -92,6 +92,12 @@ export async function GET(request: NextRequest) {
         limit,
         hasMore: (count || 0) > offset + limit
       }
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     })
 
   } catch (error) {

@@ -1,14 +1,13 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
+import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
 import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
 
 interface Stats {
   activeProjects: number
@@ -25,12 +24,21 @@ interface Project {
   status: string
   repo_url?: string
   demo_url?: string
+  thumbnail_url?: string
   created_at: string
   contributors: any[]
   created_by_profile?: {
     username: string
     full_name: string
     avatar_url?: string
+  }
+  thumbnail_image?: {
+    id: string
+    filename: string
+    public_url: string
+    width: number
+    height: number
+    alt_text?: string
   }
 }
 
@@ -56,76 +64,170 @@ interface NewsPost {
   }
 }
 
-export default function HomePage() {
-  const [stats, setStats] = useState<Stats>({
-    activeProjects: 0,
-    activeMembers: 0,
-    postsShared: 0,
-    workshopsHeld: 0
-  })
-  const [statsLoading, setStatsLoading] = useState(true)
-  const [recentProjects, setRecentProjects] = useState<Project[]>([])
-  const [projectsLoading, setProjectsLoading] = useState(true)
-  const [recentPosts, setRecentPosts] = useState<NewsPost[]>([])
-  const [postsLoading, setPostsLoading] = useState(true)
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const response = await fetch('/api/stats')
-        if (response.ok) {
-          const data = await response.json()
-          setStats(data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch stats:', error)
-        // Fallback to default values
-        setStats({
-          activeProjects: 8,
-          activeMembers: 15,
-          postsShared: 25,
-          workshopsHeld: 1
-        })
-      } finally {
-        setStatsLoading(false)
-      }
+// SEO Metadata
+export const metadata = generateSEOMetadata({
+  title: 'Home',
+  description: SITE_CONFIG.description,
+  keywords: ['AI workshops', 'student tech community', 'PTNK projects', 'high school developers'],
+  url: '/',
+})
+
+// Fetch stats from database
+async function getStats(): Promise<Stats> {
+  try {
+    const supabase = createClient()
+
+    // Get projects count
+    const { count: projectsCount } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active')
+
+    // Get members count
+    const { count: membersCount } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+
+    // Get published posts count
+    const { count: postsCount } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'published')
+
+    // For workshops, we'll set to 1 as requested
+    const workshopsCount = 1
+
+    return {
+      activeProjects: projectsCount || 0,
+      activeMembers: membersCount || 0,
+      postsShared: postsCount || 0,
+      workshopsHeld: workshopsCount
+    }
+  } catch (error) {
+    console.error('Failed to fetch stats:', error)
+    // Fallback to default values
+    return {
+      activeProjects: 8,
+      activeMembers: 15,
+      postsShared: 25,
+      workshopsHeld: 1
+    }
+  }
+}
+
+// Fetch recent projects from database
+async function getRecentProjects(): Promise<Project[]> {
+  try {
+    const supabase = createClient()
+
+    // Get recent projects with contributors and creator info
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        created_by_profile:profiles!projects_created_by_fkey(
+          username,
+          full_name,
+          avatar_url
+        ),
+        project_contributors(
+          id,
+          contribution_percentage,
+          role_in_project,
+          profiles(
+            id,
+            username,
+            full_name,
+            avatar_url
+          )
+        ),
+        thumbnail_image:images(
+          id,
+          public_url,
+          alt_text
+        )
+      `)
+      .in('status', ['active', 'completed'])
+      .order('created_at', { ascending: false })
+      .limit(3)
+
+    if (error) {
+      console.error('Error fetching recent projects:', error)
+      return []
     }
 
-    async function fetchRecentProjects() {
-      try {
-        const response = await fetch('/api/projects/recent')
-        if (response.ok) {
-          const data = await response.json()
-          setRecentProjects(data.projects || [])
-        }
-      } catch (error) {
-        console.error('Failed to fetch recent projects:', error)
-        // Fallback to empty array
-        setRecentProjects([])
-      } finally {
-        setProjectsLoading(false)
-      }
+    // Transform the data to match the expected format
+    return projects?.map(project => ({
+      id: project.id,
+      title: project.title,
+      description: project.description,
+      tech_stack: project.tech_stack || [],
+      status: project.status,
+      repo_url: project.repo_url,
+      demo_url: project.demo_url,
+      thumbnail_url: project.thumbnail_url,
+      created_at: project.created_at,
+      contributors: project.project_contributors || [],
+      created_by_profile: project.created_by_profile,
+      thumbnail_image: project.thumbnail_image
+    })) || []
+  } catch (error) {
+    console.error('Failed to fetch recent projects:', error)
+    return []
+  }
+}
+
+// Fetch recent posts from database
+async function getRecentPosts(): Promise<NewsPost[]> {
+  try {
+    const supabase = createClient()
+
+    const { data: posts, error } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        author:profiles!posts_author_id_fkey(
+          id,
+          username,
+          full_name,
+          avatar_url
+        ),
+        thumbnail_image:images!posts_thumbnail_image_id_fkey(
+          id,
+          filename,
+          public_url,
+          width,
+          height,
+          alt_text
+        )
+      `)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(2)
+
+    if (error) {
+      console.error('Error fetching recent posts:', error)
+      return []
     }
 
-    async function fetchRecentPosts() {
-      try {
-        const response = await fetch('/api/posts?status=published&limit=2')
-        if (response.ok) {
-          const data = await response.json()
-          setRecentPosts(data.posts || [])
-        }
-      } catch (error) {
-        console.error('Failed to fetch recent posts:', error)
-        setRecentPosts([])
-      } finally {
-        setPostsLoading(false)
-      }
-    }
+    return posts || []
+  } catch (error) {
+    console.error('Failed to fetch recent posts:', error)
+    return []
+  }
+}
 
-    fetchStats()
-    fetchRecentProjects()
-    fetchRecentPosts()
-  }, [])
+export default async function HomePage() {
+  // Fetch all data in parallel
+  const [stats, recentProjects, recentPosts] = await Promise.all([
+    getStats(),
+    getRecentProjects(),
+    getRecentPosts()
+  ])
+
   const features = [
     {
       icon: <Brain className="w-8 h-8" />,
@@ -189,7 +291,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateOrganizationSchema())
+        }}
+      />
+
+      <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background Decorations - Neural Network Pattern */}
@@ -416,18 +527,14 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {statsDisplay.map((stat, index) => (
+            {statsDisplay.map((stat) => (
               <div key={stat.key} className="text-center group">
                 <div className="relative bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 border border-dark-border/50 rounded-xl p-6 hover:border-primary-blue/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/10">
                   <div className="text-3xl md:text-4xl font-bold font-mono bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent mb-2">
-                    {!statsLoading ? (
-                      <CounterAnimation
-                        end={stat.value}
-                        suffix={stat.key === 'workshopsHeld' ? '+' : '+'}
-                      />
-                    ) : (
-                      <span className="animate-pulse">0+</span>
-                    )}
+                    <CounterAnimation
+                      end={stat.value}
+                      suffix={stat.key === 'workshopsHeld' ? '+' : '+'}
+                    />
                   </div>
                   <div className="text-text-secondary text-sm md:text-base font-medium">
                     {stat.label}
@@ -461,7 +568,7 @@ export default function HomePage() {
               Our club focuses on hands-on learning, collaboration, and innovation in the AI space.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <Card key={index} className="text-center hover-lift group relative overflow-hidden">
@@ -499,148 +606,129 @@ export default function HomePage() {
               Check out some of our latest innovations and collaborative efforts.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {projectsLoading ? (
-              // Loading state
-              Array.from({ length: 3 }).map((_, index) => (
-                <Card key={index} className="animate-pulse">
-                  <CardContent className="">
-                    <div className="h-4 bg-dark-surface rounded mb-4"></div>
-                    <div className="h-3 bg-dark-surface rounded mb-2"></div>
-                    <div className="h-3 bg-dark-surface rounded w-3/4 mb-4"></div>
-                    <div className="flex gap-2 mb-4">
-                      <div className="h-6 w-16 bg-dark-surface rounded"></div>
-                      <div className="h-6 w-20 bg-dark-surface rounded"></div>
+            {recentProjects.map((project) => (
+              <Link key={project.id} href={`/projects/${project.id}`} className="block group">
+                <div className="relative overflow-hidden rounded-xl bg-dark-surface border border-dark-border hover:border-primary-blue/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-blue/10 h-full">
+                  {/* Thumbnail Image */}
+                  <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
+                    {project.thumbnail_image?.public_url || project.thumbnail_url ? (
+                      <Image
+                        src={project.thumbnail_image?.public_url || project.thumbnail_url}
+                        alt={project.thumbnail_image?.alt_text || project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
+                        <div className="text-center">
+                          <Code className="w-16 h-16 text-primary-blue/40 mx-auto mb-2" />
+                          <p className="text-xs text-text-tertiary font-mono">No preview</p>
+                        </div>
+                      </div>
+                    )}
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Status badge */}
+                    <div className="absolute top-3 right-3">
+                      <Badge
+                        variant={getStatusVariant(project.status)}
+                        size="sm"
+                        className="backdrop-blur-sm bg-dark-bg/80 font-mono text-xs shadow-lg"
+                      >
+                        {project.status}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300 line-clamp-1">
+                      {project.title}
+                    </h3>
+
+                    {/* Contributors */}
+                    {project.contributors && project.contributors.length > 0 ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-3">
+                            {project.contributors.slice(0, 4).map((contributor, idx) => {
+                              const profile = contributor.profiles || contributor.profile
+                              const initial = (profile?.full_name?.[0] || profile?.username?.[0] || '?').toUpperCase()
+                              const colors = ['bg-primary-blue', 'bg-accent-cyan', 'bg-purple-500', 'bg-pink-500']
+                              return (
+                                <div
+                                  key={contributor.id || idx}
+                                  className={`w-9 h-9 rounded-full ${colors[idx % colors.length]} flex items-center justify-center text-sm text-white font-semibold border-2 border-dark-surface ring-2 ring-dark-bg transition-transform group-hover:scale-110`}
+                                  title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
+                                >
+                                  {initial}
+                                </div>
+                              )
+                            })}
+                            {project.contributors.length > 4 && (
+                              <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center text-xs text-text-secondary font-semibold border-2 border-dark-surface ring-2 ring-dark-bg">
+                                +{project.contributors.length - 4}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-sm text-text-tertiary">
+                            <Users className="w-4 h-4 inline mr-1" />
+                            {project.contributors.length}
+                          </div>
+                        </div>
+
+                        {/* View details indicator */}
+                        <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-text-tertiary">
+                          <Users className="w-4 h-4 inline mr-1" />
+                          No contributors yet
+                        </div>
+                        <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Hover border glow effect */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-primary-blue/0 group-hover:border-primary-blue/20 transition-all duration-300 pointer-events-none" />
+                </div>
+              </Link>
+            ))}
+
+            {/* Show "View All Projects" card if less than 3 projects */}
+            {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
+              <Card key={`viewall-${index}`} variant="interactive" className="hover-lift group">
+                <Link href="/projects">
+                  <CardContent className="p-2 text-center h-full flex flex-col justify-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
+                      <Code className="w-8 h-8 text-primary-blue" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-text-primary mb-2">
+                      View All Projects
+                    </h3>
+                    <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                      Discover more of our innovative projects and technical achievements
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
+                      <span className="text-sm font-medium">Browse Projects</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </CardContent>
-                </Card>
-              ))
-            ) : (
-              <>
-                {recentProjects.map((project, index) => (
-                  <Link key={project.id} href={`/projects/${project.id}`} className="block group">
-                    <div className="relative overflow-hidden rounded-xl bg-dark-surface border border-dark-border hover:border-primary-blue/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-blue/10 h-full">
-                      {/* Thumbnail Image */}
-                      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
-                        {project.thumbnail_image?.public_url || project.thumbnail_url ? (
-                          <Image
-                            src={project.thumbnail_image?.public_url || project.thumbnail_url}
-                            alt={project.thumbnail_image?.alt_text || project.title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            loading="lazy"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
-                            <div className="text-center">
-                              <Code className="w-16 h-16 text-primary-blue/40 mx-auto mb-2" />
-                              <p className="text-xs text-text-tertiary font-mono">No preview</p>
-                            </div>
-                          </div>
-                        )}
-                        {/* Overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                        {/* Status badge */}
-                        <div className="absolute top-3 right-3">
-                          <Badge
-                            variant={getStatusVariant(project.status)}
-                            size="sm"
-                            className="backdrop-blur-sm bg-dark-bg/80 font-mono text-xs shadow-lg"
-                          >
-                            {project.status}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-5">
-                        {/* Title */}
-                        <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300 line-clamp-1">
-                          {project.title}
-                        </h3>
-
-                        {/* Contributors */}
-                        {project.contributors && project.contributors.length > 0 ? (
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="flex -space-x-3">
-                                {project.contributors.slice(0, 4).map((contributor, idx) => {
-                                  const profile = contributor.profiles || contributor.profile
-                                  const initial = (profile?.full_name?.[0] || profile?.username?.[0] || '?').toUpperCase()
-                                  const colors = ['bg-primary-blue', 'bg-accent-cyan', 'bg-purple-500', 'bg-pink-500']
-                                  return (
-                                    <div
-                                      key={contributor.id || idx}
-                                      className={`w-9 h-9 rounded-full ${colors[idx % colors.length]} flex items-center justify-center text-sm text-white font-semibold border-2 border-dark-surface ring-2 ring-dark-bg transition-transform group-hover:scale-110`}
-                                      title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
-                                    >
-                                      {initial}
-                                    </div>
-                                  )
-                                })}
-                                {project.contributors.length > 4 && (
-                                  <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center text-xs text-text-secondary font-semibold border-2 border-dark-surface ring-2 ring-dark-bg">
-                                    +{project.contributors.length - 4}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="text-sm text-text-tertiary">
-                                <Users className="w-4 h-4 inline mr-1" />
-                                {project.contributors.length}
-                              </div>
-                            </div>
-
-                            {/* View details indicator */}
-                            <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <ArrowRight className="w-5 h-5" />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm text-text-tertiary">
-                              <Users className="w-4 h-4 inline mr-1" />
-                              No contributors yet
-                            </div>
-                            <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <ArrowRight className="w-5 h-5" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Hover border glow effect */}
-                      <div className="absolute inset-0 rounded-xl border-2 border-primary-blue/0 group-hover:border-primary-blue/20 transition-all duration-300 pointer-events-none" />
-                    </div>
-                  </Link>
-                ))}
-
-                {/* Show "View All Projects" card if less than 3 projects */}
-                {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
-                  <Card key={`viewall-${index}`} variant="interactive" className="hover-lift group">
-                    <Link href="/projects">
-                      <CardContent className="p-2 text-center h-full flex flex-col justify-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                          <Code className="w-8 h-8 text-primary-blue" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-text-primary mb-2">
-                          View All Projects
-                        </h3>
-                        <p className="text-text-secondary text-sm mb-4 leading-relaxed">
-                          Discover more of our innovative projects and technical achievements
-                        </p>
-                        <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
-                          <span className="text-sm font-medium">Browse Projects</span>
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                        </div>
-                      </CardContent>
-                    </Link>
-                  </Card>
-                ))}
-              </>
-            )}
+                </Link>
+              </Card>
+            ))}
           </div>
 
           {recentProjects.length >= 3 && (
@@ -669,96 +757,76 @@ export default function HomePage() {
           </div>
 
           <div className={`grid gap-8 mb-8 ${recentPosts.length === 1 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-            {postsLoading ? (
-              // Loading state
-              Array.from({ length: 2 }).map((_, index) => (
-                <Card key={index} className="animate-pulse">
-                  <div className="aspect-video bg-dark-surface rounded-t-lg"></div>
-                  <CardContent className="p-6">
-                    <div className="h-5 bg-dark-surface rounded w-20 mb-3"></div>
-                    <div className="h-6 bg-dark-surface rounded mb-2"></div>
-                    <div className="h-4 bg-dark-surface rounded mb-4"></div>
-                    <div className="flex gap-4 mb-4">
-                      <div className="h-4 bg-dark-surface rounded w-24"></div>
-                      <div className="h-4 bg-dark-surface rounded w-20"></div>
+            {recentPosts.map((post) => (
+              <Card key={post.id} variant="interactive" className="hover-lift group">
+                <Link href={`/posts/${post.slug}`}>
+                  <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
+                    {post.thumbnail_image?.public_url ? (
+                      <Image
+                        src={post.thumbnail_image.public_url}
+                        alt={post.thumbnail_image.alt_text || post.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
+                      </div>
+                    )}
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <CardContent className="pt-4">
+                    <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
+                      {post.category}
+                    </Badge>
+                    <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                      {post.title || 'Untitled Post'}
+                    </h3>
+                    <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
+                      {post.summary || 'No summary available'}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(post.published_at)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {post.reading_time} min read
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-primary-blue text-sm font-medium">Read More</span>
+                      <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </CardContent>
-                </Card>
-              ))
-            ) : (
-              <>
-                {recentPosts.map((post) => (
-                  <Card key={post.id} variant="interactive" className="hover-lift group">
-                    <Link href={`/posts/${post.slug}`}>
-                      <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
-                        {post.thumbnail_image?.public_url ? (
-                          <Image
-                            src={post.thumbnail_image.public_url}
-                            alt={post.thumbnail_image.alt_text || post.title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            loading="lazy"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
-                          </div>
-                        )}
-                        {/* Overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                      <CardContent className="pt-4">
-                        <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
-                          {post.category}
-                        </Badge>
-                        <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                          {post.title || 'Untitled Post'}
-                        </h3>
-                        <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                          {post.summary || 'No summary available'}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(post.published_at)}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {post.reading_time} min read
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-primary-blue text-sm font-medium">Read More</span>
-                          <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
-                        </div>
-                      </CardContent>
-                    </Link>
-                  </Card>
-                ))}
+                </Link>
+              </Card>
+            ))}
 
-                {/* View all posts CTA */}
-                <Card variant="interactive" className="hover-lift group">
-                  <Link href="/posts">
-                    <CardContent className="p-8 text-center h-full flex flex-col justify-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                        <Newspaper className="w-8 h-8 text-primary-blue" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-text-primary mb-2">
-                        View All Posts
-                      </h3>
-                      <p className="text-text-secondary text-sm mb-4 leading-relaxed">
-                        Discover more stories, updates, and insights from our community
-                      </p>
-                      <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
-                        <span className="text-sm font-medium">Browse All Posts</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                      </div>
-                    </CardContent>
-                  </Link>
-                </Card>
-              </>
-            )}
+            {/* View all posts CTA */}
+            <Card variant="interactive" className="hover-lift group">
+              <Link href="/posts">
+                <CardContent className="p-8 text-center h-full flex flex-col justify-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
+                    <Newspaper className="w-8 h-8 text-primary-blue" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-text-primary mb-2">
+                    View All Posts
+                  </h3>
+                  <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                    Discover more stories, updates, and insights from our community
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
+                    <span className="text-sm font-medium">Browse All Posts</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
           </div>
         </div>
       </section>
@@ -792,5 +860,6 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

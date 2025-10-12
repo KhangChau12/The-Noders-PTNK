@@ -1,8 +1,31 @@
 export const SITE_CONFIG = {
   name: 'The Noders PTNK',
-  description: 'A portfolio website for The Noders PTNK technology club',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  shortName: 'The Noders',
+  description: 'A technology club at VNUHCM High School for the Gifted, building practical AI solutions, organizing workshops, and connecting young developers in PTNK.',
   tagline: 'Connecting Minds, Creating Intelligence',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.thenodersptnk.com',
+  keywords: [
+    'The Noders',
+    'PTNK',
+    'VNUHCM High School for the Gifted',
+    'technology club',
+    'AI innovation',
+    'student developers',
+    'coding workshops',
+    'tech community',
+    'Vietnam tech students',
+    'high school programming',
+    'AI projects',
+    'web development',
+    'mobile development',
+    'machine learning',
+    'student projects'
+  ],
+  author: 'The Noders PTNK',
+  twitterHandle: '@thenoders_ptnk',
+  ogImage: 'https://qaiziusbqefdgnebbocm.supabase.co/storage/v1/object/public/images/e72a4551-46a2-40c3-a9b9-ac91540e5003/1759994134563-v9qulq24k8.png',
+  locale: 'en_US',
+  type: 'website',
 }
 
 export const NAVIGATION_ITEMS = [
