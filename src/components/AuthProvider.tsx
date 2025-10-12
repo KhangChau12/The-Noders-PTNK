@@ -18,31 +18,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
     let isMounted = true
-    let profileRequestInProgress = false
+    let activeProfileRequest: Promise<any> | null = null
+    let lastFetchedUserId: string | null = null
 
-    // Helper function to fetch profile safely
+    // Helper function to fetch profile safely with proper mutex
     const fetchProfile = async (userId: string, setLoadingState = true) => {
-      if (profileRequestInProgress) return null
+      // Skip if we already have this profile
+      if (lastFetchedUserId === userId && profile?.id === userId) {
+        return profile
+      }
 
-      profileRequestInProgress = true
+      // If there's already a request in progress for this user, return it
+      if (activeProfileRequest && lastFetchedUserId === userId) {
+        return activeProfileRequest
+      }
+
       if (setLoadingState) setProfileLoading(true)
 
-      try {
-        const userProfile = await auth.getProfile(userId)
-        if (isMounted) {
-          if (userProfile) {
-            setProfile(userProfile)
-          } else {
-            setProfile(null)
+      // Create new request with retry logic
+      activeProfileRequest = (async () => {
+        let retries = 3
+        let lastError: any = null
+
+        while (retries > 0) {
+          try {
+            const userProfile = await auth.getProfile(userId)
+            if (isMounted) {
+              if (userProfile) {
+                setProfile(userProfile)
+                lastFetchedUserId = userId
+              } else {
+                setProfile(null)
+              }
+            }
+            return userProfile
+          } catch (error) {
+            lastError = error
+            retries--
+            if (retries > 0) {
+              // Wait before retry (exponential backoff)
+              await new Promise(resolve => setTimeout(resolve, 1000 * (4 - retries)))
+            }
           }
         }
-        return userProfile
-      } catch (error) {
-        console.error('Error loading profile:', error)
+
+        // All retries failed
+        console.error('Error loading profile after retries:', lastError)
         if (isMounted) setProfile(null)
         return null
+      })()
+
+      try {
+        const result = await activeProfileRequest
+        return result
       } finally {
-        profileRequestInProgress = false
+        activeProfileRequest = null
         if (isMounted && setLoadingState) setProfileLoading(false)
       }
     }
@@ -69,18 +99,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session.user as AuthUser)
           setSession(session as AuthSession)
 
-          // Fetch profile with timeout
+          // Fetch profile with longer timeout and retry
           try {
             await Promise.race([
               fetchProfile(session.user.id),
               new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+                setTimeout(() => reject(new Error('Profile fetch timeout')), 30000) // 30s timeout
               )
             ])
           } catch (profileError) {
-            console.error('AuthProvider: Profile fetch failed:', profileError)
-            // Continue anyway, just without profile data
-            setProfile(null)
+            console.warn('AuthProvider: Profile fetch timed out, will retry in background')
+            // Continue anyway, retry in background
+            fetchProfile(session.user.id, false).catch(() => {
+              console.error('Background profile fetch also failed')
+            })
           }
         } else {
           setUser(null)
@@ -113,18 +145,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(session.user as AuthUser)
             setSession(session as AuthSession)
 
-            // Fetch profile with timeout
-            try {
-              await Promise.race([
-                fetchProfile(session.user.id, false),
-                new Promise((_, reject) =>
-                  setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
-                )
-              ])
-            } catch (profileError) {
-              console.error('AuthProvider: Profile fetch failed on auth change:', profileError)
-              setProfile(null)
-            }
+            // Fetch profile with timeout, but don't block auth state change
+            fetchProfile(session.user.id, false).catch((profileError) => {
+              console.warn('AuthProvider: Profile fetch failed on auth change:', profileError)
+              // Don't set profile to null, keep existing profile if any
+            })
           } else {
             setUser(null)
             setSession(null)

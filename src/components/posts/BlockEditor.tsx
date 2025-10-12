@@ -24,22 +24,16 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   const { confirm } = useConfirm()
   const [addingBlockType, setAddingBlockType] = useState<string | null>(null)
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null)
-  const [localBlocks, setLocalBlocks] = useState<PostBlock[]>(blocks)
   const [optimisticUpdates, setOptimisticUpdates] = useState<Set<string>>(new Set())
 
-  // Update local blocks when props change
-  if (blocks !== localBlocks && optimisticUpdates.size === 0) {
-    setLocalBlocks(blocks)
-  }
-
-  const imageBlockCount = localBlocks.filter(b => b.type === 'image').length
+  const imageBlockCount = blocks.filter(b => b.type === 'image').length
   const canAddImage = imageBlockCount < 5
-  const canAddBlock = localBlocks.length < 15
+  const canAddBlock = blocks.length < 15
 
   // Client-side validation
   const validateBlock = useCallback((type: string, content: any, order_index?: number) => {
     // Check max blocks
-    if (localBlocks.length >= 15) {
+    if (blocks.length >= 15) {
       return { valid: false, error: 'Maximum 15 blocks per post' }
     }
 
@@ -49,8 +43,8 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     }
 
     // Check consecutive text blocks
-    if (type === 'text' && localBlocks.length > 0) {
-      const lastBlock = localBlocks[localBlocks.length - 1]
+    if (type === 'text' && blocks.length > 0) {
+      const lastBlock = blocks[blocks.length - 1]
       if (lastBlock.type === 'text') {
         return { valid: false, error: 'Cannot add consecutive text blocks. Please add a different block type.' }
       }
@@ -78,7 +72,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     }
 
     return { valid: true }
-  }, [localBlocks, imageBlockCount])
+  }, [blocks, imageBlockCount])
 
   const handleAddBlock = async (type: string, content: any) => {
     // Client-side validation
@@ -90,7 +84,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
 
     // Generate temporary ID for optimistic update
     const tempId = `temp-${Date.now()}`
-    const order_index = localBlocks.length
+    const order_index = blocks.length
 
     // Optimistic update: Add block immediately to UI
     const optimisticBlock: PostBlock = {
@@ -102,7 +96,12 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       created_at: new Date().toISOString()
     }
 
-    setLocalBlocks(prev => [...prev, optimisticBlock])
+    // Capture current blocks snapshot to avoid stale closure
+    const currentBlocks = [...blocks]
+    const optimisticBlocks = [...currentBlocks, optimisticBlock]
+
+    // Update parent immediately with optimistic block
+    onBlocksChange(optimisticBlocks)
     setOptimisticUpdates(prev => new Set(prev).add(tempId))
     setAddingBlockType(null) // Close form immediately
 
@@ -123,20 +122,19 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       const result = await response.json()
 
       if (result.success) {
-        // Replace temp block with real block from server
-        setLocalBlocks(prev =>
-          prev.map(b => b.id === tempId ? result.block : b)
-        )
+        // Replace temp block with real block from server using captured snapshot
+        const updatedBlocks = optimisticBlocks.map(b => b.id === tempId ? result.block : b)
+        onBlocksChange(updatedBlocks)
         setOptimisticUpdates(prev => {
           const newSet = new Set(prev)
           newSet.delete(tempId)
           return newSet
         })
-        // Notify parent with updated blocks
-        onBlocksChange(localBlocks.map(b => b.id === tempId ? result.block : b))
+        showToast('success', 'Block added successfully!')
       } else {
-        // Rollback on error
-        setLocalBlocks(prev => prev.filter(b => b.id !== tempId))
+        // Rollback on error using captured snapshot
+        const rollbackBlocks = optimisticBlocks.filter(b => b.id !== tempId)
+        onBlocksChange(rollbackBlocks)
         setOptimisticUpdates(prev => {
           const newSet = new Set(prev)
           newSet.delete(tempId)
@@ -146,8 +144,9 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         setAddingBlockType(type) // Re-open form
       }
     } catch (error) {
-      // Rollback on error
-      setLocalBlocks(prev => prev.filter(b => b.id !== tempId))
+      // Rollback on error using captured snapshot
+      const rollbackBlocks = optimisticBlocks.filter(b => b.id !== tempId)
+      onBlocksChange(rollbackBlocks)
       setOptimisticUpdates(prev => {
         const newSet = new Set(prev)
         newSet.delete(tempId)
@@ -160,14 +159,16 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   }
 
   const handleUpdateBlock = async (blockId: string, content: any) => {
+    // Capture current blocks snapshot to avoid stale closure
+    const currentBlocks = [...blocks]
+
     // Store original block for rollback
-    const originalBlock = localBlocks.find(b => b.id === blockId)
+    const originalBlock = currentBlocks.find(b => b.id === blockId)
     if (!originalBlock) return
 
     // Optimistic update: Update UI immediately
-    setLocalBlocks(prev =>
-      prev.map(b => b.id === blockId ? { ...b, content } : b)
-    )
+    const optimisticBlocks = currentBlocks.map(b => b.id === blockId ? { ...b, content } : b)
+    onBlocksChange(optimisticBlocks)
     setOptimisticUpdates(prev => new Set(prev).add(blockId))
     setSavingBlockId(blockId)
 
@@ -184,22 +185,19 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       const result = await response.json()
 
       if (result.success) {
-        // Success: Update with server data
-        setLocalBlocks(prev =>
-          prev.map(b => b.id === blockId ? result.block : b)
-        )
+        // Success: Update with server data using captured snapshot
+        const updatedBlocks = optimisticBlocks.map(b => b.id === blockId ? result.block : b)
+        onBlocksChange(updatedBlocks)
         setOptimisticUpdates(prev => {
           const newSet = new Set(prev)
           newSet.delete(blockId)
           return newSet
         })
-        // Notify parent with updated blocks
-        onBlocksChange(localBlocks.map(b => b.id === blockId ? result.block : b))
+        showToast('success', 'Block updated successfully!')
       } else {
-        // Rollback on error
-        setLocalBlocks(prev =>
-          prev.map(b => b.id === blockId ? originalBlock : b)
-        )
+        // Rollback on error using captured snapshot
+        const rollbackBlocks = optimisticBlocks.map(b => b.id === blockId ? originalBlock : b)
+        onBlocksChange(rollbackBlocks)
         setOptimisticUpdates(prev => {
           const newSet = new Set(prev)
           newSet.delete(blockId)
@@ -208,10 +206,9 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         showToast('error', 'Failed to update block: ' + result.error)
       }
     } catch (error) {
-      // Rollback on error
-      setLocalBlocks(prev =>
-        prev.map(b => b.id === blockId ? originalBlock : b)
-      )
+      // Rollback on error using captured snapshot
+      const rollbackBlocks = optimisticBlocks.map(b => b.id === blockId ? originalBlock : b)
+      onBlocksChange(rollbackBlocks)
       setOptimisticUpdates(prev => {
         const newSet = new Set(prev)
         newSet.delete(blockId)
@@ -237,12 +234,15 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       return
     }
 
+    // Capture current blocks snapshot to avoid stale closure
+    const currentBlocks = [...blocks]
+
     // Store original blocks for rollback
-    const originalBlocks = [...localBlocks]
-    const deletedBlock = localBlocks.find(b => b.id === blockId)
+    const originalBlocks = currentBlocks
 
     // Optimistic update: Remove block immediately
-    setLocalBlocks(prev => prev.filter(b => b.id !== blockId))
+    const optimisticBlocks = currentBlocks.filter(b => b.id !== blockId)
+    onBlocksChange(optimisticBlocks)
     setOptimisticUpdates(prev => new Set(prev).add(blockId))
 
     try {
@@ -256,17 +256,17 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       const result = await response.json()
 
       if (result.success) {
-        // Success: Remove from optimistic updates
+        // Success: Confirm deletion (already filtered in optimisticBlocks)
+        onBlocksChange(optimisticBlocks)
         setOptimisticUpdates(prev => {
           const newSet = new Set(prev)
           newSet.delete(blockId)
           return newSet
         })
-        // Notify parent with updated blocks
-        onBlocksChange(localBlocks.filter(b => b.id !== blockId))
+        showToast('success', 'Block deleted successfully!')
       } else {
         // Rollback on error
-        setLocalBlocks(originalBlocks)
+        onBlocksChange(originalBlocks)
         setOptimisticUpdates(prev => {
           const newSet = new Set(prev)
           newSet.delete(blockId)
@@ -276,7 +276,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       }
     } catch (error) {
       // Rollback on error
-      setLocalBlocks(originalBlocks)
+      onBlocksChange(originalBlocks)
       setOptimisticUpdates(prev => {
         const newSet = new Set(prev)
         newSet.delete(blockId)
@@ -348,7 +348,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Existing Blocks */}
-        {localBlocks.map(renderBlock)}
+        {blocks.map(renderBlock)}
 
         {/* Add New Block */}
         {addingBlockType ? (
@@ -437,7 +437,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           </div>
         )}
 
-        {localBlocks.length === 0 && !addingBlockType && (
+        {blocks.length === 0 && !addingBlockType && (
           <Card className="text-center py-8 bg-dark-surface">
             <CardContent>
               <Plus className="w-12 h-12 text-text-tertiary mx-auto mb-3" />

@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   verification: {
     google: 'C_XZICiFp6a496BsWT2-tAY_NEVaBNCnY4drwerjuaU',
   },
+  icons: {
+    icon: [
+      { url: '/logo.png', sizes: 'any' },
+      { url: '/logo.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/logo.png',
+    shortcut: '/logo.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

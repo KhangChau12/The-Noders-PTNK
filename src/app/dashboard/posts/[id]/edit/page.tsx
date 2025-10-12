@@ -32,10 +32,11 @@ function EditPostPage() {
   const [publishing, setPublishing] = useState(false)
 
   useEffect(() => {
-    if (postId) {
+    // Wait for both postId and session to be ready before fetching
+    if (postId && session) {
       fetchPost()
     }
-  }, [postId])
+  }, [postId, session])
 
   const fetchPost = async () => {
     try {

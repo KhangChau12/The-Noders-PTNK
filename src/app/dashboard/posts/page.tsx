@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent } from '@/components/Card'
@@ -23,6 +24,7 @@ import {
 import Link from 'next/link'
 
 function UserPostsPage() {
+  const router = useRouter()
   const { user, session } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -74,8 +76,8 @@ function UserPostsPage() {
       if (error) {
         alert('Failed to create post: ' + error.message)
       } else if (post) {
-        // Redirect to edit page
-        window.location.href = `/dashboard/posts/${post.id}/edit`
+        // Use Next.js router for client-side navigation (no hard reload)
+        router.push(`/dashboard/posts/${post.id}/edit`)
       }
     } catch (err) {
       alert('Network error occurred')

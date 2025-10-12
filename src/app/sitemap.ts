@@ -5,40 +5,43 @@ import { SITE_CONFIG } from '@/lib/constants'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createClient()
 
+  // Use production URL for sitemap
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.thenodersptnk.com'
+
   // Static pages
   const staticPages = [
     {
-      url: SITE_CONFIG.url,
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
-      url: `${SITE_CONFIG.url}/projects`,
+      url: `${baseUrl}/projects`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     {
-      url: `${SITE_CONFIG.url}/posts`,
+      url: `${baseUrl}/posts`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     {
-      url: `${SITE_CONFIG.url}/members`,
+      url: `${baseUrl}/members`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
     {
-      url: `${SITE_CONFIG.url}/contest`,
+      url: `${baseUrl}/contest`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     },
     {
-      url: `${SITE_CONFIG.url}/contact`,
+      url: `${baseUrl}/contact`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.5,
@@ -53,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .order('published_at', { ascending: false })
 
   const postPages = (posts || []).map((post) => ({
-    url: `${SITE_CONFIG.url}/posts/${post.slug}`,
+    url: `${baseUrl}/posts/${post.slug}`,
     lastModified: new Date(post.updated_at || post.published_at),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
@@ -66,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .order('created_at', { ascending: false })
 
   const projectPages = (projects || []).map((project) => ({
-    url: `${SITE_CONFIG.url}/projects/${project.id}`,
+    url: `${baseUrl}/projects/${project.id}`,
     lastModified: new Date(project.updated_at),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
@@ -79,7 +82,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .order('created_at', { ascending: false })
 
   const memberPages = (members || []).map((member) => ({
-    url: `${SITE_CONFIG.url}/members/${member.username}`,
+    url: `${baseUrl}/members/${member.username}`,
     lastModified: new Date(member.updated_at),
     changeFrequency: 'monthly' as const,
     priority: 0.6,
