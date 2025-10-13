@@ -34,6 +34,7 @@ module.exports = {
         primary: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
         display: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-shrikhand)', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

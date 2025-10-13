@@ -471,7 +471,7 @@ export default async function HomePage() {
 
         <div className="container mx-auto text-center relative z-10">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-4">
+            <h1 className="text-5xl md:text-7xl font-[family-name:var(--font-shrikhand)] mb-4">
               <span className="gradient-text">
                 THE NODERS PTNK
               </span>

@@ -33,10 +33,12 @@ function EditPostPage() {
 
   useEffect(() => {
     // Wait for both postId and session to be ready before fetching
-    if (postId && session) {
+    // Use session?.access_token instead of session object to avoid unnecessary re-fetches
+    if (postId && session?.access_token) {
       fetchPost()
     }
-  }, [postId, session])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postId, session?.access_token])
 
   const fetchPost = async () => {
     try {

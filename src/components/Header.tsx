@@ -25,12 +25,9 @@ export function Header() {
         <div className="relative flex items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AI</span>
-              </div>
-              <span className="font-bold text-text-primary text-lg">
-                {SITE_CONFIG.name}
+            <Link href="/" className="flex items-center">
+              <span className="font-[family-name:var(--font-shrikhand)] text-text-primary text-2xl">
+                The Noders <span className="text-primary-blue">PTNK</span>
               </span>
             </Link>
           </div>

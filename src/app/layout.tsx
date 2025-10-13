@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Shrikhand } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/AuthProvider'
 import { ToastProvider } from '@/components/Toast'
@@ -9,6 +9,11 @@ import { Footer } from '@/components/Footer'
 import { SITE_CONFIG } from '@/lib/constants'
 
 const inter = Inter({ subsets: ['latin'] })
+export const shrikhand = Shrikhand({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-shrikhand'
+})
 
 export const metadata: Metadata = {
   title: {
@@ -64,7 +69,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-dark-bg text-text-primary min-h-screen flex flex-col`}>
+      <body className={`${inter.className} ${shrikhand.variable} bg-dark-bg text-text-primary min-h-screen flex flex-col`}>
         <ToastProvider>
           <ConfirmProvider>
             <AuthProvider>
