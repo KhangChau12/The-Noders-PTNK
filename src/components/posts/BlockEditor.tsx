@@ -30,7 +30,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   const canAddImage = imageBlockCount < 5
   const canAddBlock = blocks.length < 15
 
-  // Client-side validation
+  // Client-side validation (updated for bilingual block content)
   const validateBlock = useCallback((type: string, content: any, order_index?: number) => {
     // Check max blocks
     if (blocks.length >= 15) {
@@ -50,24 +50,30 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       }
     }
 
-    // Validate content
-    if (type === 'text' && (!content.html || !content.word_count)) {
-      return { valid: false, error: 'Text block requires content' }
+    // Validate content (bilingual)
+    if (type === 'text') {
+      // require both languages and numeric word counts
+      if (!content || !content.html_en || !content.html_vi || typeof content.word_count_en !== 'number' || typeof content.word_count_vi !== 'number') {
+        return { valid: false, error: 'Text block requires content in both English and Vietnamese' }
+      }
+      // enforce per-language word limit (adjust as needed)
+      if (content.word_count_en > 800 || content.word_count_vi > 800) {
+        return { valid: false, error: 'Text block cannot exceed 800 words per language' }
+      }
     }
 
-    if (type === 'text' && content.word_count > 800) {
-      return { valid: false, error: 'Text block cannot exceed 800 words' }
+    if (type === 'quote') {
+      // require at least one language
+      if (!content || (!content.quote_en && !content.quote_vi)) {
+        return { valid: false, error: 'Quote block requires quote text (English or Vietnamese)' }
+      }
     }
 
-    if (type === 'quote' && !content.quote) {
-      return { valid: false, error: 'Quote block requires quote text' }
-    }
-
-    if (type === 'image' && !content.image_id) {
+    if (type === 'image' && (!content || !content.image_id)) {
       return { valid: false, error: 'Image block requires image_id' }
     }
 
-    if (type === 'youtube' && (!content.youtube_url || !content.video_id)) {
+    if (type === 'youtube' && (!content || !content.youtube_url || !content.video_id)) {
       return { valid: false, error: 'YouTube block requires URL and video ID' }
     }
 
@@ -86,6 +92,8 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     const tempId = `temp-${Date.now()}`
     const order_index = blocks.length
 
+    const now = new Date().toISOString()
+
     // Optimistic update: Add block immediately to UI
     const optimisticBlock: PostBlock = {
       id: tempId,
@@ -93,7 +101,8 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       type: type as any,
       content,
       order_index,
-      created_at: new Date().toISOString()
+      created_at: now,
+      updated_at: now
     }
 
     // Capture current blocks snapshot to avoid stale closure
@@ -140,7 +149,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           newSet.delete(tempId)
           return newSet
         })
-        showToast('error', 'Failed to add block: ' + result.error)
+        showToast('error', 'Failed to add block: ' + result.error + content.html_en)
         setAddingBlockType(type) // Re-open form
       }
     } catch (error) {
@@ -167,7 +176,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     if (!originalBlock) return
 
     // Optimistic update: Update UI immediately
-    const optimisticBlocks = currentBlocks.map(b => b.id === blockId ? { ...b, content } : b)
+    const optimisticBlocks = currentBlocks.map(b => b.id === blockId ? { ...b, content, updated_at: new Date().toISOString() } : b)
     onBlocksChange(optimisticBlocks)
     setOptimisticUpdates(prev => new Set(prev).add(blockId))
     setSavingBlockId(blockId)
