@@ -70,8 +70,8 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
 
         <div className="flex items-center justify-between mt-3">
           <p className={`text-sm ${isValid ? 'text-text-tertiary' : 'text-error'}`}>
-            {wordCountEn}/200 words
-            {wordCountEn > 200 && ' - Exceeds maximum'}
+            {wordCount}/200 words
+            {wordCount > 200 && ' - Exceeds maximum'}
           </p>
 
           {isNew && (
