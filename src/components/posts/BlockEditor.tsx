@@ -106,7 +106,6 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         ...content,
         html: legacyHtml,
         word_count: legacyWordCount,
-        word_count_en,
         word_count_vi
       }
     }
