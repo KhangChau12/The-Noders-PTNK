@@ -152,7 +152,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
   ]
 
   return (
-    <div className={`border border-dark-border rounded-xl bg-dark-surface shadow-lg ${className}`}>
+    <div className={`border mb-3 border-dark-border rounded-xl bg-dark-surface shadow-lg ${className}`}>
       {/* Toolbar */}
       <div className="border-b border-dark-border p-4 flex flex-wrap gap-3 bg-gradient-to-r from-dark-surface to-dark-surface/80 rounded-t-xl">
         {/* Format buttons */}
@@ -273,7 +273,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
           onPaste={handlePaste}
           onFocus={() => setIsEditorFocused(true)}
           onBlur={() => setIsEditorFocused(false)}
-          className={`min-h-[200px] p-6 text-text-primary focus:outline-none rounded-b-xl prose prose-invert max-w-none ${
+          className={`min-h-[100px] p-6 text-text-primary focus:outline-none rounded-b-xl prose prose-invert max-w-none ${
             isEditorFocused ? 'bg-dark-surface/50' : 'bg-transparent'
           } transition-all duration-200`}
           style={{ wordBreak: 'break-word' }}

@@ -7,8 +7,8 @@ import { RichTextEditor } from '@/components/RichTextEditor'
 import { Type, Trash2, GripVertical, Check, X } from 'lucide-react'
 
 interface TextBlockEditorProps {
-  content?: { html: string; word_count: number }
-  onSave: (content: { html: string; word_count: number }) => void
+  content?: { html_en: string; html_vi: string; word_count_en: number; word_count_vi: number }
+  onSave: (content: { html_en: string; html_vi: string; word_count_en: number; word_count_vi: number }) => void
   onDelete: () => void
   onCancel?: () => void
   isNew?: boolean
@@ -19,10 +19,12 @@ function countWords(text: string): number {
 }
 
 export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: TextBlockEditorProps) {
-  const [html, setHtml] = useState(content?.html || '')
-  const wordCount = countWords(html.replace(/<[^>]*>/g, ''))
-  const isValid = wordCount > 0 && wordCount <= 200
-  const hasChanges = html !== (content?.html || '')
+  const [html_en, setHtmlEn] = useState(content?.html_en || '')
+  const [html_vi, setHtmlVi] = useState(content?.html_vi || '')
+  const wordCountEn = countWords(html_en.replace(/<[^>]*>/g, ''))
+  const wordCountVi = countWords(html_vi.replace(/<[^>]*>/g, ''))
+  const isValid = (wordCountEn > 0 && wordCountEn <= 200) || (wordCountVi > 0 && wordCountVi <= 200)
+  const hasChanges = html_en !== (content?.html_en || '') || html_vi !== (content?.html_vi || '')
 
   const handleSave = () => {
     if (!isValid) {
@@ -30,7 +32,7 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
       return
     }
 
-    onSave({ html, word_count: wordCount })
+    onSave({ html_en, html_vi, word_count_en: wordCountEn, word_count_vi: wordCountVi })
   }
 
   return (
@@ -55,15 +57,21 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
         </div>
 
         <RichTextEditor
-          value={html}
-          onChange={setHtml}
+          value={html_en}
+          onChange={setHtmlEn}
+          placeholder="Write your content here... Use the toolbar to format text with bold, italic, headers, colors and more."
+        />
+
+        <RichTextEditor
+          value={html_vi}
+          onChange={setHtmlVi}
           placeholder="Write your content here... Use the toolbar to format text with bold, italic, headers, colors and more."
         />
 
         <div className="flex items-center justify-between mt-3">
           <p className={`text-sm ${isValid ? 'text-text-tertiary' : 'text-error'}`}>
-            {wordCount}/200 words
-            {wordCount > 200 && ' - Exceeds maximum'}
+            {wordCountEn}/200 words
+            {wordCountEn > 200 && ' - Exceeds maximum'}
           </p>
 
           {isNew && (

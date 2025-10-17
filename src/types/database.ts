@@ -123,19 +123,23 @@ export interface PostUpvote {
 
 // Block content types
 export interface TextBlockContent {
-  html: string
-  word_count: number
+  html_en: string
+  html_vi: string
+  word_count_en: number
+  word_count_vi: number
 }
 
 export interface QuoteBlockContent {
-  quote: string
+  quote_en: string
+  quote_vi: string
   author?: string
   source?: string
 }
 
 export interface ImageBlockContent {
   image_id: string
-  caption?: string
+  caption_en?: string
+  caption_vi?: string
   alt_text?: string
 }
 
