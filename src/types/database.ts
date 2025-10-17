@@ -88,7 +88,9 @@ export interface Post {
   id: string
   slug: string
   title: string
+  title_vi: string
   summary: string
+  summary_vi: string
   thumbnail_image_id: string | null
   category: 'News' | 'You may want to know' | 'Member Spotlight' | 'Community Activities'
   author_id: string

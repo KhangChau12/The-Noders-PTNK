@@ -73,7 +73,9 @@ function EditPostPage() {
 
   const handleUpdateInfo = async (data: {
     title: string
+    title_vi: string
     summary: string
+    summary_vi: string
     category: string
     thumbnail_image_id?: string
   }) => {
@@ -113,7 +115,9 @@ function EditPostPage() {
       const updates: any = {
         status: 'draft',
         title: post.title || 'Untitled Post',
+        title_vi: post.title_vi || 'Untitled Post',
         summary: post.summary || '',
+        summary_vi: post.summary_vi || '',
         category: post.category || 'News',
         thumbnail_image_id: post.thumbnail_image_id || null,
       }

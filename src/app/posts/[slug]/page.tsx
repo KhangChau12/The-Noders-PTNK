@@ -266,9 +266,11 @@ export default function PostDetailPage() {
   }
 
   const localize = (field: 'title' | 'summary') => {
-    const anyPost = post as any
-    if (lang === 'vi') return anyPost?.[`${field}_vi`] ?? anyPost?.[field]
-    return anyPost?.[`${field}_en`] ?? anyPost?.[field]
+    console.log(lang);
+    if (lang === 'vi') {
+      return field === 'title' ? post?.title_vi || post?.title : post?.summary_vi || post?.summary
+    }
+    return field === 'title' ? post?.title : post?.summary
   }
 
   if (loading) {

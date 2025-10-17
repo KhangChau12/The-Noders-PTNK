@@ -13,7 +13,9 @@ interface PostFormProps {
   post?: Post | null
   onSave: (data: {
     title: string
+    title_vi: string
     summary: string
+    summary_vi: string
     category: string
     thumbnail_image_id?: string
   }) => Promise<void>
@@ -23,7 +25,9 @@ interface PostFormProps {
 
 export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const [title, setTitle] = useState(post?.title || '')
+  const [title_vi, setTitleVi] = useState(post?.title_vi || '')
   const [summary, setSummary] = useState(post?.summary || '')
+  const [summary_vi, setSummaryVi] = useState(post?.summary_vi || '')
   const [category, setCategory] = useState<string>(post?.category || POST_CATEGORIES[0])
   const [thumbnailImageId, setThumbnailImageId] = useState<string | undefined>(
     post?.thumbnail_image_id || undefined
@@ -42,9 +46,11 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   }, [post])
 
   const titleLength = title.length
+  const titleViLength = title_vi.length
   const summaryLength = summary.length
-  const titleValid = titleLength <= 100
-  const summaryValid = summaryLength <= 500
+  const summaryViLength = summary_vi.length
+  const titleValid = titleLength <= 100 && titleViLength <= 100
+  const summaryValid = summaryLength <= 500 && summaryViLength <= 500
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -93,7 +99,9 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
 
     await onSave({
       title,
+      title_vi,
       summary,
+      summary_vi,
       category,
       thumbnail_image_id: thumbnailImageId
     })
@@ -117,6 +125,12 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
               placeholder="Enter post title..."
               maxLength={100}
             />
+            <Input
+              value={title_vi}
+              onChange={(e) => setTitleVi(e.target.value)}
+              placeholder="Enter post title (Vietnamese)..."
+              maxLength={100}
+            />
             <div className="flex justify-between mt-1">
               <p className={`text-xs ${titleValid ? 'text-text-tertiary' : 'text-error'}`}>
                 {titleLength}/100 characters
@@ -136,6 +150,14 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="Write a brief summary..."
+              maxLength={500}
+              rows={3}
+              className="w-full px-4 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+            />
+            <textarea
+              value={summary_vi}
+              onChange={(e) => setSummaryVi(e.target.value)}
+              placeholder="Write a brief summary (Vietnamese)..."
               maxLength={500}
               rows={3}
               className="w-full px-4 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
