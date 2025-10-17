@@ -80,6 +80,41 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     return { valid: true }
   }, [blocks, imageBlockCount])
 
+  // helper to count words from HTML (used when backend still expects legacy fields)
+  const countWordsFromHtml = (html = ''): number => {
+    const txt = String(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    return txt ? txt.split(' ').filter(Boolean).length : 0
+  }
+
+  // prepare content to include legacy single-language fields (html, word_count)
+  // while keeping bilingual fields (html_en/html_vi, word_count_en/word_count_vi)
+  const prepareContentForServer = (type: string, content: any) => {
+    if (!content) return content
+
+    if (type === 'text') {
+      const html_en = content.html_en ?? ''
+      const html_vi = content.html_vi ?? ''
+      // pick a fallback html for legacy 'html' field (prefer english)
+      const legacyHtml = html_en || html_vi || ''
+      const word_count_en = typeof content.word_count_en === 'number' ? content.word_count_en : countWordsFromHtml(html_en)
+      const word_count_vi = typeof content.word_count_vi === 'number' ? content.word_count_vi : countWordsFromHtml(html_vi)
+      const legacyWordCount = typeof content.word_count === 'number'
+        ? content.word_count
+        : Math.max(word_count_en, word_count_vi, countWordsFromHtml(legacyHtml))
+
+      return {
+        ...content,
+        html: legacyHtml,
+        word_count: legacyWordCount,
+        word_count_en,
+        word_count_vi
+      }
+    }
+
+    // For other block types you can adapt here if server expects legacy fields
+    return content
+  }
+
   const handleAddBlock = async (type: string, content: any) => {
     // Client-side validation
     const validation = validateBlock(type, content)
@@ -115,6 +150,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     setAddingBlockType(null) // Close form immediately
 
     try {
+      console.log('Adding block with content:', content);
       const response = await fetch(`/api/posts/${postId}/blocks`, {
         method: 'POST',
         headers: {
@@ -123,7 +159,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         },
         body: JSON.stringify({
           type,
-          content,
+          content: prepareContentForServer(type, content),
           order_index
         })
       })
@@ -149,7 +185,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           newSet.delete(tempId)
           return newSet
         })
-        showToast('error', 'Failed to add block: ' + result.error + content.html_en)
+        showToast('error', 'Failed to add block: ' + result.error + (content?.html_en ? ' ('+content.html_en.slice(0,50)+')' : ''))
         setAddingBlockType(type) // Re-open form
       }
     } catch (error) {
@@ -188,7 +224,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content: prepareContentForServer(originalBlock.type, content) })
       })
 
       const result = await response.json()

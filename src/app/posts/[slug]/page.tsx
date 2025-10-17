@@ -61,11 +61,12 @@ function processLinksInHTML(html: string): string {
   )
 }
 
-function RenderBlock({ block }: { block: PostBlock }) {
+function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
   switch (block.type) {
     case 'text':
-      const textContent = block.content as { html: string; word_count: number }
-      const processedHTML = processLinksInHTML(textContent.html)
+      const textContent = block.content as any
+      const htmlField = lang === 'vi' ? (textContent.html_vi) : (textContent.html_en)
+      const processedHTML = processLinksInHTML(htmlField || '')
       return (
         <div
           className="prose prose-invert max-w-none mb-8"
@@ -74,12 +75,13 @@ function RenderBlock({ block }: { block: PostBlock }) {
       )
 
     case 'quote':
-      const quoteContent = block.content as { quote: string; author?: string; source?: string }
+      const quoteContent = block.content as any
+      const quoteText = lang === 'vi' ? (quoteContent.quote_vi || quoteContent.quote) : (quoteContent.quote_en || quoteContent.quote)
       return (
         <Card className="bg-primary-blue/5 border-primary-blue/20 mb-8">
           <CardContent className="p-6">
             <blockquote className="text-lg italic text-text-primary mb-4">
-              "{quoteContent.quote}"
+              "{quoteText}"
             </blockquote>
             {(quoteContent.author || quoteContent.source) && (
               <div className="text-sm text-text-secondary">
@@ -175,6 +177,7 @@ export default function PostDetailPage() {
   const [upvoting, setUpvoting] = useState(false)
   const [showAuthMessage, setShowAuthMessage] = useState(false)
   const viewCountIncrementedRef = useRef<string | null>(null)
+  const [lang, setLang] = useState<'en' | 'vi'>('en')
 
   useEffect(() => {
     fetchPost()
@@ -262,6 +265,12 @@ export default function PostDetailPage() {
     }
   }
 
+  const localize = (field: 'title' | 'summary') => {
+    const anyPost = post as any
+    if (lang === 'vi') return anyPost?.[`${field}_vi`] ?? anyPost?.[field]
+    return anyPost?.[`${field}_en`] ?? anyPost?.[field]
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -327,22 +336,40 @@ export default function PostDetailPage() {
             </div>
           )}
 
-          {/* Meta */}
-          <div className="flex items-center gap-4 mb-4">
-            <CategoryBadge category={post.category} />
-            {post.featured && (
-              <Badge variant="primary">Featured</Badge>
-            )}
+          {/* Meta + language switch */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <CategoryBadge category={post.category} />
+              {post.featured && <Badge variant="primary">Featured</Badge>}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setLang('en')}
+                className={`px-3 py-1 rounded ${lang === 'en' && 'bg-white text-black border'}`}
+                aria-pressed={lang === 'en'}
+                aria-label="Switch to English"
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLang('vi')}
+                className={`px-3 py-1 rounded ${lang === 'vi' && 'bg-white text-black border'}`}
+                aria-pressed={lang === 'vi'}
+                aria-label="Switch to Vietnamese"
+              >
+                VI
+              </button>
+            </div>
           </div>
 
           {/* Title */}
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
-            {post.title}
+            {localize('title')}
           </h1>
 
           {/* Summary */}
           <p className="text-lg text-text-secondary mb-6">
-            {post.summary}
+            {localize('summary')}
           </p>
 
           {/* Author & Stats */}
@@ -371,7 +398,7 @@ export default function PostDetailPage() {
           <div className="mb-12">
             {blocks.length > 0 ? (
               blocks.map((block) => (
-                <RenderBlock key={block.id} block={block} />
+                <RenderBlock key={block.id} block={block} lang={lang} />
               ))
             ) : (
               <Card className="text-center py-8">

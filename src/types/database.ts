@@ -130,16 +130,14 @@ export interface TextBlockContent {
 }
 
 export interface QuoteBlockContent {
-  quote_en: string
-  quote_vi: string
+  quote: string
   author?: string
   source?: string
 }
 
 export interface ImageBlockContent {
   image_id: string
-  caption_en?: string
-  caption_vi?: string
+  caption?: string
   alt_text?: string
 }
 
