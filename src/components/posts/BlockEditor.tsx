@@ -53,7 +53,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     // Validate content (bilingual)
     if (type === 'text') {
       // require both languages and numeric word counts
-      if (!content || !content.html_en || !content.html_vi || typeof content.word_count_en !== 'number' || typeof content.word_count_vi !== 'number') {
+      if (!content || !content.html || !content.html_vi || typeof content.word_count !== 'number' || typeof content.word_count_vi !== 'number') {
         return { valid: false, error: 'Text block requires content in both English and Vietnamese' }
       }
       // enforce per-language word limit (adjust as needed)
@@ -92,15 +92,15 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     if (!content) return content
 
     if (type === 'text') {
-      const html_en = content.html_en ?? ''
+      const html = content.html ?? ''
       const html_vi = content.html_vi ?? ''
       // pick a fallback html for legacy 'html' field (prefer english)
-      const legacyHtml = html_en || html_vi || ''
-      const word_count_en = typeof content.word_count_en === 'number' ? content.word_count_en : countWordsFromHtml(html_en)
+      const legacyHtml = html || html_vi || ''
+      const word_count = typeof content.word_count === 'number' ? content.word_count : countWordsFromHtml(html)
       const word_count_vi = typeof content.word_count_vi === 'number' ? content.word_count_vi : countWordsFromHtml(html_vi)
       const legacyWordCount = typeof content.word_count === 'number'
         ? content.word_count
-        : Math.max(word_count_en, word_count_vi, countWordsFromHtml(legacyHtml))
+        : Math.max(word_count, word_count_vi, countWordsFromHtml(legacyHtml))
 
       return {
         ...content,

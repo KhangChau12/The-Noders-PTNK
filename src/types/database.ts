@@ -123,9 +123,9 @@ export interface PostUpvote {
 
 // Block content types
 export interface TextBlockContent {
-  html_en: string
+  html: string
   html_vi: string
-  word_count_en: number
+  word_count: number
   word_count_vi: number
 }
 

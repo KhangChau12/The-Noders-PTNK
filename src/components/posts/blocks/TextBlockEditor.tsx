@@ -7,8 +7,8 @@ import { RichTextEditor } from '@/components/RichTextEditor'
 import { Type, Trash2, GripVertical, Check, X } from 'lucide-react'
 
 interface TextBlockEditorProps {
-  content?: { html_en: string; html_vi: string; word_count_en: number; word_count_vi: number }
-  onSave: (content: { html_en: string; html_vi: string; word_count_en: number; word_count_vi: number }) => void
+  content?: { html: string; html_vi: string; word_count: number; word_count_vi: number }
+  onSave: (content: { html: string; html_vi: string; word_count: number; word_count_vi: number }) => void
   onDelete: () => void
   onCancel?: () => void
   isNew?: boolean
@@ -19,12 +19,12 @@ function countWords(text: string): number {
 }
 
 export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: TextBlockEditorProps) {
-  const [html_en, setHtmlEn] = useState(content?.html_en || '')
+  const [html, setHtml] = useState(content?.html || '')
   const [html_vi, setHtmlVi] = useState(content?.html_vi || '')
-  const wordCountEn = countWords(html_en.replace(/<[^>]*>/g, ''))
+  const wordCount = countWords(html.replace(/<[^>]*>/g, ''))
   const wordCountVi = countWords(html_vi.replace(/<[^>]*>/g, ''))
-  const isValid = (wordCountEn > 0 && wordCountEn <= 200) || (wordCountVi > 0 && wordCountVi <= 200)
-  const hasChanges = html_en !== (content?.html_en || '') || html_vi !== (content?.html_vi || '')
+  const isValid = (wordCount > 0 && wordCount <= 200) || (wordCountVi > 0 && wordCountVi <= 200)
+  const hasChanges = html !== (content?.html || '') || html_vi !== (content?.html_vi || '')
 
   const handleSave = () => {
     if (!isValid) {
@@ -32,7 +32,7 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
       return
     }
 
-    onSave({ html_en, html_vi, word_count_en: wordCountEn, word_count_vi: wordCountVi })
+    onSave({ html, html_vi, word_count: wordCount, word_count_vi: wordCountVi })
   }
 
   return (
@@ -57,8 +57,8 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
         </div>
 
         <RichTextEditor
-          value={html_en}
-          onChange={setHtmlEn}
+          value={html}
+          onChange={setHtml}
           placeholder="Write your content here... Use the toolbar to format text with bold, italic, headers, colors and more."
         />
 
