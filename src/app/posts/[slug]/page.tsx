@@ -65,7 +65,7 @@ function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
   switch (block.type) {
     case 'text':
       const textContent = block.content as any
-      const htmlField = lang === 'vi' ? (textContent.html_vi) : (textContent.html_en)
+      const htmlField = lang === 'vi' ? (textContent.html_vi) : (textContent.html_en || textContent.html)
       const processedHTML = processLinksInHTML(htmlField || '')
       return (
         <div
