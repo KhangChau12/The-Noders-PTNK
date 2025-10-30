@@ -31,9 +31,9 @@ module.exports = {
         info: '#2563EB',
       },
       fontFamily: {
-        primary: ['Inter', 'system-ui', 'sans-serif'],
+        primary: ['Nunito', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
-        display: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Nunito', 'system-ui', 'sans-serif'],
         heading: ['var(--font-shrikhand)', 'system-ui', 'sans-serif'],
       },
       animation: {

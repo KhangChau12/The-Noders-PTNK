@@ -1,14 +1,18 @@
 import type { Metadata } from 'next'
-import { Inter, Shrikhand } from 'next/font/google'
+import { Nunito, Shrikhand } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/AuthProvider'
 import { ToastProvider } from '@/components/Toast'
 import { ConfirmProvider } from '@/components/ConfirmDialog'
+import { LanguageProvider } from '@/components/LanguageProvider'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { SITE_CONFIG } from '@/lib/constants'
 
-const inter = Inter({ subsets: ['latin'] })
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '700', '800']
+})
 export const shrikhand = Shrikhand({
   weight: '400',
   subsets: ['latin'],
@@ -69,15 +73,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} ${shrikhand.variable} bg-dark-bg text-text-primary min-h-screen flex flex-col`}>
+      <body className={`${nunito.className} ${shrikhand.variable} bg-dark-bg text-text-primary min-h-screen flex flex-col`}>
         <ToastProvider>
           <ConfirmProvider>
             <AuthProvider>
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
+              <LanguageProvider>
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </LanguageProvider>
             </AuthProvider>
           </ConfirmProvider>
         </ToastProvider>

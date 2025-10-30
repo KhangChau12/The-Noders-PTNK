@@ -205,7 +205,7 @@ export async function PUT(
     // Parse request body
     const updates = await request.json()
     const allowedFields = [
-      'title', 'summary', 'thumbnail_image_id', 'category', 'slug',
+      'title', 'title_vi', 'summary', 'summary_vi', 'thumbnail_image_id', 'category', 'slug',
       'status', 'related_post_id_1', 'related_post_id_2', 'reading_time', 'featured'
     ]
 
@@ -225,9 +225,23 @@ export async function PUT(
       )
     }
 
-    if (postUpdates.summary && postUpdates.summary.length > 300) {
+    if (postUpdates.title_vi && postUpdates.title_vi.length > 100) {
       return NextResponse.json(
-        { success: false, error: 'Summary must be 300 characters or less' },
+        { success: false, error: 'Vietnamese title must be 100 characters or less' },
+        { status: 400 }
+      )
+    }
+
+    if (postUpdates.summary && postUpdates.summary.length > 500) {
+      return NextResponse.json(
+        { success: false, error: 'Summary must be 500 characters or less' },
+        { status: 400 }
+      )
+    }
+
+    if (postUpdates.summary_vi && postUpdates.summary_vi.length > 500) {
+      return NextResponse.json(
+        { success: false, error: 'Vietnamese summary must be 500 characters or less' },
         { status: 400 }
       )
     }

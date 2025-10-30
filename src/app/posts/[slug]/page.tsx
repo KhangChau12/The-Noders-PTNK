@@ -9,6 +9,7 @@ import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
 import { Loading } from '@/components/Loading'
 import { useAuth } from '@/components/AuthProvider'
+import { useLanguage } from '@/components/LanguageProvider'
 import { Post, PostBlock } from '@/types/database'
 import { postQueries } from '@/lib/queries'
 import {
@@ -165,6 +166,7 @@ export default function PostDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { session } = useAuth()
+  const { lang, localize } = useLanguage()
   const slug = params.slug as string
 
   const [post, setPost] = useState<PostWithDetails | null>(null)
@@ -177,7 +179,6 @@ export default function PostDetailPage() {
   const [upvoting, setUpvoting] = useState(false)
   const [showAuthMessage, setShowAuthMessage] = useState(false)
   const viewCountIncrementedRef = useRef<string | null>(null)
-  const [lang, setLang] = useState<'en' | 'vi'>('en')
 
   useEffect(() => {
     fetchPost()
@@ -265,13 +266,6 @@ export default function PostDetailPage() {
     }
   }
 
-  const localize = (field: 'title' | 'summary') => {
-    console.log(lang);
-    if (lang === 'vi') {
-      return field === 'title' ? post?.title_vi || post?.title : post?.summary_vi || post?.summary
-    }
-    return field === 'title' ? post?.title : post?.summary
-  }
 
   if (loading) {
     return (
@@ -338,40 +332,22 @@ export default function PostDetailPage() {
             </div>
           )}
 
-          {/* Meta + language switch */}
+          {/* Meta */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-4">
               <CategoryBadge category={post.category} />
               {post.featured && <Badge variant="primary">Featured</Badge>}
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setLang('en')}
-                className={`px-3 py-1 rounded ${lang === 'en' && 'bg-white text-black border'}`}
-                aria-pressed={lang === 'en'}
-                aria-label="Switch to English"
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLang('vi')}
-                className={`px-3 py-1 rounded ${lang === 'vi' && 'bg-white text-black border'}`}
-                aria-pressed={lang === 'vi'}
-                aria-label="Switch to Vietnamese"
-              >
-                VI
-              </button>
-            </div>
           </div>
 
           {/* Title */}
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
-            {localize('title')}
+            {localize(post.title, post.title_vi)}
           </h1>
 
           {/* Summary */}
           <p className="text-lg text-text-secondary mb-6">
-            {localize('summary')}
+            {localize(post.summary, post.summary_vi)}
           </p>
 
           {/* Author & Stats */}

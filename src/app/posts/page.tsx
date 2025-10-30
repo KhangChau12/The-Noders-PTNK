@@ -8,6 +8,7 @@ import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
+import { useLanguage } from "@/components/LanguageProvider";
 import { Post } from "@/types/database";
 import {
   Search,
@@ -89,6 +90,7 @@ function PostCard({
   post: PostWithAuthor;
   featured?: boolean;
 }) {
+  const { localize } = useLanguage();
   const cardClass = featured
     ? "bg-gradient-to-br from-primary-blue/5 to-accent-cyan/5 border-primary-blue/20"
     : "";
@@ -157,11 +159,11 @@ function PostCard({
           </div>
 
           <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-            {post.title}
+            {localize(post.title, post.title_vi)}
           </h3>
 
           <p className="text-text-secondary text-sm mb-4 line-clamp-3">
-            {post.summary}
+            {localize(post.summary, post.summary_vi)}
           </p>
 
           <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
