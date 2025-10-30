@@ -9,6 +9,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
 import { useLanguage } from "@/components/LanguageProvider";
+import { LanguageDropdown } from "@/components/LanguageDropdown";
 import { Post } from "@/types/database";
 import {
   Search,
@@ -239,11 +240,16 @@ export default function PostsPage() {
       <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 z-10">
         <div className="container mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
-              Posts & Updates
-            </h1>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+          <div className="mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="text-4xl md:text-5xl font-bold text-text-primary">
+                  Posts & Updates
+                </h1>
+              </div>
+              <LanguageDropdown />
+            </div>
+            <p className="text-text-secondary text-lg text-center sm:text-left max-w-3xl">
               Stay updated with the latest news, educational content, member
               spotlights, and community activities from The Noders PTNK.
             </p>

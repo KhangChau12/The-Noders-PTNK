@@ -1,130 +1,123 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/components/AuthProvider'
+import { useLanguage } from '@/components/LanguageProvider'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Badge } from '@/components/Badge'
 import { Loading } from '@/components/Loading'
-import { memberQueries, projectQueries } from '@/lib/queries'
-import { Users, FileText, Activity, Settings, TrendingUp, Shield, RefreshCw } from 'lucide-react'
+import {
+  Users,
+  FileText,
+  Shield,
+  RefreshCw,
+  TrendingUp,
+  Eye,
+  ThumbsUp,
+  FileEdit,
+  Calendar,
+  ArrowRight
+} from 'lucide-react'
 import Link from 'next/link'
 
+interface AdminStats {
+  totalMembers: number
+  adminCount: number
+  totalProjects: number
+  activeProjects: number
+  totalPosts: number
+  draftPosts: number
+  totalViews: number
+  totalUpvotes: number
+  postsByCategory: {
+    'News': number
+    'You may want to know': number
+    'Member Spotlight': number
+    'Community Activities': number
+  }
+}
+
+interface RecentPost {
+  id: string
+  title: string
+  title_vi: string
+  status: string
+  created_at: string
+  author: {
+    full_name: string
+    username: string
+  }
+}
+
+interface RecentProject {
+  id: string
+  title: string
+  status: string
+  created_at: string
+  created_by_profile: {
+    full_name: string
+    username: string
+  }
+}
+
+interface NewMember {
+  id: string
+  full_name: string
+  username: string
+  role: string
+  created_at: string
+}
+
 function AdminDashboardContent() {
-  // Manual loading state
-  const [members, setMembers] = useState<any[]>([])
-  const [projects, setProjects] = useState<any[]>([])
-  const [membersLoading, setMembersLoading] = useState(false)
-  const [projectsLoading, setProjectsLoading] = useState(false)
-  const [dataLoaded, setDataLoaded] = useState(false)
-  const [initialLoading, setInitialLoading] = useState(true)
+  const { session } = useAuth()
+  const { localize } = useLanguage()
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([])
+  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([])
+  const [newMembers, setNewMembers] = useState<NewMember[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Manual reload functions
-  const handleLoadMembers = async () => {
-    setMembersLoading(true)
+  const fetchStats = async () => {
+    if (!session?.access_token) return
+
     try {
-      const { members: fetchedMembers, error } = await memberQueries.getMembers()
-      if (!error && fetchedMembers) {
-        setMembers(fetchedMembers)
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch('/api/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setStats(data.stats)
+        setRecentPosts(data.recentPosts || [])
+        setRecentProjects(data.recentProjects || [])
+        setNewMembers(data.newMembers || [])
+      } else {
+        setError(data.error || 'Failed to fetch stats')
       }
-    } catch (error) {
-      // Silently handle error
+    } catch (err) {
+      setError('Network error occurred')
+      console.error('Error fetching admin stats:', err)
     } finally {
-      setMembersLoading(false)
+      setLoading(false)
     }
   }
 
-  const handleLoadProjects = async () => {
-    setProjectsLoading(true)
-    try {
-      const { projects: fetchedProjects, error } = await projectQueries.getProjects()
-      if (!error && fetchedProjects) {
-        setProjects(fetchedProjects)
-      }
-    } catch (error) {
-      // Silently handle error
-    } finally {
-      setProjectsLoading(false)
-    }
-  }
-
-  const handleReloadAll = async () => {
-    try {
-      await Promise.all([
-        handleLoadMembers(),
-        handleLoadProjects()
-      ])
-      setDataLoaded(true)
-    } catch (error) {
-      setDataLoaded(false)
-    } finally {
-      setInitialLoading(false)
-    }
-  }
-
-  // Auto-load data on component mount
   useEffect(() => {
-    let mounted = true
-
-    const loadMembers = async () => {
-      setMembersLoading(true)
-      try {
-        const { members: fetchedMembers, error } = await memberQueries.getMembers()
-        if (!error && fetchedMembers && mounted) {
-          setMembers(fetchedMembers)
-        }
-      } catch (error) {
-        // Silently handle error
-      } finally {
-        if (mounted) setMembersLoading(false)
-      }
+    if (session?.access_token) {
+      fetchStats()
     }
+  }, [session?.access_token])
 
-    const loadProjects = async () => {
-      setProjectsLoading(true)
-      try {
-        const { projects: fetchedProjects, error } = await projectQueries.getProjects()
-        if (!error && fetchedProjects && mounted) {
-          setProjects(fetchedProjects)
-        }
-      } catch (error) {
-        // Silently handle error
-      } finally {
-        if (mounted) setProjectsLoading(false)
-      }
-    }
-
-    const loadData = async () => {
-      try {
-        await Promise.all([
-          loadMembers(),
-          loadProjects()
-        ])
-        if (mounted) {
-          setDataLoaded(true)
-        }
-      } catch (error) {
-        // Silently handle error
-        if (mounted) {
-          setDataLoaded(false)
-        }
-      } finally {
-        if (mounted) {
-          setInitialLoading(false)
-        }
-      }
-    }
-
-    loadData()
-
-    return () => {
-      mounted = false
-    }
-  }, []) // Chỉ chạy 1 lần khi mount
-
-  const loading = membersLoading || projectsLoading
-
-  if (initialLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loading size="lg" text="Loading admin dashboard..." />
@@ -132,20 +125,26 @@ function AdminDashboardContent() {
     )
   }
 
-  // Calculate stats
-  const stats = {
-    totalMembers: members?.length || 0,
-    adminCount: members?.filter(m => m.role === 'admin').length || 0,
-    totalProjects: projects?.length || 0,
-    activeProjects: projects?.filter(p => p.status === 'active').length || 0,
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-error mb-4">{error}</p>
+            <Button onClick={fetchStats}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  const recentActivity = [
-    { type: 'member_joined', user: 'New Member', detail: 'Profile created', time: '2 hours ago' },
-    { type: 'project_created', user: 'Alice Johnson', detail: 'Created new project', time: '1 day ago' },
-    { type: 'project_updated', user: 'Bob Smith', detail: 'Updated project status', time: '2 days ago' },
-    { type: 'member_updated', user: 'Charlie Brown', detail: 'Updated profile', time: '3 days ago' },
-  ]
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-text-secondary">No data available</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -158,84 +157,23 @@ function AdminDashboardContent() {
               Admin Dashboard
             </h1>
             <p className="text-text-secondary mt-2">
-              Manage club members, projects, and system settings.
+              Manage club members, projects, posts, and view statistics.
             </p>
           </div>
-          
-          <div className="flex space-x-3">
-            {!dataLoaded && (
-              <Button
-                onClick={handleReloadAll}
-                variant="primary"
-                size="sm"
-                disabled={loading}
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Load Data
-              </Button>
-            )}
 
-            {dataLoaded && (
-              <>
-                <Button
-                  onClick={handleLoadMembers}
-                  variant="secondary"
-                  size="sm"
-                  disabled={membersLoading}
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Reload Members
-                </Button>
-                <Button
-                  onClick={handleLoadProjects}
-                  variant="secondary"
-                  size="sm"
-                  disabled={projectsLoading}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Reload Projects
-                </Button>
-                <Button
-                  onClick={handleReloadAll}
-                  variant="primary"
-                  size="sm"
-                  disabled={loading}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Reload All
-                </Button>
-              </>
-            )}
-
-            <Button variant="secondary" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
-            <Button size="sm">
-              <Activity className="w-4 h-4 mr-2" />
-              View Logs
-            </Button>
-          </div>
+          <Button
+            onClick={fetchStats}
+            variant="primary"
+            size="sm"
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Reload
+          </Button>
         </div>
 
-        {/* Data Loading Notice */}
-        {!dataLoaded && (
-          <Card className="mb-8 border-primary-blue/20 bg-primary-blue/5">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
-                Admin Dashboard Ready
-              </h3>
-              <p className="text-text-secondary mb-4">
-                To prevent server overload, data is loaded manually. Click "Load Data" to fetch
-                the latest members and projects information.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Stats Overview - Row 1 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -246,10 +184,6 @@ function AdminDashboardContent() {
                 <div className="p-3 bg-primary-blue/20 rounded-full">
                   <Users className="w-6 h-6 text-primary-blue" />
                 </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-success mr-1">↗</span>
-                <span className="text-text-secondary">+2 this month</span>
               </div>
             </CardContent>
           </Card>
@@ -265,9 +199,6 @@ function AdminDashboardContent() {
                   <Shield className="w-6 h-6 text-accent-green" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-text-secondary">Stable</span>
-              </div>
             </CardContent>
           </Card>
 
@@ -281,10 +212,6 @@ function AdminDashboardContent() {
                 <div className="p-3 bg-accent-cyan/20 rounded-full">
                   <FileText className="w-6 h-6 text-accent-cyan" />
                 </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-success mr-1">↗</span>
-                <span className="text-text-secondary">+1 this week</span>
               </div>
             </CardContent>
           </Card>
@@ -300,116 +227,290 @@ function AdminDashboardContent() {
                   <TrendingUp className="w-6 h-6 text-warning" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
-                <span className="text-text-secondary">
-                  {stats.totalProjects - stats.activeProjects} archived
-                </span>
+              <div className="mt-4 text-sm text-text-secondary">
+                {stats.totalProjects - stats.activeProjects} completed/archived
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Stats Overview - Row 2 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-text-secondary text-sm font-medium">Published Posts</p>
+                  <p className="text-2xl font-bold text-text-primary">{stats.totalPosts}</p>
+                </div>
+                <div className="p-3 bg-success/20 rounded-full">
+                  <FileEdit className="w-6 h-6 text-success" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-text-secondary text-sm font-medium">Draft Posts</p>
+                  <p className="text-2xl font-bold text-text-primary">{stats.draftPosts}</p>
+                </div>
+                <div className="p-3 bg-text-tertiary/20 rounded-full">
+                  <FileEdit className="w-6 h-6 text-text-tertiary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-text-secondary text-sm font-medium">Total Views</p>
+                  <p className="text-2xl font-bold text-text-primary">{stats.totalViews.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-accent-purple/20 rounded-full">
+                  <Eye className="w-6 h-6 text-accent-purple" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-text-secondary text-sm font-medium">Total Upvotes</p>
+                  <p className="text-2xl font-bold text-text-primary">{stats.totalUpvotes.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-primary-blue/20 rounded-full">
+                  <ThumbsUp className="w-6 h-6 text-primary-blue" />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-1">
+          {/* Left Column - Quick Actions & Posts by Category */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="">
+                <div className="space-y-2">
                   <Link href="/admin/users">
-                    <Button variant="secondary" size="sm" className="mb-2 w-full justify-start">
+                    <Button variant="secondary" size="sm" className="w-full justify-start">
                       <Users className="w-4 h-4 mr-2" />
                       Manage Members
                     </Button>
                   </Link>
                   <Link href="/admin/projects">
-                    <Button variant="secondary" size="sm" className="mb-2 w-full justify-start">
+                    <Button variant="secondary" size="sm" className="w-full justify-start">
                       <FileText className="w-4 h-4 mr-2" />
                       Manage Projects
                     </Button>
                   </Link>
-                  <Link href="/admin/settings">
-                    <Button variant="secondary" size="sm" className="mb-2 w-full justify-start">
-                      <Settings className="w-4 h-4 mr-2" />
-                      System Settings
+                  <Link href="/members">
+                    <Button variant="secondary" size="sm" className="w-full justify-start">
+                      <Users className="w-4 h-4 mr-2" />
+                      View All Members
                     </Button>
                   </Link>
-                  <Link href="/admin/analytics">
+                  <Link href="/projects">
                     <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <Activity className="w-4 h-4 mr-2" />
-                      View Analytics
+                      <FileText className="w-4 h-4 mr-2" />
+                      View All Projects
+                    </Button>
+                  </Link>
+                  <Link href="/posts">
+                    <Button variant="secondary" size="sm" className="w-full justify-start">
+                      <FileEdit className="w-4 h-4 mr-2" />
+                      View All Posts
                     </Button>
                   </Link>
                 </div>
               </CardContent>
             </Card>
 
-            {/* System Status */}
-            <Card className="mt-6">
+            {/* Posts by Category */}
+            <Card>
               <CardHeader>
-                <CardTitle>System Status</CardTitle>
+                <CardTitle>Posts by Category</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Database</span>
-                    <Badge variant="success" size="sm">Online</Badge>
+                    <span className="text-sm text-text-secondary">News</span>
+                    <Badge variant="primary" size="sm">{stats.postsByCategory['News']}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Authentication</span>
-                    <Badge variant="success" size="sm">Active</Badge>
+                    <span className="text-sm text-text-secondary">Educational</span>
+                    <Badge variant="tech" size="sm">{stats.postsByCategory['You may want to know']}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">File Storage</span>
-                    <Badge variant="success" size="sm">Available</Badge>
+                    <span className="text-sm text-text-secondary">Member Spotlight</span>
+                    <Badge variant="success" size="sm">{stats.postsByCategory['Member Spotlight']}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">API Status</span>
-                    <Badge variant="success" size="sm">Operational</Badge>
+                    <span className="text-sm text-text-secondary">Activities</span>
+                    <Badge variant="warning" size="sm">{stats.postsByCategory['Community Activities']}</Badge>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Recent Activity */}
-          <div className="lg:col-span-2">
+          {/* Right Column - Recent Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Recent Posts */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Recent Posts</CardTitle>
+                  <Link href="/posts">
+                    <Button variant="ghost" size="sm">
+                      View All <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-4 py-4 border-b border-dark-border last:border-b-0">
-                      <div className="w-8 h-8 bg-primary-blue/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        {activity.type === 'member_joined' && <Users className="w-4 h-4 text-primary-blue" />}
-                        {activity.type === 'project_created' && <FileText className="w-4 h-4 text-accent-green" />}
-                        {activity.type === 'project_updated' && <Activity className="w-4 h-4 text-accent-cyan" />}
-                        {activity.type === 'member_updated' && <Settings className="w-4 h-4 text-warning" />}
+                {recentPosts.length === 0 ? (
+                  <p className="text-text-secondary text-center py-4">No posts yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {recentPosts.map((post) => (
+                      <div key={post.id} className="flex items-start justify-between py-3 border-b border-dark-border last:border-b-0">
+                        <div className="flex-1 min-w-0">
+                          <Link href={`/posts/${post.id}`}>
+                            <h4 className="text-sm font-medium text-text-primary hover:text-primary-blue truncate">
+                              {localize(post.title, post.title_vi)}
+                            </h4>
+                          </Link>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-text-tertiary">
+                              by {post.author?.full_name || 'Unknown'}
+                            </span>
+                            <span className="text-xs text-text-tertiary">•</span>
+                            <span className="text-xs text-text-tertiary">
+                              {new Date(post.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={post.status === 'published' ? 'success' : 'secondary'}
+                          size="sm"
+                          className="ml-2 flex-shrink-0"
+                        >
+                          {post.status}
+                        </Badge>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-text-primary">
-                          {activity.user}
-                        </p>
-                        <p className="text-sm text-text-secondary truncate">
-                          {activity.detail}
-                        </p>
-                      </div>
-                      <div className="text-xs text-text-tertiary">
-                        {activity.time}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Projects */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Recent Projects</CardTitle>
+                  <Link href="/projects">
+                    <Button variant="ghost" size="sm">
+                      View All <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
-                
-                <div className="mt-6 text-center">
-                  <Button variant="ghost" size="sm">
-                    View All Activity
-                  </Button>
+              </CardHeader>
+              <CardContent>
+                {recentProjects.length === 0 ? (
+                  <p className="text-text-secondary text-center py-4">No projects yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {recentProjects.map((project) => (
+                      <div key={project.id} className="flex items-start justify-between py-3 border-b border-dark-border last:border-b-0">
+                        <div className="flex-1 min-w-0">
+                          <Link href={`/projects/${project.id}`}>
+                            <h4 className="text-sm font-medium text-text-primary hover:text-primary-blue truncate">
+                              {project.title}
+                            </h4>
+                          </Link>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-text-tertiary">
+                              by {project.created_by_profile?.full_name || 'Unknown'}
+                            </span>
+                            <span className="text-xs text-text-tertiary">•</span>
+                            <span className="text-xs text-text-tertiary">
+                              {new Date(project.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={project.status === 'active' ? 'success' : 'secondary'}
+                          size="sm"
+                          className="ml-2 flex-shrink-0"
+                        >
+                          {project.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* New Members */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>New Members</CardTitle>
+                  <Link href="/members">
+                    <Button variant="ghost" size="sm">
+                      View All <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
+              </CardHeader>
+              <CardContent>
+                {newMembers.length === 0 ? (
+                  <p className="text-text-secondary text-center py-4">No members yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {newMembers.map((member) => (
+                      <div key={member.id} className="flex items-start justify-between py-3 border-b border-dark-border last:border-b-0">
+                        <div className="flex-1 min-w-0">
+                          <Link href={`/members/${member.username}`}>
+                            <h4 className="text-sm font-medium text-text-primary hover:text-primary-blue truncate">
+                              {member.full_name}
+                            </h4>
+                          </Link>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-text-tertiary">
+                              @{member.username}
+                            </span>
+                            <span className="text-xs text-text-tertiary">•</span>
+                            <span className="text-xs text-text-tertiary">
+                              Joined {new Date(member.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={member.role === 'admin' ? 'primary' : 'secondary'}
+                          size="sm"
+                          className="ml-2 flex-shrink-0"
+                        >
+                          {member.role}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -425,7 +526,7 @@ function AdminDashboardContent() {
               <div>
                 <h3 className="font-semibold text-text-primary mb-1">Admin Access</h3>
                 <p className="text-sm text-text-secondary">
-                  You have administrative privileges. Use these powers responsibly to maintain 
+                  You have administrative privileges. Use these powers responsibly to maintain
                   the club's community and ensure all members have a positive experience.
                 </p>
               </div>

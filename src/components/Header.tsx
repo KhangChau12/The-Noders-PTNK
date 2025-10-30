@@ -5,15 +5,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuth } from './AuthProvider'
-import { useLanguage } from './LanguageProvider'
 import { Button } from './Button'
 import { NAVIGATION_ITEMS, SITE_CONFIG } from '@/lib/constants'
-import { Menu, X, User, LogOut, Settings, Shield, Languages } from 'lucide-react'
+import { Menu, X, User, LogOut, Settings, Shield } from 'lucide-react'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { user, profile, signOut, isAdmin } = useAuth()
-  const { lang, setLang } = useLanguage()
   const pathname = usePathname()
 
   const handleSignOut = async () => {
@@ -57,32 +55,6 @@ export function Header() {
 
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center space-x-4 ml-auto">
-            {/* Language Toggle */}
-            <div className="flex items-center gap-1 bg-dark-surface rounded-lg p-1">
-              <button
-                onClick={() => setLang('en')}
-                className={cn(
-                  'px-3 py-1 rounded text-xs font-medium transition-all',
-                  lang === 'en'
-                    ? 'bg-primary-blue text-white'
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLang('vi')}
-                className={cn(
-                  'px-3 py-1 rounded text-xs font-medium transition-all',
-                  lang === 'vi'
-                    ? 'bg-primary-blue text-white'
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                VI
-              </button>
-            </div>
-
             {user ? (
               <div className="flex items-center space-x-2">
                 {isAdmin && (
@@ -151,34 +123,6 @@ export function Header() {
                 )
               })}
               
-              {/* Mobile Language Toggle */}
-              <div className="pt-3 border-t border-dark-border">
-                <div className="flex items-center gap-1 bg-dark-surface rounded-lg p-1 mb-3">
-                  <button
-                    onClick={() => setLang('en')}
-                    className={cn(
-                      'flex-1 px-3 py-2 rounded text-xs font-medium transition-all',
-                      lang === 'en'
-                        ? 'bg-primary-blue text-white'
-                        : 'text-text-secondary hover:text-text-primary'
-                    )}
-                  >
-                    EN
-                  </button>
-                  <button
-                    onClick={() => setLang('vi')}
-                    className={cn(
-                      'flex-1 px-3 py-2 rounded text-xs font-medium transition-all',
-                      lang === 'vi'
-                        ? 'bg-primary-blue text-white'
-                        : 'text-text-secondary hover:text-text-primary'
-                    )}
-                  >
-                    VI
-                  </button>
-                </div>
-              </div>
-
               {/* Mobile user menu */}
               <div className="pt-3 border-t border-dark-border">
                 {user ? (

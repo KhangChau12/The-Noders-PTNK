@@ -10,6 +10,7 @@ import { Button } from '@/components/Button'
 import { Loading } from '@/components/Loading'
 import { useAuth } from '@/components/AuthProvider'
 import { useLanguage } from '@/components/LanguageProvider'
+import { LanguageDropdown } from '@/components/LanguageDropdown'
 import { Post, PostBlock } from '@/types/database'
 import { postQueries } from '@/lib/queries'
 import {
@@ -306,14 +307,15 @@ export default function PostDetailPage() {
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-4xl">
-        {/* Back Button */}
-        <div className="mb-6">
+        {/* Back Button & Language Selector */}
+        <div className="mb-6 flex items-center justify-between">
           <Link href="/posts">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Posts
             </Button>
           </Link>
+          <LanguageDropdown />
         </div>
 
         {/* Post Header */}
