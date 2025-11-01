@@ -270,11 +270,21 @@ export default async function HomePage() {
     }
   }
 
+  // Helper function to get post category display name
+  const getCategoryDisplayName = (category: string) => {
+    if (category === 'You may want to know') {
+      return 'Did You Know?'
+    }
+    return category
+  }
+
   // Helper function to get post category badge variant
   const getCategoryBadgeVariant = (category: string) => {
     switch (category) {
       case 'News':
         return 'primary'
+      case 'You may want to know':
+        return 'secondary'
       case 'Member Spotlight':
         return 'success'
       case 'Community Activities':
@@ -780,7 +790,7 @@ export default async function HomePage() {
                   </div>
                   <CardContent className="pt-4">
                     <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
-                      {post.category}
+                      {getCategoryDisplayName(post.category)}
                     </Badge>
                     <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
                       {post.title || 'Untitled Post'}
