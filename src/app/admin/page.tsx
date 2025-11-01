@@ -349,7 +349,7 @@ function AdminDashboardContent() {
                     <Badge variant="primary" size="sm">{stats.postsByCategory['News']}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Educational</span>
+                    <span className="text-sm text-text-secondary">Did You Know?</span>
                     <Badge variant="tech" size="sm">{stats.postsByCategory['You may want to know']}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
