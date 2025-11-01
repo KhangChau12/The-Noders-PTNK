@@ -62,8 +62,8 @@ export async function GET(request: NextRequest) {
       // Total projects and active projects
       supabase.from('projects').select('id, status', { count: 'exact' }),
 
-      // Total posts by status
-      supabase.from('posts').select('id, status', { count: 'exact' }),
+      // Total posts by status (need to fetch data to filter by status)
+      supabase.from('posts').select('id, status'),
 
       // Sum of views and upvotes
       supabase.from('posts')
