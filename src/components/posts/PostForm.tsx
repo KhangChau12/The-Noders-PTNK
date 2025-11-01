@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Badge } from '@/components/Badge'
+import { LanguageTabs, LanguageTabPanel, Language, ValidationStatus } from '@/components/LanguageTabs'
 import { POST_CATEGORIES } from '@/lib/constants'
 import { Post } from '@/types/database'
 import { X, Upload, Image as ImageIcon } from 'lucide-react'
@@ -35,6 +36,10 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
 
+  // Language tab states
+  const [titleLanguage, setTitleLanguage] = useState<Language>('en')
+  const [summaryLanguage, setSummaryLanguage] = useState<Language>('en')
+
   // Load existing thumbnail on mount
   useEffect(() => {
     if (post) {
@@ -51,6 +56,21 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const summaryViLength = summary_vi.length
   const titleValid = titleLength <= 100 && titleViLength <= 100
   const summaryValid = summaryLength <= 500 && summaryViLength <= 500
+
+  // Validation status for tabs
+  const getTitleStatus = (lang: Language): ValidationStatus => {
+    const len = lang === 'en' ? titleLength : titleViLength
+    if (len > 100) return 'error'
+    if (len === 0) return 'empty'
+    return 'valid'
+  }
+
+  const getSummaryStatus = (lang: Language): ValidationStatus => {
+    const len = lang === 'en' ? summaryLength : summaryViLength
+    if (len > 500) return 'error'
+    if (len === 0) return 'empty'
+    return 'valid'
+  }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -116,60 +136,80 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-3">
               Title
             </label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter post title..."
-              maxLength={100}
+            <LanguageTabs
+              activeLanguage={titleLanguage}
+              onLanguageChange={setTitleLanguage}
+              enStatus={getTitleStatus('en')}
+              viStatus={getTitleStatus('vi')}
             />
-            <Input
-              value={title_vi}
-              onChange={(e) => setTitleVi(e.target.value)}
-              placeholder="Enter post title (Vietnamese)..."
-              maxLength={100}
-            />
-            <div className="flex justify-between mt-1">
-              <p className={`text-xs ${titleValid ? 'text-text-tertiary' : 'text-error'}`}>
+            <LanguageTabPanel language="en" activeLanguage={titleLanguage}>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter post title in English..."
+                maxLength={100}
+              />
+              <p className={`text-xs mt-2 ${titleLength > 100 ? 'text-error' : 'text-text-tertiary'}`}>
                 {titleLength}/100 characters
+                {titleLength > 100 && ' - Exceeds maximum'}
               </p>
-              {!titleValid && (
-                <p className="text-xs text-error">Max 100 characters</p>
-              )}
-            </div>
+            </LanguageTabPanel>
+            <LanguageTabPanel language="vi" activeLanguage={titleLanguage}>
+              <Input
+                value={title_vi}
+                onChange={(e) => setTitleVi(e.target.value)}
+                placeholder="Nhập tiêu đề bài viết bằng tiếng Việt..."
+                maxLength={100}
+              />
+              <p className={`text-xs mt-2 ${titleViLength > 100 ? 'text-error' : 'text-text-tertiary'}`}>
+                {titleViLength}/100 ký tự
+                {titleViLength > 100 && ' - Vượt quá giới hạn'}
+              </p>
+            </LanguageTabPanel>
           </div>
 
           {/* Summary */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-3">
               Summary (2-3 sentences)
             </label>
-            <textarea
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder="Write a brief summary..."
-              maxLength={500}
-              rows={3}
-              className="w-full px-4 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+            <LanguageTabs
+              activeLanguage={summaryLanguage}
+              onLanguageChange={setSummaryLanguage}
+              enStatus={getSummaryStatus('en')}
+              viStatus={getSummaryStatus('vi')}
             />
-            <textarea
-              value={summary_vi}
-              onChange={(e) => setSummaryVi(e.target.value)}
-              placeholder="Write a brief summary (Vietnamese)..."
-              maxLength={500}
-              rows={3}
-              className="w-full px-4 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
-            />
-            <div className="flex justify-between mt-1">
-              <p className={`text-xs ${summaryValid ? 'text-text-tertiary' : 'text-error'}`}>
+            <LanguageTabPanel language="en" activeLanguage={summaryLanguage}>
+              <textarea
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                placeholder="Write a brief summary in English (2-3 sentences)..."
+                maxLength={500}
+                rows={4}
+                className="w-full px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+              />
+              <p className={`text-xs mt-2 ${summaryLength > 500 ? 'text-error' : 'text-text-tertiary'}`}>
                 {summaryLength}/500 characters
+                {summaryLength > 500 && ' - Exceeds maximum'}
               </p>
-              {!summaryValid && (
-                <p className="text-xs text-error">Max 500 characters</p>
-              )}
-            </div>
+            </LanguageTabPanel>
+            <LanguageTabPanel language="vi" activeLanguage={summaryLanguage}>
+              <textarea
+                value={summary_vi}
+                onChange={(e) => setSummaryVi(e.target.value)}
+                placeholder="Viết tóm tắt ngắn gọn bằng tiếng Việt (2-3 câu)..."
+                maxLength={500}
+                rows={4}
+                className="w-full px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+              />
+              <p className={`text-xs mt-2 ${summaryViLength > 500 ? 'text-error' : 'text-text-tertiary'}`}>
+                {summaryViLength}/500 ký tự
+                {summaryViLength > 500 && ' - Vượt quá giới hạn'}
+              </p>
+            </LanguageTabPanel>
           </div>
 
           {/* Category */}
