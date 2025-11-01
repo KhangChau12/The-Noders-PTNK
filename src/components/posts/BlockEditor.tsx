@@ -10,7 +10,7 @@ import { TextBlockEditor } from './blocks/TextBlockEditor'
 import { QuoteBlockEditor } from './blocks/QuoteBlockEditor'
 import { ImageBlockEditor } from './blocks/ImageBlockEditor'
 import { YouTubeBlockEditor } from './blocks/YouTubeBlockEditor'
-import { Plus, Type, Quote, Image, Youtube, AlertCircle } from 'lucide-react'
+import { Plus, Type, Image, Youtube, AlertCircle } from 'lucide-react'
 
 interface BlockEditorProps {
   blocks: PostBlock[]
@@ -405,14 +405,6 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
                 isNew
               />
             )}
-            {addingBlockType === 'quote' && (
-              <QuoteBlockEditor
-                onSave={(content) => handleAddBlock('quote', content)}
-                onDelete={() => setAddingBlockType(null)}
-                onCancel={() => setAddingBlockType(null)}
-                isNew
-              />
-            )}
             {addingBlockType === 'image' && (
               <ImageBlockEditor
                 onSave={(content) => handleAddBlock('image', content)}
@@ -449,15 +441,6 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
                 icon={<Type className="w-4 h-4" />}
               >
                 Add Text
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setAddingBlockType('quote')}
-                disabled={!canAddBlock}
-                icon={<Quote className="w-4 h-4" />}
-              >
-                Add Quote
               </Button>
               <Button
                 variant="secondary"

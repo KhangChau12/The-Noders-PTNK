@@ -20,7 +20,6 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
   const [imageId, setImageId] = useState(content?.image_id || '')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [caption, setCaption] = useState(content?.caption || '')
-  const [altText, setAltText] = useState(content?.alt_text || '')
   const [uploading, setUploading] = useState(false)
 
   // Load existing image on mount
@@ -42,7 +41,7 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
       const formData = new FormData()
       formData.append('file', file)
       formData.append('usage', 'news_image')
-      formData.append('alt_text', altText || 'Post image')
+      formData.append('alt_text', 'Post image')
 
       const response = await fetch('/api/upload/image', {
         method: 'POST',
@@ -61,7 +60,6 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
       const imageData = await response.json()
       setImageId(imageData.id)
       setImageUrl(imageData.public_url)
-      if (!altText) setAltText(imageData.filename)
     } catch (error) {
       alert('Error uploading image')
       console.error('Upload error:', error)
@@ -79,7 +77,7 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
     onSave({
       image_id: imageId,
       caption: caption.trim() || undefined,
-      alt_text: altText.trim() || undefined
+      alt_text: content?.alt_text || undefined
     })
   }
 
@@ -110,7 +108,7 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
             <div className="relative aspect-video w-full rounded-lg overflow-hidden">
               <img
                 src={imageUrl}
-                alt={altText || 'Uploaded image'}
+                alt="Post image"
                 className="w-full h-full object-cover"
               />
               <button
@@ -150,17 +148,6 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
             </label>
           )}
 
-          {/* Alt Text */}
-          <div>
-            <label className="block text-xs text-text-tertiary mb-1">Alt Text (for accessibility)</label>
-            <Input
-              value={altText}
-              onChange={(e) => setAltText(e.target.value)}
-              placeholder="Describe the image..."
-              maxLength={200}
-            />
-          </div>
-
           {/* Caption */}
           <div>
             <label className="block text-xs text-text-tertiary mb-1">Caption (optional)</label>
@@ -182,7 +169,7 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
           </div>
         )}
 
-        {!isNew && (imageId !== content?.image_id || caption !== content?.caption || altText !== content?.alt_text) && (
+        {!isNew && (imageId !== content?.image_id || caption !== content?.caption) && (
           <div className="flex justify-end mt-4">
             <Button size="sm" onClick={handleSave} disabled={!isValid || uploading}>
               Save Changes
