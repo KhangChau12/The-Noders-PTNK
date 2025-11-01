@@ -12,7 +12,7 @@ interface CounterAnimationProps {
 export function CounterAnimation({
   end,
   duration = 2000,
-  suffix = '+',
+  suffix = '',
   className = ''
 }: CounterAnimationProps) {
   const [count, setCount] = useState(0)

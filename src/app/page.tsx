@@ -13,6 +13,7 @@ interface Stats {
   activeProjects: number
   activeMembers: number
   postsShared: number
+  totalViews: number
   workshopsHeld: number
 }
 
@@ -97,6 +98,14 @@ async function getStats(): Promise<Stats> {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'published')
 
+    // Get total views from all published posts
+    const { data: postsData } = await supabase
+      .from('posts')
+      .select('view_count')
+      .eq('status', 'published')
+
+    const totalViews = postsData?.reduce((sum, post) => sum + (post.view_count || 0), 0) || 0
+
     // For workshops, we'll set to 1 as requested
     const workshopsCount = 1
 
@@ -104,6 +113,7 @@ async function getStats(): Promise<Stats> {
       activeProjects: projectsCount || 0,
       activeMembers: membersCount || 0,
       postsShared: postsCount || 0,
+      totalViews: totalViews,
       workshopsHeld: workshopsCount
     }
   } catch (error) {
@@ -113,6 +123,7 @@ async function getStats(): Promise<Stats> {
       activeProjects: 8,
       activeMembers: 15,
       postsShared: 25,
+      totalViews: 0,
       workshopsHeld: 1
     }
   }
@@ -251,11 +262,12 @@ export default async function HomePage() {
     }
   ]
 
-  const statsDisplay = [
+  const statsData = [
     { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
     { label: 'Active Members', value: stats.activeMembers, key: 'activeMembers' },
+    { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' },
     { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared' },
-    { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' }
+    { label: 'Total Views', value: stats.totalViews, key: 'totalViews' }
   ]
 
   // Helper function to get project status badge variant
@@ -488,7 +500,7 @@ export default async function HomePage() {
             </h1>
 
             <p className="text-lg text-text-secondary mb-3">
-              Technology Club at PTNK
+              Technology Community with students from PTNK
             </p>
 
             <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-text-primary">
@@ -525,44 +537,64 @@ export default async function HomePage() {
       </section>
 
       {/* Stats Section - Our Journey So Far */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-dark-surface/40 to-primary-blue/5 relative">
-        <div className="container mx-auto relative">
-          <div className="text-center mb-12">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/20 to-dark-bg" />
+        
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `
+            linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }} />
+
+        <div className="container mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Our Journey So Far
             </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto leading-relaxed">
               From innovative projects to growing community, here's what we've achieved together
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {statsDisplay.map((stat) => (
-              <div key={stat.key} className="text-center group">
-                <div className="relative bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 border border-dark-border/50 rounded-xl p-6 hover:border-primary-blue/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/10">
-                  <div className="text-3xl md:text-4xl font-bold font-mono bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent mb-2">
-                    <CounterAnimation
-                      end={stat.value}
-                      suffix={stat.key === 'workshopsHeld' ? '+' : '+'}
-                    />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-6xl mx-auto">
+            {statsData.map((stat, index) => (
+              <div key={stat.key} className="group relative">
+                <div className="relative h-full bg-gradient-to-br from-dark-surface to-dark-surface/50 border border-dark-border rounded-xl p-8 transition-all duration-500 hover:border-primary-blue/50 hover:shadow-2xl hover:shadow-primary-blue/20 hover:-translate-y-1">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary-blue/20 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="absolute top-4 left-4 text-4xl font-bold text-primary-blue/10 group-hover:text-primary-blue/20 transition-colors duration-500">
+                    {String(index + 1).padStart(2, '0')}
                   </div>
-                  <div className="text-text-secondary text-sm md:text-base font-medium">
-                    {stat.label}
+
+                  <div className="relative z-10 text-center pt-8">
+                    <div className="text-3xl md:text-4xl font-bold mb-3 text-primary-blue">
+                      <CounterAnimation end={stat.value} />
+                    </div>
+
+                    <div className="text-text-secondary text-sm md:text-base font-medium">
+                      {stat.label}
+                    </div>
+
+                    <div className="mt-6 h-1 bg-dark-border rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary-blue to-accent-cyan rounded-full animate-fill-bar"
+                        style={{
+                          animationDelay: `${index * 0.2}s`
+                        }}
+                      />
+                    </div>
                   </div>
+
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/5 group-hover:to-accent-cyan/5 transition-all duration-500 pointer-events-none" />
                 </div>
               </div>
             ))}
-          </div>
-          {/* Subtle geometric background */}
-          <div className="absolute inset-0 pointer-events-none opacity-5">
-            <svg className="w-full h-full">
-              <defs>
-                <pattern id="grid" patternUnits="userSpaceOnUse" width="60" height="60">
-                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="1" className="text-primary-blue"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)"/>
-            </svg>
           </div>
         </div>
       </section>
@@ -625,7 +657,7 @@ export default async function HomePage() {
                   <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
                     {project.thumbnail_image?.public_url || project.thumbnail_url ? (
                       <Image
-                        src={project.thumbnail_image?.public_url || project.thumbnail_url}
+                        src={(project.thumbnail_image?.public_url || project.thumbnail_url) as string}
                         alt={project.thumbnail_image?.alt_text || project.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -773,7 +805,7 @@ export default async function HomePage() {
                   <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
                     {post.thumbnail_image?.public_url ? (
                       <Image
-                        src={post.thumbnail_image.public_url}
+                        src={post.thumbnail_image.public_url as string}
                         alt={post.thumbnail_image.alt_text || post.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"

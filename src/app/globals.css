@@ -87,6 +87,37 @@
   }
 }
 
+/* Stats Section Animations */
+@keyframes fillBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-fill-bar {
+  width: 0%;
+  animation: fillBar 2s ease-out forwards;
+}
+
+.animate-gradient {
+  animation: gradient 3s ease infinite;
+}
+
 /* Line clamp utilities */
 .line-clamp-1 {
   overflow: hidden;
