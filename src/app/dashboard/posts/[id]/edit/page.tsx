@@ -20,7 +20,7 @@ import Link from 'next/link'
 function EditPostPage() {
   const params = useParams()
   const router = useRouter()
-  const { session, user } = useAuth()
+  const { session, user, profile, isAdmin } = useAuth()
   const { showToast } = useToast()
   const { confirm } = useConfirm()
   const postId = params.id as string
@@ -52,10 +52,10 @@ function EditPostPage() {
         return
       }
 
-      // Check if user owns this post
+      // Check if user owns this post OR is admin
       // Note: user might not be loaded immediately on first render after redirect
       // If user is not loaded yet, skip permission check (ProtectedRoute will handle auth)
-      if (fetchedPost && user && fetchedPost.author_id !== user.id) {
+      if (fetchedPost && user && !isAdmin && fetchedPost.author_id !== user.id) {
         showToast('error', 'You do not have permission to edit this post')
         router.push('/dashboard/posts')
         return

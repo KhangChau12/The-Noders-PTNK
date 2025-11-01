@@ -315,6 +315,12 @@ function AdminDashboardContent() {
                       Manage Projects
                     </Button>
                   </Link>
+                  <Link href="/admin/posts">
+                    <Button variant="secondary" size="sm" className="w-full justify-start">
+                      <FileEdit className="w-4 h-4 mr-2" />
+                      Manage Posts
+                    </Button>
+                  </Link>
                   <Link href="/members">
                     <Button variant="secondary" size="sm" className="w-full justify-start">
                       <Users className="w-4 h-4 mr-2" />

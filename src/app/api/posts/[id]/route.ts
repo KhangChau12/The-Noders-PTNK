@@ -181,7 +181,7 @@ export async function PUT(
       refresh_token: token
     })
 
-    // Check if user is author
+    // Check if post exists and get user role
     const { data: post, error: checkError } = await supabase
       .from('posts')
       .select('author_id, status')
@@ -195,7 +195,17 @@ export async function PUT(
       )
     }
 
-    if (post.author_id !== user.id) {
+    // Check if user is author OR admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = profile?.role === 'admin'
+    const isAuthor = post.author_id === user.id
+
+    if (!isAuthor && !isAdmin) {
       return NextResponse.json(
         { success: false, error: 'You do not have permission to update this post' },
         { status: 403 }
@@ -317,7 +327,7 @@ export async function DELETE(
       refresh_token: token
     })
 
-    // Check if user is author
+    // Check if post exists and get user role
     const { data: post, error: checkError } = await supabase
       .from('posts')
       .select('author_id')
@@ -331,9 +341,19 @@ export async function DELETE(
       )
     }
 
-    if (post.author_id !== user.id) {
+    // Check if user is author OR admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = profile?.role === 'admin'
+    const isAuthor = post.author_id === user.id
+
+    if (!isAuthor && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: 'Only post authors can delete posts' },
+        { success: false, error: 'Only post authors or admins can delete posts' },
         { status: 403 }
       )
     }
