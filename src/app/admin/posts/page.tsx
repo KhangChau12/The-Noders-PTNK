@@ -43,7 +43,7 @@ interface PostWithAuthor extends Post {
 const categories = [
   { id: 'all', name: 'All Categories', icon: BookOpen },
   { id: 'News', name: 'News', icon: TrendingUp },
-  { id: 'You may want to know', name: 'Did You Know?', icon: Lightbulb },
+  { id: 'You may want to know', name: 'Do You Know?', icon: Lightbulb },
   { id: 'Member Spotlight', name: 'Member Spotlight', icon: Award },
   { id: 'Community Activities', name: 'Community Activities', icon: Users }
 ]
@@ -323,7 +323,7 @@ export default function AdminPostsPage() {
                                     }
                                     size="sm"
                                   >
-                                    {post.category === 'You may want to know' ? 'Did You Know?' : post.category}
+                                    {post.category === 'You may want to know' ? 'Do You Know?' : post.category}
                                   </Badge>
                                   {post.featured && (
                                     <Badge variant="primary" size="sm">

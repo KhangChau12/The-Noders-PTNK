@@ -285,7 +285,7 @@ export default async function HomePage() {
   // Helper function to get post category display name
   const getCategoryDisplayName = (category: string) => {
     if (category === 'You may want to know') {
-      return 'Did You Know?'
+      return 'Do You Know?'
     }
     return category
   }

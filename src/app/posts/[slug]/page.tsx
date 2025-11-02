@@ -39,7 +39,7 @@ interface PostWithDetails extends Post {
 function CategoryBadge({ category }: { category: Post['category'] }) {
   const config = {
     'News': { label: 'News', variant: 'primary' as const },
-    'You may want to know': { label: 'Did You Know?', variant: 'tech' as const },
+    'You may want to know': { label: 'Do You Know?', variant: 'tech' as const },
     'Member Spotlight': { label: 'Member Spotlight', variant: 'success' as const },
     'Community Activities': { label: 'Activities', variant: 'warning' as const }
   }
