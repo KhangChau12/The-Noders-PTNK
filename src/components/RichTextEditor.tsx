@@ -18,6 +18,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react'
 import { Button } from '@/components/Button'
+import { LinkDialog } from '@/components/LinkDialog'
 
 interface RichTextEditorProps {
   value: string
@@ -29,6 +30,9 @@ interface RichTextEditorProps {
 export function RichTextEditor({ value, onChange, placeholder = "Enter project details...", className = "" }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isEditorFocused, setIsEditorFocused] = useState(false)
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
+  const [selectedText, setSelectedText] = useState('')
+  const savedSelectionRef = useRef<Range | null>(null)
 
   useEffect(() => {
     if (editorRef.current && editorRef.current.innerHTML !== value) {
@@ -81,21 +85,26 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
       return
     }
 
-    const selectedText = selection.toString()
-    if (!selectedText) {
+    const text = selection.toString()
+    if (!text) {
       alert('Please select text to create a link')
       return
     }
 
-    const url = prompt('Enter URL:', 'https://')
-    if (!url) return
+    // Save the selection range
+    savedSelectionRef.current = selection.getRangeAt(0).cloneRange()
+    setSelectedText(text)
+    setIsLinkDialogOpen(true)
+  }
 
-    // Validate URL
-    try {
-      new URL(url)
-    } catch {
-      alert('Please enter a valid URL')
-      return
+  const handleLinkSubmit = (url: string) => {
+    // Restore the selection
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(savedSelectionRef.current)
+      }
     }
 
     executeCommand('createLink', url)
@@ -113,6 +122,8 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
         onChange(editorRef.current.innerHTML)
       }
     }, 10)
+
+    savedSelectionRef.current = null
   }
 
   const formatButtons = [
@@ -152,7 +163,15 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
   ]
 
   return (
-    <div className={`border mb-3 border-dark-border rounded-xl bg-dark-surface shadow-lg ${className}`}>
+    <>
+      <LinkDialog
+        isOpen={isLinkDialogOpen}
+        onClose={() => setIsLinkDialogOpen(false)}
+        onSubmit={handleLinkSubmit}
+        selectedText={selectedText}
+      />
+
+      <div className={`border mb-3 border-dark-border rounded-xl bg-dark-surface shadow-lg ${className}`}>
       {/* Toolbar */}
       <div className="border-b border-dark-border p-4 flex flex-wrap gap-3 bg-gradient-to-r from-dark-surface to-dark-surface/80 rounded-t-xl">
         {/* Format buttons */}
@@ -344,5 +363,6 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
         }
       `}</style>
     </div>
+    </>
   )
 }
