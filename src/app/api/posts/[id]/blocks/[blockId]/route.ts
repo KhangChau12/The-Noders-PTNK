@@ -22,10 +22,24 @@ async function verifyPostOwnership(supabase: any, postId: string, userId: string
 
   if (error || !post) {
     result = { authorized: false, error: 'Post not found' }
-  } else if (post.author_id !== userId) {
-    result = { authorized: false, error: 'You do not have permission to modify this post' }
   } else {
-    result = { authorized: true }
+    // Check if user is author
+    const isAuthor = post.author_id === userId
+
+    // Check if user is admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single()
+
+    const isAdmin = profile?.role === 'admin'
+
+    if (isAuthor || isAdmin) {
+      result = { authorized: true }
+    } else {
+      result = { authorized: false, error: 'You do not have permission to modify this post' }
+    }
   }
 
   // Cache the result

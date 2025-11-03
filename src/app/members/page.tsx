@@ -151,94 +151,123 @@ export default function MembersPage() {
 
                   return (
                     <Link key={member.id} href={`/members/${member.username}`}>
-                      <Card variant="interactive" className="h-full hover-lift">
-                        <CardContent className="p-2 text-center">
-                          {/* Avatar */}
-                          <div className="relative mx-auto mb-4 flex justify-center">
-                            <Avatar
-                              name={member.full_name}
-                              src={member.avatar_url}
-                              size="xl"
-                            />
-                            {member.role === "admin" && (
-                              <div className="absolute -top-1 -right-1 w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center">
-                                <Award className="w-5 h-5 text-white" />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Name and Username */}
-                          <h3 className="text-lg font-semibold text-text-primary mb-1">
-                            {member.full_name || member.username}
-                          </h3>
-                          <p className="text-text-secondary text-sm mb-3">
-                            @{member.username}
-                          </p>
-
-                          {/* Role Badge */}
-                          <div className="mb-4">
-                            <Badge
-                              variant={
-                                member.role === "admin"
-                                  ? "primary"
-                                  : "secondary"
-                              }
-                              size="sm"
-                            >
-                              {member.role === "admin" ? "Admin" : "Member"}
-                            </Badge>
-                          </div>
-
-                          {/* Bio */}
-                          {member.bio && (
-                            <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                              {member.bio}
-                            </p>
+                      <div className="group h-full">
+                        <div className={`relative h-full rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-2 ${
+                          member.role === "admin"
+                            ? "bg-gradient-to-br from-primary-blue/10 via-dark-surface to-accent-cyan/10 border-2 border-primary-blue/30 hover:border-primary-blue/60 hover:shadow-2xl hover:shadow-primary-blue/30"
+                            : "bg-gradient-to-br from-dark-surface to-dark-surface/50 border border-dark-border hover:border-primary-blue/40 hover:shadow-xl hover:shadow-primary-blue/20"
+                        }`}>
+                          {/* Gradient overlay top */}
+                          {member.role === "admin" && (
+                            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary-blue/20 to-transparent pointer-events-none" />
                           )}
 
-                          {/* Stats Grid */}
-                          <div className="mb-4 grid grid-cols-2 gap-4">
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-primary-blue">
-                                {projectCount}
+                          {/* Decorative corner */}
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary-blue/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                          <div className="relative p-6 text-center">
+                            {/* Avatar with glow */}
+                            <div className="relative mx-auto mb-4 flex justify-center">
+                              <div className={`${member.role === "admin" ? "ring-4 ring-primary-blue/30 rounded-full animate-pulse" : ""}`}>
+                                <Avatar
+                                  name={member.full_name}
+                                  src={member.avatar_url}
+                                  size="xl"
+                                />
                               </div>
-                              <div className="text-xs text-text-tertiary">
-                                Projects
+                              {member.role === "admin" && (
+                                <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full flex items-center justify-center shadow-lg shadow-primary-blue/50 ring-2 ring-dark-surface">
+                                  <Award className="w-6 h-6 text-white" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Name and Username */}
+                            <h3 className="text-xl font-bold text-text-primary mb-1 group-hover:text-primary-blue transition-colors">
+                              {member.full_name || member.username}
+                            </h3>
+                            <p className="text-text-tertiary text-sm mb-3 font-mono">
+                              @{member.username}
+                            </p>
+
+                            {/* Role Badge - Enhanced */}
+                            <div className="mb-4">
+                              <Badge
+                                variant={member.role === "admin" ? "primary" : "secondary"}
+                                size="sm"
+                                className={member.role === "admin" ? "shadow-lg shadow-primary-blue/30 font-semibold" : ""}
+                              >
+                                {member.role === "admin" ? "👑 Admin" : "Member"}
+                              </Badge>
+                            </div>
+
+                            {/* Bio */}
+                            {member.bio && (
+                              <p className="text-text-secondary text-sm mb-6 line-clamp-2 leading-relaxed">
+                                {member.bio}
+                              </p>
+                            )}
+
+                            {/* Stats Grid - Enhanced với icons */}
+                            <div className="mb-6 grid grid-cols-2 gap-4">
+                              <div className="relative bg-dark-bg/50 rounded-xl p-4 group-hover:bg-primary-blue/5 transition-colors duration-300">
+                                <div className="absolute top-2 right-2 opacity-20">
+                                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                                  </svg>
+                                </div>
+                                <div className="text-2xl font-bold text-primary-blue mb-1">
+                                  {projectCount}
+                                </div>
+                                <div className="text-xs text-text-tertiary font-medium uppercase tracking-wide">
+                                  Projects
+                                </div>
+                              </div>
+                              <div className="relative bg-dark-bg/50 rounded-xl p-4 group-hover:bg-accent-cyan/5 transition-colors duration-300">
+                                <div className="absolute top-2 right-2 opacity-20">
+                                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clipRule="evenodd" />
+                                    <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
+                                  </svg>
+                                </div>
+                                <div className="text-2xl font-bold text-accent-cyan mb-1">
+                                  <MemberPostCount memberId={member.id} />
+                                </div>
+                                <div className="text-xs text-text-tertiary font-medium uppercase tracking-wide">
+                                  Posts
+                                </div>
                               </div>
                             </div>
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-primary-blue">
-                                <MemberPostCount memberId={member.id} />
-                              </div>
-                              <div className="text-xs text-text-tertiary">
-                                Posts
-                              </div>
+
+                            {/* Contact Links - Enhanced */}
+                            <div className="flex justify-center space-x-3 pt-4 border-t border-dark-border/50">
+                              <a
+                                href="mailto:phuckhangtdn@gmail.com"
+                                className="flex items-center justify-center w-10 h-10 rounded-lg bg-dark-bg/50 text-text-tertiary hover:text-primary-blue hover:bg-primary-blue/10 transition-all duration-200 hover:scale-110"
+                                onClick={(e) => e.stopPropagation()}
+                                title="Send Email"
+                              >
+                                <Mail className="w-5 h-5" />
+                              </a>
+                              {socialLinks.facebook && (
+                                <a
+                                  href={socialLinks.facebook}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center w-10 h-10 rounded-lg bg-dark-bg/50 text-text-tertiary hover:text-primary-blue hover:bg-primary-blue/10 transition-all duration-200 hover:scale-110"
+                                  onClick={(e) => e.stopPropagation()}
+                                  title="Facebook Profile"
+                                >
+                                  <Facebook className="w-5 h-5" />
+                                </a>
+                              )}
                             </div>
                           </div>
 
-                          {/* Contact Links */}
-                          <div className="flex justify-center space-x-3 pt-4 border-t border-dark-border">
-                            <a
-                              href="mailto:phuckhangtdn@gmail.com"
-                              className="text-text-tertiary hover:text-primary-blue transition-colors"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Mail className="w-4 h-4" />
-                            </a>
-                            {socialLinks.facebook && (
-                              <a
-                                href={socialLinks.facebook}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-text-tertiary hover:text-primary-blue transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Facebook className="w-4 h-4" />
-                              </a>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
+                          {/* Hover gradient overlay */}
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/5 group-hover:to-accent-cyan/5 transition-all duration-500 pointer-events-none" />
+                        </div>
+                      </div>
                     </Link>
                   );
                 })}

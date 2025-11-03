@@ -30,10 +30,10 @@ export const SITE_CONFIG = {
 
 export const NAVIGATION_ITEMS = [
   { name: 'Home', href: '/' },
-  { name: 'Projects', href: '/projects' },
-  { name: 'Members', href: '/members' },
   { name: 'Contest', href: '/contest' },
   { name: 'Posts', href: '/posts' },
+  { name: 'Projects', href: '/projects' },
+  { name: 'Members', href: '/members' },
   { name: 'Contact', href: '/contact' },
 ]
 

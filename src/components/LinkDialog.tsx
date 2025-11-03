@@ -73,39 +73,47 @@ export function LinkDialog({ isOpen, onClose, onSubmit, selectedText }: LinkDial
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="bg-dark-surface border border-dark-border rounded-xl shadow-2xl shadow-primary-blue/10 max-w-md w-full pointer-events-auto animate-scale-in"
+          className="bg-dark-surface border border-primary-blue/20 rounded-2xl shadow-2xl shadow-primary-blue/20 max-w-lg w-full pointer-events-auto animate-scale-in relative overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Gradient overlay at top */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-blue via-accent-cyan to-primary-blue" />
+
+          {/* Subtle glow background */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-b from-primary-blue/10 to-transparent blur-2xl pointer-events-none" />
+
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-dark-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg flex items-center justify-center">
-                <LinkIcon className="w-5 h-5 text-primary-blue" />
+          <div className="flex items-center justify-between p-6 border-b border-dark-border/50 relative">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-blue/30 to-accent-cyan/30 rounded-xl flex items-center justify-center border border-primary-blue/30 shadow-lg shadow-primary-blue/20 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/20 to-transparent rounded-xl" />
+                <LinkIcon className="w-6 h-6 text-primary-blue relative z-10" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-text-primary">Insert Link</h3>
+                <h3 className="text-xl font-bold text-text-primary">Insert Link</h3>
                 {selectedText && (
-                  <p className="text-sm text-text-tertiary mt-0.5 line-clamp-1">
-                    Linking: "{selectedText}"
+                  <p className="text-sm text-text-secondary mt-1 line-clamp-1 max-w-[300px]">
+                    Linking: <span className="text-accent-cyan font-medium">"{selectedText}"</span>
                   </p>
                 )}
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-text-tertiary hover:text-text-primary transition-colors p-1 rounded-lg hover:bg-dark-border/50"
+              className="text-text-tertiary hover:text-text-primary transition-all p-2 rounded-lg hover:bg-dark-border/50 hover:scale-110"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6">
-            <div className="mb-4">
-              <label htmlFor="url-input" className="block text-sm font-medium text-text-secondary mb-2">
-                URL
+          <form onSubmit={handleSubmit} className="p-6 pt-8 relative">
+            <div className="mb-6">
+              <label htmlFor="url-input" className="flex items-center gap-2 text-sm font-semibold text-text-primary mb-3">
+                <ExternalLink className="w-4 h-4 text-primary-blue" />
+                URL Address
               </label>
-              <div className="relative">
+              <div className="relative group">
                 <input
                   ref={inputRef}
                   id="url-input"
@@ -117,25 +125,33 @@ export function LinkDialog({ isOpen, onClose, onSubmit, selectedText }: LinkDial
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="https://example.com"
-                  className={`w-full px-4 py-3 bg-dark-bg border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full px-4 py-3.5 bg-dark-bg/50 border-2 rounded-xl text-text-primary placeholder-text-tertiary/60 focus:outline-none focus:ring-4 transition-all font-mono text-sm ${
                     error
-                      ? 'border-error focus:ring-error/20'
-                      : 'border-dark-border focus:border-primary-blue focus:ring-primary-blue/20'
+                      ? 'border-error/50 focus:border-error focus:ring-error/10 bg-error/5'
+                      : 'border-dark-border/50 focus:border-primary-blue focus:ring-primary-blue/10 group-hover:border-primary-blue/30'
                   }`}
                 />
-                <ExternalLink className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" />
+                {!error && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                    <div className="w-2 h-2 rounded-full bg-accent-cyan/50 animate-pulse" />
+                  </div>
+                )}
               </div>
               {error && (
-                <p className="text-error text-sm mt-2 flex items-center gap-1">
-                  <X className="w-3 h-3" />
-                  {error}
-                </p>
+                <div className="mt-3 p-3 bg-error/10 border border-error/30 rounded-lg">
+                  <p className="text-error text-sm flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-error/20 flex items-center justify-center flex-shrink-0">
+                      <X className="w-3 h-3" />
+                    </div>
+                    {error}
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Quick links suggestion */}
-            <div className="mb-6">
-              <p className="text-xs text-text-tertiary mb-2">Quick examples:</p>
+            <div className="mb-8">
+              <p className="text-xs font-medium text-text-secondary mb-3 uppercase tracking-wider">Quick Templates</p>
               <div className="flex flex-wrap gap-2">
                 {['https://github.com/', 'https://docs.example.com/', 'https://'].map((example) => (
                   <button
@@ -146,26 +162,31 @@ export function LinkDialog({ isOpen, onClose, onSubmit, selectedText }: LinkDial
                       setError('')
                       inputRef.current?.focus()
                     }}
-                    className="text-xs px-2 py-1 bg-dark-border/50 hover:bg-primary-blue/20 border border-dark-border hover:border-primary-blue/50 rounded text-text-tertiary hover:text-primary-blue transition-all"
+                    className={`text-xs px-3 py-2 rounded-lg font-mono border-2 transition-all duration-200 ${
+                      example === 'https://'
+                        ? 'bg-dark-border/30 border-dark-border hover:border-accent-cyan/50 hover:bg-accent-cyan/10 text-text-secondary hover:text-accent-cyan'
+                        : 'bg-primary-blue/5 border-primary-blue/20 hover:border-primary-blue/50 hover:bg-primary-blue/10 text-text-secondary hover:text-primary-blue'
+                    } hover:scale-105 hover:shadow-lg`}
                   >
-                    {example === 'https://' ? 'Clear' : example}
+                    {example === 'https://' ? '✕ Clear' : example}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-dark-border/30">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={onClose}
+                className="hover:bg-dark-border/30"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90"
+                className="bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90 shadow-lg shadow-primary-blue/30 hover:shadow-xl hover:shadow-primary-blue/40 hover:scale-105 transition-all duration-200"
               >
                 <Check className="w-4 h-4 mr-2" />
                 Insert Link
