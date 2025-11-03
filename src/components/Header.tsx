@@ -34,7 +34,7 @@ export function Header() {
 
           {/* Desktop Navigation - Absolutely Centered */}
           <nav className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center gap-2">
               {NAVIGATION_ITEMS.map((item) => {
                 const isActive = pathname === item.href
                 return (
@@ -42,11 +42,21 @@ export function Header() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'text-sm font-medium transition-colors hover:text-primary-blue',
-                      isActive ? 'text-primary-blue' : 'text-text-secondary'
+                      'relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 group',
+                      isActive
+                        ? 'text-white bg-gradient-to-r from-primary-blue to-accent-cyan shadow-lg shadow-primary-blue/30'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface/50 hover:backdrop-blur-sm border border-transparent hover:border-dark-border/50'
                     )}
                   >
-                    {item.name}
+                    <span className="relative z-10">{item.name}</span>
+                    {!isActive && (
+                      <>
+                        {/* Hover gradient background */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/10 group-hover:to-accent-cyan/10 transition-all duration-300" />
+                        {/* Animated bottom indicator */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary-blue to-accent-cyan group-hover:w-3/4 transition-all duration-300 rounded-full" />
+                      </>
+                    )}
                   </Link>
                 )
               })}
@@ -105,7 +115,7 @@ export function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-dark-border">
-            <nav className="flex flex-col space-y-3">
+            <nav className="flex flex-col space-y-2">
               {NAVIGATION_ITEMS.map((item) => {
                 const isActive = pathname === item.href
                 return (
@@ -113,12 +123,17 @@ export function Header() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'text-sm font-medium transition-colors hover:text-primary-blue px-2 py-1',
-                      isActive ? 'text-primary-blue' : 'text-text-secondary'
+                      'relative px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 group',
+                      isActive
+                        ? 'text-white bg-gradient-to-r from-primary-blue to-accent-cyan shadow-lg shadow-primary-blue/20'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface/50 border border-transparent hover:border-dark-border/50'
                     )}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {item.name}
+                    <span className="relative z-10">{item.name}</span>
+                    {!isActive && (
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/5 group-hover:to-accent-cyan/5 transition-all duration-300" />
+                    )}
                   </Link>
                 )
               })}
