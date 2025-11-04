@@ -24,7 +24,9 @@ import {
   TrendingUp,
   Users,
   Code,
-  ExternalLink
+  ExternalLink,
+  Clock,
+  BookOpen
 } from 'lucide-react'
 
 interface SkillChartProps {
@@ -198,6 +200,118 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
   )
 }
 
+interface MemberPostsProps {
+  posts: any[]
+  memberName: string
+}
+
+function MemberPosts({ posts, memberName }: MemberPostsProps) {
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <BookOpen className="w-12 h-12 text-text-tertiary mx-auto mb-4 opacity-50" />
+        <p className="text-text-secondary">No posts published yet</p>
+      </div>
+    )
+  }
+
+  // Helper to calculate reading time
+  const calculateReadingTime = (content: string) => {
+    const wordsPerMinute = 200
+    const words = content?.split(/\s+/).length || 0
+    const minutes = Math.ceil(words / wordsPerMinute)
+    return minutes
+  }
+
+  // Helper to format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (diffInDays === 0) return 'Today'
+    if (diffInDays === 1) return 'Yesterday'
+    if (diffInDays < 7) return `${diffInDays} days ago`
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`
+    if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
+  return (
+    <div className="space-y-4">
+      {posts.map((post) => {
+        const thumbnailSrc = post.thumbnail_image?.public_url || post.thumbnail_url
+        const readingTime = calculateReadingTime(post.content || '')
+
+        return (
+          <Link
+            key={post.id}
+            href={`/posts/${post.slug}`}
+            className="group block"
+          >
+            <article className="flex gap-4 p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
+              {/* Thumbnail */}
+              {thumbnailSrc && (
+                <div className="flex-shrink-0 w-32 h-24 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+                  <img
+                    src={thumbnailSrc}
+                    alt={post.thumbnail_image?.alt_text || post.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                {/* Category Badge */}
+                {post.category && (
+                  <Badge variant="secondary" size="sm" className="mb-2">
+                    {post.category}
+                  </Badge>
+                )}
+
+                {/* Title */}
+                <h3 className="font-semibold text-text-primary text-lg mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                  {post.title}
+                </h3>
+
+                {/* Excerpt */}
+                {post.excerpt && (
+                  <p className="text-sm text-text-secondary mb-3 line-clamp-2">
+                    {post.excerpt}
+                  </p>
+                )}
+
+                {/* Metadata */}
+                <div className="flex items-center gap-4 text-xs text-text-tertiary">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{formatDate(post.published_at || post.created_at)}</span>
+                  </div>
+
+                  {readingTime > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{readingTime} min read</span>
+                    </div>
+                  )}
+
+                  <Badge
+                    variant={post.status === 'published' ? 'success' : 'secondary'}
+                    size="sm"
+                  >
+                    {post.status}
+                  </Badge>
+                </div>
+              </div>
+            </article>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
 interface ActivityTimelineProps {
   member: any
 }
@@ -260,21 +374,24 @@ export default function MemberProfilePage() {
   const username = params.username as string
 
   const { member, loading, error } = useMember(username);
-  const [postsCount, setPostsCount] = useState(0)
+  const [posts, setPosts] = useState<any[]>([])
   const [postsLoading, setPostsLoading] = useState(true)
 
   console.log(member);
 
-  // Fetch member's posts count
+  // Fetch member's posts with full data
   useEffect(() => {
     const fetchMemberPosts = async () => {
       if (!member?.id) return
 
       try {
-        const response = await fetch(`/api/posts?author=${member.id}&status=all`)
-        const data = await response.json()
-        if (data.success && data.posts) {
-          setPostsCount(data.posts.length)
+        const { postQueries } = await import('@/lib/queries')
+        const { posts: fetchedPosts, error: postsError } = await postQueries.getUserPosts(member.id)
+
+        if (!postsError && fetchedPosts) {
+          // Only show published posts for non-owner viewers
+          const publishedPosts = fetchedPosts.filter(p => p.status === 'published')
+          setPosts(publishedPosts)
         }
       } catch (error) {
         console.error('Error fetching member posts:', error)
@@ -385,7 +502,7 @@ export default function MemberProfilePage() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-blue">
-                      {postsLoading ? '...' : postsCount}
+                      {postsLoading ? '...' : posts.length}
                     </div>
                     <div className="text-xs text-text-tertiary">Posts</div>
                   </div>
@@ -496,7 +613,7 @@ export default function MemberProfilePage() {
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">Posts Written</span>
                   <span className="font-semibold text-text-primary">
-                    {postsLoading ? '...' : postsCount}
+                    {postsLoading ? '...' : posts.length}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -531,13 +648,32 @@ export default function MemberProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Activity Timeline */}
+            {/* Published Articles */}
             <Card>
               <CardHeader>
-                <h3 className="text-xl font-semibold text-text-primary">Recent Activity</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    Published Articles
+                  </h3>
+                  {posts.length > 0 && (
+                    <span className="text-sm text-text-tertiary">
+                      {posts.length} {posts.length === 1 ? 'article' : 'articles'}
+                    </span>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                <ActivityTimeline member={member} />
+                {postsLoading ? (
+                  <div className="text-center py-8">
+                    <Loading size="md" />
+                  </div>
+                ) : (
+                  <MemberPosts
+                    posts={posts}
+                    memberName={member.full_name || member.username}
+                  />
+                )}
               </CardContent>
             </Card>
 

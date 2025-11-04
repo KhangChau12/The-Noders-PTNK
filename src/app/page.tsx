@@ -161,9 +161,8 @@ async function getRecentProjects(): Promise<Project[]> {
           alt_text
         )
       `)
-      .eq('featured', true)
       .in('status', ['active', 'completed'])
-      .order('created_at', { ascending: false})
+      .order('created_at', { ascending: false })
       .limit(3)
 
     if (error) {
@@ -266,37 +265,21 @@ export default async function HomePage() {
   const statsData = [
     { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
     { label: 'Active Members', value: stats.activeMembers, key: 'activeMembers' },
-    { label: 'Events Held', value: stats.workshopsHeld, key: 'workshopsHeld' },
+    { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' },
     { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared' },
     { label: 'Total Views', value: stats.totalViews, key: 'totalViews' }
   ]
 
-  // Helper function to get project status config
-  const getProjectStatusConfig = (status: string) => {
+  // Helper function to get project status badge variant
+  const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
-        return { label: 'Active', className: 'bg-green-500/20 text-green-400 border border-green-400/30' }
-      case 'completed':
-        return { label: 'Completed', className: 'bg-blue-500/20 text-blue-400 border border-blue-400/30' }
+        return 'success'
       case 'archived':
-        return { label: 'Archived', className: 'bg-gray-500/20 text-gray-400 border border-gray-400/30' }
+        return 'default'
       default:
-        return { label: 'Active', className: 'bg-green-500/20 text-green-400 border border-green-400/30' }
+        return 'warning'
     }
-  }
-
-  // Helper function to get tech stack colors
-  const TECH_COLORS: Record<string, string> = {
-    'React': '#61DAFB',
-    'Next.js': '#000000',
-    'TypeScript': '#3178C6',
-    'JavaScript': '#F7DF1E',
-    'Python': '#3776AB',
-    'TensorFlow': '#FF6F00',
-    'PyTorch': '#EE4C2C',
-    'Node.js': '#339933',
-    'Tailwind CSS': '#06B6D4',
-    'Supabase': '#3ECF8E',
   }
 
   // Helper function to get post category display name
@@ -667,141 +650,104 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recentProjects.map((project) => {
-              const statusConfig = getProjectStatusConfig(project.status)
-              return (
-                <Link key={project.id} href={`/projects/${project.id}`} className="block group">
-                  <div className="relative overflow-hidden rounded-2xl bg-dark-surface border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 hover:-translate-y-2 h-full">
-                    {/* Glow effect on hover */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/10 group-hover:to-accent-cyan/10 transition-all duration-500 pointer-events-none" />
-
-                    {/* Thumbnail Image */}
-                    <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-                      {project.thumbnail_image?.public_url || project.thumbnail_url ? (
-                        <>
-                          <Image
-                            src={(project.thumbnail_image?.public_url || project.thumbnail_url) as string}
-                            alt={project.thumbnail_image?.alt_text || project.title}
-                            fill
-                            className="object-cover"
-                            loading="lazy"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          />
-                          {/* Gradient overlay on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/60 via-dark-bg/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/30 to-accent-cyan/30 blur-xl group-hover:blur-2xl transition-all duration-500" />
-                            <Code className="w-16 h-16 text-primary-blue/60 mx-auto mb-2 relative z-10 group-hover:scale-110 transition-transform duration-500" />
-                          </div>
-                          <span className="text-sm font-medium bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent">No Image</span>
-                        </div>
-                      )}
-
-                      {/* Enhanced Status badge */}
-                      <div className="absolute top-3 right-3">
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md ${statusConfig.className} shadow-lg transition-all duration-300 group-hover:scale-110`}>
-                          {statusConfig.label}
+            {recentProjects.map((project) => (
+              <Link key={project.id} href={`/projects/${project.id}`} className="block group">
+                <div className="relative overflow-hidden rounded-xl bg-dark-surface border border-dark-border hover:border-primary-blue/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-blue/10 h-full">
+                  {/* Thumbnail Image */}
+                  <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
+                    {project.thumbnail_image?.public_url || project.thumbnail_url ? (
+                      <Image
+                        src={(project.thumbnail_image?.public_url || project.thumbnail_url) as string}
+                        alt={project.thumbnail_image?.alt_text || project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
+                        <div className="text-center">
+                          <Code className="w-16 h-16 text-primary-blue/40 mx-auto mb-2" />
+                          <p className="text-xs text-text-tertiary font-mono">No preview</p>
                         </div>
                       </div>
-                    </div>
+                    )}
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Content */}
-                    <div className="p-6">
-                      {/* Title */}
-                      <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary-blue transition-colors duration-300 line-clamp-2">
-                        {project.title}
-                      </h3>
-
-                      {/* Description */}
-                      {project.description && (
-                        <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                          {project.description}
-                        </p>
-                      )}
-
-                      {/* Tech Stack */}
-                      {project.tech_stack && project.tech_stack.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {project.tech_stack.slice(0, 3).map((tech) => {
-                            const techColor = TECH_COLORS[tech] || '#6B7280'
-                            return (
-                              <div
-                                key={tech}
-                                className="relative px-2 py-1 rounded-lg text-xs font-semibold transition-all duration-300 hover:scale-105"
-                                style={{
-                                  backgroundColor: `${techColor}20`,
-                                  color: techColor,
-                                  boxShadow: `0 0 0 1px ${techColor}30`,
-                                }}
-                              >
-                                <span className="relative z-10">{tech}</span>
-                              </div>
-                            )
-                          })}
-                          {project.tech_stack.length > 3 && (
-                            <div className="px-2 py-1 rounded-lg text-xs font-semibold bg-dark-border/50 text-text-secondary">
-                              +{project.tech_stack.length - 3}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Contributors */}
-                      {project.contributors && project.contributors.length > 0 ? (
-                        <div className="flex items-center justify-between bg-dark-surface/30 rounded-xl p-3 border border-dark-border/50 group-hover:border-primary-blue/30 transition-all duration-300">
-                          <div className="flex items-center gap-3">
-                            <div className="flex -space-x-2">
-                              {project.contributors.slice(0, 3).map((contributor, idx) => {
-                                const profile = contributor.profiles || contributor.profile
-                                const initial = (profile?.full_name?.[0] || profile?.username?.[0] || '?').toUpperCase()
-                                return (
-                                  <div
-                                    key={contributor.id || idx}
-                                    className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-blue to-accent-cyan p-0.5 ring-2 ring-dark-surface transition-all duration-300 hover:scale-110 hover:ring-primary-blue/50"
-                                    title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
-                                    style={{ zIndex: 10 - idx }}
-                                  >
-                                    <div className="w-full h-full bg-dark-surface rounded-full flex items-center justify-center text-xs text-white font-semibold">
-                                      {initial}
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                              {project.contributors.length > 3 && (
-                                <div className="w-8 h-8 rounded-full bg-dark-border flex items-center justify-center text-xs text-text-secondary font-semibold ring-2 ring-dark-surface">
-                                  +{project.contributors.length - 3}
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-xs text-text-tertiary">
-                              {project.contributors.length} contributor{project.contributors.length !== 1 ? 's' : ''}
-                            </div>
-                          </div>
-
-                          {/* View details arrow */}
-                          <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
-                            <ArrowRight className="w-4 h-4" />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between bg-dark-surface/30 rounded-xl p-3 border border-dark-border/50">
-                          <div className="text-xs text-text-tertiary">
-                            <Users className="w-4 h-4 inline mr-1" />
-                            No contributors yet
-                          </div>
-                          <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <ArrowRight className="w-4 h-4" />
-                          </div>
-                        </div>
-                      )}
+                    {/* Status badge */}
+                    <div className="absolute top-3 right-3">
+                      <Badge
+                        variant={getStatusVariant(project.status)}
+                        size="sm"
+                        className="backdrop-blur-sm bg-dark-bg/80 font-mono text-xs shadow-lg"
+                      >
+                        {project.status}
+                      </Badge>
                     </div>
                   </div>
-                </Link>
-              )
-            })}
+
+                  {/* Content */}
+                  <div className="p-5">
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300 line-clamp-1">
+                      {project.title}
+                    </h3>
+
+                    {/* Contributors */}
+                    {project.contributors && project.contributors.length > 0 ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-3">
+                            {project.contributors.slice(0, 4).map((contributor, idx) => {
+                              const profile = contributor.profiles || contributor.profile
+                              const initial = (profile?.full_name?.[0] || profile?.username?.[0] || '?').toUpperCase()
+                              const colors = ['bg-primary-blue', 'bg-accent-cyan', 'bg-purple-500', 'bg-pink-500']
+                              return (
+                                <div
+                                  key={contributor.id || idx}
+                                  className={`w-9 h-9 rounded-full ${colors[idx % colors.length]} flex items-center justify-center text-sm text-white font-semibold border-2 border-dark-surface ring-2 ring-dark-bg transition-transform group-hover:scale-110`}
+                                  title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
+                                >
+                                  {initial}
+                                </div>
+                              )
+                            })}
+                            {project.contributors.length > 4 && (
+                              <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center text-xs text-text-secondary font-semibold border-2 border-dark-surface ring-2 ring-dark-bg">
+                                +{project.contributors.length - 4}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-sm text-text-tertiary">
+                            <Users className="w-4 h-4 inline mr-1" />
+                            {project.contributors.length}
+                          </div>
+                        </div>
+
+                        {/* View details indicator */}
+                        <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-text-tertiary">
+                          <Users className="w-4 h-4 inline mr-1" />
+                          No contributors yet
+                        </div>
+                        <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Hover border glow effect */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-primary-blue/0 group-hover:border-primary-blue/20 transition-all duration-300 pointer-events-none" />
+                </div>
+              </Link>
+            ))}
 
             {/* Show "View All Projects" card if less than 3 projects */}
             {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
@@ -928,87 +874,31 @@ export default async function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary-blue/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-accent-cyan/10 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container mx-auto relative z-10">
-          <div className="relative overflow-hidden rounded-3xl border-2 border-primary-blue/30 bg-gradient-to-br from-dark-surface via-dark-surface/90 to-dark-bg shadow-2xl">
-            {/* Animated gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/20 via-transparent to-accent-cyan/20 opacity-50" />
-
-            {/* Glow effects */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-primary-blue to-transparent" />
-            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary-blue/30 rounded-full blur-3xl" />
-
-            {/* Content */}
-            <div className="relative p-12 md:p-16 text-center">
-              {/* Icon with glow */}
-              <div className="inline-flex items-center justify-center mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-2xl blur-xl opacity-60 animate-pulse" />
-                  <div className="relative w-20 h-20 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-2xl flex items-center justify-center shadow-xl">
-                    <Users className="w-10 h-10 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Title with gradient */}
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-primary-blue via-accent-cyan to-primary-blue bg-clip-text text-transparent">
-                  Join The Noders Community
-                </span>
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto">
+          <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
+            <CardContent className="p-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+                Join The Noders Community
               </h2>
-
-              {/* Subtitle */}
-              <p className="text-text-secondary text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-text-secondary text-lg mb-8 max-w-3xl mx-auto">
                 Passionate about AI, web/app development, or technology in general?
-                <br />
-                <span className="text-text-primary font-semibold">Join us in connecting to create amazing things together!</span>
+                Join us in connecting to create amazing things together!
               </p>
-
-              {/* Features grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-4xl mx-auto">
-                <div className="bg-dark-bg/50 backdrop-blur-sm rounded-xl p-6 border border-dark-border/50 hover:border-primary-blue/50 transition-all duration-300 hover:scale-105">
-                  <Code className="w-8 h-8 text-primary-blue mx-auto mb-3" />
-                  <h3 className="text-text-primary font-semibold mb-2">Build Projects</h3>
-                  <p className="text-text-secondary text-sm">Work on real-world AI and tech projects</p>
-                </div>
-                <div className="bg-dark-bg/50 backdrop-blur-sm rounded-xl p-6 border border-dark-border/50 hover:border-accent-cyan/50 transition-all duration-300 hover:scale-105">
-                  <Brain className="w-8 h-8 text-accent-cyan mx-auto mb-3" />
-                  <h3 className="text-text-primary font-semibold mb-2">Learn Together</h3>
-                  <p className="text-text-secondary text-sm">Attend workshops and share knowledge</p>
-                </div>
-                <div className="bg-dark-bg/50 backdrop-blur-sm rounded-xl p-6 border border-dark-border/50 hover:border-primary-blue/50 transition-all duration-300 hover:scale-105">
-                  <Zap className="w-8 h-8 text-primary-blue mx-auto mb-3" />
-                  <h3 className="text-text-primary font-semibold mb-2">Grow Skills</h3>
-                  <p className="text-text-secondary text-sm">Connect with talented developers</p>
-                </div>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/members">
-                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90 shadow-lg shadow-primary-blue/30 hover:shadow-xl hover:shadow-primary-blue/40 transition-all duration-300 hover:scale-105">
-                    <Users className="w-5 h-5 mr-2" />
-                    Meet Our Team
+                  <Button size="lg" className="w-full sm:w-auto">
+                    Learn More
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto border-2 border-primary-blue/30 hover:border-primary-blue/60 hover:bg-primary-blue/10 transition-all duration-300 hover:scale-105">
-                    Get In Touch
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                    Contact Us
                   </Button>
                 </Link>
               </div>
-
-              {/* Bottom decoration */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-accent-cyan to-transparent" />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>
