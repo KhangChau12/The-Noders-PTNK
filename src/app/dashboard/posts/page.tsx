@@ -110,30 +110,44 @@ function UserPostsPage() {
 
   const filteredPosts = posts.filter(post => post.status === activeTab)
 
-  const PostCard = ({ post }: { post: Post }) => (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2">
-              {post.title}
-            </h3>
-            <p className="text-text-secondary text-sm mb-3 line-clamp-2">
-              {post.summary}
-            </p>
+  const PostCard = ({ post }: { post: Post }) => {
+    const thumbnailSrc = (post as any).thumbnail_image?.public_url
+
+    return (
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+        {/* Thumbnail Image */}
+        {thumbnailSrc && (
+          <div className="aspect-video relative bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+            <img
+              src={thumbnailSrc}
+              alt={(post as any).thumbnail_image?.alt_text || post.title}
+              className="w-full h-full object-cover"
+            />
           </div>
-          <Badge
-            variant={
-              post.status === 'published' ? 'success' :
-              post.status === 'draft' ? 'secondary' :
-              'default'
-            }
-            size="sm"
-            className="ml-4"
-          >
-            {post.status}
-          </Badge>
-        </div>
+        )}
+
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2">
+                {post.title}
+              </h3>
+              <p className="text-text-secondary text-sm mb-3 line-clamp-2">
+                {post.summary}
+              </p>
+            </div>
+            <Badge
+              variant={
+                post.status === 'published' ? 'success' :
+                post.status === 'draft' ? 'secondary' :
+                'default'
+              }
+              size="sm"
+              className="ml-4"
+            >
+              {post.status}
+            </Badge>
+          </div>
 
         <div className="flex items-center gap-4 text-sm text-text-tertiary mb-4">
           <div className="flex items-center gap-1">
@@ -202,7 +216,8 @@ function UserPostsPage() {
         </div>
       </CardContent>
     </Card>
-  )
+    )
+  }
 
   if (loading) {
     return (

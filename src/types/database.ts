@@ -39,11 +39,13 @@ export interface Project {
   description: string | null
   details: string | null
   thumbnail_url: string | null
+  thumbnail_image_id: string | null
   video_url: string | null
   repo_url: string | null
   demo_url: string | null
   tech_stack: string[] | null
   status: 'active' | 'archived'
+  featured: boolean
   created_by: string | null
   created_at: string
 }

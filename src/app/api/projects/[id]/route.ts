@@ -4,7 +4,16 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 // Helper function to check if user can modify project
-async function canUserModifyProject(supabase: any, projectId: string, userId: string): Promise<{ canModify: boolean, isOwner: boolean, error?: string }> {
+async function canUserModifyProject(supabase: any, projectId: string, userId: string): Promise<{ canModify: boolean, isOwner: boolean, isAdmin: boolean, error?: string }> {
+  // Check if user is admin
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single()
+
+  const isAdmin = profile?.role === 'admin'
+
   // Check if user is the creator
   const { data: project, error: projectError } = await supabase
     .from('projects')
@@ -13,13 +22,14 @@ async function canUserModifyProject(supabase: any, projectId: string, userId: st
     .single()
 
   if (projectError) {
-    return { canModify: false, isOwner: false, error: 'Project not found' }
+    return { canModify: false, isOwner: false, isAdmin: false, error: 'Project not found' }
   }
 
   const isOwner = project.created_by === userId
 
-  if (isOwner) {
-    return { canModify: true, isOwner: true }
+  // User can modify if they are admin, owner, or contributor
+  if (isAdmin || isOwner) {
+    return { canModify: true, isOwner, isAdmin }
   }
 
   // Check if user is a contributor
@@ -30,7 +40,7 @@ async function canUserModifyProject(supabase: any, projectId: string, userId: st
     .eq('user_id', userId)
     .single()
 
-  return { canModify: !!contributor, isOwner: false }
+  return { canModify: !!contributor, isOwner: false, isAdmin: false }
 }
 
 // GET method removed - now using direct database queries in queries.ts
@@ -64,7 +74,7 @@ export async function PUT(
     }
 
     // Check permissions
-    const { canModify, isOwner, error: permError } = await canUserModifyProject(supabase, id, user.id)
+    const { canModify, isOwner, isAdmin, error: permError } = await canUserModifyProject(supabase, id, user.id)
     if (!canModify) {
       return NextResponse.json(
         { success: false, error: permError || 'You do not have permission to modify this project' },
@@ -77,7 +87,7 @@ export async function PUT(
     const { contributors, ...otherUpdates } = updates
     const allowedFields = [
       'title', 'description', 'details', 'thumbnail_url', 'thumbnail_image_id', 'video_url',
-      'repo_url', 'demo_url', 'tech_stack', 'status'
+      'repo_url', 'demo_url', 'tech_stack', 'status', 'featured'
     ]
 
     // Filter only allowed fields
@@ -88,10 +98,10 @@ export async function PUT(
       }
     })
 
-    // Only owners can change certain fields
-    const ownerOnlyFields = ['status']
-    if (!isOwner) {
-      ownerOnlyFields.forEach(field => {
+    // Only owners and admins can change certain fields
+    const ownerAdminOnlyFields = ['status', 'featured']
+    if (!isOwner && !isAdmin) {
+      ownerAdminOnlyFields.forEach(field => {
         delete projectUpdates[field]
       })
     }
@@ -211,7 +221,15 @@ export async function DELETE(
       )
     }
 
-    // Check if user is owner (only owners can delete)
+    // Check if user is owner or admin (only owners and admins can delete)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = profile?.role === 'admin'
+
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('created_by')
@@ -225,9 +243,11 @@ export async function DELETE(
       )
     }
 
-    if ((project as any).created_by !== user.id) {
+    const isOwner = (project as any).created_by === user.id
+
+    if (!isOwner && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: 'Only project creators can delete projects' },
+        { success: false, error: 'Only project creators and admins can delete projects' },
         { status: 403 }
       )
     }

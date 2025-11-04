@@ -113,17 +113,30 @@ function MemberProjectsPage() {
     }
   }
 
-  const ProjectCard = ({ project, isOwner = false }: { project: Project, isOwner?: boolean }) => (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-video relative">
-        <PlaceholderImage
-          src={project.thumbnail_url}
-          alt={project.title}
-          fill
-          text="No Image"
-          bgColor="#334155"
-          textColor="#CBD5E1"
-        />
+  const ProjectCard = ({ project, isOwner = false }: { project: Project, isOwner?: boolean }) => {
+    // Get thumbnail from either thumbnail_image.public_url or thumbnail_url
+    const thumbnailSrc = (project as any).thumbnail_image?.public_url || project.thumbnail_url
+
+    // Debug: Log to see what we're getting
+    console.log('Project:', project.title)
+    console.log('thumbnail_image:', (project as any).thumbnail_image)
+    console.log('thumbnail_url:', project.thumbnail_url)
+    console.log('thumbnailSrc:', thumbnailSrc)
+
+    return (
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+        <div className="aspect-video relative bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+          {thumbnailSrc ? (
+            <img
+              src={thumbnailSrc}
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-text-tertiary">
+              <span className="text-sm">No Image</span>
+            </div>
+          )}
         <div className="absolute top-3 left-3">
           <Badge variant={project.status === 'active' ? 'success' : 'secondary'} size="sm">
             {project.status}
@@ -241,7 +254,8 @@ function MemberProjectsPage() {
         </div>
       </CardContent>
     </Card>
-  )
+    )
+  }
 
   if (loading) {
     return (

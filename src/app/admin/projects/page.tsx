@@ -108,6 +108,38 @@ function ProjectManagementPage() {
     }
   }
 
+  const toggleFeatured = async (projectId: string, newFeaturedValue: boolean) => {
+    try {
+      setUpdatingProjectId(projectId)
+
+      // Check if trying to feature a 4th project
+      if (newFeaturedValue) {
+        const currentFeaturedCount = projects.filter(p => (p as any).featured && p.id !== projectId).length
+        if (currentFeaturedCount >= 3) {
+          alert('Maximum 3 projects can be featured on homepage. Please unfeature another project first.')
+          return
+        }
+      }
+
+      const { project, error } = await projectQueries.updateProject(projectId, {
+        featured: newFeaturedValue
+      }, session)
+
+      if (!error && project) {
+        // Update local state
+        setProjects(prev =>
+          prev.map(p => p.id === projectId ? { ...p, featured: newFeaturedValue } as any : p)
+        )
+      } else {
+        alert('Failed to update featured status: ' + (error?.message || 'Unknown error'))
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Network error occurred')
+    } finally {
+      setUpdatingProjectId(null)
+    }
+  }
+
   const deleteProject = async (projectId: string) => {
     if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
       return
@@ -256,18 +288,25 @@ function ProjectManagementPage() {
             </Card>
           ) : dataLoaded ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => (
-                <Card key={project.id} className="overflow-hidden">
-                  <div className="aspect-video relative">
-                    <PlaceholderImage
-                      src={project.thumbnail_url}
-                      alt={project.title}
-                      fill
-                      text="No Image"
-                      bgColor="#334155"
-                      textColor="#CBD5E1"
-                    />
-                    <div className="absolute top-3 left-3">
+              {filteredProjects.map((project) => {
+                // Get thumbnail from either thumbnail_image.public_url or thumbnail_url
+                const thumbnailSrc = (project as any).thumbnail_image?.public_url || project.thumbnail_url
+
+                return (
+                  <Card key={project.id} className="overflow-hidden">
+                    <div className="aspect-video relative bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+                      {thumbnailSrc ? (
+                        <img
+                          src={thumbnailSrc}
+                          alt={project.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-text-tertiary">
+                          <span className="text-sm">No Image</span>
+                        </div>
+                      )}
+                      <div className="absolute top-3 left-3">
                       <Badge variant={getStatusColor(project.status)} size="sm">
                         {getStatusIcon(project.status)}
                         {project.status.replace('_', ' ')}
@@ -308,6 +347,26 @@ function ProjectManagementPage() {
                       {project.contributors?.length || 0} contributors
                       <Calendar className="w-4 h-4 ml-4 mr-1" />
                       {new Date(project.created_at).toLocaleDateString()}
+                    </div>
+
+                    {/* Featured on Homepage */}
+                    <div className="flex items-center justify-between mb-4 p-3 bg-dark-surface/50 rounded-lg border border-dark-border">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className={`w-4 h-4 ${(project as any).featured ? 'text-accent-green' : 'text-text-tertiary'}`} />
+                        <span className="text-sm text-text-secondary">
+                          Featured on Homepage
+                        </span>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(project as any).featured || false}
+                          onChange={() => toggleFeatured(project.id, !(project as any).featured)}
+                          disabled={updatingProjectId === project.id}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-dark-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-blue rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-blue"></div>
+                      </label>
                     </div>
 
                     {/* Actions */}
@@ -376,7 +435,8 @@ function ProjectManagementPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                )
+              })}
 
               {filteredProjects.length === 0 && (
                 <div className="col-span-full text-center py-12">

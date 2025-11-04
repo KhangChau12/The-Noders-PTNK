@@ -232,6 +232,14 @@ export const projectQueries = {
           contribution_percentage,
           role_in_project,
           profiles(id, username, full_name, avatar_url)
+        ),
+        thumbnail_image:images!projects_thumbnail_image_id_fkey(
+          id,
+          filename,
+          public_url,
+          width,
+          height,
+          alt_text
         )
       `)
       .eq('created_by', userId)
@@ -253,15 +261,7 @@ export const projectQueries = {
       .select(`
         contribution_percentage,
         role_in_project,
-        projects(
-          *,
-          project_contributors(
-            id,
-            contribution_percentage,
-            role_in_project,
-            profiles(id, username, full_name, avatar_url)
-          )
-        )
+        projects!inner(*)
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -270,9 +270,58 @@ export const projectQueries = {
       return { createdProjects: createdProjectsWithContributors, contributedProjects: [], error: contributedError }
     }
 
+    // Get project IDs to fetch additional data
+    const projectIds = contributedData?.map(item => item.projects.id) || []
+
+    // Fetch thumbnail images and contributors for contributed projects
+    let thumbnails: any = {}
+    let allContributors: any = {}
+
+    if (projectIds.length > 0) {
+      // Fetch thumbnails
+      const { data: thumbnailData } = await supabase
+        .from('projects')
+        .select(`
+          id,
+          thumbnail_image:images!projects_thumbnail_image_id_fkey(
+            id,
+            filename,
+            public_url,
+            width,
+            height,
+            alt_text
+          )
+        `)
+        .in('id', projectIds)
+
+      thumbnailData?.forEach(proj => {
+        thumbnails[proj.id] = proj.thumbnail_image
+      })
+
+      // Fetch contributors
+      const { data: contributorsData } = await supabase
+        .from('project_contributors')
+        .select(`
+          project_id,
+          id,
+          contribution_percentage,
+          role_in_project,
+          profiles(id, username, full_name, avatar_url)
+        `)
+        .in('project_id', projectIds)
+
+      contributorsData?.forEach(contrib => {
+        if (!allContributors[contrib.project_id]) {
+          allContributors[contrib.project_id] = []
+        }
+        allContributors[contrib.project_id].push(contrib)
+      })
+    }
+
     const contributedProjects = contributedData?.map(item => ({
       ...item.projects,
-      contributors: item.projects.project_contributors || [],
+      thumbnail_image: thumbnails[item.projects.id] || null,
+      contributors: allContributors[item.projects.id] || [],
       user_contribution: {
         contribution_percentage: item.contribution_percentage,
         role_in_project: item.role_in_project
@@ -768,7 +817,17 @@ export const postQueries = {
 
     const { data: posts, error } = await supabase
       .from('posts')
-      .select('*')
+      .select(`
+        *,
+        thumbnail_image:images!posts_thumbnail_image_id_fkey(
+          id,
+          filename,
+          public_url,
+          width,
+          height,
+          alt_text
+        )
+      `)
       .eq('author_id', userId)
       .order('created_at', { ascending: false })
 

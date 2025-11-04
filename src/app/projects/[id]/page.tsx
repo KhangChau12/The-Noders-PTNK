@@ -23,7 +23,8 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Info
 } from 'lucide-react'
 
 interface ImageGalleryProps {
@@ -209,69 +210,101 @@ export default function ProjectDetailPage() {
     )
   }
 
+  const getStatusConfig = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return { label: 'Active', className: 'bg-green-500/20 text-green-400 border border-green-400/30' }
+      case 'completed':
+        return { label: 'Completed', className: 'bg-blue-500/20 text-blue-400 border border-blue-400/30' }
+      case 'archived':
+        return { label: 'Archived', className: 'bg-gray-500/20 text-gray-400 border border-gray-400/30' }
+      default:
+        return { label: 'Active', className: 'bg-green-500/20 text-green-400 border border-green-400/30' }
+    }
+  }
+
+  const statusConfig = getStatusConfig(project.status)
+
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 relative">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-blue/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-accent-cyan/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="container mx-auto relative z-10">
         {/* Back Navigation */}
         <div className="mb-8">
           <Link
             href="/projects"
-            className="inline-flex items-center text-text-secondary hover:text-primary-blue transition-colors"
+            className="inline-flex items-center text-text-secondary hover:text-primary-blue transition-all duration-300 group"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
             Back to Projects
           </Link>
         </div>
 
-        {/* Project Header */}
-        <div className="mb-12">
-          <div className="flex items-start justify-between gap-6 mb-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <h1 className="text-4xl md:text-5xl font-bold text-text-primary">
-                  {project.title}
-                </h1>
-                <Badge variant={project.status === 'active' ? 'success' : 'secondary'}>
-                  {project.status}
-                </Badge>
+        {/* Enhanced Project Header */}
+        <div className="mb-12 relative">
+          {/* Gradient background card */}
+          <div className="relative overflow-hidden rounded-3xl border-2 border-dark-border/50 bg-gradient-to-br from-dark-surface via-dark-surface/90 to-dark-bg p-8 md:p-12">
+            {/* Glow effect */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-primary-blue to-transparent" />
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary-blue/20 rounded-full blur-3xl" />
+
+            <div className="relative">
+              <div className="flex items-start justify-between gap-6 mb-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4 flex-wrap">
+                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-text-primary via-primary-blue to-text-primary bg-clip-text text-transparent">
+                      {project.title}
+                    </h1>
+                    <div className={`px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-md ${statusConfig.className} shadow-lg`}>
+                      {statusConfig.label}
+                    </div>
+                  </div>
+
+                  {project.description && (
+                    <p className="text-lg text-text-secondary leading-relaxed">
+                      {project.description}
+                    </p>
+                  )}
+                </div>
               </div>
 
-              {project.description && (
-                <p className="text-lg text-text-secondary">
-                  {project.description}
-                </p>
-              )}
+              {/* Enhanced Project Links */}
+              <div className="flex flex-wrap gap-4">
+                {project.repo_url && (
+                  <a
+                    href={project.repo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      size="lg"
+                      className="bg-dark-bg border-2 border-primary-blue/30 hover:border-primary-blue/60 hover:bg-primary-blue/10 transition-all duration-300 hover:scale-105 shadow-lg"
+                    >
+                      <Github className="w-5 h-5 mr-2" />
+                      View Code
+                    </Button>
+                  </a>
+                )}
+                {project.demo_url && (
+                  <a
+                    href={project.demo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90 shadow-lg shadow-primary-blue/30 hover:shadow-xl hover:shadow-primary-blue/40 transition-all duration-300 hover:scale-105"
+                    >
+                      <ExternalLink className="w-5 h-5 mr-2" />
+                      Use Product
+                    </Button>
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
-
-          {/* Project Links */}
-          <div className="flex flex-wrap gap-4">
-            {project.repo_url && (
-              <Button asChild variant="secondary">
-                <a
-                  href={project.repo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  <Github className="w-4 h-4" />
-                  View Code
-                </a>
-              </Button>
-            )}
-            {project.demo_url && (
-              <Button asChild variant="secondary">
-                <a
-                  href={project.demo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Use Product
-                </a>
-              </Button>
-            )}
           </div>
         </div>
 
@@ -281,22 +314,54 @@ export default function ProjectDetailPage() {
             {/* Video Demo */}
             <VideoPlayer videoUrl={project.video_url} title={project.title} />
 
-            {/* Tech Stack */}
+            {/* Enhanced Tech Stack */}
             {project.tech_stack && project.tech_stack.length > 0 && (
-              <Card>
+              <Card className="border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-300">
                 <CardHeader>
                   <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                    <Code className="w-5 h-5" />
+                    <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg">
+                      <Code className="w-5 h-5 text-primary-blue" />
+                    </div>
                     Technology Stack
                   </h3>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {project.tech_stack.map((tech, index) => (
-                      <Badge key={index} variant="tech" size="lg">
-                        {tech}
-                      </Badge>
-                    ))}
+                  <div className="flex flex-wrap gap-3">
+                    {project.tech_stack.map((tech, index) => {
+                      const techColors: Record<string, string> = {
+                        'React': '#61DAFB',
+                        'Next.js': '#000000',
+                        'TypeScript': '#3178C6',
+                        'JavaScript': '#F7DF1E',
+                        'Python': '#3776AB',
+                        'TensorFlow': '#FF6F00',
+                        'PyTorch': '#EE4C2C',
+                        'Node.js': '#339933',
+                        'Tailwind CSS': '#06B6D4',
+                        'Supabase': '#3ECF8E',
+                      }
+                      const techColor = techColors[tech] || '#6B7280'
+
+                      return (
+                        <div
+                          key={index}
+                          className="relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-110 hover:shadow-xl cursor-default group"
+                          style={{
+                            backgroundColor: `${techColor}20`,
+                            color: techColor,
+                            boxShadow: `0 0 0 1px ${techColor}30`,
+                          }}
+                        >
+                          <div
+                            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            style={{
+                              boxShadow: `0 0 30px ${techColor}50`,
+                            }}
+                          />
+                          <span className="relative z-10">{tech}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -333,36 +398,47 @@ export default function ProjectDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Project Info */}
-            <Card>
+            <Card className="border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-300">
               <CardHeader>
-                <h3 className="text-lg font-semibold text-text-primary">Project Information</h3>
+                <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
+                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg">
+                    <Info className="w-4 h-4 text-primary-blue" />
+                  </div>
+                  Project Information
+                </h3>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-text-tertiary" />
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface/30 border border-dark-border/50 hover:border-primary-blue/30 transition-all duration-300 group">
+                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Calendar className="w-4 h-4 text-primary-blue" />
+                  </div>
                   <div>
-                    <p className="text-sm text-text-tertiary">Created</p>
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-xs text-text-tertiary font-medium">Created</p>
+                    <p className="text-sm text-text-primary font-semibold">
                       {new Date(project.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-text-tertiary" />
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface/30 border border-dark-border/50 hover:border-primary-blue/30 transition-all duration-300 group">
+                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Clock className="w-4 h-4 text-primary-blue" />
+                  </div>
                   <div>
-                    <p className="text-sm text-text-tertiary">Status</p>
-                    <Badge variant={project.status === 'active' ? 'success' : 'secondary'} size="sm">
-                      {project.status}
-                    </Badge>
+                    <p className="text-xs text-text-tertiary font-medium">Status</p>
+                    <div className={`mt-1 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md ${statusConfig.className} shadow-md`}>
+                      {statusConfig.label}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Users className="w-4 h-4 text-text-tertiary" />
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface/30 border border-dark-border/50 hover:border-primary-blue/30 transition-all duration-300 group">
+                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-4 h-4 text-primary-blue" />
+                  </div>
                   <div>
-                    <p className="text-sm text-text-tertiary">Team Size</p>
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-xs text-text-tertiary font-medium">Team Size</p>
+                    <p className="text-sm text-text-primary font-semibold">
                       {project.contributors?.length || 0} contributors
                     </p>
                   </div>
@@ -370,51 +446,58 @@ export default function ProjectDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Contributors */}
+            {/* Enhanced Contributors */}
             {project.contributors && project.contributors.length > 0 && (
-              <Card>
+              <Card className="border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-300">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Users className="w-4 h-4" />
+                    <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg">
+                      <Users className="w-4 h-4 text-primary-blue" />
+                    </div>
                     Contributors
                   </h3>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                   {project.contributors.map((contributor) => {
                     const profile = contributor.profiles
-                    // Use CSS Avatar component instead of external image
 
                     return (
                       <Link
                         key={contributor.id}
                         href={`/members/${profile?.username}`}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-dark-surface transition-colors"
+                        className="group flex items-center gap-4 p-4 rounded-xl hover:bg-dark-surface/50 transition-all duration-300 border border-transparent hover:border-primary-blue/30 hover:shadow-lg"
                       >
                         <div className="relative">
-                          <Avatar
-                            name={profile?.full_name}
-                            src={profile?.avatar_url}
-                            size="md"
-                          />
-                          {profile?.role === 'admin' && (
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary-blue rounded-full flex items-center justify-center">
-                              <Award className="w-2 h-2 text-white" />
-                            </div>
-                          )}
+                          <div className="absolute -inset-1 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity duration-300" />
+                          <div className="relative">
+                            <Avatar
+                              name={profile?.full_name}
+                              src={profile?.avatar_url}
+                              size="md"
+                            />
+                            {profile?.role === 'admin' && (
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full flex items-center justify-center shadow-lg">
+                                <Award className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-text-primary text-sm">
+                          <p className="font-semibold text-text-primary text-sm group-hover:text-primary-blue transition-colors">
                             {profile?.full_name || profile?.username}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="flex-1 max-w-[100px] bg-dark-border rounded-full h-1.5">
+                          <div className="flex items-center gap-3 mt-2">
+                            <div className="flex-1 max-w-[120px] bg-dark-border rounded-full h-2 overflow-hidden">
                               <div
-                                className="bg-primary-blue h-1.5 rounded-full transition-all"
-                                style={{ width: `${contributor.contribution_percentage}%` }}
+                                className="h-2 rounded-full bg-gradient-to-r from-primary-blue to-accent-cyan transition-all duration-500 shadow-lg"
+                                style={{
+                                  width: `${contributor.contribution_percentage}%`,
+                                  boxShadow: `0 0 10px rgba(59, 130, 246, 0.5)`,
+                                }}
                               />
                             </div>
-                            <p className="text-xs text-text-tertiary">
+                            <p className="text-xs font-semibold text-primary-blue">
                               {contributor.contribution_percentage}%
                             </p>
                           </div>
