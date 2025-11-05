@@ -10,6 +10,14 @@ import { POST_CATEGORIES } from '@/lib/constants'
 import { Post } from '@/types/database'
 import { X, Upload, Image as ImageIcon } from 'lucide-react'
 
+// Display name mapping for categories
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+  'News': 'News',
+  'You may want to know': 'Do You Know?',
+  'Member Spotlight': 'Member Spotlight',
+  'Community Activities': 'Community Activities',
+}
+
 interface PostFormProps {
   post?: Post | null
   onSave: (data: {
@@ -229,7 +237,7 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
                       : 'border-dark-border text-text-secondary hover:border-dark-border/60'
                   }`}
                 >
-                  {cat}
+                  {CATEGORY_DISPLAY_NAMES[cat] || cat}
                 </button>
               ))}
             </div>

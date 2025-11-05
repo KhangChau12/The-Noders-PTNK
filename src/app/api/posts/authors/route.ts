@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 
 // GET /api/posts/authors - Get list of authors who have published posts
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = createClient()
 
@@ -55,6 +55,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       authors: uniqueAuthors
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     })
 
   } catch (error) {
