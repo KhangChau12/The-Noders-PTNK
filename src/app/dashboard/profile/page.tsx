@@ -17,8 +17,6 @@ import {
   ArrowLeft,
   Save,
   Upload,
-  X,
-  Plus,
   Github,
   Linkedin,
   Twitter,
@@ -26,81 +24,11 @@ import {
   Globe,
   User,
   Mail,
-  FileText,
   Shield,
   Lock,
   Eye,
   EyeOff
 } from 'lucide-react'
-
-interface SkillsEditorProps {
-  skills: string[]
-  onChange: (skills: string[]) => void
-}
-
-function SkillsEditor({ skills, onChange }: SkillsEditorProps) {
-  const [newSkill, setNewSkill] = useState('')
-
-  const addSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      onChange([...skills, newSkill.trim()])
-      setNewSkill('')
-    }
-  }
-
-  const removeSkill = (skillToRemove: string) => {
-    onChange(skills.filter(skill => skill !== skillToRemove))
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      addSkill()
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Add a skill (e.g. React, Python, AI)"
-          value={newSkill}
-          onChange={(e) => setNewSkill(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="flex-1"
-        />
-        <Button
-          type="button"
-          onClick={addSkill}
-          variant="secondary"
-          size="sm"
-          disabled={!newSkill.trim()}
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {skills.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {skills.map((skill, index) => (
-            <Badge key={index} variant="tech" className="flex items-center gap-1">
-              {skill}
-              <Button
-                type="button"
-                onClick={() => removeSkill(skill)}
-                variant="ghost"
-                size="sm"
-                className="ml-1 hover:text-error transition-colors p-0 h-auto"
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            </Badge>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
 interface SocialLinksEditorProps {
   socialLinks: UpdateProfileData['social_links']
@@ -310,23 +238,6 @@ function ProfileEditPage() {
                       </p>
                     )}
 
-                    {/* Skills Preview */}
-                    {formData.skills && formData.skills.length > 0 && (
-                      <div className="mt-4">
-                        <div className="flex flex-wrap gap-1 justify-center">
-                          {formData.skills.slice(0, 4).map((skill, index) => (
-                            <Badge key={index} variant="tech" size="sm">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {formData.skills.length > 4 && (
-                            <Badge variant="secondary" size="sm">
-                              +{formData.skills.length - 4}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -413,22 +324,6 @@ function ProfileEditPage() {
                       }}
                       usage="avatar"
                       placeholder="Upload your avatar"
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Skills */}
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      Skills & Expertise
-                    </h3>
-                  </CardHeader>
-                  <CardContent>
-                    <SkillsEditor
-                      skills={formData.skills || []}
-                      onChange={(skills) => handleChange('skills', skills)}
                     />
                   </CardContent>
                 </Card>

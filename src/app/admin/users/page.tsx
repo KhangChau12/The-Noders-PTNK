@@ -54,7 +54,6 @@ interface CreateUserFormData {
   username: string
   bio: string
   role: 'admin' | 'member'
-  skills: string[]
   avatar_url: string
 }
 
@@ -71,27 +70,14 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
     username: '',
     bio: '',
     role: 'member',
-    skills: [],
     avatar_url: ''
   })
-  const [newSkill, setNewSkill] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
   const handleChange = (field: keyof CreateUserFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const addSkill = () => {
-    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
-      handleChange('skills', [...formData.skills, newSkill.trim()])
-      setNewSkill('')
-    }
-  }
-
-  const removeSkill = (skillToRemove: string) => {
-    handleChange('skills', formData.skills.filter(skill => skill !== skillToRemove))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,7 +114,7 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
           username: formData.username,
           bio: formData.bio || null,
           role: formData.role,
-          skills: formData.skills,
+          skills: [],
           avatar_url: formData.avatar_url || null,
           social_links: {}
         }
@@ -168,7 +154,6 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
             username: '',
             bio: '',
             role: 'member',
-            skills: [],
             avatar_url: ''
           })
         }, 2000)
@@ -368,44 +353,6 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
                   </div>
                 </div>
 
-                {/* Skills */}
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Skills
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <Input
-                      placeholder="Add a skill"
-                      value={newSkill}
-                      onChange={(e) => setNewSkill(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      onClick={addSkill}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  {formData.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.skills.map((skill, index) => (
-                        <ClickableBadge
-                          key={index}
-                          variant="tech"
-                          className="flex items-center gap-1"
-                          onClick={() => removeSkill(skill)}
-                        >
-                          {skill}
-                          <X className="w-3 h-3" />
-                        </ClickableBadge>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
 
               {error && (

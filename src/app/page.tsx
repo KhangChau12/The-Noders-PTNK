@@ -8,6 +8,7 @@ import { SITE_CONFIG } from '@/lib/constants'
 import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
 import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { TECH_STACK_COLORS } from '@/lib/constants'
 
 interface Stats {
   activeProjects: number
@@ -134,7 +135,7 @@ async function getRecentProjects(): Promise<Project[]> {
   try {
     const supabase = createClient()
 
-    // Get recent projects with contributors and creator info
+    // Get featured projects (up to 3) with contributors and creator info
     const { data: projects, error } = await supabase
       .from('projects')
       .select(`
@@ -161,6 +162,7 @@ async function getRecentProjects(): Promise<Project[]> {
           alt_text
         )
       `)
+      .eq('featured', true)
       .in('status', ['active', 'completed'])
       .order('created_at', { ascending: false })
       .limit(3)
@@ -171,7 +173,7 @@ async function getRecentProjects(): Promise<Project[]> {
     }
 
     // Transform the data to match the expected format
-    return projects?.map(project => ({
+    return projects?.map((project: any) => ({
       id: project.id,
       title: project.title,
       description: project.description,
@@ -229,6 +231,14 @@ async function getRecentPosts(): Promise<NewsPost[]> {
     console.error('Failed to fetch recent posts:', error)
     return []
   }
+}
+
+// Helper function to get initials
+function getInitials(name?: string): string {
+  if (!name) return '?'
+  const words = name.trim().split(' ')
+  if (words.length === 1) return words[0].charAt(0).toUpperCase()
+  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
 }
 
 export default async function HomePage() {
@@ -540,7 +550,7 @@ export default async function HomePage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/20 to-dark-bg" />
-        
+
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: `
@@ -649,136 +659,177 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {recentProjects.map((project) => (
               <Link key={project.id} href={`/projects/${project.id}`} className="block group">
-                <div className="relative overflow-hidden rounded-xl bg-dark-surface border border-dark-border hover:border-primary-blue/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-blue/10 h-full">
-                  {/* Thumbnail Image */}
-                  <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-dark-bg to-dark-surface">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 border-2 border-dark-border/50 hover:border-primary-blue/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 h-full flex flex-col backdrop-blur-sm hover:-translate-y-2">
+
+                  {/* Animated gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/0 via-accent-cyan/0 to-purple-500/0 group-hover:from-primary-blue/5 group-hover:via-accent-cyan/5 group-hover:to-purple-500/5 transition-all duration-700 pointer-events-none" />
+
+                  {/* Thumbnail with glassmorphism overlay */}
+                  <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary-blue/10 via-accent-cyan/10 to-purple-500/10">
                     {project.thumbnail_image?.public_url || project.thumbnail_url ? (
                       <Image
                         src={(project.thumbnail_image?.public_url || project.thumbnail_url) as string}
                         alt={project.thumbnail_image?.alt_text || project.title}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="object-cover"
                         loading="lazy"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
-                        <div className="text-center">
-                          <Code className="w-16 h-16 text-primary-blue/40 mx-auto mb-2" />
-                          <p className="text-xs text-text-tertiary font-mono">No preview</p>
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10">
+                        <div className="text-center relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/40 to-accent-cyan/40 blur-2xl group-hover:blur-3xl animate-pulse" />
+                          <Code className="w-20 h-20 text-primary-blue/50 mx-auto mb-2 relative z-10" />
+                          <p className="text-sm text-text-tertiary font-semibold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent relative z-10">No Preview</p>
                         </div>
                       </div>
                     )}
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Status badge */}
-                    <div className="absolute top-3 right-3">
+                    {/* Subtle blue gradient overlay - more transparent */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary-blue/20 via-accent-cyan/5 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+
+                    {/* Status badge with glow */}
+                    <div className="absolute top-4 right-4 z-10">
                       <Badge
                         variant={getStatusVariant(project.status)}
                         size="sm"
-                        className="backdrop-blur-sm bg-dark-bg/80 font-mono text-xs shadow-lg"
+                        className="backdrop-blur-xl bg-dark-bg/80 font-bold text-xs shadow-xl border border-white/10"
                       >
                         {project.status}
                       </Badge>
                     </div>
+
+                    {/* Quick action buttons on hover */}
+                    <div className="absolute bottom-4 right-4 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                      {project.repo_url && (
+                        <div className="p-2 rounded-lg bg-dark-bg/90 backdrop-blur-md border border-primary-blue/30 shadow-lg hover:scale-110 transition-transform duration-200">
+                          <Github className="w-4 h-4 text-primary-blue" />
+                        </div>
+                      )}
+                      {project.demo_url && (
+                        <div className="p-2 rounded-lg bg-dark-bg/90 backdrop-blur-md border border-accent-cyan/30 shadow-lg hover:scale-110 transition-transform duration-200">
+                          <ExternalLink className="w-4 h-4 text-accent-cyan" />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-5">
-                    {/* Title */}
-                    <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300 line-clamp-1">
+                  {/* Content section */}
+                  <div className="p-6 flex-1 flex flex-col relative z-10">
+                    {/* Title with gradient hover effect */}
+                    <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:bg-gradient-to-r group-hover:from-primary-blue group-hover:to-accent-cyan group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 line-clamp-2 leading-tight">
                       {project.title}
                     </h3>
 
-                    {/* Contributors */}
-                    {project.contributors && project.contributors.length > 0 ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="flex -space-x-3">
-                            {project.contributors.slice(0, 4).map((contributor, idx) => {
-                              const profile = contributor.profiles || contributor.profile
-                              const initial = (profile?.full_name?.[0] || profile?.username?.[0] || '?').toUpperCase()
-                              const colors = ['bg-primary-blue', 'bg-accent-cyan', 'bg-purple-500', 'bg-pink-500']
-                              return (
-                                <div
-                                  key={contributor.id || idx}
-                                  className={`w-9 h-9 rounded-full ${colors[idx % colors.length]} flex items-center justify-center text-sm text-white font-semibold border-2 border-dark-surface ring-2 ring-dark-bg transition-transform group-hover:scale-110`}
-                                  title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
-                                >
-                                  {initial}
-                                </div>
-                              )
-                            })}
-                            {project.contributors.length > 4 && (
-                              <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center text-xs text-text-secondary font-semibold border-2 border-dark-surface ring-2 ring-dark-bg">
-                                +{project.contributors.length - 4}
-                              </div>
-                            )}
+                    {/* Description */}
+                    {project.description && (
+                      <p className="text-text-secondary/90 mb-4 line-clamp-2 leading-relaxed text-sm">
+                        {project.description}
+                      </p>
+                    )}
+
+                    {/* Tech Stack */}
+                    {project.tech_stack && project.tech_stack.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {project.tech_stack.slice(0, 5).map((tech) => {
+                          const techColor = TECH_STACK_COLORS[tech] || '#6B7280'
+                          return (
+                            <div
+                              key={tech}
+                              className="relative px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 hover:scale-110 cursor-default group/tech"
+                              style={{
+                                backgroundColor: `${techColor}20`,
+                                color: techColor,
+                                border: `1.5px solid ${techColor}35`,
+                              }}
+                            >
+                              <div
+                                className="absolute inset-0 rounded-lg opacity-0 group-hover/tech:opacity-100 transition-opacity duration-300"
+                                style={{
+                                  boxShadow: `0 0 20px ${techColor}40`,
+                                }}
+                              />
+                              <span className="relative z-10">{tech}</span>
+                            </div>
+                          )
+                        })}
+                        {project.tech_stack.length > 5 && (
+                          <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-dark-border/50 text-text-secondary border border-dark-border">
+                            +{project.tech_stack.length - 5}
                           </div>
-                          <div className="text-sm text-text-tertiary">
-                            <Users className="w-4 h-4 inline mr-1" />
-                            {project.contributors.length}
+                        )}
+                      </div>
+                    )}
+
+                    {/* Contributors section - improved */}
+                    {project.contributors && project.contributors.length > 0 && (
+                      <div className="mt-auto pt-4 border-t border-dark-border/60 group-hover:border-primary-blue/30 transition-colors duration-300">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {/* Avatars */}
+                            <div className="flex -space-x-3">
+                              {project.contributors.slice(0, 4).map((contributor, idx) => {
+                                const profile = contributor.profiles || contributor.profile
+                                const initial = getInitials(profile?.full_name || profile?.username)
+                                const colors = ['from-primary-blue to-accent-cyan', 'from-accent-cyan to-purple-500', 'from-purple-500 to-pink-500', 'from-pink-500 to-primary-blue']
+                                return (
+                                  <div
+                                    key={contributor.id || idx}
+                                    className={`w-10 h-10 rounded-full bg-gradient-to-br ${colors[idx % colors.length]} p-0.5 ring-2 ring-dark-bg transition-all duration-300 group-hover:scale-110 shadow-lg`}
+                                    title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
+                                    style={{ zIndex: 4 - idx }}
+                                  >
+                                    <div className="w-full h-full bg-dark-surface rounded-full flex items-center justify-center text-xs text-white font-bold">
+                                      {initial}
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                              {project.contributors.length > 4 && (
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dark-border to-dark-surface flex items-center justify-center text-xs text-text-secondary font-bold ring-2 ring-dark-bg shadow-lg">
+                                  +{project.contributors.length - 4}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Team count */}
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Team</span>
+                              <span className="text-sm font-bold text-primary-blue">{project.contributors.length} {project.contributors.length === 1 ? 'Member' : 'Members'}</span>
+                            </div>
+                          </div>
+
+                          {/* View arrow */}
+                          <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
+                            <ArrowRight className="w-5 h-5" />
                           </div>
                         </div>
 
-                        {/* View details indicator */}
-                        <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <ArrowRight className="w-5 h-5" />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-text-tertiary">
-                          <Users className="w-4 h-4 inline mr-1" />
-                          No contributors yet
-                        </div>
-                        <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <ArrowRight className="w-5 h-5" />
+                        {/* Created date */}
+                        <div className="flex items-center gap-2 mt-3 text-xs text-text-tertiary">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>Created {formatDate(project.created_at)}</span>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Hover border glow effect */}
-                  <div className="absolute inset-0 rounded-xl border-2 border-primary-blue/0 group-hover:border-primary-blue/20 transition-all duration-300 pointer-events-none" />
+                  {/* Hover border glow */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ boxShadow: '0 0 30px rgba(59, 130, 246, 0.3), inset 0 0 30px rgba(6, 182, 212, 0.1)' }} />
                 </div>
               </Link>
             ))}
-
-            {/* Show "View All Projects" card if less than 3 projects */}
-            {recentProjects.length < 3 && Array.from({ length: 3 - recentProjects.length }).map((_, index) => (
-              <Card key={`viewall-${index}`} variant="interactive" className="hover-lift group">
-                <Link href="/projects">
-                  <CardContent className="p-2 text-center h-full flex flex-col justify-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                      <Code className="w-8 h-8 text-primary-blue" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-text-primary mb-2">
-                      View All Projects
-                    </h3>
-                    <p className="text-text-secondary text-sm mb-4 leading-relaxed">
-                      Discover more of our innovative projects and technical achievements
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
-                      <span className="text-sm font-medium">Browse Projects</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
           </div>
 
-          {recentProjects.length >= 3 && (
+          {recentProjects.length >= 1 && (
             <div className="text-center mt-12">
               <Link href="/projects">
-                <Button variant="secondary" size="lg">
+                <Button variant="secondary" size="lg" className="group">
                   View All Projects
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </Button>
               </Link>
             </div>

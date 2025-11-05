@@ -668,28 +668,18 @@ export const postQueries = {
         headers['Authorization'] = `Bearer ${session.access_token}`
       }
 
-      // Get post by slug
-      const response = await fetch(`/api/posts?slug=${slug}`, { headers })
+      // Single optimized API call - get everything in one request
+      const response = await fetch(`/api/posts/by-slug/${slug}`, { headers })
       const data = await response.json()
 
-      if (!data.success || data.posts.length === 0) {
-        return { post: null, error: { message: 'Post not found' } }
-      }
-
-      const foundPost = data.posts[0]
-
-      // Get full details with blocks
-      const detailResponse = await fetch(`/api/posts/${foundPost.id}`, { headers })
-      const detailResult = await detailResponse.json()
-
-      if (!detailResult.success) {
-        return { post: null, error: { message: detailResult.error } }
+      if (!data.success) {
+        return { post: null, error: { message: data.error || 'Post not found' } }
       }
 
       return {
-        post: detailResult.post,
-        blocks: detailResult.blocks,
-        userHasUpvoted: detailResult.user_has_upvoted,
+        post: data.post,
+        blocks: data.blocks || [],
+        userHasUpvoted: data.user_has_upvoted || false,
         error: null
       }
     } catch (error) {

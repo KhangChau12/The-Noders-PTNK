@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 // POST /api/posts/[id]/upvote - Toggle upvote
 export async function POST(
@@ -19,7 +19,19 @@ export async function POST(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+
+    // Create Supabase client with auth token for RLS
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      }
+    )
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
@@ -125,7 +137,12 @@ export async function GET(
 ) {
   try {
     const { id: postId } = params
-    const supabase = createClient()
+
+    // Create anonymous client for public data
+    let supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
     // Get upvote count
     const { data: post, error: postError } = await supabase
@@ -147,6 +164,20 @@ export async function GET(
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.replace('Bearer ', '')
+
+      // Create authenticated client with token
+      supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      )
+
       const { data: { user } } = await supabase.auth.getUser(token)
 
       if (user) {
