@@ -487,10 +487,7 @@ export const memberQueries = {
       query = query.or(`full_name.ilike.%${filters.search}%,username.ilike.%${filters.search}%`)
     }
 
-    const sortBy = filters.sort_by || 'created_at'
-    const sortOrder = filters.sort_order || 'desc'
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' })
-
+    // Don't apply default sorting here - we'll sort after fetching counts
     const { data, error } = await query
 
     if (error || !data) {
@@ -510,13 +507,40 @@ export const memberQueries = {
       contributionCounts[contrib.user_id] = (contributionCounts[contrib.user_id] || 0) + 1
     })
 
-    // Map members with their contribution count
-    const membersWithProjects = data.map(member => ({
+    // Fetch posts count for all members in one query
+    const { data: posts } = await supabase
+      .from('posts')
+      .select('author_id')
+      .eq('status', 'published')
+      .in('author_id', memberIds)
+
+    // Count posts per member
+    const postCounts: Record<string, number> = {}
+    posts?.forEach(post => {
+      postCounts[post.author_id] = (postCounts[post.author_id] || 0) + 1
+    })
+
+    // Map members with their counts
+    const membersWithCounts = data.map(member => ({
       ...member,
       contributed_projects: Array(contributionCounts[member.id] || 0).fill({}), // Fake array with correct length
+      posts_count: postCounts[member.id] || 0,
+      total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)
     }))
 
-    return { members: membersWithProjects, error: null }
+    // Custom sorting:
+    // 1. Admins first, then members
+    // 2. Within each group, sort by total contributions (projects + posts) descending
+    const sortedMembers = membersWithCounts.sort((a, b) => {
+      // First, sort by role (admin first)
+      if (a.role === 'admin' && b.role !== 'admin') return -1
+      if (a.role !== 'admin' && b.role === 'admin') return 1
+
+      // Then, within same role, sort by total contributions (descending)
+      return b.total_contributions - a.total_contributions
+    })
+
+    return { members: sortedMembers, error: null }
   },
 
   // Get single member by username

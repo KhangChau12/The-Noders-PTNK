@@ -16,33 +16,6 @@ import { ClickableBadge } from "@/components/ClickableBadge";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
 import { Search, Users, Mail, Facebook, Award } from "lucide-react";
 
-// Component to fetch and display member's post count
-function MemberPostCount({ memberId }: { memberId: string }) {
-  const [postsCount, setPostsCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchPostsCount = async () => {
-      try {
-        const response = await fetch(
-          `/api/posts?author=${memberId}&status=all`,
-        );
-        const data = await response.json();
-        if (data.success && data.posts) {
-          setPostsCount(data.posts.length);
-        }
-      } catch (error) {
-        console.error("Error fetching posts count:", error);
-        setPostsCount(0);
-      }
-    };
-
-    fetchPostsCount();
-  }, [memberId]);
-
-  if (postsCount === null) return <span>...</span>;
-
-  return <span>{postsCount}</span>;
-}
 
 export default function MembersPage() {
   const [filters, setFilters] = useState<MemberFilters>({
@@ -231,7 +204,7 @@ export default function MembersPage() {
                                   </svg>
                                 </div>
                                 <div className="text-2xl font-bold text-accent-cyan mb-1">
-                                  <MemberPostCount memberId={member.id} />
+                                  {(member as any).posts_count || 0}
                                 </div>
                                 <div className="text-xs text-text-tertiary font-medium uppercase tracking-wide">
                                   Posts
