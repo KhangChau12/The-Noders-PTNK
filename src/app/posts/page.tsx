@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/Card";
@@ -25,6 +26,10 @@ import {
   Filter,
   ThumbsUp,
   Eye,
+  UserCircle,
+  X,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 
 const categories = [
@@ -189,14 +194,242 @@ function PostCard({
   );
 }
 
+interface Author {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url: string | null;
+  post_count: number;
+}
+
+function AuthorDropdown({
+  authors,
+  selectedAuthor,
+  onSelect,
+  loading,
+}: {
+  authors: Author[];
+  selectedAuthor: string;
+  onSelect: (authorId: string) => void;
+  loading: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedAuthorData = authors.find((a) => a.id === selectedAuthor);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".author-dropdown")) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const getInitials = (name: string) => {
+    const words = name.trim().split(" ");
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+  };
+
+  return (
+    <div className="relative author-dropdown flex-1 lg:flex-none lg:min-w-[320px]">
+      {/* Trigger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={loading}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-dark-surface/80 backdrop-blur-sm border border-dark-border rounded-xl text-text-primary text-sm font-medium hover:border-primary-blue/50 hover:bg-dark-surface focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {selectedAuthorData ? (
+            <>
+              {/* Author Avatar */}
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary-blue to-accent-cyan flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                {selectedAuthorData.avatar_url ? (
+                  <img
+                    src={selectedAuthorData.avatar_url}
+                    alt={selectedAuthorData.full_name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  getInitials(selectedAuthorData.full_name)
+                )}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <div className="font-semibold text-text-primary truncate">
+                  {selectedAuthorData.full_name}
+                </div>
+                <div className="text-xs text-text-tertiary">
+                  {selectedAuthorData.post_count}{" "}
+                  {selectedAuthorData.post_count === 1 ? "post" : "posts"}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <UserCircle className="w-5 h-5 text-text-tertiary transition-colors duration-300 group-hover:text-primary-blue" />
+              <span className="text-text-secondary group-hover:text-text-primary transition-colors">
+                All Authors
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Chevron Icon */}
+        <div className="flex-shrink-0">
+          {loading ? (
+            <div className="w-4 h-4 border-2 border-primary-blue/30 border-t-primary-blue rounded-full animate-spin" />
+          ) : (
+            <ChevronDown
+              className={`w-4 h-4 text-text-tertiary transition-all duration-300 group-hover:text-primary-blue ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
+          )}
+        </div>
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && !loading && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-dark-surface border border-dark-border rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+            {/* All Authors Option */}
+            <button
+              onClick={() => {
+                onSelect("");
+                setIsOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-dark-border/50 transition-colors ${
+                !selectedAuthor ? "bg-primary-blue/10 border-l-2 border-primary-blue" : ""
+              }`}
+            >
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-dark-border to-dark-surface flex items-center justify-center">
+                <UserCircle className="w-5 h-5 text-text-tertiary" />
+              </div>
+              <div className="flex-1 text-left">
+                <div className="font-semibold text-text-primary">All Authors</div>
+                <div className="text-xs text-text-tertiary">
+                  {authors.reduce((sum, a) => sum + a.post_count, 0)} total posts
+                </div>
+              </div>
+              {!selectedAuthor && (
+                <Check className="w-4 h-4 text-primary-blue flex-shrink-0" />
+              )}
+            </button>
+
+            {/* Divider */}
+            <div className="h-px bg-dark-border my-1" />
+
+            {/* Authors List */}
+            {authors.map((author) => (
+              <button
+                key={author.id}
+                onClick={() => {
+                  onSelect(author.id);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-dark-border/50 transition-colors ${
+                  selectedAuthor === author.id
+                    ? "bg-primary-blue/10 border-l-2 border-primary-blue"
+                    : ""
+                }`}
+              >
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary-blue to-accent-cyan flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                  {author.avatar_url ? (
+                    <img
+                      src={author.avatar_url}
+                      alt={author.full_name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    getInitials(author.full_name)
+                  )}
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="font-semibold text-text-primary truncate">
+                    {author.full_name}
+                  </div>
+                  <div className="text-xs text-text-tertiary">
+                    {author.post_count} {author.post_count === 1 ? "post" : "posts"}
+                  </div>
+                </div>
+                {selectedAuthor === author.id && (
+                  <Check className="w-4 h-4 text-primary-blue flex-shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PostsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get("category") || "all"
+  );
+  const [selectedAuthor, setSelectedAuthor] = useState<string>(
+    searchParams.get("author") || ""
+  );
   const [showFilters, setShowFilters] = useState(false);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authorsLoading, setAuthorsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch authors on mount
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      try {
+        setAuthorsLoading(true);
+        const response = await fetch('/api/posts/authors');
+        const data = await response.json();
+
+        if (data.success) {
+          setAuthors(data.authors);
+        }
+      } catch (err) {
+        console.error("Error fetching authors:", err);
+      } finally {
+        setAuthorsLoading(false);
+      }
+    };
+
+    fetchAuthors();
+  }, []);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    }
+    if (selectedCategory !== "all") {
+      params.set("category", selectedCategory);
+    }
+    if (selectedAuthor) {
+      params.set("author", selectedAuthor);
+    }
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "/posts";
+    router.replace(newUrl, { scroll: false });
+  }, [searchTerm, selectedCategory, selectedAuthor, router]);
+
+  // Fetch posts when filters change
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -208,6 +441,9 @@ export default function PostsPage() {
         }
         if (selectedCategory !== "all") {
           params.set("category", selectedCategory);
+        }
+        if (selectedAuthor) {
+          params.set("author", selectedAuthor);
         }
 
         const response = await fetch(`/api/posts?${params.toString()}`);
@@ -229,7 +465,7 @@ export default function PostsPage() {
 
     const timeoutId = setTimeout(fetchPosts, 300);
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, selectedAuthor]);
 
   const featuredPosts = posts.filter((post) => post.featured);
   const regularPosts = posts.filter((post) => !post.featured);
@@ -267,14 +503,24 @@ export default function PostsPage() {
                 />
               </div>
 
-              <Button
-                variant="secondary"
-                onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden"
-                icon={<Filter className="w-4 h-4" />}
-              >
-                Filters
-              </Button>
+              <div className="flex gap-2 w-full lg:w-auto">
+                {/* Author Filter Dropdown */}
+                <AuthorDropdown
+                  authors={authors}
+                  selectedAuthor={selectedAuthor}
+                  onSelect={setSelectedAuthor}
+                  loading={authorsLoading}
+                />
+
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="lg:hidden"
+                  icon={<Filter className="w-4 h-4" />}
+                >
+                  Filters
+                </Button>
+              </div>
             </div>
 
             {/* Categories */}
@@ -336,17 +582,50 @@ export default function PostsPage() {
             </div>
           )}
 
-          {/* Results Count */}
+          {/* Active Filters & Results Count */}
           {!loading && !error && (
             <div className="mb-6">
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                {selectedAuthor && (
+                  <Badge variant="secondary" className="flex items-center gap-2">
+                    <UserCircle className="w-3 h-3" />
+                    {authors.find((a) => a.id === selectedAuthor)?.full_name}
+                    <button
+                      onClick={() => setSelectedAuthor("")}
+                      className="hover:text-error transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedCategory !== "all" && (
+                  <Badge variant="secondary" className="flex items-center gap-2">
+                    {categories.find((c) => c.id === selectedCategory)?.name}
+                    <button
+                      onClick={() => setSelectedCategory("all")}
+                      className="hover:text-error transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {(selectedAuthor || selectedCategory !== "all" || searchTerm) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedCategory("all");
+                      setSelectedAuthor("");
+                    }}
+                    className="text-text-tertiary hover:text-primary-blue"
+                  >
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
               <p className="text-text-secondary">
                 {posts.length} post{posts.length !== 1 ? "s" : ""} found
-                {selectedCategory !== "all" && (
-                  <span>
-                    {" "}
-                    in {categories.find((c) => c.id === selectedCategory)?.name}
-                  </span>
-                )}
               </p>
             </div>
           )}
@@ -388,15 +667,16 @@ export default function PostsPage() {
                   No posts found
                 </h3>
                 <p className="text-text-secondary mb-6">
-                  {selectedCategory !== "all" || searchTerm
+                  {selectedCategory !== "all" || selectedAuthor || searchTerm
                     ? "Try adjusting your search criteria or filters."
                     : "No posts have been published yet. Check back soon!"}
                 </p>
-                {(selectedCategory !== "all" || searchTerm) && (
+                {(selectedCategory !== "all" || selectedAuthor || searchTerm) && (
                   <Button
                     onClick={() => {
                       setSearchTerm("");
                       setSelectedCategory("all");
+                      setSelectedAuthor("");
                     }}
                   >
                     Clear Filters
