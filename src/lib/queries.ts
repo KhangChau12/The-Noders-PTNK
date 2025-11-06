@@ -520,9 +520,19 @@ export const memberQueries = {
       postCounts[post.author_id] = (postCounts[post.author_id] || 0) + 1
     })
 
-    // Map members with their counts
+    // Fetch emails from auth.users for all members in one query
+    const { data: users } = await supabase.auth.admin.listUsers()
+    const emailMap: Record<string, string> = {}
+    users?.users?.forEach(user => {
+      if (user.email) {
+        emailMap[user.id] = user.email
+      }
+    })
+
+    // Map members with their counts and email
     const membersWithCounts = data.map(member => ({
       ...member,
+      email: emailMap[member.id] || null,
       contributed_projects: Array(contributionCounts[member.id] || 0).fill({}), // Fake array with correct length
       posts_count: postCounts[member.id] || 0,
       total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)

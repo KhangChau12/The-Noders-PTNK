@@ -171,32 +171,64 @@ export function useMembers(filters: MemberFilters = {}) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Serialize filters to prevent unnecessary re-renders
+  const filterKey = JSON.stringify(filters)
+
   useEffect(() => {
     const fetchMembers = async () => {
       setLoading(true)
-      const { members, error } = await memberQueries.getMembers(filters)
-      
-      if (error) {
-        setError(error.message)
-      } else {
-        setMembers(members || [])
-        setError(null)
+
+      try {
+        // Build query params
+        const params = new URLSearchParams()
+        if (filters.role) params.append('role', filters.role)
+        if (filters.search) params.append('search', filters.search)
+
+        const response = await fetch(`/api/members?${params.toString()}`)
+        const data = await response.json()
+
+        if (!response.ok || !data.success) {
+          setError(data.error || 'Failed to fetch members')
+          setMembers([])
+        } else {
+          setMembers(data.members || [])
+          setError(null)
+        }
+      } catch (err: any) {
+        setError(err.message || 'Network error')
+        setMembers([])
       }
-      
+
       setLoading(false)
     }
 
     fetchMembers()
-  }, [filters])
+  }, [filterKey]) // Use serialized key
 
   const refetch = async () => {
-    const { members, error } = await memberQueries.getMembers(filters)
-    if (error) {
-      setError(error.message)
-    } else {
-      setMembers(members || [])
-      setError(null)
+    setLoading(true)
+
+    try {
+      const params = new URLSearchParams()
+      if (filters.role) params.append('role', filters.role)
+      if (filters.search) params.append('search', filters.search)
+
+      const response = await fetch(`/api/members?${params.toString()}`)
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        setError(data.error || 'Failed to fetch members')
+        setMembers([])
+      } else {
+        setMembers(data.members || [])
+        setError(null)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Network error')
+      setMembers([])
     }
+
+    setLoading(false)
   }
 
   return { members, loading, error, refetch }

@@ -14,7 +14,7 @@ import { getInitials } from "@/lib/utils";
 import { Avatar } from "@/components/Avatar";
 import { ClickableBadge } from "@/components/ClickableBadge";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { Search, Users, Mail, Facebook, Award } from "lucide-react";
+import { Search, Users, Mail, Facebook, Award, Check } from "lucide-react";
 
 
 export default function MembersPage() {
@@ -24,8 +24,22 @@ export default function MembersPage() {
     sort_by: "full_name",
     sort_order: "asc",
   });
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
   const { members, loading, error } = useMembers(filters);
+
+  const handleCopyEmail = async (email: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopiedEmail(email);
+      setTimeout(() => setCopiedEmail(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy email:', err);
+    }
+  };
 
   const handleSearchChange = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
@@ -214,14 +228,26 @@ export default function MembersPage() {
 
                             {/* Contact Links - Enhanced */}
                             <div className="flex justify-center space-x-3 pt-4 border-t border-dark-border/50">
-                              <a
-                                href="mailto:phuckhangtdn@gmail.com"
-                                className="flex items-center justify-center w-10 h-10 rounded-lg bg-dark-bg/50 text-text-tertiary hover:text-primary-blue hover:bg-primary-blue/10 transition-all duration-200 hover:scale-110"
-                                onClick={(e) => e.stopPropagation()}
-                                title="Send Email"
-                              >
-                                <Mail className="w-5 h-5" />
-                              </a>
+                              {member.email && (
+                                <div className="relative group/email">
+                                  <button
+                                    onClick={(e) => handleCopyEmail(member.email, e)}
+                                    className="flex items-center justify-center w-10 h-10 rounded-lg bg-dark-bg/50 text-text-tertiary hover:text-primary-blue hover:bg-primary-blue/10 transition-all duration-200 hover:scale-110"
+                                    title={copiedEmail === member.email ? "Copied!" : "Click to copy email"}
+                                  >
+                                    {copiedEmail === member.email ? (
+                                      <Check className="w-5 h-5 text-success" />
+                                    ) : (
+                                      <Mail className="w-5 h-5" />
+                                    )}
+                                  </button>
+                                  {/* Tooltip */}
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-dark-surface border border-dark-border rounded-lg text-xs text-text-secondary whitespace-nowrap opacity-0 group-hover/email:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                                    {copiedEmail === member.email ? "Copied!" : member.email}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-dark-border" />
+                                  </div>
+                                </div>
+                              )}
                               {socialLinks.facebook && (
                                 <a
                                   href={socialLinks.facebook}

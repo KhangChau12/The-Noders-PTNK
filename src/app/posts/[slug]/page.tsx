@@ -432,10 +432,10 @@ export default function PostDetailPage() {
                     <CardContent className="p-4">
                       <CategoryBadge category={related.category} />
                       <h3 className="text-lg font-semibold text-text-primary mt-3 mb-2 line-clamp-2">
-                        {related.title}
+                        {localize(related.title, related.title_vi)}
                       </h3>
                       <p className="text-sm text-text-secondary line-clamp-2">
-                        {related.summary}
+                        {localize(related.summary, related.summary_vi)}
                       </p>
                     </CardContent>
                   </Card>

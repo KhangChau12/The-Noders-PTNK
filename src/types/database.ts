@@ -77,6 +77,7 @@ export interface ProjectWithContributors extends Project {
 }
 
 export interface ProfileWithProjects extends Profile {
+  email?: string | null
   contributed_projects: (ProjectContributor & {
     project: Project
   })[]
