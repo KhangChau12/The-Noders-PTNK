@@ -152,7 +152,9 @@ export function ProjectCard({ project, showStats = true }: ProjectCardProps) {
                       >
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-blue to-accent-cyan p-0.5 ring-2 ring-dark-surface transition-all duration-300 group-hover/avatar:scale-110 group-hover/avatar:ring-primary-blue/50">
                           <div className="w-full h-full bg-dark-surface rounded-full flex items-center justify-center text-xs text-white font-semibold">
-                            {getInitials(profile?.full_name || profile?.username)}
+                            {profile?.avatar_url ? (
+                              <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full rounded-full" />
+                            ) : getInitials(profile?.full_name || profile?.username)}
                           </div>
                         </div>
                         {/* Tooltip on hover */}
