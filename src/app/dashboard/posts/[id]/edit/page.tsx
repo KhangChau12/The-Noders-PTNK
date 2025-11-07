@@ -84,7 +84,7 @@ function EditPostPage() {
 
       // Optimistic update
       if (post) {
-        setPost({ ...post, ...data })
+        setPost({ ...post, ...data } as Post)
       }
 
       const { post: updatedPost, error } = await postQueries.updatePost(postId, data, session)
