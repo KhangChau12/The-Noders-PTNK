@@ -57,8 +57,8 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
         return { valid: false, error: 'Text block requires content in both English and Vietnamese' }
       }
       // enforce per-language word limit (adjust as needed)
-      if (content.word_count_en > 800 || content.word_count_vi > 800) {
-        return { valid: false, error: 'Text block cannot exceed 800 words per language' }
+      if (content.word_count > 350 || content.word_count_vi > 350) {
+        return { valid: false, error: 'Text block cannot exceed 350 words per language' }
       }
     }
 
