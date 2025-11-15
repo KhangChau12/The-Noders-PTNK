@@ -64,7 +64,9 @@ interface PostWithAuthor extends Post {
   };
   thumbnail_image?: {
     public_url: string;
+    alt_text?: string;
   };
+  thumbnail_url?: string | null;
 }
 
 function CategoryBadge({ category }: { category: Post["category"] }) {
@@ -452,6 +454,9 @@ export default function PostsPage() {
         if (data.success) {
           setPosts(data.posts);
           setError(null);
+
+          // Refetch authors to ensure dropdown is up-to-date
+          fetchAuthors();
         } else {
           setError(data.error || "Failed to fetch posts");
         }
@@ -460,6 +465,19 @@ export default function PostsPage() {
         console.error("Error fetching posts:", err);
       } finally {
         setLoading(false);
+      }
+    };
+
+    const fetchAuthors = async () => {
+      try {
+        const response = await fetch('/api/posts/authors');
+        const data = await response.json();
+
+        if (data.success) {
+          setAuthors(data.authors);
+        }
+      } catch (err) {
+        console.error("Error fetching authors:", err);
       }
     };
 
