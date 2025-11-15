@@ -23,7 +23,9 @@ export const projectQueries = {
       }
 
       const response = await fetch(`/api/projects?${params}`)
-      const result = await response.json()
+      const result = await response.json();
+
+      console.log(result);
 
       if (!result.success) {
         return { projects: null, error: { message: result.error } }
