@@ -389,8 +389,12 @@ export default function PostsPage() {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [authorsLoading, setAuthorsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const POSTS_PER_PAGE = 20;
 
   // Fetch authors on mount
   useEffect(() => {
@@ -431,11 +435,26 @@ export default function PostsPage() {
     router.replace(newUrl, { scroll: false });
   }, [searchTerm, selectedCategory, selectedAuthor, router]);
 
-  // Fetch posts when filters change
+  // Fetch authors helper
+  const fetchAuthors = async () => {
+    try {
+      const response = await fetch('/api/posts/authors');
+      const data = await response.json();
+
+      if (data.success) {
+        setAuthors(data.authors);
+      }
+    } catch (err) {
+      console.error("Error fetching authors:", err);
+    }
+  };
+
+  // Fetch posts when filters change (reset to page 1)
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
+        setPage(1);
         const params = new URLSearchParams();
 
         if (searchTerm) {
@@ -448,11 +467,15 @@ export default function PostsPage() {
           params.set("author", selectedAuthor);
         }
 
+        params.set("limit", POSTS_PER_PAGE.toString());
+        params.set("offset", "0");
+
         const response = await fetch(`/api/posts?${params.toString()}`);
         const data = await response.json();
 
         if (data.success) {
           setPosts(data.posts);
+          setHasMore(data.pagination?.hasMore || false);
           setError(null);
 
           // Refetch authors to ensure dropdown is up-to-date
@@ -468,22 +491,69 @@ export default function PostsPage() {
       }
     };
 
-    const fetchAuthors = async () => {
-      try {
-        const response = await fetch('/api/posts/authors');
-        const data = await response.json();
-
-        if (data.success) {
-          setAuthors(data.authors);
-        }
-      } catch (err) {
-        console.error("Error fetching authors:", err);
-      }
-    };
-
     const timeoutId = setTimeout(fetchPosts, 300);
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, selectedCategory, selectedAuthor]);
+  }, [searchTerm, selectedCategory, selectedAuthor, POSTS_PER_PAGE]);
+
+  // Load more posts (infinite scroll)
+  const loadMorePosts = async () => {
+    if (loadingMore || !hasMore) return;
+
+    try {
+      setLoadingMore(true);
+      const params = new URLSearchParams();
+
+      if (searchTerm) {
+        params.set("search", searchTerm);
+      }
+      if (selectedCategory !== "all") {
+        params.set("category", selectedCategory);
+      }
+      if (selectedAuthor) {
+        params.set("author", selectedAuthor);
+      }
+
+      const offset = page * POSTS_PER_PAGE;
+      params.set("limit", POSTS_PER_PAGE.toString());
+      params.set("offset", offset.toString());
+
+      const response = await fetch(`/api/posts?${params.toString()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setPosts(prev => [...prev, ...data.posts]);
+        setHasMore(data.pagination?.hasMore || false);
+        setPage(prev => prev + 1);
+      }
+    } catch (err) {
+      console.error("Error loading more posts:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const sentinel = document.getElementById('scroll-sentinel');
+    if (sentinel) {
+      observer.observe(sentinel);
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel);
+      }
+    };
+  }, [hasMore, loading, loadingMore, page, searchTerm, selectedCategory, selectedAuthor]);
 
   const featuredPosts = posts.filter((post) => post.featured);
   const regularPosts = posts.filter((post) => !post.featured);
@@ -676,6 +746,18 @@ export default function PostsPage() {
                   <PostCard key={post.id} post={post} />
                 ))}
               </div>
+
+              {/* Infinite Scroll Sentinel */}
+              {hasMore && (
+                <div id="scroll-sentinel" className="py-8 text-center">
+                  {loadingMore && (
+                    <div className="inline-flex items-center gap-2 text-text-secondary">
+                      <div className="w-4 h-4 border-2 border-primary-blue/30 border-t-primary-blue rounded-full animate-spin" />
+                      Loading more posts...
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : !loading && posts.length === 0 ? (
             <Card className="text-center py-12 mb-4">
