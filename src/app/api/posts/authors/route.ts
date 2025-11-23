@@ -31,6 +31,8 @@ export async function GET() {
     // Get unique authors and count their posts
     const authorMap = new Map()
 
+    console.log(authors);
+
     authors?.forEach((post: any) => {
       if (post.author) {
         const authorId = post.author.id
