@@ -60,6 +60,8 @@ export async function GET(request: NextRequest) {
       postCounts[post.author_id] = (postCounts[post.author_id] || 0) + 1
     })
 
+    console.log(posts);
+
     // Fetch emails from auth.users using admin client
     const { data: usersData } = await supabase.auth.admin.listUsers()
     const emailMap: Record<string, string> = {}
