@@ -133,15 +133,13 @@ export default function ContestPage() {
               Experience real-world AI development with practical applications students actually care about.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="group">
-                Register Now
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button variant="secondary" size="lg">
-                Download Guidelines
-                <FileText className="ml-2 w-4 h-4" />
-              </Button>
+            <div className="flex justify-center">
+              <Link href="https://the-noders-competition-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="group">
+                  Join Our Contest
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -381,14 +379,11 @@ export default function ContestPage() {
                 Join The Noders PTNK's first AI challenge and showcase your machine learning skills.
                 Build something meaningful while competing for substantial prizes!
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="group">
-                  Register for Contest
-                  <Trophy className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
-                </Button>
-                <Link href="/contact">
-                  <Button variant="secondary" size="lg">
-                    Contact Organizers
+              <div className="flex justify-center">
+                <Link href="https://the-noders-competition-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="group">
+                    Join Our Contest
+                    <Trophy className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
                   </Button>
                 </Link>
               </div>
