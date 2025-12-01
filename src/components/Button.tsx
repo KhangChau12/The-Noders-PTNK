@@ -14,13 +14,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, icon, children, disabled, asChild, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue disabled:pointer-events-none disabled:opacity-50'
+    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue disabled:pointer-events-none disabled:opacity-50'
 
     const variants = {
-      primary: 'bg-primary-blue text-white hover:bg-accent-blue',
-      secondary: 'bg-dark-surface text-text-primary border border-dark-border hover:bg-dark-border',
+      primary: 'bg-gradient-to-r from-primary-blue to-accent-blue text-white hover:from-accent-blue hover:to-primary-blue hover:shadow-lg hover:shadow-primary-blue/30',
+      secondary: 'bg-dark-surface text-text-primary border border-dark-border hover:bg-dark-border hover:border-primary-blue/30',
       ghost: 'text-text-secondary hover:bg-dark-surface hover:text-text-primary',
-      danger: 'bg-error text-white hover:bg-red-700',
+      danger: 'bg-gradient-to-r from-error to-red-700 text-white hover:from-red-700 hover:to-error hover:shadow-lg hover:shadow-error/30',
     }
 
     const sizes = {

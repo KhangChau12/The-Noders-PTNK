@@ -6,7 +6,7 @@ import { Badge } from '@/components/Badge'
 import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
 import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
-import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper } from 'lucide-react'
+import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper, Target } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { TECH_STACK_COLORS } from '@/lib/constants'
 
@@ -140,7 +140,7 @@ async function getRecentProjects(): Promise<Project[]> {
       .from('projects')
       .select(`
         *,
-        created_by_profile:profiles!projects_created_by_fkey(
+        created_by_profile:profiles!created_by(
           username,
           full_name,
           avatar_url
@@ -647,8 +647,91 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Recent Projects Section */}
+      {/* Our Contests Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+              Our Contests
+            </h2>
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+              Challenge yourself and level up your AI skills through real competition
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* NAIC 2025 Card */}
+            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border border-primary-blue/30">
+              <CardContent className="p-8">
+                <Badge variant="success" className="mb-4">Internal • Ongoing</Badge>
+                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors">
+                  Noders AI Competition 2025
+                </h3>
+                <p className="text-text-secondary mb-6 leading-relaxed">
+                  Our internal training ground where members sharpen AI skills through hands-on IELTS scoring challenges. Practice, compete, and earn rewards.
+                </p>
+                <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary-blue" />
+                    <span>14/18 Joined</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary-blue" />
+                    <span>29 Nov - 21 Dec</span>
+                  </div>
+                </div>
+                <Link href="/contest/naic-2025">
+                  <Button variant="secondary" className="w-full group/btn">
+                    Learn More
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* PAIC 2026 Card */}
+            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-accent-cyan/10 to-primary-blue/10 border border-accent-cyan/30">
+              <CardContent className="p-8">
+                <Badge variant="warning" className="mb-4">Public • Coming Soon</Badge>
+                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-accent-cyan transition-colors">
+                  PTNK AI Challenge 2026
+                </h3>
+                <p className="text-text-secondary mb-6 leading-relaxed">
+                  Our flagship public competition for VNU High School students. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.
+                </p>
+                <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-accent-cyan" />
+                    <span>Open Registration</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-accent-cyan" />
+                    <span>29 Dec - 14 Jan</span>
+                  </div>
+                </div>
+                <Link href="/contest/paic-2026">
+                  <Button variant="secondary" className="w-full group/btn">
+                    Learn More
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/contest">
+              <Button size="lg" className="group">
+                View All Contests
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Projects Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
