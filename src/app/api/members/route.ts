@@ -5,12 +5,14 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔄 [API] /api/members called at:', new Date().toISOString())
     const supabase = createAdminClient()
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams
     const role = searchParams.get('role')
     const search = searchParams.get('search')
+    console.log('📝 [API] Query params:', { role, search })
 
     // Fetch profiles
     let query = supabase
@@ -79,6 +81,8 @@ export async function GET(request: NextRequest) {
       posts_count: postCounts[member.id] || 0,
       total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)
     }))
+
+    console.log(`✅ [API] Returning ${membersWithData.length} members`)
 
     // Sort: Admins first, then by total contributions
     const sortedMembers = membersWithData.sort((a, b) => {

@@ -564,16 +564,11 @@ export default function PostsPage() {
       <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 z-10">
         <div className="container mx-auto">
           {/* Header */}
-          <div className="mb-12">
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-4xl md:text-5xl font-bold text-text-primary">
-                  Posts & Updates
-                </h1>
-              </div>
-              <LanguageDropdown />
-            </div>
-            <p className="text-text-secondary text-lg text-center sm:text-left max-w-3xl">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
+              Posts & Updates
+            </h1>
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
               Stay updated with the latest news, educational content, member
               spotlights, and community activities from The Noders PTNK.
             </p>
@@ -613,31 +608,37 @@ export default function PostsPage() {
 
             {/* Categories */}
             <div
-              className={`grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap gap-2 ${
-                showFilters ? "block" : "hidden lg:flex"
+              className={`flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 ${
+                showFilters ? "flex" : "hidden lg:flex"
               }`}
             >
-              {categories.map((category) => {
-                const Icon = category.icon;
-                const isActive = selectedCategory === category.id;
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap gap-2">
+                {categories.map((category) => {
+                  const Icon = category.icon;
+                  const isActive = selectedCategory === category.id;
 
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                      isActive
-                        ? "border-primary-blue bg-primary-blue/10 text-primary-blue"
-                        : "border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    <Icon
-                      className={`w-4 h-4 ${isActive ? "text-primary-blue" : category.color}`}
-                    />
-                    <span className="text-sm font-medium">{category.name}</span>
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                        isActive
+                          ? "border-primary-blue bg-primary-blue/10 text-primary-blue"
+                          : "border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      <Icon
+                        className={`w-4 h-4 ${isActive ? "text-primary-blue" : category.color}`}
+                      />
+                      <span className="text-sm font-medium">{category.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-end">
+                <LanguageDropdown />
+              </div>
             </div>
           </div>
 

@@ -1,0 +1,985 @@
+================================================================================
+                    THE NODERS PTNK - TYPOGRAPHY SYSTEM
+================================================================================
+Chi tiết đầy đủ về fonts, sizes, weights, và cách sử dụng
+Phiên bản: 1.0 | Cập nhật: 17/11/2025
+================================================================================
+
+
+================================================================================
+1. FONT FAMILIES (Họ font chữ)
+================================================================================
+
+1.1. NUNITO (Primary/Body Font)
+--------------------------------
+Source: Google Fonts
+URL: https://fonts.google.com/specimen/Nunito
+License: Open Font License
+
+Import configuration:
+```javascript
+import { Nunito } from 'next/font/google'
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '700', '800']
+})
+```
+
+Weights imported:
+- 300 (Light)
+- 400 (Regular)
+- 600 (SemiBold)
+- 700 (Bold)
+- 800 (ExtraBold)
+
+Subset: Latin only (English, European languages)
+
+Character set:
+- Uppercase: A-Z
+- Lowercase: a-z
+- Numbers: 0-9
+- Punctuation: ., , ; : ! ? ' " - ( ) [ ] { } / \ @ # $ % & * + = < >
+- Special: © ® ™ ° § ¶ † ‡
+
+Tính cách font:
+- Friendly, approachable
+- Modern, clean
+- Rounded terminals
+- Excellent readability
+- Professional yet warm
+
+Dùng cho:
+✓ Body text (paragraphs, descriptions)
+✓ UI text (buttons, labels, inputs)
+✓ Headings (h1-h6)
+✓ Navigation menu
+✓ Form fields
+✓ Card content
+✓ Lists
+✓ Tables
+✓ Tooltips, modals
+
+KHÔNG dùng cho:
+✗ Code blocks (dùng JetBrains Mono)
+✗ Tech badges (dùng JetBrains Mono)
+✗ Brand hero titles (có thể dùng Shrikhand)
+
+
+1.2. SHRIKHAND (Display/Heading Font)
+--------------------------------------
+Source: Google Fonts
+URL: https://fonts.google.com/specimen/Shrikhand
+License: Open Font License
+
+Import configuration:
+```javascript
+import { Shrikhand } from 'next/font/google'
+
+const shrikhand = Shrikhand({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-shrikhand'
+})
+```
+
+Weight: 400 (Regular) - chỉ có 1 weight
+Subset: Latin only
+Variable: --font-shrikhand
+
+Tính cách font:
+- Bold, distinctive
+- Display-oriented
+- High impact
+- Retro vibe
+- Attention-grabbing
+- Playful yet professional
+
+Dùng cho:
+✓ Hero titles (trang chủ)
+✓ Brand name "The Noders PTNK"
+✓ Large display headings (optional)
+✓ Special event titles
+✓ Marketing materials
+✓ Decorative headings
+
+KHÔNG dùng cho:
+✗ Body text (khó đọc)
+✗ Small text (< 24px)
+✗ Long paragraphs
+✗ UI elements
+✗ Navigation
+
+Usage note: Chỉ dùng cho headings rất lớn (48px+), không dùng cho mọi heading
+
+
+1.3. JETBRAINS MONO (Monospace Font)
+-------------------------------------
+Source: JetBrains
+URL: https://www.jetbrains.com/lp/mono/
+License: OFL-1.1 (Open Font License)
+
+Không import trực tiếp, dùng qua font-mono class
+
+Tailwind config:
+```javascript
+fontFamily: {
+  mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace']
+}
+```
+
+Fallback chain:
+1. JetBrains Mono (nếu có)
+2. Fira Code (coding font backup)
+3. Consolas (Windows system font)
+4. Generic monospace
+
+Tính cách font:
+- Monospaced (fixed-width)
+- Developer-friendly
+- Clear character distinction (0 vs O, 1 vs l vs I)
+- Coding-optimized
+- Ligatures support
+- Technical aesthetic
+
+Dùng cho:
+✓ Code blocks (<code>, <pre>)
+✓ Tech stack badges
+✓ Terminal/console output
+✓ Technical data (IDs, hashes, keys)
+✓ JSON/YAML/config display
+✓ Inline code snippets
+✓ File paths, URLs (technical context)
+✓ Numbers trong stats (optional)
+
+KHÔNG dùng cho:
+✗ Body text
+✗ Headings (trừ technical headings)
+✗ UI labels
+✗ Marketing content
+
+
+================================================================================
+2. TYPOGRAPHY SCALE (Thang đo kích thước)
+================================================================================
+
+Sử dụng Tailwind's default type scale (rem-based):
+
+2.1. SIZE REFERENCE
+-------------------
+text-xs:    0.75rem     12px    // Extra small
+text-sm:    0.875rem    14px    // Small
+text-base:  1rem        16px    // Base (default)
+text-lg:    1.125rem    18px    // Large
+text-xl:    1.25rem     20px    // Extra large
+text-2xl:   1.5rem      24px    // 2X large
+text-3xl:   1.875rem    30px    // 3X large
+text-4xl:   2.25rem     36px    // 4X large
+text-5xl:   3rem        48px    // 5X large
+text-6xl:   3.75rem     60px    // 6X large
+text-7xl:   4.5rem      72px    // 7X large
+text-8xl:   6rem        96px    // 8X large
+text-9xl:   8rem        128px   // 9X large
+
+2.2. USAGE GUIDE
+----------------
+
+text-xs (12px):
+- Badges text
+- Small captions
+- Metadata nhỏ (last updated, tiny labels)
+- Footnotes
+- Helper text rất nhỏ
+
+text-sm (14px):
+- Card descriptions
+- Secondary body text
+- Form helper text
+- Small buttons
+- Metadata (date, author, read time)
+- Navigation items (mobile)
+- Toast messages
+- Table cells
+
+text-base (16px):
+- Body text chính (DEFAULT)
+- Paragraphs
+- Normal buttons
+- Form inputs
+- List items
+- Navigation items (desktop)
+
+text-lg (18px):
+- Large body text
+- Subtitles
+- Card subtitles
+- Important descriptions
+- Lead paragraphs
+- Section descriptions
+
+text-xl (20px):
+- Card titles
+- Small headings (h4)
+- Sidebar headings
+- Modal titles
+- Feature titles
+
+text-2xl (24px):
+- Section headings (h3)
+- Card main titles
+- Sub-page headings
+- Widget titles
+
+text-3xl (30px):
+- Page titles (h2)
+- Section main headings
+- Large card titles
+
+text-4xl (36px):
+- Hero subtitles
+- Page main headings (h1)
+- Important section titles
+
+text-5xl (48px):
+- Hero titles (mobile)
+- Display headings
+- Landing page titles
+
+text-6xl (60px):
+- Hero titles (tablet)
+- Large display headings
+
+text-7xl (72px):
+- Hero titles (desktop)
+- Main landing page title
+- Maximum heading size
+
+text-8xl, text-9xl (96px, 128px):
+- Không dùng trong project này
+- Quá lớn cho web content
+
+
+2.3. RESPONSIVE PATTERNS
+------------------------
+
+Hero title:
+Mobile:  text-5xl (48px)
+Desktop: text-7xl (72px)
+Class:   text-5xl md:text-7xl
+
+Section heading:
+Mobile:  text-3xl (30px)
+Desktop: text-4xl (36px)
+Class:   text-3xl md:text-4xl
+
+Card title:
+Mobile:  text-xl (20px)
+Desktop: text-2xl (24px)
+Class:   text-xl md:text-2xl
+
+General rule:
+- Mobile: 60-70% của desktop size
+- Scale up at md breakpoint (768px)
+
+
+================================================================================
+3. FONT WEIGHTS (Độ đậm chữ)
+================================================================================
+
+Available weights for Nunito:
+
+font-light (300):
+- Large headings (48px+)
+- Display text
+- Subtle emphasis
+- Hero subtitles
+Example: Hero subtitle text
+
+font-normal (400):
+- Body text (DEFAULT)
+- Paragraphs
+- Descriptions
+- Most UI text
+Example: All body content
+
+font-semibold (600):
+- Card titles
+- Button labels
+- Form labels
+- Small headings (h4-h6)
+- Emphasis trong paragraph
+- Navigation items (active)
+Example: "Featured Projects"
+
+font-bold (700):
+- Section headings (h2-h3)
+- Page titles
+- Important callouts
+- Stats numbers
+- CTA buttons (primary)
+Example: "About Us", "Our Projects"
+
+font-extrabold (800):
+- Hero titles (h1)
+- Main display headings
+- Maximum emphasis
+- Brand name (trong hero)
+Example: "PTNK AI Challenge"
+
+Weight usage rules:
+- Headings lớn (60px+): light (300) hoặc extrabold (800)
+- Headings vừa (24-48px): bold (700)
+- Headings nhỏ (20-24px): semibold (600)
+- Body text: normal (400)
+- Emphasis: semibold (600)
+
+
+================================================================================
+4. LINE HEIGHT (Khoảng cách dòng)
+================================================================================
+
+Tailwind classes:
+
+leading-none:    1          // Rất chặt (không dùng)
+leading-tight:   1.25       // Chặt - cho headings lớn
+leading-snug:    1.375      // Hơi chặt
+leading-normal:  1.5        // Normal - cho body text (DEFAULT)
+leading-relaxed: 1.625      // Thoải mái - long-form content
+leading-loose:   2          // Rộng (không dùng thường xuyên)
+
+Usage guide:
+
+leading-tight (1.25):
+✓ Hero titles (text-5xl+)
+✓ Display headings
+✓ Large headings (text-3xl+)
+✓ Short headlines
+Example: "The Noders PTNK"
+
+leading-normal (1.5):
+✓ Body text (DEFAULT)
+✓ Paragraphs
+✓ Card descriptions
+✓ UI text
+✓ Most content
+Example: Article paragraphs
+
+leading-relaxed (1.625):
+✓ Long-form content
+✓ Blog posts body
+✓ Documentation
+✓ Reading-heavy content
+Example: Post content area
+
+Rule:
+- Large text (24px+) → leading-tight (1.25)
+- Normal text (14-20px) → leading-normal (1.5)
+- Reading text (16-18px) → leading-relaxed (1.625)
+
+
+================================================================================
+5. LETTER SPACING (Khoảng cách chữ)
+================================================================================
+
+Tailwind classes:
+
+tracking-tighter: -0.05em   // Rất chặt
+tracking-tight:   -0.025em  // Chặt - cho large headings
+tracking-normal:  0         // Normal (DEFAULT)
+tracking-wide:    0.025em   // Rộng - cho uppercase
+tracking-wider:   0.05em    // Rất rộng
+tracking-widest:  0.1em     // Cực rộng
+
+Usage guide:
+
+tracking-tight (-0.025em):
+✓ Large display headings (text-5xl+)
+✓ Hero titles
+✓ Dense headings
+Example: Hero main title
+
+tracking-normal (0):
+✓ Body text (DEFAULT)
+✓ Most content
+✓ Normal headings
+Example: All standard text
+
+tracking-wide (0.025em):
+✓ Uppercase text
+✓ Small caps
+✓ Navigation items (uppercase)
+✓ Badges (uppercase)
+✓ Button labels (uppercase)
+Example: "READ MORE", "NEW"
+
+tracking-wider (0.05em):
+✓ Uppercase headings
+✓ Section labels
+✓ Category tags (uppercase)
+Example: "FEATURED", "TRENDING"
+
+Rule:
+- Large headings → tracking-tight
+- Uppercase text → tracking-wide
+- Normal text → tracking-normal (default)
+
+
+================================================================================
+6. TEXT ALIGNMENT (Căn chỉnh)
+================================================================================
+
+text-left:    // Căn trái (DEFAULT cho body)
+text-center:  // Căn giữa (headings, hero, CTAs)
+text-right:   // Căn phải (metadata, timestamps)
+text-justify: // Căn đều (long-form content)
+
+Common patterns:
+
+Hero section:
+- Heading: text-center
+- Subtitle: text-center
+- Buttons: justify-center (flex)
+
+Section heading:
+- Desktop: text-center (centered sections)
+- Desktop: text-left (left-aligned sections)
+
+Card:
+- Title: text-left
+- Description: text-left
+- Actions: text-right hoặc justify-between
+
+Body content:
+- Paragraphs: text-left
+- Long articles: text-justify (optional)
+
+Metadata:
+- Dates, authors: text-left hoặc text-right
+- Timestamps: text-right
+
+
+================================================================================
+7. TEXT COLOR (Màu chữ)
+================================================================================
+
+Hierarchy colors:
+
+text-text-primary (#F8FAFC):
+✓ Main headings
+✓ Body text
+✓ Primary content
+✓ Important information
+Example: Page titles, paragraphs
+
+text-text-secondary (#CBD5E1):
+✓ Subtitles
+✓ Descriptions
+✓ Metadata
+✓ Secondary information
+Example: Card descriptions, timestamps
+
+text-text-tertiary (#94A3B8):
+✓ Captions
+✓ Helper text
+✓ Placeholders
+✓ Disabled text
+Example: Input placeholders, footnotes
+
+Accent colors:
+
+text-primary-blue (#2563EB):
+✓ Links
+✓ CTAs
+✓ Important keywords
+✓ Active states
+Example: "Learn more", active nav
+
+text-accent-cyan (#06B6D4):
+✓ Tech-related text
+✓ Code elements
+✓ Hover states
+✓ Highlights
+Example: Inline code, tech terms
+
+Semantic colors:
+
+text-success (#059669):
+✓ Success messages
+✓ Positive indicators
+✓ "Active", "Published"
+
+text-warning (#D97706):
+✓ Warning messages
+✓ Caution text
+✓ "Pending", "Draft"
+
+text-error (#DC2626):
+✓ Error messages
+✓ Form errors
+✓ Destructive actions
+✓ "Error", "Failed"
+
+
+================================================================================
+8. SPECIAL TEXT STYLES
+================================================================================
+
+8.1. GRADIENT TEXT
+------------------
+Class: .gradient-text
+
+CSS:
+```css
+.gradient-text {
+  background: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+```
+
+Dùng cho:
+✓ Hero main titles
+✓ Section main headings
+✓ Brand name "The Noders PTNK"
+✓ Special emphasis headings
+✓ CTAs text (optional)
+
+Example:
+<h1 className="gradient-text">PTNK AI Challenge</h1>
+
+
+8.2. INLINE CODE
+----------------
+HTML element: <code>
+
+Auto styling (globals.css):
+```css
+code {
+  @apply bg-dark-surface text-accent-cyan px-2 py-1
+         rounded text-sm font-mono;
+}
+```
+
+Features:
+- Font: JetBrains Mono
+- Size: text-sm (14px)
+- Color: accent-cyan (#06B6D4)
+- Background: dark-surface
+- Padding: 2px vertical, 4px horizontal
+- Border radius: rounded
+
+Example:
+Use <code>npm install</code> to install dependencies.
+
+
+8.3. CODE BLOCKS
+----------------
+HTML elements: <pre><code>
+
+Auto styling (globals.css):
+```css
+pre {
+  @apply bg-dark-surface border border-dark-border
+         rounded-lg p-4 overflow-x-auto;
+}
+
+pre code {
+  @apply bg-transparent p-0;
+}
+```
+
+Features:
+- Font: JetBrains Mono
+- Background: dark-surface
+- Border: 1px dark-border
+- Padding: 16px
+- Border radius: rounded-lg (12px)
+- Overflow: horizontal scroll
+
+Example:
+```javascript
+function hello() {
+  console.log("Hello world");
+}
+```
+
+
+8.4. UPPERCASE TEXT
+-------------------
+Pattern: uppercase + tracking-wide
+
+Common usage:
+<span className="text-xs uppercase tracking-wide text-text-tertiary">
+  Category
+</span>
+
+Dùng cho:
+✓ Badges
+✓ Category labels
+✓ Section labels ("FEATURES", "PRICING")
+✓ Status indicators
+✓ Small headings
+
+
+8.5. LINE CLAMP (Truncate)
+--------------------------
+Classes: .line-clamp-1, .line-clamp-2, .line-clamp-3
+
+CSS (globals.css):
+```css
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+```
+
+Dùng cho:
+✓ Card descriptions (2-3 lines max)
+✓ Preview text
+✓ List items
+✓ Grid items
+
+Example:
+<p className="line-clamp-2 text-text-secondary">
+  Long description that will be truncated after 2 lines...
+</p>
+
+
+================================================================================
+9. COMPONENT-SPECIFIC TYPOGRAPHY
+================================================================================
+
+9.1. NAVIGATION
+---------------
+Desktop:
+- Font: Nunito
+- Size: text-base (16px)
+- Weight: font-normal (400)
+- Active: font-semibold (600)
+- Color: text-text-secondary → text-white (active)
+
+Mobile:
+- Font: Nunito
+- Size: text-sm (14px)
+- Weight: font-normal (400)
+
+
+9.2. BUTTONS
+------------
+Primary:
+- Font: Nunito
+- Size: text-sm (small), text-base (medium), text-lg (large)
+- Weight: font-semibold (600)
+- Color: white
+- Transform: none (không uppercase)
+
+Secondary:
+- Font: Nunito
+- Size: text-sm / text-base / text-lg
+- Weight: font-semibold (600)
+- Color: text-text-primary
+
+
+9.3. CARDS
+----------
+Title:
+- Font: Nunito
+- Size: text-xl md:text-2xl
+- Weight: font-semibold (600)
+- Color: text-text-primary
+
+Description:
+- Font: Nunito
+- Size: text-sm
+- Weight: font-normal (400)
+- Color: text-text-secondary
+- Line height: leading-relaxed
+
+
+9.4. BADGES
+-----------
+Regular badges:
+- Font: Nunito
+- Size: text-xs (small), text-sm (medium)
+- Weight: font-medium (500) - closest to semibold
+- Transform: none
+
+Tech badges:
+- Font: JetBrains Mono (font-mono)
+- Size: text-xs (small), text-sm (medium)
+- Weight: font-normal (400) - mono fonts don't need bold
+- Color: Dynamic (tech-specific colors)
+
+
+9.5. FORMS
+----------
+Label:
+- Font: Nunito
+- Size: text-sm (14px)
+- Weight: font-medium (500) - closest to semibold
+- Color: text-text-primary
+
+Input:
+- Font: Nunito
+- Size: text-sm (14px)
+- Weight: font-normal (400)
+- Color: text-text-primary
+
+Placeholder:
+- Font: Nunito
+- Size: text-sm (14px)
+- Weight: font-normal (400)
+- Color: text-text-tertiary
+
+Helper text:
+- Font: Nunito
+- Size: text-xs (12px)
+- Weight: font-normal (400)
+- Color: text-text-secondary
+
+Error text:
+- Font: Nunito
+- Size: text-xs (12px)
+- Weight: font-normal (400)
+- Color: text-error
+
+
+9.6. MODAL
+----------
+Title:
+- Font: Nunito
+- Size: text-xl (20px)
+- Weight: font-semibold (600)
+- Color: text-text-primary
+
+Body:
+- Font: Nunito
+- Size: text-base (16px)
+- Weight: font-normal (400)
+- Color: text-text-secondary
+
+
+9.7. TOAST
+----------
+Message:
+- Font: Nunito
+- Size: text-sm (14px)
+- Weight: font-normal (400)
+- Color: text-text-primary
+
+
+================================================================================
+10. ACCESSIBILITY CONSIDERATIONS
+================================================================================
+
+10.1. MINIMUM SIZES
+-------------------
+- Body text: 16px minimum (text-base)
+- Small text: 14px minimum (text-sm)
+- Absolute minimum: 12px (text-xs) - chỉ cho metadata
+
+10.2. CONTRAST RATIOS
+---------------------
+WCAG AA compliance:
+
+text-text-primary on dark-bg:
+- Ratio: ~15:1 (Excellent)
+- Use: Body text, headings
+
+text-text-secondary on dark-bg:
+- Ratio: ~8:1 (Good)
+- Use: Descriptions, metadata
+
+text-text-tertiary on dark-bg:
+- Ratio: ~4.5:1 (Minimum AA)
+- Use: Captions only, not for small text
+
+10.3. LINE LENGTH
+-----------------
+Optimal reading width:
+- Characters: 50-75 per line
+- Max width: 672px-768px (max-w-2xl to max-w-3xl)
+
+Implementation:
+<div className="max-w-3xl mx-auto">
+  <p>Long-form content here...</p>
+</div>
+
+
+================================================================================
+11. FONT LOADING OPTIMIZATION
+================================================================================
+
+11.1. NEXT.JS FONT OPTIMIZATION
+-------------------------------
+Next.js tự động:
+- Inline font CSS
+- Self-host fonts
+- Preload font files
+- Remove external requests
+- Zero layout shift
+
+11.2. FONT DISPLAY
+------------------
+Default: swap
+- Shows fallback font immediately
+- Swaps to web font when loaded
+- No invisible text (FOIT)
+
+11.3. FALLBACK FONTS
+--------------------
+Primary (Nunito):
+→ system-ui → sans-serif
+
+Heading (Shrikhand):
+→ var(--font-shrikhand) → system-ui → sans-serif
+
+Mono (JetBrains Mono):
+→ Fira Code → Consolas → monospace
+
+
+================================================================================
+12. QUICK REFERENCE CHEAT SHEET
+================================================================================
+
+HERO SECTION:
+-------------
+Main title:     text-5xl md:text-7xl font-extrabold gradient-text
+Subtitle:       text-xl md:text-2xl font-light text-text-secondary
+CTA button:     text-base font-semibold
+
+SECTION HEADINGS:
+-----------------
+H1 (Page):      text-3xl md:text-4xl font-bold text-text-primary
+H2 (Section):   text-2xl md:text-3xl font-bold text-text-primary
+H3 (Sub):       text-xl md:text-2xl font-semibold text-text-primary
+
+BODY TEXT:
+----------
+Paragraph:      text-base font-normal leading-relaxed text-text-primary
+Description:    text-sm font-normal text-text-secondary
+Caption:        text-xs font-normal text-text-tertiary
+
+CARD:
+-----
+Title:          text-xl font-semibold text-text-primary
+Description:    text-sm font-normal line-clamp-2 text-text-secondary
+Metadata:       text-xs text-text-tertiary
+
+BUTTON:
+-------
+Primary:        text-base font-semibold text-white
+Secondary:      text-base font-semibold text-text-primary
+
+BADGE:
+------
+Regular:        text-xs font-medium uppercase tracking-wide
+Tech:           text-xs font-mono font-normal
+
+FORM:
+-----
+Label:          text-sm font-medium text-text-primary
+Input:          text-sm font-normal text-text-primary
+Helper:         text-xs text-text-secondary
+Error:          text-xs text-error
+
+
+================================================================================
+13. EXAMPLES BY USE CASE
+================================================================================
+
+13.1. LANDING PAGE HERO
+-----------------------
+<div className="text-center">
+  <h1 className="text-5xl md:text-7xl font-extrabold mb-6">
+    <span className="gradient-text">The Noders</span>
+    <br />
+    <span className="text-text-primary">PTNK</span>
+  </h1>
+  <p className="text-xl md:text-2xl font-light text-text-secondary mb-8
+                max-w-3xl mx-auto leading-relaxed">
+    Building the future with AI and Machine Learning
+  </p>
+</div>
+
+
+13.2. SECTION HEADING
+---------------------
+<div className="text-center mb-12">
+  <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+    Featured Projects
+  </h2>
+  <p className="text-lg text-text-secondary max-w-2xl mx-auto">
+    Explore our innovative AI projects and solutions
+  </p>
+</div>
+
+
+13.3. PROJECT CARD
+------------------
+<div>
+  <h3 className="text-xl font-semibold text-text-primary mb-2">
+    IELTS Scoring AI
+  </h3>
+  <p className="text-sm text-text-secondary line-clamp-2 mb-4
+                leading-relaxed">
+    An AI model that automatically scores IELTS Writing tasks
+    with high accuracy.
+  </p>
+  <div className="flex gap-2 text-xs text-text-tertiary">
+    <span>5 min read</span>
+    <span>•</span>
+    <span>Dec 15, 2024</span>
+  </div>
+</div>
+
+
+13.4. CODE EXAMPLE
+------------------
+<div className="prose">
+  <p>Install dependencies using <code>npm install</code></p>
+
+  <pre><code className="language-bash">
+npm install
+npm run dev
+  </code></pre>
+</div>
+
+
+================================================================================
+KẾT LUẬN
+================================================================================
+
+Typography System Summary:
+--------------------------
+✓ 3 fonts: Nunito (primary), Shrikhand (display), JetBrains Mono (code)
+✓ 5 weights for Nunito: 300, 400, 600, 700, 800
+✓ Responsive sizes: Mobile 60-70% của desktop
+✓ Color hierarchy: primary, secondary, tertiary
+✓ Accessibility: WCAG AA compliance
+✓ Optimization: Next.js font loading
+
+Core Principles:
+----------------
+1. Consistency: Dùng consistent scale và weights
+2. Hierarchy: Clear visual hierarchy với size + weight + color
+3. Readability: Optimize cho reading (line height, length, contrast)
+4. Performance: Self-hosted fonts, optimized loading
+5. Accessibility: Minimum sizes, contrast ratios, semantic HTML
+
+Khi áp dụng cho dự án mới:
+--------------------------
+1. Import Nunito với weights: 300, 400, 600, 700, 800
+2. Import Shrikhand cho display headings (optional)
+3. Setup JetBrains Mono cho code
+4. Dùng type scale theo guideline này
+5. Maintain color hierarchy (primary/secondary/tertiary)
+6. Test contrast ratios
+7. Optimize line length cho readability
+
+Happy typing! 📝
+
+================================================================================

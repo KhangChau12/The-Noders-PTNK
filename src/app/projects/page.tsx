@@ -59,7 +59,7 @@ export default function ProjectsPage() {
         <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
             Our Projects
           </h1>
           <p className="text-text-secondary text-lg max-w-3xl mx-auto">

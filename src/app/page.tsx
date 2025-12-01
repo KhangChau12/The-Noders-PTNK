@@ -525,7 +525,7 @@ export default async function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contest">
                 <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90">
-                  Join AI Challenge 2025
+                  Join AI Challenge 2026
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </Link>

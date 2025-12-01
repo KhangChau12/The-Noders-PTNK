@@ -162,7 +162,7 @@ ${formData.message}
         <div className="container mx-auto max-w-6xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
               Contact Us
             </h1>
             <p className="text-text-secondary text-lg max-w-3xl mx-auto">

@@ -183,8 +183,12 @@ export function useMembers(filters: MemberFilters = {}) {
         const params = new URLSearchParams()
         if (filters.role) params.append('role', filters.role)
         if (filters.search) params.append('search', filters.search)
+        // Add timestamp to prevent caching
+        params.append('_t', Date.now().toString())
 
-        const response = await fetch(`/api/members?${params.toString()}`)
+        const response = await fetch(`/api/members?${params.toString()}`, {
+          cache: 'no-store'
+        })
         const data = await response.json()
 
         if (!response.ok || !data.success) {
@@ -212,8 +216,12 @@ export function useMembers(filters: MemberFilters = {}) {
       const params = new URLSearchParams()
       if (filters.role) params.append('role', filters.role)
       if (filters.search) params.append('search', filters.search)
+      // Add timestamp to prevent caching
+      params.append('_t', Date.now().toString())
 
-      const response = await fetch(`/api/members?${params.toString()}`)
+      const response = await fetch(`/api/members?${params.toString()}`, {
+        cache: 'no-store'
+      })
       const data = await response.json()
 
       if (!response.ok || !data.success) {

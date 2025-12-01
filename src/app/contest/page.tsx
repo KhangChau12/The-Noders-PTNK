@@ -23,10 +23,11 @@ import {
   Gift,
   Zap
 } from 'lucide-react'
+import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: 'PTNK AI Challenge 2025',
-  description: 'Join The Noders PTNK AI Challenge 2025! Build AI models for IELTS Writing scoring. Cash prizes up to 1,000,000 VNĐ. Two-week competition for VNU High School students.',
+  title: 'PTNK AI Challenge 2026',
+  description: 'Join The Noders PTNK AI Challenge 2026! Build AI models for IELTS Writing scoring. Cash prizes up to 1,000,000 VNĐ. Two-week competition for VNU High School students.',
   keywords: ['AI challenge', 'IELTS scoring', 'machine learning contest', 'student competition', 'AI competition Vietnam', 'PTNK challenge'],
   url: '/contest',
 })
@@ -113,19 +114,17 @@ export default function ContestPage() {
   ]
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-dark-surface/50 to-primary-blue/5">
+    <>
+      <NeuralNetworkBackground />
+      <div className="relative min-h-screen z-10">
+        {/* Hero Section */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-dark-surface/50 to-primary-blue/5">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 border border-primary-blue/30 rounded-2xl mb-6">
-              <Trophy className="w-8 h-8 text-primary-blue" />
-            </div>
-
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold font-heading mb-6">
               <span className="gradient-text">PTNK AI Challenge</span>
               <br />
-              <span className="text-text-primary">2025</span>
+              <span className="text-text-primary">2026</span>
             </h1>
 
             <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -391,6 +390,7 @@ export default function ContestPage() {
           </Card>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
 }

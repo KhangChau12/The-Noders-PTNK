@@ -8,6 +8,10 @@ export const metadata: Metadata = generateSEOMetadata({
   url: '/members',
 })
 
+// Force dynamic rendering, disable all caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default function MembersLayout({
   children,
 }: {
