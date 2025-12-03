@@ -6,7 +6,7 @@ import { Badge } from '@/components/Badge'
 import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
 import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
-import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper, Target } from 'lucide-react'
+import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper, Target, BookOpen } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { TECH_STACK_COLORS } from '@/lib/constants'
 
@@ -251,24 +251,28 @@ export default async function HomePage() {
 
   const features = [
     {
-      icon: <Brain className="w-8 h-8" />,
-      title: 'AI Innovation & Workshops',
-      description: 'Organizing workshops at our school to spread AI and technology knowledge to more students.'
+      icon: <Target className="w-8 h-8" />,
+      title: 'Contest',
+      description: 'Compete and learn through hands-on AI challenges',
+      href: '/contest'
+    },
+    {
+      icon: <BookOpen className="w-8 h-8" />,
+      title: 'Education',
+      description: 'Structured workshops and courses for skill development',
+      href: '/education'
     },
     {
       icon: <Code className="w-8 h-8" />,
-      title: 'Practical Tech Solutions',
-      description: 'Building practical technology products, especially AI tools to support student learning.'
+      title: 'Projects',
+      description: 'Real-world tech solutions built by our members',
+      href: '/projects'
     },
     {
-      icon: <Users className="w-8 h-8" />,
-      title: 'Knowledge Sharing',
-      description: 'Writing and sharing tech posts for the community to learn, explore and share together.'
-    },
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: 'Community Building',
-      description: 'Connecting young developers at PTNK into a strong learning and development community.'
+      icon: <Newspaper className="w-8 h-8" />,
+      title: 'Posts',
+      description: 'Insights and knowledge shared by the community',
+      href: '/posts'
     }
   ]
 
@@ -610,7 +614,7 @@ export default async function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
@@ -621,34 +625,38 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover-lift group relative overflow-hidden">
-                <CardContent className="p-2 relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl mb-4 text-primary-blue group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                    {feature.icon}
+              <Link key={index} href={feature.href}>
+                <Card className="text-center hover-lift group relative overflow-hidden cursor-pointer h-full transition-all duration-300">
+                  <CardContent className="p-8 relative z-10">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-2xl mb-6 text-primary-blue group-hover:shadow-2xl group-hover:shadow-primary-blue/30 group-hover:scale-110 transition-all duration-300">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold text-text-primary mb-4 group-hover:bg-gradient-to-r group-hover:from-primary-blue group-hover:to-accent-cyan group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                      {feature.title}
+                    </h3>
+                    <p className="text-text-secondary leading-relaxed text-base min-h-[3rem]">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                  {/* Animated border on hover */}
+                  <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-blue/50 rounded-lg transition-all duration-300"></div>
+                  {/* Gradient glow background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/10 group-hover:to-accent-cyan/10 transition-all duration-500 rounded-lg"></div>
+                  {/* Arrow indicator on bottom right */}
+                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                    <ArrowRight className="w-5 h-5 text-primary-blue" />
                   </div>
-                  <h3 className="text-xl font-semibold text-text-primary mb-3 font-mono">
-                    {feature.title}
-                  </h3>
-                  <p className="text-text-secondary leading-relaxed">
-                    {feature.description}
-                  </p>
-                </CardContent>
-                {/* Terminal-style border effect */}
-                <div className="absolute inset-0 border border-transparent group-hover:border-primary-blue/30 rounded-lg transition-all duration-300"></div>
-                {/* Circuit pattern background */}
-                <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
-                  <div className="w-full h-full bg-gradient-to-br from-primary-blue/10 to-transparent"></div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
       {/* Our Contests Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
@@ -723,6 +731,65 @@ export default async function HomePage() {
             <Link href="/contest">
               <Button size="lg" className="group">
                 View All Contests
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Education Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+              Courses & Workshops
+            </h2>
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+              Structured learning paths and hands-on workshops to build your AI and Data Science skills
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            {/* Data Science Module 1 Card */}
+            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border border-primary-blue/30">
+              <CardContent className="p-8">
+                <Badge variant="warning" className="mb-4">Mini-Course • Coming Soon</Badge>
+                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors">
+                  Introduction to Data Science - Module 1
+                </h3>
+                <p className="text-text-secondary mb-6 leading-relaxed">
+                  Build a solid foundation in data science thinking and gain comprehensive knowledge of the 3 pillars of data (Structured, Vision, NLP).
+                  4-session mini-course focused on problem fundamentals and practical applications.
+                </p>
+                <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-text-secondary">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary-blue" />
+                    <span>Grade 10-11 Students</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary-blue" />
+                    <span>4 sessions × 1.5h</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary-blue" />
+                    <span>January 2026</span>
+                  </div>
+                </div>
+                <Link href="/education/data-science-module-1">
+                  <Button variant="secondary" className="w-full group/btn">
+                    Learn More
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/education">
+              <Button size="lg" className="group">
+                View All Programs
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>

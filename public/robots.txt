@@ -1,0 +1,34 @@
+# robots.txt for The Noders PTNK
+
+# Allow all bots to crawl public pages
+User-agent: *
+Allow: /
+Allow: /projects
+Allow: /posts
+Allow: /members
+Allow: /contest
+Allow: /contact
+Allow: /terms
+
+# Disallow protected and private pages
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+Disallow: /api
+
+# Allow access to static assets
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp
+Allow: /*.ico
+
+# Sitemap location
+Sitemap: https://www.thenodersptnk.com/sitemap.xml
+
+# Crawl delay (optional, helps prevent server overload)
+Crawl-delay: 1
