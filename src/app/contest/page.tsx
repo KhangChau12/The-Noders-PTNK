@@ -30,8 +30,8 @@ export default function ContestPage() {
       title: 'Noders AI Competition 2025',
       shortDescription: 'Our internal competition where Noders members sharpen their AI skills through practical challenges. A focused learning environment for our club members.',
       stats: [
-        { icon: <Users className="w-4 h-4" />, text: '14/18 Members Joined' },
-        { icon: <Calendar className="w-4 h-4" />, text: '29 Nov - 21 Dec 2025' }
+        { icon: <Users className="w-4 h-4" />, text: '16 Members Joined' },
+        { icon: <Calendar className="w-4 h-4" />, text: '28 Nov - 28 Dec 2025' }
       ],
       gradient: 'from-primary-blue/10 to-accent-cyan/10',
       border: 'border-primary-blue/30'
