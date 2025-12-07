@@ -131,7 +131,7 @@ export default function NAIC2025Page() {
               <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-primary-blue" />
-                  <span>14/18 Members Joined</span>
+                  <span>16 Members Joined</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-primary-blue" />
@@ -142,86 +142,95 @@ export default function NAIC2025Page() {
           </div>
         </section>
 
-        {/* Overview Section */}
+        {/* Overview & Video Section */}
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-6 text-center">
-                Competition Overview
+            <div className="max-w-7xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-12 text-center">
+                Competition Overview & Rules
               </h2>
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-                <CardContent className="p-8">
-                  <p className="text-text-secondary text-lg leading-relaxed mb-6">
-                    NAIC 2025 is designed as a practical learning experience for Noders members to
-                    develop real AI skills through hands-on competition. Whether you're a seasoned
-                    AI team member or completely new to machine learning, this is your chance to
-                    train your first model, learn from detailed guides, and see your skills grow
-                    in a friendly, low-pressure environment.
-                  </p>
 
-                  <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
-                    <h3 className="text-text-primary font-semibold mb-4 flex items-center">
-                      <Users className="w-5 h-5 mr-2 text-primary-blue" />
-                      Target Audience
-                    </h3>
-                    <ul className="space-y-2 text-text-secondary">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mr-2 mt-0.5" />
-                        <span><strong className="text-text-primary">AI Team Members:</strong> Mandatory participation to practice and improve skills</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mr-2 mt-0.5" />
-                        <span><strong className="text-text-primary">Other Club Members:</strong> Optional participation - perfect for those curious about AI</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mr-2 mt-0.5" />
-                        <span><strong className="text-text-primary">Beginners Welcome:</strong> Detailed tutorial guides provided for first-time AI practitioners</span>
-                      </li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Rules & Q&A Video Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
-          <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-2xl mb-4 text-primary-blue">
-                  <PlayCircle className="w-8 h-8" />
-                </div>
-                <h2 className="text-3xl font-bold text-text-primary mb-4">
-                  Rules Explanation & Q&A Session
-                </h2>
-                <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                  Watch our detailed walkthrough of competition rules and get answers to common questions
-                </p>
-              </div>
-
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                    <iframe
-                      className="absolute top-0 left-0 w-full h-full"
-                      src="https://www.youtube.com/embed/zN5i0p9qJqI"
-                      title="NAIC 2025 Rules & Q&A"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                  <div className="p-6 bg-dark-surface/50">
-                    <div className="flex items-start space-x-3 text-text-secondary text-sm">
-                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                      <p>
-                        This session covers all competition rules, submission guidelines, evaluation criteria, and answers frequently asked questions from participants.
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Left Column - Overview (2/5 width) */}
+                <div className="lg:col-span-2">
+                  <Card className="bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 h-full">
+                    <CardContent className="p-8">
+                      <h3 className="text-2xl font-bold text-text-primary mb-6">
+                        About NAIC 2025
+                      </h3>
+                      <p className="text-text-secondary leading-relaxed mb-6">
+                        NAIC 2025 is designed as a practical learning experience for Noders members to
+                        develop real AI skills through hands-on competition. Whether you're a seasoned
+                        AI team member or completely new to machine learning, this is your chance to
+                        train your first model, learn from detailed guides, and see your skills grow
+                        in a friendly, low-pressure environment.
                       </p>
+
+                      <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
+                        <h4 className="text-text-primary font-semibold mb-4 flex items-center">
+                          <Users className="w-5 h-5 mr-2 text-primary-blue" />
+                          Target Audience
+                        </h4>
+                        <ul className="space-y-3 text-text-secondary text-sm">
+                          <li className="flex items-start">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mr-2 mt-0.5" />
+                            <span><strong className="text-text-primary">AI Team Members:</strong> Mandatory participation to practice and improve skills</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mr-2 mt-0.5" />
+                            <span><strong className="text-text-primary">Other Club Members:</strong> Optional participation - perfect for those curious about AI</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mr-2 mt-0.5" />
+                            <span><strong className="text-text-primary">Beginners Welcome:</strong> Detailed tutorial guides provided for first-time AI practitioners</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Right Column - Video (3/5 width) */}
+                <div className="lg:col-span-3">
+                  <div className="mb-6">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl text-primary-blue">
+                        <PlayCircle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-text-primary">
+                          Rules Explanation & Q&A
+                        </h3>
+                        <p className="text-text-secondary text-sm">
+                          Watch our detailed walkthrough of competition rules
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+
+                  <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src="https://www.youtube.com/embed/zN5i0p9qJqI"
+                          title="NAIC 2025 Rules & Q&A"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                      <div className="p-6 bg-dark-surface/50">
+                        <div className="flex items-start space-x-3 text-text-secondary text-sm">
+                          <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                          <p>
+                            This session covers all competition rules, submission guidelines, evaluation criteria, and answers frequently asked questions from participants.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -229,38 +238,125 @@ export default function NAIC2025Page() {
         {/* Timeline Section */}
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl font-bold text-text-primary mb-12 text-center">
                 Competition Timeline
               </h2>
-              <div className="space-y-4">
+
+              {/* Desktop Timeline */}
+              <div className="hidden md:block relative">
+                {/* Progress Bar Background */}
+                <div className="absolute top-8 left-0 right-0 h-1 bg-dark-border/30 rounded-full">
+                  {/* Active Progress */}
+                  <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-success via-warning to-dark-border/50 rounded-full transition-all duration-1000" style={{ width: '66%' }}></div>
+                </div>
+
+                {/* Timeline Items */}
+                <div className="relative flex justify-between items-start pt-16">
+                  {timeline.map((item, index) => (
+                    <div key={index} className="flex flex-col items-center flex-1 relative">
+                      {/* Milestone Node */}
+                      <div className={`absolute -top-16 w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-500 ${
+                        item.status === 'completed'
+                          ? 'bg-success border-success/30 shadow-lg shadow-success/50' :
+                        item.status === 'ongoing'
+                          ? 'bg-warning border-warning/30 shadow-xl shadow-warning/60 animate-pulse' :
+                          'bg-dark-surface border-dark-border/50'
+                      }`}>
+                        <div className={`w-8 h-8 rounded-full ${
+                          item.status === 'completed' ? 'bg-white' :
+                          item.status === 'ongoing' ? 'bg-white' :
+                          'bg-dark-border'
+                        }`}></div>
+                      </div>
+
+                      {/* Content Card */}
+                      <Card className={`w-full mt-2 transition-all duration-300 ${
+                        item.status === 'ongoing'
+                          ? 'bg-gradient-to-br from-warning/10 to-accent-cyan/5 border-warning/30 shadow-lg'
+                          : 'bg-dark-surface/50 border-dark-border/30'
+                      }`}>
+                        <CardContent className="p-6 text-center">
+                          <Badge
+                            variant={
+                              item.status === 'completed' ? 'success' :
+                              item.status === 'ongoing' ? 'warning' :
+                              'default'
+                            }
+                            className="mb-3"
+                          >
+                            {item.status}
+                          </Badge>
+                          <h3 className="text-lg font-bold text-text-primary mb-2 leading-tight">
+                            {item.event}
+                          </h3>
+                          <p className="text-sm text-text-secondary font-mono">
+                            {item.date}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile Timeline (Vertical) */}
+              <div className="md:hidden space-y-6">
                 {timeline.map((item, index) => (
-                  <Card key={index} variant="hover" className="hover-lift">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-3 h-3 rounded-full ${
-                            item.status === 'completed' ? 'bg-success' :
-                            item.status === 'ongoing' ? 'bg-warning animate-pulse' :
-                            'bg-dark-border'
-                          }`}></div>
-                          <div>
-                            <p className="text-text-primary font-semibold">{item.event}</p>
-                            <p className="text-text-secondary text-sm">{item.date}</p>
-                          </div>
-                        </div>
+                  <div key={index} className="relative flex items-start space-x-4">
+                    {/* Vertical Line */}
+                    {index < timeline.length - 1 && (
+                      <div className="absolute left-6 top-12 bottom-0 w-0.5 bg-dark-border/30">
+                        <div className={`w-full ${
+                          item.status === 'completed' ? 'bg-success h-full' :
+                          item.status === 'ongoing' ? 'bg-warning h-1/2' :
+                          'bg-transparent'
+                        } transition-all duration-500`}></div>
+                      </div>
+                    )}
+
+                    {/* Node */}
+                    <div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full border-4 flex items-center justify-center ${
+                      item.status === 'completed'
+                        ? 'bg-success border-success/30 shadow-lg shadow-success/50' :
+                      item.status === 'ongoing'
+                        ? 'bg-warning border-warning/30 shadow-xl shadow-warning/60 animate-pulse' :
+                        'bg-dark-surface border-dark-border/50'
+                    }`}>
+                      <div className={`w-5 h-5 rounded-full ${
+                        item.status === 'completed' ? 'bg-white' :
+                        item.status === 'ongoing' ? 'bg-white' :
+                        'bg-dark-border'
+                      }`}></div>
+                    </div>
+
+                    {/* Card */}
+                    <Card className={`flex-1 ${
+                      item.status === 'ongoing'
+                        ? 'bg-gradient-to-br from-warning/10 to-accent-cyan/5 border-warning/30'
+                        : 'bg-dark-surface/50 border-dark-border/30'
+                    }`}>
+                      <CardContent className="p-4">
                         <Badge
                           variant={
                             item.status === 'completed' ? 'success' :
                             item.status === 'ongoing' ? 'warning' :
                             'default'
                           }
+                          size="sm"
+                          className="mb-2"
                         >
                           {item.status}
                         </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        <h3 className="text-base font-bold text-text-primary mb-1">
+                          {item.event}
+                        </h3>
+                        <p className="text-xs text-text-secondary font-mono">
+                          {item.date}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 ))}
               </div>
             </div>
