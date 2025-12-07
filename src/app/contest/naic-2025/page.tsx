@@ -19,7 +19,8 @@ import {
   FileText,
   Medal,
   Coins,
-  Star
+  Star,
+  PlayCircle
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
@@ -33,8 +34,8 @@ export const metadata: Metadata = generateSEOMetadata({
 export default function NAIC2025Page() {
   const timeline = [
     { date: '29 Nov 2025', event: 'Registration Opens', status: 'completed' },
-    { date: '29 Nov - 21 Dec', event: 'Active Competition Period', status: 'ongoing' },
-    { date: '21 Dec 2025', event: 'Final Submission Deadline', status: 'upcoming' }
+    { date: '29 Nov - 28 Dec', event: 'Active Competition Period', status: 'ongoing' },
+    { date: '28 Dec 2025', event: 'Final Submission Deadline', status: 'upcoming' }
   ]
 
   const formatDetails = [
@@ -134,7 +135,7 @@ export default function NAIC2025Page() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-primary-blue" />
-                  <span>29 Nov - 21 Dec 2025</span>
+                  <span>29 Nov - 28 Dec 2025</span>
                 </div>
               </div>
             </div>
@@ -184,8 +185,49 @@ export default function NAIC2025Page() {
           </div>
         </section>
 
-        {/* Timeline Section */}
+        {/* Rules & Q&A Video Section */}
         <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+          <div className="container mx-auto">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-2xl mb-4 text-primary-blue">
+                  <PlayCircle className="w-8 h-8" />
+                </div>
+                <h2 className="text-3xl font-bold text-text-primary mb-4">
+                  Rules Explanation & Q&A Session
+                </h2>
+                <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+                  Watch our detailed walkthrough of competition rules and get answers to common questions
+                </p>
+              </div>
+
+              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src="https://www.youtube.com/embed/zN5i0p9qJqI"
+                      title="NAIC 2025 Rules & Q&A"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="p-6 bg-dark-surface/50">
+                    <div className="flex items-start space-x-3 text-text-secondary text-sm">
+                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                      <p>
+                        This session covers all competition rules, submission guidelines, evaluation criteria, and answers frequently asked questions from participants.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Timeline Section */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
