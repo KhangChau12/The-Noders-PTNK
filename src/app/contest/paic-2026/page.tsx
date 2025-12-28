@@ -173,9 +173,8 @@ export default function PAIC2026Page() {
                 <span className="text-text-primary">PTNK AI Challenge 2026</span>
               </h1>
               <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-                Kỳ thi học thuật về Trí tuệ Nhân tạo do Câu lạc bộ The Noders tổ chức,
-                dưới sự cố vấn chuyên môn của thầy Nguyễn Thành Lộc. Tạo sân chơi AI thực tế
-                cho học sinh PTNK, giúp rèn luyện tư duy dữ liệu và thuật toán.
+                PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do The Noders PTNK community tổ chức,
+                được xây dựng theo hình thức thi đấu tương tự VOAI / VAIC / IOAI, với advisor là thầy Nguyễn Thành Lộc.
               </p>
               <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
@@ -196,21 +195,20 @@ export default function PAIC2026Page() {
         </section>
 
         {/* Overview Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-6 text-center">
                 Giới thiệu chung
               </h2>
               <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 mb-8">
                 <CardContent className="p-8">
                   <p className="text-text-secondary text-lg leading-relaxed mb-4">
-                    PAIC 2026 là một kỳ thi học thuật về Trí tuệ Nhân tạo do Câu lạc bộ The Noders tổ chức,
-                    dưới sự cố vấn chuyên môn của thầy Nguyễn Thành Lộc.
+                    PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do <span className="text-text-primary font-semibold">The Noders PTNK community</span> tổ chức,
+                    được xây dựng theo hình thức thi đấu tương tự <span className="text-primary-blue font-semibold">VOAI / VAIC / IOAI</span>, với advisor là <span className="text-text-primary font-semibold">thầy Nguyễn Thành Lộc</span>.
                   </p>
                   <p className="text-text-secondary text-lg leading-relaxed mb-4">
-                    Cuộc thi được xây dựng với hình thức thi đấu tương tự các kỳ thi AI học sinh như VOAI, VAIC, IOAI,
-                    nhằm tạo sân chơi học thuật cho học sinh quan tâm đến AI được:
+                    Cuộc thi nhằm tạo sân chơi học thuật cho học sinh quan tâm đến AI:
                   </p>
                   <div className="space-y-3 mb-4">
                     <div className="flex items-start space-x-3">
@@ -259,9 +257,9 @@ export default function PAIC2026Page() {
         </section>
 
         {/* Timeline Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-7xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
                 Lịch trình kỳ thi
               </h2>
@@ -369,9 +367,9 @@ export default function PAIC2026Page() {
         </section>
 
         {/* Competition Format */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
                 Hình thức và nội dung thi
               </h2>
@@ -444,9 +442,9 @@ export default function PAIC2026Page() {
         </section>
 
         {/* Support Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
                 Hỗ trợ thí sinh
               </h2>
@@ -479,40 +477,82 @@ export default function PAIC2026Page() {
         </section>
 
         {/* Prizes Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-7xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
                 Giải thưởng
               </h2>
-              <p className="text-text-secondary text-center mb-8">
-                Giải thưởng được tính theo đội
+              <p className="text-text-secondary text-lg">
+                Giải thưởng được tính theo đội • Tổng giải thưởng <span className="text-primary-blue font-bold">1,600,000 VNĐ</span>
               </p>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {prizes.map((prize, index) => (
-                  <Card key={index} className={`text-center hover-lift group relative overflow-hidden bg-gradient-to-br ${prize.gradient} border-2 ${prize.border}`}>
-                    <CardContent className="p-10 relative z-10">
-                      <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {prizes.map((prize, index) => (
+                <Card
+                  key={index}
+                  className={`group relative overflow-hidden bg-gradient-to-br ${prize.gradient} border-2 ${prize.border} hover:shadow-2xl transition-all duration-300 ${index === 0 ? 'md:scale-105' : ''}`}
+                >
+                  <CardContent className="p-12 relative z-10">
+                    {/* Icon */}
+                    <div className="flex justify-center mb-8">
+                      <div className="relative">
                         {prize.icon}
+                        {index === 0 && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <Trophy className="w-4 h-4 text-white" />
+                          </div>
+                        )}
                       </div>
+                    </div>
 
-                      <h3 className="text-2xl font-bold text-text-primary mb-2 font-mono">
-                        {prize.rank}
-                      </h3>
+                    {/* Rank */}
+                    <h3 className="text-2xl md:text-3xl font-bold text-text-primary mb-3 text-center">
+                      {prize.rank}
+                    </h3>
 
-                      <p className="text-text-secondary text-sm mb-4">{prize.count}</p>
+                    {/* Count */}
+                    <p className="text-text-secondary text-sm mb-6 text-center font-medium">
+                      {prize.count}
+                    </p>
 
-                      <div className="text-3xl font-bold text-primary-blue">
+                    {/* Prize Amount */}
+                    <div className="bg-dark-surface/50 rounded-xl p-6 border border-dark-border/30 mb-4">
+                      <div className="text-4xl font-bold text-primary-blue text-center">
                         {prize.prize}
                       </div>
-                    </CardContent>
+                    </div>
 
-                    {/* Spotlight effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </Card>
-                ))}
-              </div>
+                    {/* Highlight for top prize */}
+                    {index === 0 && (
+                      <div className="mt-4 py-2 px-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                        <p className="text-yellow-500 text-sm font-medium text-center">Giải cao nhất</p>
+                      </div>
+                    )}
+                  </CardContent>
+
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/5 via-transparent to-accent-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Total Prize Pool */}
+            <div className="mt-12 text-center">
+              <Card className="inline-block bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-primary-blue/40">
+                <CardContent className="py-6 px-12">
+                  <p className="text-text-secondary text-sm mb-2">Tổng giá trị giải thưởng</p>
+                  <p className="text-5xl font-bold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent">
+                    1,600,000 VNĐ
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
@@ -529,7 +569,7 @@ export default function PAIC2026Page() {
                   Đăng ký tham gia PAIC 2026 - Kỳ thi học thuật về AI do The Noders tổ chức.
                   Trải nghiệm quy trình AI thực tế và tranh tài cùng các học sinh PTNK!
                 </p>
-                <Link href="https://forms.gle/your-form-link" target="_blank" rel="noopener noreferrer">
+                <Link href="https://forms.gle/4PnaDe4DXQk41Q6t8" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="group">
                     Đăng ký ngay
                     <ExternalLink className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
