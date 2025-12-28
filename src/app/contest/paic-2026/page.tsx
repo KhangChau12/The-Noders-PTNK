@@ -19,70 +19,81 @@ import {
   FileText,
   Lightbulb,
   BarChart3,
-  Gift,
   Medal
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: 'PTNK AI Challenge 2026 - Public Competition',
-  description: 'Join The Noders PTNK AI Challenge 2026! Build AI models for IELTS Writing scoring. Cash prizes up to 1,000,000 VNĐ. Two-week competition for VNU High School students.',
-  keywords: ['AI challenge', 'IELTS scoring', 'machine learning contest', 'student competition', 'AI competition Vietnam', 'PTNK challenge'],
+  title: 'PAIC 2026 - PTNK AI Challenge 2026',
+  description: 'Kỳ thi học thuật về Trí tuệ Nhân tạo do CLB The Noders tổ chức. Giải thưởng đến 1,600,000 VNĐ. Dành cho học sinh PTNK yêu thích AI.',
+  keywords: ['AI challenge', 'cuộc thi AI', 'học sinh PTNK', 'kỳ thi AI', 'machine learning', 'PAIC 2026'],
   url: '/contest/paic-2026',
 })
 
 export default function PAIC2026Page() {
   const timeline = [
     {
-      week: 'Week 1',
-      title: 'Kickoff',
+      date: '28/12 - 03/01',
+      title: 'Đăng ký',
+      status: 'ongoing' as const,
       items: [
-        { icon: <Users className="w-4 h-4" />, text: 'Welcome Workshop: Official contest introduction' },
-        { icon: <Lightbulb className="w-4 h-4" />, text: 'Technical Guide: Sample notebook demo and usage' },
-        { icon: <FileText className="w-4 h-4" />, text: 'Rules Overview: Detailed regulations and evaluation criteria' }
+        { icon: <Users className="w-4 h-4" />, text: 'Mở đơn đăng ký tham gia qua Google Form' },
+        { icon: <FileText className="w-4 h-4" />, text: 'Thí sinh đăng ký theo đội 1-3 người' },
       ]
     },
     {
-      week: 'Week 1-2',
-      title: 'Online Phase',
+      date: '04/01/2026',
+      title: 'Workshop',
+      status: 'upcoming' as const,
       items: [
-        { icon: <Database className="w-4 h-4" />, text: 'Public train dataset (labeled) provided' },
-        { icon: <Target className="w-4 h-4" />, text: 'Public test dataset (unlabeled) released' },
-        { icon: <BarChart3 className="w-4 h-4" />, text: 'Real-time leaderboard updates based on public test results' }
+        { icon: <Lightbulb className="w-4 h-4" />, text: 'Giải đáp thắc mắc về kỳ thi' },
+        { icon: <FileText className="w-4 h-4" />, text: 'Hướng dẫn chạy thử notebook lần đầu' },
+        { icon: <CheckCircle className="w-4 h-4" />, text: 'Thông báo các lưu ý quan trọng' }
       ]
     },
     {
-      week: 'End Week 2',
-      title: 'Live Finals',
+      date: '05/01 - 17/01',
+      title: 'Vòng Public',
+      status: 'upcoming' as const,
       items: [
-        { icon: <Users className="w-4 h-4" />, text: 'On-site competition at school' },
-        { icon: <Zap className="w-4 h-4" />, text: 'Private dataset revealed' },
-        { icon: <Trophy className="w-4 h-4" />, text: 'Final model evaluation and winner announcement' }
+        { icon: <Database className="w-4 h-4" />, text: 'Cung cấp tập dữ liệu huấn luyện' },
+        { icon: <Target className="w-4 h-4" />, text: 'Cung cấp tập test public' },
+        { icon: <BarChart3 className="w-4 h-4" />, text: 'Xếp hạng tạm thời theo kết quả nộp' }
+      ]
+    },
+    {
+      date: '18/01/2026',
+      title: 'Vòng Private',
+      status: 'upcoming' as const,
+      items: [
+        { icon: <Zap className="w-4 h-4" />, text: 'Mở thêm dữ liệu và thay đổi tập test' },
+        { icon: <Calendar className="w-4 h-4" />, text: '24 giờ để cải thiện mô hình' },
+        { icon: <Trophy className="w-4 h-4" />, text: 'Nộp kết quả cuối cùng và công bố giải thưởng' }
       ]
     }
   ]
 
   const prizes = [
     {
-      rank: '1st Place',
+      rank: 'Giải Nhất',
+      count: '01 đội',
       prize: '1,000,000 VNĐ',
-      medal: 'Gold Medal',
       icon: <Trophy className="w-8 h-8 text-yellow-500" />,
       gradient: 'from-yellow-500/20 to-orange-500/20',
       border: 'border-yellow-500/30'
     },
     {
-      rank: '2nd Place',
+      rank: 'Giải Nhì',
+      count: '01 đội',
       prize: '500,000 VNĐ',
-      medal: 'Silver Medal',
       icon: <Medal className="w-8 h-8 text-gray-400" />,
       gradient: 'from-gray-300/20 to-gray-500/20',
       border: 'border-gray-400/30'
     },
     {
-      rank: '3rd Place',
-      prize: '300,000 VNĐ',
-      medal: 'Bronze Medal',
+      rank: 'Giải Ba',
+      count: '03 đội',
+      prize: '100,000 VNĐ/đội',
       icon: <Award className="w-8 h-8 text-amber-600" />,
       gradient: 'from-amber-600/20 to-orange-700/20',
       border: 'border-amber-600/30'
@@ -92,33 +103,47 @@ export default function PAIC2026Page() {
   const features = [
     {
       icon: <Brain className="w-6 h-6" />,
-      title: 'Build Something Real',
-      description: 'No toy datasets or fake problems—create an AI that scores real IELTS essays, tackling a challenge that matters to students like you'
-    },
-    {
-      icon: <Database className="w-6 h-6" />,
-      title: 'Rich, Flexible Dataset',
-      description: 'Curated IELTS essays from Hugging Face as your foundation, but creative minds can supplement with external data to gain an edge'
+      title: 'Trải nghiệm thực tế',
+      description: 'Trải nghiệm quy trình xây dựng và đánh giá mô hình AI thực tế, giống các kỳ thi AI học sinh như VOAI, VAIC, IOAI'
     },
     {
       icon: <Target className="w-6 h-6" />,
-      title: 'Pure Performance Wins',
-      description: 'Your model\'s accuracy on our private test set determines everything—no fluff, just results that speak for themselves'
+      title: 'Rèn luyện tư duy',
+      description: 'Rèn luyện tư duy dữ liệu và thuật toán thông qua bài toán AI thực tế'
+    },
+    {
+      icon: <Lightbulb className="w-6 h-6" />,
+      title: 'Hỗ trợ toàn diện',
+      description: 'Notebook mẫu, workshop hướng dẫn, tài liệu giải thích, và được phép sử dụng AI tools để hỗ trợ lập trình'
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: 'Full Support System',
-      description: 'Kickoff workshops, technical guides, live finals, and a community of competitors all pushing each other to improve'
+      title: 'Dành cho mọi cấp độ',
+      description: 'Không yêu cầu nền tảng AI trước đó, phù hợp cho học sinh muốn thử sức với kỳ thi AI học thuật'
     }
   ]
 
-  const learningTopics = [
-    'Natural Language Processing (NLP) fundamentals',
-    'IELTS Writing scoring criteria and analysis',
-    'Text preprocessing and feature extraction',
-    'Machine learning model development',
-    'Model evaluation and optimization',
-    'Real-world AI project workflow'
+  const supportItems = [
+    {
+      icon: <FileText className="w-6 h-6" />,
+      title: 'Notebook mẫu cơ bản',
+      description: 'Hướng dẫn cách huấn luyện mô hình AI từ dữ liệu vòng Public và xuất file kết quả hợp lệ'
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: 'Workshop hướng dẫn',
+      description: 'Giải đáp thắc mắc, hướng dẫn chạy notebook lần đầu, và các lưu ý quan trọng (có ghi hình)'
+    },
+    {
+      icon: <Lightbulb className="w-6 h-6" />,
+      title: 'Tài liệu đi kèm',
+      description: 'Giải thích khái niệm AI, phân tích cấu trúc mô hình, và gợi ý hướng cải tiến'
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: 'Công cụ AI hỗ trợ',
+      description: 'Được phép sử dụng các công cụ AI để hỗ trợ lập trình, tập trung vào tư duy và cải tiến thuật toán'
+    }
   ]
 
   return (
@@ -140,27 +165,30 @@ export default function PAIC2026Page() {
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
               <Badge variant="warning" className="mb-6">
-                Public • Coming Soon
+                Đang mở đăng ký
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
-                <span className="gradient-text">PTNK AI Challenge</span>
+                <span className="gradient-text">PAIC 2026</span>
                 <br />
-                <span className="text-text-primary">2026</span>
+                <span className="text-text-primary">PTNK AI Challenge 2026</span>
               </h1>
               <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-                The Noders PTNK's flagship public competition where VNU High School students
-                transform from AI enthusiasts into builders. Create IELTS Writing scoring models,
-                compete for serious cash prizes, and experience what real AI development feels like—
-                all while working on something you actually understand and care about.
+                Kỳ thi học thuật về Trí tuệ Nhân tạo do Câu lạc bộ The Noders tổ chức,
+                dưới sự cố vấn chuyên môn của thầy Nguyễn Thành Lộc. Tạo sân chơi AI thực tế
+                cho học sinh PTNK, giúp rèn luyện tư duy dữ liệu và thuật toán.
               </p>
               <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
-                  <Target className="w-5 h-5 text-primary-blue" />
-                  <span>Open Registration</span>
+                  <Users className="w-5 h-5 text-primary-blue" />
+                  <span>Thi theo đội 1-3 người</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-primary-blue" />
-                  <span>29 Dec 2025 - 14 Jan 2026</span>
+                  <span>05 - 18 Tháng 1, 2026</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Trophy className="w-5 h-5 text-primary-blue" />
+                  <span>1,600,000 VNĐ</span>
                 </div>
               </div>
             </div>
@@ -172,26 +200,38 @@ export default function PAIC2026Page() {
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-6 text-center">
-                Competition Overview
+                Giới thiệu chung
               </h2>
               <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 mb-8">
                 <CardContent className="p-8">
                   <p className="text-text-secondary text-lg leading-relaxed mb-4">
-                    Forget boring theoretical exercises. PAIC 2026 challenges you to build something that
-                    actually matters—an AI that scores IELTS Writing essays. This isn't just another school
-                    project; it's a taste of real AI engineering where you'll face actual challenges,
-                    make real decisions, and see your model compete against others in real-time.
+                    PAIC 2026 là một kỳ thi học thuật về Trí tuệ Nhân tạo do Câu lạc bộ The Noders tổ chức,
+                    dưới sự cố vấn chuyên môn của thầy Nguyễn Thành Lộc.
                   </p>
                   <p className="text-text-secondary text-lg leading-relaxed mb-4">
-                    Over two intense weeks, you'll go from dataset to deployed model, experiencing the
-                    complete AI development cycle. Think you can outsmart the leaderboard? There's only
-                    one way to find out—and over 1.8 million VNĐ in prizes waiting for those who do.
+                    Cuộc thi được xây dựng với hình thức thi đấu tương tự các kỳ thi AI học sinh như VOAI, VAIC, IOAI,
+                    nhằm tạo sân chơi học thuật cho học sinh quan tâm đến AI được:
                   </p>
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-start space-x-3">
+                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                      <p className="text-text-secondary">Trải nghiệm quy trình xây dựng và đánh giá mô hình AI thực tế</p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                      <p className="text-text-secondary">Rèn luyện tư duy dữ liệu và thuật toán</p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                      <p className="text-text-secondary">Làm nền tảng cho việc tham gia các kỳ thi AI chuyên sâu trong tương lai</p>
+                    </div>
+                  </div>
                   <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
                     <p className="text-text-secondary">
-                      <strong className="text-text-primary">Target Audience:</strong> VNU High School for the Gifted
-                      students passionate about AI and machine learning. Whether you've trained models before or
-                      you're ready to dive into your first competition—if you're curious and committed, you belong here.
+                      <strong className="text-text-primary">Đối tượng tham gia:</strong> Học sinh Trường Phổ thông Năng khiếu
+                      có quan tâm đến Trí tuệ Nhân tạo và mong muốn thử sức trong một kỳ thi AI học thuật.
+                      Không yêu cầu thí sinh phải có nền tảng AI trước đó, tuy nhiên cần có tinh thần học hỏi
+                      và chủ động tìm hiểu trong quá trình thi.
                     </p>
                   </div>
                 </CardContent>
@@ -223,42 +263,102 @@ export default function PAIC2026Page() {
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-                Competition Timeline
+                Lịch trình kỳ thi
               </h2>
               <p className="text-text-secondary text-center mb-8">
-                2-week intensive competition with key milestones
+                Thời gian đăng ký & thi đấu từ 28/12/2025 đến 18/01/2026
               </p>
 
-              <div className="space-y-8">
-                {timeline.map((phase, index) => (
-                  <Card key={index} variant="hover" className="hover-lift overflow-hidden">
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="md:w-1/4 bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 p-6 border-b md:border-b-0 md:border-r border-dark-border/20">
-                          <div className="text-center">
-                            <Badge variant="primary" className="mb-3">
-                              {phase.week}
+              {/* Desktop Timeline */}
+              <div className="hidden md:block relative">
+                {/* Progress Bar Background */}
+                <div className="absolute top-8 left-0 right-0 h-1 bg-dark-border/30 rounded-full">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-success via-warning to-dark-border/50 rounded-full transition-all duration-1000"
+                    style={{ width: '25%' }}
+                  ></div>
+                </div>
+
+                {/* Timeline Items */}
+                <div className="relative flex justify-between items-start pt-16">
+                  {timeline.map((item, index) => (
+                    <div key={index} className="flex flex-col items-center flex-1 relative">
+                      {/* Milestone Node */}
+                      <div className={`absolute -top-16 w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-500 ${
+                        item.status === 'completed' ? 'bg-success border-success/30 shadow-lg shadow-success/50' :
+                        item.status === 'ongoing' ? 'bg-warning border-warning/30 shadow-xl shadow-warning/60 animate-pulse' :
+                        'bg-dark-surface border-dark-border/50'
+                      }`}>
+                        <div className={`w-8 h-8 rounded-full ${
+                          item.status === 'completed' ? 'bg-white' :
+                          item.status === 'ongoing' ? 'bg-white' :
+                          'bg-dark-border'
+                        }`}></div>
+                      </div>
+
+                      {/* Card */}
+                      <Card variant="hover" className="w-full hover-lift">
+                        <CardContent className="p-6">
+                          <div className="text-center mb-4">
+                            <Badge variant={item.status === 'ongoing' ? 'warning' : 'primary'} className="mb-2">
+                              {item.date}
                             </Badge>
-                            <h3 className="text-xl font-bold text-text-primary font-mono">
-                              {phase.title}
+                            <h3 className="text-lg font-bold text-text-primary font-mono">
+                              {item.title}
                             </h3>
                           </div>
-                        </div>
-
-                        <div className="md:w-3/4 p-6">
-                          <div className="space-y-4">
-                            {phase.items.map((item, itemIndex) => (
-                              <div key={itemIndex} className="flex items-start space-x-3 group">
-                                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-lg flex items-center justify-center text-primary-blue mt-0.5 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                                  {item.icon}
+                          <div className="space-y-3">
+                            {item.items.map((subItem, subIndex) => (
+                              <div key={subIndex} className="flex items-start space-x-2 text-sm">
+                                <div className="flex-shrink-0 w-6 h-6 bg-primary-blue/10 border border-primary-blue/30 rounded flex items-center justify-center text-primary-blue mt-0.5">
+                                  {subItem.icon}
                                 </div>
-                                <p className="text-text-secondary leading-relaxed">
-                                  {item.text}
-                                </p>
+                                <p className="text-text-secondary text-left">{subItem.text}</p>
                               </div>
                             ))}
                           </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile Timeline */}
+              <div className="md:hidden space-y-6">
+                {timeline.map((item, index) => (
+                  <Card key={index} variant="hover" className="hover-lift">
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4 mb-4">
+                        <div className={`flex-shrink-0 w-12 h-12 rounded-full border-4 flex items-center justify-center ${
+                          item.status === 'completed' ? 'bg-success border-success/30' :
+                          item.status === 'ongoing' ? 'bg-warning border-warning/30' :
+                          'bg-dark-surface border-dark-border/50'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full ${
+                            item.status === 'completed' ? 'bg-white' :
+                            item.status === 'ongoing' ? 'bg-white' :
+                            'bg-dark-border'
+                          }`}></div>
                         </div>
+                        <div className="flex-1">
+                          <Badge variant={item.status === 'ongoing' ? 'warning' : 'primary'} className="mb-2">
+                            {item.date}
+                          </Badge>
+                          <h3 className="text-lg font-bold text-text-primary font-mono">
+                            {item.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="space-y-3 ml-16">
+                        {item.items.map((subItem, subIndex) => (
+                          <div key={subIndex} className="flex items-start space-x-2 text-sm">
+                            <div className="flex-shrink-0 w-6 h-6 bg-primary-blue/10 border border-primary-blue/30 rounded flex items-center justify-center text-primary-blue mt-0.5">
+                              {subItem.icon}
+                            </div>
+                            <p className="text-text-secondary">{subItem.text}</p>
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -273,87 +373,69 @@ export default function PAIC2026Page() {
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-                Competition Format
+                Hình thức và nội dung thi
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <Card variant="hover" className="hover-lift">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl flex items-center justify-center text-primary-blue">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-text-primary mb-2">
-                          Individual or Team
-                        </h3>
-                        <p className="text-text-secondary text-sm leading-relaxed">
-                          Compete individually or form teams of up to 3 members
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <Card variant="hover" className="hover-lift">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl flex items-center justify-center text-primary-blue">
-                        <BarChart3 className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-text-primary mb-2">
-                          Two-Phase Structure
-                        </h3>
-                        <p className="text-text-secondary text-sm leading-relaxed">
-                          Online phase with public leaderboard, followed by live finals
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Dataset Info */}
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
+              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 mb-8">
                 <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-text-primary mb-6 text-center">
-                    Primary Dataset
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center mb-6">
-                    <div className="text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-2xl mb-4">
-                        <Database className="w-8 h-8 text-primary-blue" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-text-primary mb-2">
-                        Hugging Face Source
-                      </h4>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
+                        <Users className="w-6 h-6 text-primary-blue" />
+                        <span>Hình thức thi đấu</span>
+                      </h3>
+                      <p className="text-text-secondary leading-relaxed ml-9">
+                        Thi đấu online, theo đội từ 1–3 học sinh. Mỗi thí sinh chỉ được tham gia 01 đội,
+                        đội được cố định sau khi kỳ thi bắt đầu.
+                      </p>
                     </div>
 
-                    <div className="text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-success/20 to-accent-cyan/20 rounded-2xl mb-4">
-                        <FileText className="w-8 h-8 text-success" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-text-primary mb-2">
-                        IELTS Essays + Scores
-                      </h4>
-                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
+                        <Target className="w-6 h-6 text-primary-blue" />
+                        <span>Cấu trúc cuộc thi</span>
+                      </h3>
+                      <p className="text-text-secondary leading-relaxed ml-9 mb-4">
+                        Cuộc thi gồm 02 vòng:
+                      </p>
 
-                    <div className="text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent-cyan/20 to-primary-blue/20 rounded-2xl mb-4">
-                        <Zap className="w-8 h-8 text-accent-cyan" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-text-primary mb-2">
-                        External Data Allowed
-                      </h4>
-                    </div>
-                  </div>
+                      <div className="ml-9 space-y-4">
+                        <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
+                          <h4 className="text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
+                            <BarChart3 className="w-5 h-5 text-success" />
+                            <span>Vòng Public</span>
+                          </h4>
+                          <p className="text-sm text-text-secondary mb-2">
+                            <strong>Thời gian:</strong> Thứ Hai 05/01/2026 – Thứ Bảy 17/01/2026
+                          </p>
+                          <p className="text-text-secondary text-sm leading-relaxed">
+                            Ban tổ chức cung cấp tập dữ liệu huấn luyện và tập test public.
+                            Thí sinh xây dựng mô hình AI, nộp kết quả để được chấm điểm và xếp hạng tạm thời.
+                          </p>
+                        </div>
 
-                  <div className="p-6 bg-dark-surface/50 rounded-lg border border-dark-border/30">
-                    <p className="text-text-secondary text-center">
-                      <strong className="text-text-primary">Primary Source:</strong> Curated dataset from Hugging Face containing IELTS writing samples with corresponding scores.
-                      <br />
-                      <strong className="text-text-primary">Enhancement Encouraged:</strong> Participants are encouraged to find additional data sources to improve model performance.
-                    </p>
+                        <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
+                          <h4 className="text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
+                            <Zap className="w-5 h-5 text-warning" />
+                            <span>Vòng Private</span>
+                          </h4>
+                          <p className="text-sm text-text-secondary mb-2">
+                            <strong>Thời gian:</strong> Chủ nhật 18/01/2026
+                          </p>
+                          <p className="text-text-secondary text-sm leading-relaxed">
+                            Ban tổ chức mở thêm dữ liệu và thay đổi tập test.
+                            Thí sinh có 24 giờ để tiếp tục cải thiện mô hình và nộp kết quả cuối cùng.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="ml-9 mt-4 p-4 bg-primary-blue/10 border border-primary-blue/30 rounded-lg">
+                        <p className="text-text-secondary text-sm">
+                          <Trophy className="w-4 h-4 inline mr-2 text-primary-blue" />
+                          <strong className="text-text-primary">Bảng xếp hạng chung cuộc</strong> được tính dựa trên điểm trung bình của vòng Public và vòng Private.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -361,25 +443,37 @@ export default function PAIC2026Page() {
           </div>
         </section>
 
-        {/* Learning Content */}
+        {/* Support Section */}
         <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-                What You'll Learn
+                Hỗ trợ thí sinh
               </h2>
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-                <CardContent className="p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {learningTopics.map((topic, index) => (
-                      <div key={index} className="flex items-start space-x-3">
-                        <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                        <p className="text-text-secondary">{topic}</p>
+              <p className="text-text-secondary text-center mb-8">
+                Ban tổ chức cung cấp đầy đủ tài nguyên để người mới vẫn có thể tham gia
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {supportItems.map((item, index) => (
+                  <Card key={index} variant="hover" className="hover-lift">
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl flex items-center justify-center text-primary-blue">
+                          {item.icon}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-text-primary mb-2">
+                            {item.title}
+                          </h3>
+                          <p className="text-text-secondary text-sm leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -389,34 +483,28 @@ export default function PAIC2026Page() {
           <div className="container mx-auto">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-                Prizes & Awards
+                Giải thưởng
               </h2>
-              <p className="text-text-secondary text-center mb-2">
-                Substantial cash prizes and recognition for top performers
-              </p>
-              <p className="text-accent-cyan text-center text-sm font-medium mb-8">
-                * Prize pool may increase with additional sponsorship
+              <p className="text-text-secondary text-center mb-8">
+                Giải thưởng được tính theo đội
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {prizes.map((prize, index) => (
                   <Card key={index} className={`text-center hover-lift group relative overflow-hidden bg-gradient-to-br ${prize.gradient} border-2 ${prize.border}`}>
                     <CardContent className="p-10 relative z-10">
-                      <div className="mb-8">
+                      <div className="mb-6">
                         {prize.icon}
                       </div>
 
-                      <h3 className="text-2xl font-bold text-text-primary mb-4 font-mono">
+                      <h3 className="text-2xl font-bold text-text-primary mb-2 font-mono">
                         {prize.rank}
                       </h3>
 
-                      <div className="text-3xl font-bold text-primary-blue mb-4">
-                        {prize.prize}
-                      </div>
+                      <p className="text-text-secondary text-sm mb-4">{prize.count}</p>
 
-                      <div className="flex items-center justify-center space-x-2 text-text-secondary">
-                        <Gift className="w-5 h-5" />
-                        <span className="text-base font-medium">{prize.medal}</span>
+                      <div className="text-3xl font-bold text-primary-blue">
+                        {prize.prize}
                       </div>
                     </CardContent>
 
@@ -429,52 +517,27 @@ export default function PAIC2026Page() {
           </div>
         </section>
 
-        {/* Evaluation Criteria */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
-          <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold text-text-primary mb-8">
-                Evaluation Criteria
-              </h2>
-
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-                <CardContent className="p-12">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 border border-primary-blue/30 rounded-2xl mb-6">
-                    <Target className="w-10 h-10 text-primary-blue" />
-                  </div>
-
-                  <h3 className="text-2xl font-bold text-text-primary mb-4">
-                    Model Accuracy on Private Dataset
-                  </h3>
-
-                  <p className="text-text-secondary text-lg leading-relaxed">
-                    Winners will be determined based on the accuracy of their AI models when evaluated against
-                    our private test dataset. This ensures fair competition and prevents overfitting to public data.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
               <CardContent className="p-12">
                 <h2 className="text-3xl font-bold text-text-primary mb-4">
-                  Ready to Take the Challenge?
+                  Sẵn sàng tham gia?
                 </h2>
                 <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
-                  Join The Noders PTNK's flagship AI challenge and showcase your machine learning skills.
-                  Build something meaningful while competing for substantial prizes!
+                  Đăng ký tham gia PAIC 2026 - Kỳ thi học thuật về AI do The Noders tổ chức.
+                  Trải nghiệm quy trình AI thực tế và tranh tài cùng các học sinh PTNK!
                 </p>
-                <Link href="https://the-noders-competition-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
+                <Link href="https://forms.gle/your-form-link" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="group">
-                    Register Now
+                    Đăng ký ngay
                     <ExternalLink className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
                   </Button>
                 </Link>
+                <p className="text-text-secondary text-sm mt-4">
+                  Thời gian đăng ký: 28/12/2025 - 03/01/2026
+                </p>
               </CardContent>
             </Card>
           </div>

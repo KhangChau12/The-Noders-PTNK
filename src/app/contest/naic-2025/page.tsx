@@ -34,8 +34,8 @@ export const metadata: Metadata = generateSEOMetadata({
 export default function NAIC2025Page() {
   const timeline = [
     { date: '29 Nov 2025', event: 'Registration Opens', status: 'completed' },
-    { date: '29 Nov - 28 Dec', event: 'Active Competition Period', status: 'ongoing' },
-    { date: '28 Dec 2025', event: 'Final Submission Deadline', status: 'upcoming' }
+    { date: '29 Nov - 28 Dec', event: 'Active Competition Period', status: 'completed' },
+    { date: '28 Dec 2025', event: 'Final Submission Deadline', status: 'ongoing' }
   ]
 
   const formatDetails = [
