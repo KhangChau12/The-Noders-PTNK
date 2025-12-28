@@ -25,7 +25,7 @@ import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'PAIC 2026 - PTNK AI Challenge 2026',
-  description: 'Kỳ thi học thuật về Trí tuệ Nhân tạo do CLB The Noders tổ chức. Giải thưởng đến 1,600,000 VNĐ. Dành cho học sinh PTNK yêu thích AI.',
+  description: 'Kỳ thi học thuật về Trí tuệ Nhân tạo do CLB The Noders tổ chức. Giải thưởng đến 1,800,000 VNĐ. Dành cho học sinh PTNK yêu thích AI.',
   keywords: ['AI challenge', 'cuộc thi AI', 'học sinh PTNK', 'kỳ thi AI', 'machine learning', 'PAIC 2026'],
   url: '/contest/paic-2026',
 })
@@ -93,7 +93,7 @@ export default function PAIC2026Page() {
     {
       rank: 'Giải Ba',
       count: '03 đội',
-      prize: '100,000 VNĐ/đội',
+      prize: '100,000 VNĐ',
       icon: <Award className="w-8 h-8 text-amber-600" />,
       gradient: 'from-amber-600/20 to-orange-700/20',
       border: 'border-amber-600/30'
@@ -187,7 +187,7 @@ export default function PAIC2026Page() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Trophy className="w-5 h-5 text-primary-blue" />
-                  <span>1,600,000 VNĐ</span>
+                  <span>1,800,000 VNĐ</span>
                 </div>
               </div>
             </div>
@@ -484,7 +484,7 @@ export default function PAIC2026Page() {
                 Giải thưởng
               </h2>
               <p className="text-text-secondary text-lg">
-                Giải thưởng được tính theo đội • Tổng giải thưởng <span className="text-primary-blue font-bold">1,600,000 VNĐ</span>
+                Giải thưởng được tính theo đội • Tổng giải thưởng <span className="text-primary-blue font-bold">1,800,000 VNĐ</span>
               </p>
             </div>
 
@@ -494,9 +494,9 @@ export default function PAIC2026Page() {
                   key={index}
                   className={`group relative overflow-hidden bg-gradient-to-br ${prize.gradient} border-2 ${prize.border} hover:shadow-2xl transition-all duration-300 ${index === 0 ? 'md:scale-105' : ''}`}
                 >
-                  <CardContent className="p-12 relative z-10">
+                  <CardContent className="p-8 relative z-10">
                     {/* Icon */}
-                    <div className="flex justify-center mb-8">
+                    <div className="flex justify-center mb-6">
                       <div className="relative">
                         {prize.icon}
                         {index === 0 && (
@@ -508,28 +508,21 @@ export default function PAIC2026Page() {
                     </div>
 
                     {/* Rank */}
-                    <h3 className="text-2xl md:text-3xl font-bold text-text-primary mb-3 text-center">
+                    <h3 className="text-2xl font-bold text-text-primary mb-2 text-center">
                       {prize.rank}
                     </h3>
 
                     {/* Count */}
-                    <p className="text-text-secondary text-sm mb-6 text-center font-medium">
+                    <p className="text-text-secondary text-sm mb-5 text-center font-medium">
                       {prize.count}
                     </p>
 
                     {/* Prize Amount */}
-                    <div className="bg-dark-surface/50 rounded-xl p-6 border border-dark-border/30 mb-4">
-                      <div className="text-4xl font-bold text-primary-blue text-center">
+                    <div className="bg-dark-surface/50 rounded-xl p-5 border border-dark-border/30">
+                      <div className="text-2xl md:text-3xl font-bold text-primary-blue text-center break-words">
                         {prize.prize}
                       </div>
                     </div>
-
-                    {/* Highlight for top prize */}
-                    {index === 0 && (
-                      <div className="mt-4 py-2 px-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                        <p className="text-yellow-500 text-sm font-medium text-center">Giải cao nhất</p>
-                      </div>
-                    )}
                   </CardContent>
 
                   {/* Animated gradient overlay */}
@@ -549,7 +542,7 @@ export default function PAIC2026Page() {
                 <CardContent className="py-6 px-12">
                   <p className="text-text-secondary text-sm mb-2">Tổng giá trị giải thưởng</p>
                   <p className="text-5xl font-bold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent">
-                    1,600,000 VNĐ
+                    1,800,000 VNĐ
                   </p>
                 </CardContent>
               </Card>
