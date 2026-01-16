@@ -35,7 +35,7 @@ export default function PAIC2026Page() {
     {
       date: '28/12 - 03/01',
       title: 'Đăng ký',
-      status: 'ongoing' as const,
+      status: 'completed' as const,
       items: [
         { icon: <Users className="w-4 h-4" />, text: 'Mở đơn đăng ký tham gia qua Google Form' },
         { icon: <FileText className="w-4 h-4" />, text: 'Thí sinh đăng ký theo đội 1-3 người' },
@@ -44,7 +44,7 @@ export default function PAIC2026Page() {
     {
       date: '04/01/2026',
       title: 'Workshop',
-      status: 'upcoming' as const,
+      status: 'completed' as const,
       items: [
         { icon: <Lightbulb className="w-4 h-4" />, text: 'Giải đáp thắc mắc về kỳ thi' },
         { icon: <FileText className="w-4 h-4" />, text: 'Hướng dẫn chạy thử notebook lần đầu' },
@@ -54,7 +54,7 @@ export default function PAIC2026Page() {
     {
       date: '05/01 - 17/01',
       title: 'Vòng Public',
-      status: 'upcoming' as const,
+      status: 'ongoing' as const,
       items: [
         { icon: <Database className="w-4 h-4" />, text: 'Cung cấp tập dữ liệu huấn luyện' },
         { icon: <Target className="w-4 h-4" />, text: 'Cung cấp tập test public' },
@@ -164,8 +164,8 @@ export default function PAIC2026Page() {
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="warning" className="mb-6">
-                Đang mở đăng ký
+              <Badge variant="success" className="mb-6">
+                Đang diễn ra
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
                 <span className="gradient-text">PAIC 2026</span>
@@ -179,7 +179,7 @@ export default function PAIC2026Page() {
               <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-primary-blue" />
-                  <span>Thi theo đội 1-3 người</span>
+                  <span>24 đội • 54 thí sinh</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-primary-blue" />
@@ -195,42 +195,73 @@ export default function PAIC2026Page() {
         </section>
 
         {/* Overview Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-6 text-center">
-                Giới thiệu chung
-              </h2>
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 mb-8">
-                <CardContent className="p-8">
-                  <p className="text-text-secondary text-lg leading-relaxed mb-4">
-                    PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do <span className="text-text-primary font-semibold">The Noders PTNK community</span> tổ chức,
-                    được xây dựng theo hình thức thi đấu tương tự <span className="text-primary-blue font-semibold">VOAI / VAIC / IOAI</span>, với advisor là <span className="text-text-primary font-semibold">thầy Nguyễn Thành Lộc</span>.
-                  </p>
-                  <p className="text-text-secondary text-lg leading-relaxed mb-4">
-                    Cuộc thi nhằm tạo sân chơi học thuật cho học sinh quan tâm đến AI:
-                  </p>
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                      <p className="text-text-secondary">Trải nghiệm quy trình xây dựng và đánh giá mô hình AI thực tế</p>
+            <div className="max-w-7xl mx-auto">
+              {/* Main Content Card */}
+              <Card className="bg-gradient-to-br from-primary-blue/5 to-accent-cyan/5 border-primary-blue/20 mb-6">
+                <CardContent className="p-6 md:p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left: Video */}
+                    <div className="lg:col-span-2">
+                      <div className="mb-3">
+                        <h3 className="text-lg font-bold text-text-primary mb-1 flex items-center gap-2">
+                          <span className="text-primary-blue">▶</span>
+                          Workshop hướng dẫn
+                        </h3>
+                        <p className="text-text-secondary text-sm">
+                          Hướng dẫn chi tiết về quy định, đăng ký, tài liệu hỗ trợ và quy trình thi đấu
+                        </p>
+                      </div>
+                      <div className="relative w-full rounded-lg overflow-hidden border border-primary-blue/20" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src="https://www.youtube.com/embed/cFs5njLot7k"
+                          title="PAIC 2026 Workshop"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                      <p className="text-text-secondary">Rèn luyện tư duy dữ liệu và thuật toán</p>
+
+                    {/* Right: Overview */}
+                    <div className="lg:col-span-1 flex flex-col gap-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-text-primary mb-3">
+                          Giới thiệu chung
+                        </h3>
+                        <p className="text-text-secondary text-sm leading-relaxed mb-3">
+                          PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do <span className="text-text-primary font-semibold">The Noders PTNK community</span> tổ chức,
+                          được xây dựng theo hình thức thi đấu tương tự <span className="text-primary-blue font-semibold">VOAI / VAIC / IOAI</span>, với advisor là <span className="text-text-primary font-semibold">thầy Nguyễn Thành Lộc</span>.
+                        </p>
+                      </div>
+
+                      <div className="bg-dark-surface/50 rounded-lg p-4 border border-dark-border/30">
+                        <p className="text-primary-blue text-xs font-semibold mb-2">
+                          MỤC TIÊU CUỘC THI
+                        </p>
+                        <div className="space-y-2">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                            <p className="text-text-secondary text-xs">Trải nghiệm quy trình xây dựng và đánh giá mô hình AI thực tế</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                            <p className="text-text-secondary text-xs">Rèn luyện tư duy dữ liệu và thuật toán</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                            <p className="text-text-secondary text-xs">Làm nền tảng cho các kỳ thi AI chuyên sâu</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-dark-surface/50 rounded-lg p-4 border border-dark-border/30">
+                        <p className="text-text-secondary text-xs">
+                          <span className="text-text-primary font-semibold">Đối tượng:</span> Học sinh PTNK quan tâm AI, không yêu cầu nền tảng trước đó.
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                      <p className="text-text-secondary">Làm nền tảng cho việc tham gia các kỳ thi AI chuyên sâu trong tương lai</p>
-                    </div>
-                  </div>
-                  <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
-                    <p className="text-text-secondary">
-                      <strong className="text-text-primary">Đối tượng tham gia:</strong> Học sinh Trường Phổ thông Năng khiếu
-                      có quan tâm đến Trí tuệ Nhân tạo và mong muốn thử sức trong một kỳ thi AI học thuật.
-                      Không yêu cầu thí sinh phải có nền tảng AI trước đó, tuy nhiên cần có tinh thần học hỏi
-                      và chủ động tìm hiểu trong quá trình thi.
-                    </p>
                   </div>
                 </CardContent>
               </Card>

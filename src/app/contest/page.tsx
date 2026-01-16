@@ -23,10 +23,24 @@ export const metadata: Metadata = generateSEOMetadata({
 export default function ContestPage() {
   const competitions = [
     {
+      id: 'paic-2026',
+      slug: 'paic-2026',
+      badge: 'Public • Ongoing',
+      badgeVariant: 'success' as const,
+      title: 'PTNK AI Challenge 2026',
+      shortDescription: 'Our flagship public competition for VNU High School students. Build AI models for IELTS Writing scoring with cash prizes up to 1,000,000 VNĐ.',
+      stats: [
+        { icon: <Users className="w-4 h-4" />, text: '24 Teams • 54 Participants' },
+        { icon: <Calendar className="w-4 h-4" />, text: '05 - 18 Jan 2026' }
+      ],
+      gradient: 'from-accent-cyan/10 to-primary-blue/10',
+      border: 'border-accent-cyan/30'
+    },
+    {
       id: 'naic-2025',
       slug: 'naic-2025',
-      badge: 'Internal • Ongoing',
-      badgeVariant: 'success' as const,
+      badge: 'Internal • Ended',
+      badgeVariant: 'primary' as const,
       title: 'Noders AI Competition 2025',
       shortDescription: 'Our internal competition where Noders members sharpen their AI skills through practical challenges. A focused learning environment for our club members.',
       stats: [
@@ -35,20 +49,6 @@ export default function ContestPage() {
       ],
       gradient: 'from-primary-blue/10 to-accent-cyan/10',
       border: 'border-primary-blue/30'
-    },
-    {
-      id: 'paic-2026',
-      slug: 'paic-2026',
-      badge: 'Public • Coming Soon',
-      badgeVariant: 'warning' as const,
-      title: 'PTNK AI Challenge 2026',
-      shortDescription: 'Our flagship public competition for VNU High School students. Build AI models for IELTS Writing scoring with cash prizes up to 1,000,000 VNĐ.',
-      stats: [
-        { icon: <Target className="w-4 h-4" />, text: 'Open Registration' },
-        { icon: <Calendar className="w-4 h-4" />, text: '29 Dec 2025 - 14 Jan 2026' }
-      ],
-      gradient: 'from-accent-cyan/10 to-primary-blue/10',
-      border: 'border-accent-cyan/30'
     }
   ]
 

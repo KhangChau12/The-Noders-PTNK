@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -209,11 +209,15 @@ function AuthorDropdown({
   selectedAuthor,
   onSelect,
   loading,
+  onOpen,
+  totalPosts,
 }: {
   authors: Author[];
   selectedAuthor: string;
   onSelect: (authorId: string) => void;
   loading: boolean;
+  onOpen?: () => void;
+  totalPosts?: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedAuthorData = authors.find((a) => a.id === selectedAuthor);
@@ -234,6 +238,13 @@ function AuthorDropdown({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  // Fetch fresh data when dropdown opens
+  useEffect(() => {
+    if (isOpen && onOpen) {
+      onOpen();
+    }
+  }, [isOpen, onOpen]);
 
   const getInitials = (name: string) => {
     const words = name.trim().split(" ");
@@ -318,7 +329,7 @@ function AuthorDropdown({
               <div className="flex-1 text-left">
                 <div className="font-semibold text-text-primary">All Authors</div>
                 <div className="text-xs text-text-tertiary">
-                  {authors.reduce((sum, a) => sum + a.post_count, 0)} total posts
+                  {totalPosts !== undefined ? totalPosts : authors.reduce((sum, a) => sum + a.post_count, 0)} total posts
                 </div>
               </div>
               {!selectedAuthor && (
@@ -394,28 +405,32 @@ export default function PostsPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const POSTS_PER_PAGE = 20;
+
+  // Fetch authors helper - memoized to avoid recreating on every render
+  const fetchAuthors = useCallback(async () => {
+    try {
+      setAuthorsLoading(true);
+      // Add timestamp to bypass any caching
+      const response = await fetch(`/api/posts/authors?_t=${Date.now()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAuthors(data.authors);
+        console.log('Authors fetched:', data.authors.length, 'authors, total posts:', data.authors.reduce((sum: number, a: any) => sum + a.post_count, 0));
+      }
+    } catch (err) {
+      console.error("Error fetching authors:", err);
+    } finally {
+      setAuthorsLoading(false);
+    }
+  }, []);
 
   // Fetch authors on mount
   useEffect(() => {
-    const fetchAuthors = async () => {
-      try {
-        setAuthorsLoading(true);
-        const response = await fetch('/api/posts/authors');
-        const data = await response.json();
-
-        if (data.success) {
-          setAuthors(data.authors);
-        }
-      } catch (err) {
-        console.error("Error fetching authors:", err);
-      } finally {
-        setAuthorsLoading(false);
-      }
-    };
-
     fetchAuthors();
-  }, []);
+  }, [fetchAuthors]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -434,20 +449,6 @@ export default function PostsPage() {
     const newUrl = params.toString() ? `?${params.toString()}` : "/posts";
     router.replace(newUrl, { scroll: false });
   }, [searchTerm, selectedCategory, selectedAuthor, router]);
-
-  // Fetch authors helper
-  const fetchAuthors = async () => {
-    try {
-      const response = await fetch('/api/posts/authors');
-      const data = await response.json();
-
-      if (data.success) {
-        setAuthors(data.authors);
-      }
-    } catch (err) {
-      console.error("Error fetching authors:", err);
-    }
-  };
 
   // Fetch posts when filters change (reset to page 1)
   useEffect(() => {
@@ -476,6 +477,7 @@ export default function PostsPage() {
         if (data.success) {
           setPosts(data.posts);
           setHasMore(data.pagination?.hasMore || false);
+          setTotalCount(data.total || 0);
           setError(null);
 
           // Refetch authors to ensure dropdown is up-to-date
@@ -493,7 +495,7 @@ export default function PostsPage() {
 
     const timeoutId = setTimeout(fetchPosts, 300);
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, selectedCategory, selectedAuthor, POSTS_PER_PAGE]);
+  }, [searchTerm, selectedCategory, selectedAuthor, POSTS_PER_PAGE, fetchAuthors]);
 
   // Load more posts (infinite scroll)
   const loadMorePosts = async () => {
@@ -593,6 +595,8 @@ export default function PostsPage() {
                   selectedAuthor={selectedAuthor}
                   onSelect={setSelectedAuthor}
                   loading={authorsLoading}
+                  onOpen={fetchAuthors}
+                  totalPosts={totalCount}
                 />
 
                 <Button
@@ -714,7 +718,12 @@ export default function PostsPage() {
                 )}
               </div>
               <p className="text-text-secondary">
-                {posts.length} post{posts.length !== 1 ? "s" : ""} found
+                {totalCount} post{totalCount !== 1 ? "s" : ""} found
+                {posts.length < totalCount && (
+                  <span className="text-text-tertiary ml-1">
+                    (showing {posts.length})
+                  </span>
+                )}
               </p>
             </div>
           )}

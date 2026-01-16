@@ -35,7 +35,7 @@ export default function NAIC2025Page() {
   const timeline = [
     { date: '29 Nov 2025', event: 'Registration Opens', status: 'completed' },
     { date: '29 Nov - 28 Dec', event: 'Active Competition Period', status: 'completed' },
-    { date: '28 Dec 2025', event: 'Final Submission Deadline', status: 'ongoing' }
+    { date: '28 Dec 2025', event: 'Final Submission Deadline', status: 'completed' }
   ]
 
   const formatDetails = [
@@ -61,13 +61,23 @@ export default function NAIC2025Page() {
     }
   ]
 
-  const learningTopics = [
-    'IELTS Writing Task 1 scoring fundamentals',
-    'Text preprocessing for NLP tasks',
-    'Feature engineering for essay scoring',
-    'Regression model development and training',
-    'Mean Absolute Error (MAE) optimization',
-    'End-to-end ML competition workflow'
+  const leaderboard = [
+    { rank: 1, name: 'Nguyễn Vũ Trọng Nhân', submissions: 5, mae: 0.3487 },
+    { rank: 2, name: 'Trương Hoàng Tấn Dũng', submissions: 36, mae: 0.4511 },
+    { rank: 3, name: 'Châu Phúc Khang', submissions: 11, mae: 0.4563 },
+    { rank: 4, name: 'Đoàn Văn Quyết', submissions: 14, mae: 0.4820 },
+    { rank: 5, name: 'Đào Ngọc Minh Tâm', submissions: 4, mae: 0.4862 },
+    { rank: 6, name: 'Nguyễn Ngọc Minh Tâm', submissions: 12, mae: 0.5210 },
+    { rank: 7, name: 'Nguyễn Ngô Minh Dương', submissions: 2, mae: 0.5285 },
+    { rank: 8, name: 'Đặng Trần Thiên Phúc', submissions: 1, mae: 0.5683 },
+    { rank: 9, name: 'Huỳnh Quang Phú', submissions: 3, mae: 0.6454 },
+    { rank: 10, name: 'Lê Minh Trung', submissions: 1, mae: 0.8159 },
+    { rank: 11, name: 'Hồ Bảo Phúc', submissions: 2, mae: 0.8451 },
+    { rank: 12, name: 'Hà Lan Viên', submissions: 1, mae: 0.8939 },
+    { rank: 13, name: 'Trần Phúc Thái', submissions: 1, mae: 0.9067 },
+    { rank: 14, name: 'Việt Tiến', submissions: 1, mae: 0.9148 },
+    { rank: 15, name: 'Baseline (điểm của notebook mẫu)', submissions: 2, mae: 0.9149, isBaseline: true },
+    { rank: 16, name: 'Trần Hoàng Thiên Phúc', submissions: 1, mae: 1.3554 }
   ]
 
   const prizes = [
@@ -88,7 +98,7 @@ export default function NAIC2025Page() {
       border: 'border-gray-400/30'
     },
     {
-      rank: '3rd Place (×2)',
+      rank: '3rd Place (×3)',
       prize: '50,000 VNĐ each',
       bonus: '+ 15 Club Points',
       icon: <Award className="w-8 h-8 text-amber-600" />,
@@ -115,8 +125,8 @@ export default function NAIC2025Page() {
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="success" className="mb-6">
-                Internal • Ongoing
+              <Badge variant="primary" className="mb-6">
+                Internal • Ended
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
                 <span className="gradient-text">Noders AI Competition</span>
@@ -248,7 +258,7 @@ export default function NAIC2025Page() {
                 {/* Progress Bar Background */}
                 <div className="absolute top-8 left-0 right-0 h-1 bg-dark-border/30 rounded-full">
                   {/* Active Progress */}
-                  <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-success via-warning to-dark-border/50 rounded-full transition-all duration-1000" style={{ width: '66%' }}></div>
+                  <div className="absolute top-0 left-0 h-full bg-success rounded-full transition-all duration-1000" style={{ width: '100%' }}></div>
                 </div>
 
                 {/* Timeline Items */}
@@ -256,14 +266,14 @@ export default function NAIC2025Page() {
                   {timeline.map((item, index) => (
                     <div key={index} className="flex flex-col items-center flex-1 relative">
                       {/* Milestone Node */}
-                      <div className={`absolute -top-16 w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-500 ${
+                      <div className={`absolute -top-16 w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 ${
                         item.status === 'completed'
                           ? 'bg-success border-success/30 shadow-lg shadow-success/50' :
                         item.status === 'ongoing'
                           ? 'bg-warning border-warning/30 shadow-xl shadow-warning/60 animate-pulse' :
                           'bg-dark-surface border-dark-border/50'
                       }`}>
-                        <div className={`w-8 h-8 rounded-full ${
+                        <div className={`w-6 h-6 rounded-full ${
                           item.status === 'completed' ? 'bg-white' :
                           item.status === 'ongoing' ? 'bg-white' :
                           'bg-dark-border'
@@ -316,14 +326,14 @@ export default function NAIC2025Page() {
                     )}
 
                     {/* Node */}
-                    <div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full border-4 flex items-center justify-center ${
+                    <div className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full border-4 flex items-center justify-center ${
                       item.status === 'completed'
                         ? 'bg-success border-success/30 shadow-lg shadow-success/50' :
                       item.status === 'ongoing'
                         ? 'bg-warning border-warning/30 shadow-xl shadow-warning/60 animate-pulse' :
                         'bg-dark-surface border-dark-border/50'
                     }`}>
-                      <div className={`w-5 h-5 rounded-full ${
+                      <div className={`w-4 h-4 rounded-full ${
                         item.status === 'completed' ? 'bg-white' :
                         item.status === 'ongoing' ? 'bg-white' :
                         'bg-dark-border'
@@ -359,6 +369,97 @@ export default function NAIC2025Page() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Leaderboard Section */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+          <div className="container mx-auto">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+                Final Leaderboard
+              </h2>
+              <p className="text-text-secondary text-center mb-8">
+                Competition ended on 28 Dec 2025 • Ranked by Mean Absolute Error (lower is better)
+              </p>
+
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-dark-border/30">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Rank
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Participant
+                        </th>
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          Submissions
+                        </th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                          MAE ↓
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-dark-border/30">
+                      {leaderboard.map((entry) => (
+                        <tr
+                          key={entry.rank}
+                          className={`
+                            ${entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''}
+                            ${entry.isBaseline ? 'bg-warning/5 border-l-4 border-warning' : ''}
+                            hover:bg-dark-border/20 transition-colors
+                          `}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {entry.rank <= 3 ? (
+                                <div className={`flex items-center justify-center w-8 h-8 rounded-full mr-2 ${
+                                  entry.rank === 1 ? 'bg-yellow-500/20 text-yellow-500' :
+                                  entry.rank === 2 ? 'bg-gray-400/20 text-gray-400' :
+                                  'bg-amber-600/20 text-amber-600'
+                                }`}>
+                                  {entry.rank === 1 ? <Trophy className="w-4 h-4" /> :
+                                   entry.rank === 2 ? <Medal className="w-4 h-4" /> :
+                                   <Award className="w-4 h-4" />}
+                                </div>
+                              ) : null}
+                              <span className={`text-sm font-mono ${
+                                entry.rank <= 5 ? 'font-bold text-text-primary' : 'text-text-secondary'
+                              }`}>
+                                #{entry.rank}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`text-sm ${
+                              entry.isBaseline ? 'font-semibold text-warning italic' :
+                              entry.rank <= 5 ? 'font-semibold text-text-primary' :
+                              'text-text-secondary'
+                            }`}>
+                              {entry.name}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="text-sm text-text-secondary font-mono">
+                              {entry.submissions}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className={`text-sm font-mono ${
+                              entry.rank <= 5 ? 'font-bold text-primary-blue' : 'text-text-secondary'
+                            }`}>
+                              {entry.mae.toFixed(4)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
             </div>
           </div>
         </section>
@@ -458,22 +559,6 @@ export default function NAIC2025Page() {
                           Real-time ranking based on submission accuracy
                         </p>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-                  <CardContent className="p-8">
-                    <h3 className="text-xl font-bold text-text-primary mb-6 text-center">
-                      What You'll Learn
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {learningTopics.map((topic, index) => (
-                        <div key={index} className="flex items-start space-x-3">
-                          <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                          <p className="text-text-secondary">{topic}</p>
-                        </div>
-                      ))}
                     </div>
                   </CardContent>
                 </Card>

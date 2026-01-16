@@ -15,7 +15,7 @@ interface Stats {
   activeMembers: number
   postsShared: number
   totalViews: number
-  workshopsHeld: number
+  competitionsHeld: number
 }
 
 interface Project {
@@ -107,15 +107,15 @@ async function getStats(): Promise<Stats> {
 
     const totalViews = postsData?.reduce((sum, post) => sum + (post.view_count || 0), 0) || 0
 
-    // For workshops, we'll set to 1 as requested
-    const workshopsCount = 1
+    // For competitions, we have NAIC 2025 and PAIC 2026
+    const competitionsCount = 2
 
     return {
       activeProjects: projectsCount || 0,
       activeMembers: membersCount || 0,
       postsShared: postsCount || 0,
       totalViews: totalViews,
-      workshopsHeld: workshopsCount
+      competitionsHeld: competitionsCount
     }
   } catch (error) {
     console.error('Failed to fetch stats:', error)
@@ -125,7 +125,7 @@ async function getStats(): Promise<Stats> {
       activeMembers: 15,
       postsShared: 25,
       totalViews: 0,
-      workshopsHeld: 1
+      competitionsHeld: 2
     }
   }
 }
@@ -279,7 +279,7 @@ export default async function HomePage() {
   const statsData = [
     { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
     { label: 'Active Members', value: stats.activeMembers, key: 'activeMembers' },
-    { label: 'Workshops Held', value: stats.workshopsHeld, key: 'workshopsHeld' },
+    { label: 'Competitions Held', value: stats.competitionsHeld, key: 'competitionsHeld' },
     { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared' },
     { label: 'Total Views', value: stats.totalViews, key: 'totalViews' }
   ]
@@ -550,6 +550,45 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Latest Event Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+              Our Latest Event
+            </h2>
+            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+              Check out the highlights from our recent workshop and competition kickoff
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <Card className="overflow-hidden bg-gradient-to-br from-dark-surface to-dark-bg border-primary-blue/30">
+              <CardContent className="p-0">
+                <div className="relative aspect-video w-full">
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src="https://www.youtube.com/embed/cFs5njLot7k"
+                    title="The Noders PTNK Latest Event"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <div className="p-6 bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10">
+                  <h3 className="text-xl font-bold text-text-primary mb-2">
+                    PAIC 2026 Workshop & Registration
+                  </h3>
+                  <p className="text-text-secondary leading-relaxed">
+                    Join us as we kick off PTNK AI Challenge 2026 with an exciting workshop session,
+                    covering competition details, guidelines, and hands-on demonstrations.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section - Our Journey So Far */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Gradient background */}
@@ -668,10 +707,39 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* PAIC 2026 Card */}
+            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-accent-cyan/10 to-primary-blue/10 border border-accent-cyan/30">
+              <CardContent className="p-8">
+                <Badge variant="success" className="mb-4">Public • Ongoing</Badge>
+                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-accent-cyan transition-colors">
+                  PTNK AI Challenge 2026
+                </h3>
+                <p className="text-text-secondary mb-6 leading-relaxed">
+                  Our flagship public competition for VNU High School students. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.
+                </p>
+                <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-accent-cyan" />
+                    <span>24 Teams • 54 Participants</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-accent-cyan" />
+                    <span>05 - 18 Jan 2026</span>
+                  </div>
+                </div>
+                <Link href="/contest/paic-2026">
+                  <Button variant="secondary" className="w-full group/btn">
+                    Learn More
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
             {/* NAIC 2025 Card */}
             <Card variant="hover" className="hover-lift group bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border border-primary-blue/30">
               <CardContent className="p-8">
-                <Badge variant="success" className="mb-4">Internal • Ongoing</Badge>
+                <Badge variant="primary" className="mb-4">Internal • Ended</Badge>
                 <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors">
                   Noders AI Competition 2025
                 </h3>
@@ -681,45 +749,16 @@ export default async function HomePage() {
                 <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-primary-blue" />
-                    <span>14/18 Joined</span>
+                    <span>16 Participants</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary-blue" />
-                    <span>29 Nov - 21 Dec</span>
+                    <span>29 Nov - 28 Dec</span>
                   </div>
                 </div>
                 <Link href="/contest/naic-2025">
                   <Button variant="secondary" className="w-full group/btn">
-                    Learn More
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* PAIC 2026 Card */}
-            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-accent-cyan/10 to-primary-blue/10 border border-accent-cyan/30">
-              <CardContent className="p-8">
-                <Badge variant="warning" className="mb-4">Public • Coming Soon</Badge>
-                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-accent-cyan transition-colors">
-                  PTNK AI Challenge 2026
-                </h3>
-                <p className="text-text-secondary mb-6 leading-relaxed">
-                  Our flagship public competition for VNU High School students. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.
-                </p>
-                <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-accent-cyan" />
-                    <span>Open Registration</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-accent-cyan" />
-                    <span>29 Dec - 14 Jan</span>
-                  </div>
-                </div>
-                <Link href="/contest/paic-2026">
-                  <Button variant="secondary" className="w-full group/btn">
-                    Learn More
+                    View Results
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
