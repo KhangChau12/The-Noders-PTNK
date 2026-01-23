@@ -12,10 +12,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AI</span>
-              </div>
-              <span className="font-bold text-text-primary text-lg">
+              <span className="font-bold text-text-primary text-xl font-[family-name:var(--font-shrikhand)]">
                 {SITE_CONFIG.name}
               </span>
             </div>
@@ -32,23 +29,28 @@ export function Footer() {
             <h3 className="font-semibold text-text-primary mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
+                <Link href="/contest" className="text-text-secondary hover:text-primary-blue transition-colors">
+                  Contests
+                </Link>
+              </li>
+              <li>
                 <Link href="/projects" className="text-text-secondary hover:text-primary-blue transition-colors">
-                  Our Projects
+                  Projects
+                </Link>
+              </li>
+              <li>
+                <Link href="/education" className="text-text-secondary hover:text-primary-blue transition-colors">
+                  Education
                 </Link>
               </li>
               <li>
                 <Link href="/members" className="text-text-secondary hover:text-primary-blue transition-colors">
-                  Meet the Team
+                  Members
                 </Link>
               </li>
               <li>
                 <Link href="/posts" className="text-text-secondary hover:text-primary-blue transition-colors">
-                  News & Updates
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-text-secondary hover:text-primary-blue transition-colors">
-                  Contact
+                  News
                 </Link>
               </li>
             </ul>

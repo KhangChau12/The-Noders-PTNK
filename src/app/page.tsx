@@ -6,7 +6,7 @@ import { Badge } from '@/components/Badge'
 import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
 import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
-import { Code, Users, Zap, Brain, ArrowRight, Github, ExternalLink, Calendar, Clock, User, Newspaper, Target, BookOpen } from 'lucide-react'
+import { Code, Users, ArrowRight, Github, ExternalLink, Calendar, Clock, Newspaper, Target, BookOpen } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { TECH_STACK_COLORS } from '@/lib/constants'
 
@@ -248,33 +248,6 @@ export default async function HomePage() {
     getRecentProjects(),
     getRecentPosts()
   ])
-
-  const features = [
-    {
-      icon: <Target className="w-8 h-8" />,
-      title: 'Contest',
-      description: 'Compete and learn through hands-on AI challenges',
-      href: '/contest'
-    },
-    {
-      icon: <BookOpen className="w-8 h-8" />,
-      title: 'Education',
-      description: 'Structured workshops and courses for skill development',
-      href: '/education'
-    },
-    {
-      icon: <Code className="w-8 h-8" />,
-      title: 'Projects',
-      description: 'Real-world tech solutions built by our members',
-      href: '/projects'
-    },
-    {
-      icon: <Newspaper className="w-8 h-8" />,
-      title: 'Posts',
-      description: 'Insights and knowledge shared by the community',
-      href: '/posts'
-    }
-  ]
 
   const statsData = [
     { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
@@ -652,84 +625,46 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Our Programs Section - Contests & Education Combined */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              What We Do
+              Our Programs
             </h2>
             <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Our club focuses on hands-on learning, collaboration, and innovation in the AI space.
+              Competitions to challenge yourself and courses to build your skills
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Link key={index} href={feature.href}>
-                <Card className="text-center hover-lift group relative overflow-hidden cursor-pointer h-full transition-all duration-300">
-                  <CardContent className="p-8 relative z-10">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-2xl mb-6 text-primary-blue group-hover:shadow-2xl group-hover:shadow-primary-blue/30 group-hover:scale-110 transition-all duration-300">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-2xl font-bold text-text-primary mb-4 group-hover:bg-gradient-to-r group-hover:from-primary-blue group-hover:to-accent-cyan group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
-                      {feature.title}
-                    </h3>
-                    <p className="text-text-secondary leading-relaxed text-base min-h-[3rem]">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                  {/* Animated border on hover */}
-                  <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-blue/50 rounded-lg transition-all duration-300"></div>
-                  {/* Gradient glow background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/10 group-hover:to-accent-cyan/10 transition-all duration-500 rounded-lg"></div>
-                  {/* Arrow indicator on bottom right */}
-                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                    <ArrowRight className="w-5 h-5 text-primary-blue" />
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Our Contests Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Our Contests
-            </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Challenge yourself and level up your AI skills through real competition
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {/* PAIC 2026 Card */}
             <Card variant="hover" className="hover-lift group bg-gradient-to-br from-accent-cyan/10 to-primary-blue/10 border border-accent-cyan/30">
-              <CardContent className="p-8">
-                <Badge variant="success" className="mb-4">Public • Ongoing</Badge>
-                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-accent-cyan transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="w-5 h-5 text-accent-cyan" />
+                  <span className="text-xs font-semibold text-accent-cyan uppercase tracking-wider">Contest</span>
+                </div>
+                <Badge variant="primary" className="mb-3">Public • Ended</Badge>
+                <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-cyan transition-colors">
                   PTNK AI Challenge 2026
                 </h3>
-                <p className="text-text-secondary mb-6 leading-relaxed">
-                  Our flagship public competition for VNU High School students. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.
+                <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
+                  Our flagship public competition. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.
                 </p>
-                <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-accent-cyan" />
+                <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-text-tertiary">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
                     <span>24 Teams • 54 Participants</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-accent-cyan" />
-                    <span>05 - 18 Jan 2026</span>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>05 - 18 Jan</span>
                   </div>
                 </div>
                 <Link href="/contest/paic-2026">
-                  <Button variant="secondary" className="w-full group/btn">
-                    Learn More
+                  <Button variant="secondary" size="sm" className="w-full group/btn">
+                    View Results
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -738,85 +673,63 @@ export default async function HomePage() {
 
             {/* NAIC 2025 Card */}
             <Card variant="hover" className="hover-lift group bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border border-primary-blue/30">
-              <CardContent className="p-8">
-                <Badge variant="primary" className="mb-4">Internal • Ended</Badge>
-                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="w-5 h-5 text-primary-blue" />
+                  <span className="text-xs font-semibold text-primary-blue uppercase tracking-wider">Contest</span>
+                </div>
+                <Badge variant="primary" className="mb-3">Internal • Ended</Badge>
+                <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary-blue transition-colors">
                   Noders AI Competition 2025
                 </h3>
-                <p className="text-text-secondary mb-6 leading-relaxed">
-                  Our internal training ground where members sharpen AI skills through hands-on IELTS scoring challenges. Practice, compete, and earn rewards.
+                <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
+                  Our internal training ground where members sharpen AI skills through hands-on IELTS scoring challenges.
                 </p>
-                <div className="flex items-center gap-4 mb-6 text-sm text-text-secondary">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary-blue" />
+                <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-text-tertiary">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
                     <span>16 Participants</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary-blue" />
-                    <span>29 Nov - 28 Dec</span>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Nov - Dec 2025</span>
                   </div>
                 </div>
                 <Link href="/contest/naic-2025">
-                  <Button variant="secondary" className="w-full group/btn">
+                  <Button variant="secondary" size="sm" className="w-full group/btn">
                     View Results
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
-          </div>
 
-          <div className="text-center mt-12">
-            <Link href="/contest">
-              <Button size="lg" className="group">
-                View All Contests
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Education Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Courses & Workshops
-            </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Structured learning paths and hands-on workshops to build your AI and Data Science skills
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
             {/* Data Science Module 1 Card */}
-            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border border-primary-blue/30">
-              <CardContent className="p-8">
-                <Badge variant="warning" className="mb-4">Mini-Course • Coming Soon</Badge>
-                <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors">
-                  Introduction to Data Science - Module 1
+            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-purple-500/10 to-primary-blue/10 border border-purple-500/30">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <BookOpen className="w-5 h-5 text-purple-400" />
+                  <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Course</span>
+                </div>
+                <Badge variant="warning" className="mb-3">Coming Soon</Badge>
+                <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-purple-400 transition-colors">
+                  Intro to Data Science
                 </h3>
-                <p className="text-text-secondary mb-6 leading-relaxed">
-                  Build a solid foundation in data science thinking and gain comprehensive knowledge of the 3 pillars of data (Structured, Vision, NLP).
-                  4-session mini-course focused on problem fundamentals and practical applications.
+                <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
+                  Build a solid foundation in data science thinking. 4-session mini-course focused on fundamentals.
                 </p>
-                <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-text-secondary">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary-blue" />
-                    <span>Grade 10-11 Students</span>
+                <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-text-tertiary">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Grade 10-11</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary-blue" />
-                    <span>4 sessions × 1.5h</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-primary-blue" />
-                    <span>January 2026</span>
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>4 × 1.5h</span>
                   </div>
                 </div>
                 <Link href="/education/data-science-module-1">
-                  <Button variant="secondary" className="w-full group/btn">
+                  <Button variant="secondary" size="sm" className="w-full group/btn">
                     Learn More
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
@@ -825,10 +738,16 @@ export default async function HomePage() {
             </Card>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+            <Link href="/contest">
+              <Button variant="secondary" size="lg" className="group">
+                All Contests
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
             <Link href="/education">
-              <Button size="lg" className="group">
-                View All Programs
+              <Button variant="secondary" size="lg" className="group">
+                All Courses
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -1110,35 +1029,6 @@ export default async function HomePage() {
               </Link>
             </Card>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-            <CardContent className="p-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-                Join The Noders Community
-              </h2>
-              <p className="text-text-secondary text-lg mb-8 max-w-3xl mx-auto">
-                Passionate about AI, web/app development, or technology in general?
-                Join us in connecting to create amazing things together!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/members">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    Learn More
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                    Contact Us
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
     </div>

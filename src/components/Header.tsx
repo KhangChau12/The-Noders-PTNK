@@ -1,18 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuth } from './AuthProvider'
 import { Button } from './Button'
-import { NAVIGATION_ITEMS, SITE_CONFIG } from '@/lib/constants'
-import { Menu, X, User, LogOut, Settings, Shield } from 'lucide-react'
+import { NAVIGATION_ITEMS } from '@/lib/constants'
+import { Menu, X, User, LogOut, Shield, ChevronDown } from 'lucide-react'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const { user, profile, signOut, isAdmin } = useAuth()
   const pathname = usePathname()
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleSignOut = async () => {
     await signOut()
@@ -33,10 +46,55 @@ export function Header() {
           </div>
 
           {/* Desktop Navigation - Absolutely Centered */}
-          <nav className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
+          <nav className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2" ref={dropdownRef}>
             <div className="flex items-center gap-2">
               {NAVIGATION_ITEMS.map((item) => {
-                const isActive = pathname === item.href
+                const hasChildren = 'children' in item && item.children
+                const isActive = pathname === item.href || (hasChildren && item.children?.some(child => pathname === child.href))
+
+                if (hasChildren) {
+                  return (
+                    <div key={item.name} className="relative">
+                      <button
+                        onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
+                        className={cn(
+                          'relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 group flex items-center gap-1',
+                          isActive
+                            ? 'text-white bg-gradient-to-r from-primary-blue to-accent-cyan shadow-lg shadow-primary-blue/30'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface/50 hover:backdrop-blur-sm border border-transparent hover:border-dark-border/50'
+                        )}
+                      >
+                        <span className="relative z-10">{item.name}</span>
+                        <ChevronDown className={cn(
+                          'w-4 h-4 transition-transform duration-200',
+                          openDropdown === item.name && 'rotate-180'
+                        )} />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      {openDropdown === item.name && (
+                        <div className="absolute top-full left-0 mt-2 py-2 bg-dark-surface/95 backdrop-blur-md border border-dark-border rounded-xl shadow-xl min-w-[160px] z-50">
+                          {item.children?.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setOpenDropdown(null)}
+                              className={cn(
+                                'block px-4 py-2 text-sm font-medium transition-all duration-200',
+                                pathname === child.href
+                                  ? 'text-primary-blue bg-primary-blue/10'
+                                  : 'text-text-secondary hover:text-text-primary hover:bg-dark-border/50'
+                              )}
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
                 return (
                   <Link
                     key={item.href}
@@ -117,7 +175,53 @@ export function Header() {
           <div className="md:hidden py-4 border-t border-dark-border">
             <nav className="flex flex-col space-y-2">
               {NAVIGATION_ITEMS.map((item) => {
-                const isActive = pathname === item.href
+                const hasChildren = 'children' in item && item.children
+                const isActive = pathname === item.href || (hasChildren && item.children?.some(child => pathname === child.href))
+
+                if (hasChildren) {
+                  return (
+                    <div key={item.name} className="space-y-1">
+                      <button
+                        onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
+                        className={cn(
+                          'relative w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 flex items-center justify-between',
+                          isActive
+                            ? 'text-white bg-gradient-to-r from-primary-blue to-accent-cyan shadow-lg shadow-primary-blue/20'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface/50 border border-transparent hover:border-dark-border/50'
+                        )}
+                      >
+                        <span>{item.name}</span>
+                        <ChevronDown className={cn(
+                          'w-4 h-4 transition-transform duration-200',
+                          openDropdown === item.name && 'rotate-180'
+                        )} />
+                      </button>
+                      {openDropdown === item.name && (
+                        <div className="pl-4 space-y-1">
+                          {item.children?.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => {
+                                setIsMenuOpen(false)
+                                setOpenDropdown(null)
+                              }}
+                              className={cn(
+                                'block px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200',
+                                pathname === child.href
+                                  ? 'text-primary-blue bg-primary-blue/10'
+                                  : 'text-text-secondary hover:text-text-primary hover:bg-dark-border/30'
+                              )}
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+
                 return (
                   <Link
                     key={item.href}

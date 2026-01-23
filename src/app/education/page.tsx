@@ -130,31 +130,6 @@ export default function EducationPage() {
             </div>
           </div>
         </section>
-
-        {/* CTA Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/50">
-          <div className="container mx-auto">
-            <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="p-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-                  Ready to Start Learning?
-                </h2>
-                <p className="text-text-secondary text-lg mb-8 max-w-3xl mx-auto">
-                  Join our programs and build the skills that will set you apart. Whether you're
-                  exploring AI for the first time or deepening your expertise, we'll meet you where you are.
-                </p>
-                <div className="flex justify-center gap-4">
-                  <Link href="/contact">
-                    <Button size="lg" className="group">
-                      Get in Touch
-                      <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
       </div>
     </>
   )

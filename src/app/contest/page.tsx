@@ -25,8 +25,8 @@ export default function ContestPage() {
     {
       id: 'paic-2026',
       slug: 'paic-2026',
-      badge: 'Public • Ongoing',
-      badgeVariant: 'success' as const,
+      badge: 'Public • Ended',
+      badgeVariant: 'primary' as const,
       title: 'PTNK AI Challenge 2026',
       shortDescription: 'Our flagship public competition for VNU High School students. Build AI models for IELTS Writing scoring with cash prizes up to 1,000,000 VNĐ.',
       stats: [

@@ -211,21 +211,6 @@ export default function ProjectsPage() {
             </Card>
           )}
         </div>
-
-        {/* CTA Section */}
-        <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-          <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-text-primary mb-4">
-              Want to Contribute?
-            </h2>
-            <p className="text-text-secondary mb-6">
-              Join our community and collaborate on exciting AI projects.
-            </p>
-            <Button size="lg">
-              Learn More About Joining
-            </Button>
-          </CardContent>
-        </Card>
       </div>
       </div>
     </>

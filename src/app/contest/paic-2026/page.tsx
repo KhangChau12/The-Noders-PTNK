@@ -12,16 +12,16 @@ import {
   Trophy,
   Zap,
   Brain,
-  Database,
   Award,
   CheckCircle,
-  ExternalLink,
-  FileText,
   Lightbulb,
-  BarChart3,
-  Medal
+  Medal,
+  FileText,
+  Database,
+  BarChart3
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
+import { LeaderboardTabs } from './LeaderboardTabs'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'PAIC 2026 - PTNK AI Challenge 2026',
@@ -54,7 +54,7 @@ export default function PAIC2026Page() {
     {
       date: '05/01 - 17/01',
       title: 'Vòng Public',
-      status: 'ongoing' as const,
+      status: 'completed' as const,
       items: [
         { icon: <Database className="w-4 h-4" />, text: 'Cung cấp tập dữ liệu huấn luyện' },
         { icon: <Target className="w-4 h-4" />, text: 'Cung cấp tập test public' },
@@ -64,13 +64,84 @@ export default function PAIC2026Page() {
     {
       date: '18/01/2026',
       title: 'Vòng Private',
-      status: 'upcoming' as const,
+      status: 'completed' as const,
       items: [
         { icon: <Zap className="w-4 h-4" />, text: 'Mở thêm dữ liệu và thay đổi tập test' },
         { icon: <Calendar className="w-4 h-4" />, text: '24 giờ để cải thiện mô hình' },
         { icon: <Trophy className="w-4 h-4" />, text: 'Nộp kết quả cuối cùng và công bố giải thưởng' }
       ]
     }
+  ]
+
+  // Team Leaderboard
+  const teamLeaderboard = [
+    { rank: 1, team: 'Mango', public: 0.4103, private: 0.4150, average: 0.4126, submissions: 127 },
+    { rank: 2, team: 'Lực Hướng Tâm', public: 0.4119, private: 0.4276, average: 0.4197, submissions: 74 },
+    { rank: 3, team: 'Tuianhchaphet', public: 0.4175, private: 0.4297, average: 0.4236, submissions: 103 },
+    { rank: 4, team: 'Ép oăn - Ti oăn', public: 0.4169, private: 0.4330, average: 0.4250, submissions: 113 },
+    { rank: 5, team: 'kothanglamcho', public: 0.4264, private: 0.4461, average: 0.4362, submissions: 72 },
+    { rank: 6, team: 'Chồn Nghệ Tây', public: 0.4298, private: 0.4537, average: 0.4417, submissions: 133 },
+    { rank: 7, team: 'Synapse1', public: 0.4326, private: 0.4510, average: 0.4418, submissions: 95 },
+    { rank: 8, team: 'Nước Tương Tam Thái Tử', public: 0.5039, private: 0.5142, average: 0.5090, submissions: 14 },
+    { rank: 9, team: 'Don\'t mind us', public: 0.4588, private: 0.5594, average: 0.5091, submissions: 12 },
+    { rank: 10, team: 'Three Little Wolves', public: 0.4855, private: 0.5430, average: 0.5143, submissions: 36 },
+    { rank: 11, team: 'Nynee', public: 0.5351, private: 0.8731, average: 0.7041, submissions: 6 },
+    { rank: 12, team: 'beebee', public: 0.4287, private: null, average: null, submissions: 12 },
+    { rank: 13, team: 'nexai', public: 0.4303, private: null, average: null, submissions: 4 },
+    { rank: 14, team: 'LLmers', public: 0.4365, private: null, average: null, submissions: 33 },
+    { rank: 15, team: 'Thợ săn hạng E', public: 0.4409, private: null, average: null, submissions: 36 },
+    { rank: 16, team: 'Lmao', public: 0.4482, private: null, average: null, submissions: 22 },
+    { rank: 17, team: 'Chat_GPT', public: 0.4588, private: null, average: null, submissions: 7 },
+    { rank: 18, team: 'GeminiPro>Chatgpt', public: 0.4688, private: null, average: null, submissions: 38 },
+    { rank: 19, team: 'KhoiLe08', public: 0.4771, private: null, average: null, submissions: 3 },
+    { rank: 20, team: 'Sinh Vien ban5', public: 0.5792, private: null, average: null, submissions: 6 },
+    { rank: 21, team: 'Nhúc nhích', public: 0.7353, private: null, average: null, submissions: 2 },
+    { rank: 22, team: 'Skibidi', public: null, private: 1.3279, average: null, submissions: 2 },
+  ]
+
+  // Individual Leaderboard
+  const individualLeaderboard = [
+    { rank: 1, name: 'Phan Xuân Khoa', team: 'Mango', public: 0.4130, private: 0.4150, average: 0.4140, submissions: 25 },
+    { rank: 2, name: 'Cao Tùng Lâm', team: 'Mango', public: 0.4103, private: 0.4227, average: 0.4165, submissions: 102 },
+    { rank: 3, name: 'Đoàn Thiên An', team: 'Lực Hướng Tâm', public: 0.4119, private: 0.4276, average: 0.4197, submissions: 74 },
+    { rank: 4, name: 'Lê Trường Minh Đăng', team: 'Tuianhchaphet', public: 0.4175, private: 0.4297, average: 0.4236, submissions: 49 },
+    { rank: 5, name: 'Vũ Nguyễn Khánh Ngọc', team: 'Ép oăn - Ti oăn', public: 0.4169, private: 0.4330, average: 0.4250, submissions: 69 },
+    { rank: 6, name: 'Truong Bao Khang', team: 'Tuianhchaphet', public: 0.4287, private: 0.4406, average: 0.4346, submissions: 54 },
+    { rank: 7, name: 'Ngụy Mỹ Linh', team: 'Ép oăn - Ti oăn', public: 0.4281, private: 0.4450, average: 0.4365, submissions: 32 },
+    { rank: 8, name: 'Phạm Quốc Bình', team: 'kothanglamcho', public: 0.4298, private: 0.4461, average: 0.4379, submissions: 51 },
+    { rank: 9, name: 'Nguyễn Hoàng Anh', team: 'Chồn Nghệ Tây', public: 0.4298, private: 0.4537, average: 0.4417, submissions: 76 },
+    { rank: 10, name: 'Lâm Gia Phúc Nguyên', team: 'Synapse1', public: 0.4326, private: 0.4510, average: 0.4418, submissions: 83 },
+    { rank: 11, name: 'Cam Duy Minh', team: 'Chồn Nghệ Tây', public: 0.4342, private: 0.4581, average: 0.4461, submissions: 33 },
+    { rank: 12, name: 'Nguyễn Ngọc Minh Tâm', team: 'Ép oăn - Ti oăn', public: 0.5373, private: 0.4646, average: 0.5010, submissions: 12 },
+    { rank: 13, name: 'Đỗ Lê Chí Hùng', team: 'Nước Tương Tam Thái Tử', public: 0.5039, private: 0.5142, average: 0.5090, submissions: 10 },
+    { rank: 14, name: 'Tạ Hầu Việt Long', team: 'Don\'t mind us', public: 0.4588, private: 0.5594, average: 0.5091, submissions: 9 },
+    { rank: 15, name: 'Chu Quang Nam', team: 'Three Little Wolves', public: 0.4855, private: 0.5501, average: 0.5178, submissions: 31 },
+    { rank: 16, name: 'Phạm Đình Hải Nam', team: 'Three Little Wolves', public: 0.4933, private: 0.5430, average: 0.5182, submissions: 5 },
+    { rank: 17, name: 'Đào Ngọc Minh Tâm', team: 'Don\'t mind us', public: 0.4710, private: 0.6127, average: 0.5419, submissions: 3 },
+    { rank: 18, name: 'Trần Duy Phát', team: 'Nynee', public: 0.5351, private: 0.8731, average: 0.7041, submissions: 6 },
+    { rank: 19, name: 'Phạm Phương Thảo', team: 'Nước Tương Tam Thái Tử', public: 0.8501, private: 0.7996, average: 0.8248, submissions: 4 },
+    { rank: 20, name: 'Bui Quoc Vinh Khang', team: 'kothanglamcho', public: 0.4264, private: null, average: null, submissions: 19 },
+    { rank: 21, name: 'Nguyễn Lê Quỳnh Châu', team: 'beebee', public: 0.4287, private: null, average: null, submissions: 12 },
+    { rank: 22, name: 'Trương Hoàng Tấn Dũng', team: 'nexai', public: 0.4303, private: null, average: null, submissions: 4 },
+    { rank: 23, name: 'Thái Hoàng Sơn', team: 'LLmers', public: 0.4365, private: null, average: null, submissions: 16 },
+    { rank: 24, name: 'Từ Đình Nguyên', team: 'Thợ săn hạng E', public: 0.4409, private: null, average: null, submissions: 36 },
+    { rank: 25, name: 'Đinh Gia Minh', team: 'Chồn Nghệ Tây', public: 0.4443, private: null, average: null, submissions: 24 },
+    { rank: 26, name: 'Nguyễn Hoàng Minh Khang', team: 'LLmers', public: 0.4465, private: null, average: null, submissions: 17 },
+    { rank: 27, name: 'Gia Bảo', team: 'Lmao', public: 0.4482, private: null, average: null, submissions: 16 },
+    { rank: 28, name: 'Hoai', team: 'kothanglamcho', public: null, private: 0.4532, average: null, submissions: 2 },
+    { rank: 29, name: 'Trần Trung Quân', team: 'Chat_GPT', public: 0.4588, private: null, average: null, submissions: 5 },
+    { rank: 30, name: 'Hoàng Tô Đức Thắng', team: 'GeminiPro>Chatgpt', public: 0.4688, private: null, average: null, submissions: 16 },
+    { rank: 31, name: 'Huỳnh Khải Đông', team: 'GeminiPro>Chatgpt', public: 0.4734, private: null, average: null, submissions: 19 },
+    { rank: 32, name: 'Lê Nguyễn Minh Khôi', team: 'KhoiLe08', public: 0.4771, private: null, average: null, submissions: 3 },
+    { rank: 33, name: 'Thái Nguyên Khôi', team: 'Lmao', public: 0.5284, private: null, average: null, submissions: 4 },
+    { rank: 34, name: 'Lâm Hoàng Anh Tuấn', team: 'Lmao', public: 0.5390, private: null, average: null, submissions: 2 },
+    { rank: 35, name: 'Nguyễn Ngọc Tuấn', team: 'Synapse1', public: 0.5464, private: null, average: null, submissions: 10 },
+    { rank: 36, name: 'Khưu Trường Khả', team: 'Synapse1', public: 0.5511, private: null, average: null, submissions: 2 },
+    { rank: 37, name: 'Nguyễn Hoàng Hải Đăng', team: 'Chat_GPT', public: 0.5780, private: null, average: null, submissions: 2 },
+    { rank: 38, name: 'Nguyễn Hữu Đăng', team: 'Sinh Vien ban5', public: 0.5792, private: null, average: null, submissions: 6 },
+    { rank: 39, name: 'Trần Phúc Thái', team: 'Nhúc nhích', public: 0.7353, private: null, average: null, submissions: 2 },
+    { rank: 40, name: 'Tân Nguyễn Khánh Duy', team: 'GeminiPro>Chatgpt', public: 0.8567, private: null, average: null, submissions: 3 },
+    { rank: 41, name: 'Hoàng Nhật Nam', team: 'Skibidi', public: null, private: 1.3279, average: null, submissions: 2 },
   ]
 
   const prizes = [
@@ -164,8 +235,8 @@ export default function PAIC2026Page() {
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="success" className="mb-6">
-                Đang diễn ra
+              <Badge variant="primary" className="mb-6">
+                Đã kết thúc
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
                 <span className="gradient-text">PAIC 2026</span>
@@ -303,8 +374,8 @@ export default function PAIC2026Page() {
                 {/* Progress Bar Background */}
                 <div className="absolute top-8 left-0 right-0 h-1 bg-dark-border/30 rounded-full">
                   <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-success via-warning to-dark-border/50 rounded-full transition-all duration-1000"
-                    style={{ width: '25%' }}
+                    className="absolute top-0 left-0 h-full bg-success rounded-full transition-all duration-1000"
+                    style={{ width: '100%' }}
                   ></div>
                 </div>
 
@@ -313,23 +384,15 @@ export default function PAIC2026Page() {
                   {timeline.map((item, index) => (
                     <div key={index} className="flex flex-col items-center flex-1 relative">
                       {/* Milestone Node */}
-                      <div className={`absolute -top-16 w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-500 ${
-                        item.status === 'completed' ? 'bg-success border-success/30 shadow-lg shadow-success/50' :
-                        item.status === 'ongoing' ? 'bg-warning border-warning/30 shadow-xl shadow-warning/60 animate-pulse' :
-                        'bg-dark-surface border-dark-border/50'
-                      }`}>
-                        <div className={`w-8 h-8 rounded-full ${
-                          item.status === 'completed' ? 'bg-white' :
-                          item.status === 'ongoing' ? 'bg-white' :
-                          'bg-dark-border'
-                        }`}></div>
+                      <div className="absolute -top-16 w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 bg-success border-success/30 shadow-lg shadow-success/50">
+                        <div className="w-6 h-6 rounded-full bg-white"></div>
                       </div>
 
                       {/* Card */}
                       <Card variant="hover" className="w-full hover-lift">
                         <CardContent className="p-6">
                           <div className="text-center mb-4">
-                            <Badge variant={item.status === 'ongoing' ? 'warning' : 'primary'} className="mb-2">
+                            <Badge variant="success" className="mb-2">
                               {item.date}
                             </Badge>
                             <h3 className="text-lg font-bold text-text-primary font-mono">
@@ -359,19 +422,11 @@ export default function PAIC2026Page() {
                   <Card key={index} variant="hover" className="hover-lift">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4 mb-4">
-                        <div className={`flex-shrink-0 w-12 h-12 rounded-full border-4 flex items-center justify-center ${
-                          item.status === 'completed' ? 'bg-success border-success/30' :
-                          item.status === 'ongoing' ? 'bg-warning border-warning/30' :
-                          'bg-dark-surface border-dark-border/50'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full ${
-                            item.status === 'completed' ? 'bg-white' :
-                            item.status === 'ongoing' ? 'bg-white' :
-                            'bg-dark-border'
-                          }`}></div>
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full border-4 flex items-center justify-center bg-success border-success/30">
+                          <div className="w-5 h-5 rounded-full bg-white"></div>
                         </div>
                         <div className="flex-1">
-                          <Badge variant={item.status === 'ongoing' ? 'warning' : 'primary'} className="mb-2">
+                          <Badge variant="success" className="mb-2">
                             {item.date}
                           </Badge>
                           <h3 className="text-lg font-bold text-text-primary font-mono">
@@ -379,7 +434,7 @@ export default function PAIC2026Page() {
                           </h3>
                         </div>
                       </div>
-                      <div className="space-y-3 ml-16">
+                      <div className="space-y-3 ml-14">
                         {item.items.map((subItem, subIndex) => (
                           <div key={subIndex} className="flex items-start space-x-2 text-sm">
                             <div className="flex-shrink-0 w-6 h-6 bg-primary-blue/10 border border-primary-blue/30 rounded flex items-center justify-center text-primary-blue mt-0.5">
@@ -581,29 +636,149 @@ export default function PAIC2026Page() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        {/* Team Leaderboard Section */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
-            <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="p-12">
-                <h2 className="text-3xl font-bold text-text-primary mb-4">
-                  Sẵn sàng tham gia?
-                </h2>
-                <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
-                  Đăng ký tham gia PAIC 2026 - Kỳ thi học thuật về AI do The Noders tổ chức.
-                  Trải nghiệm quy trình AI thực tế và tranh tài cùng các học sinh PTNK!
-                </p>
-                <Link href="https://forms.gle/4PnaDe4DXQk41Q6t8" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="group">
-                    Đăng ký ngay
-                    <ExternalLink className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
-                  </Button>
-                </Link>
-                <p className="text-text-secondary text-sm mt-4">
-                  Thời gian đăng ký: 28/12/2025 - 03/01/2026
-                </p>
-              </CardContent>
-            </Card>
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold text-text-primary mb-4 text-center">
+                Bảng xếp hạng theo đội
+              </h2>
+              <p className="text-text-secondary text-center mb-8">
+                Kết quả chính thức của PAIC 2026 • Xếp hạng theo điểm trung bình (Average)
+              </p>
+
+              <Card className="overflow-hidden border-primary-blue/20">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
+                        <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">Hạng</th>
+                        <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">Đội</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Public</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Private</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Average</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Submissions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teamLeaderboard.map((entry) => (
+                        <tr
+                          key={entry.rank}
+                          className={`border-b border-dark-border/50 hover:bg-dark-surface/50 transition-colors ${
+                            entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
+                          }`}
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              {entry.rank === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
+                              {entry.rank === 2 && <Medal className="w-5 h-5 text-gray-400" />}
+                              {entry.rank === 3 && <Award className="w-5 h-5 text-amber-600" />}
+                              <span className={`font-bold ${entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
+                                #{entry.rank}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`font-medium ${entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
+                              {entry.team}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center font-mono text-sm text-text-secondary">
+                            {entry.public?.toFixed(4) ?? '—'}
+                          </td>
+                          <td className="px-4 py-3 text-center font-mono text-sm text-text-secondary">
+                            {entry.private?.toFixed(4) ?? '—'}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`font-mono text-sm font-semibold ${entry.average ? 'text-primary-blue' : 'text-text-tertiary'}`}>
+                              {entry.average?.toFixed(4) ?? '—'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center text-sm text-text-tertiary">
+                            {entry.submissions}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Individual Leaderboard Section */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto">
+            <div className="max-w-7xl mx-auto">
+              <h2 className="text-3xl font-bold text-text-primary mb-4 text-center">
+                Bảng xếp hạng cá nhân
+              </h2>
+              <p className="text-text-secondary text-center mb-8">
+                Kết quả chi tiết theo từng thí sinh • Xếp hạng theo điểm trung bình (Average)
+              </p>
+
+              <Card className="overflow-hidden border-primary-blue/20">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
+                        <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">Hạng</th>
+                        <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">Thí sinh</th>
+                        <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">Đội</th>
+                        <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Public</th>
+                        <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Private</th>
+                        <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Average</th>
+                        <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Submissions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {individualLeaderboard.map((entry) => (
+                        <tr
+                          key={entry.rank}
+                          className={`border-b border-dark-border/50 hover:bg-dark-surface/50 transition-colors ${
+                            entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
+                          }`}
+                        >
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-1">
+                              {entry.rank === 1 && <Trophy className="w-4 h-4 text-yellow-500" />}
+                              {entry.rank === 2 && <Medal className="w-4 h-4 text-gray-400" />}
+                              {entry.rank === 3 && <Award className="w-4 h-4 text-amber-600" />}
+                              <span className={`font-bold text-sm ${entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
+                                #{entry.rank}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className={`font-medium text-sm ${entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
+                              {entry.name}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-sm text-text-tertiary">
+                            {entry.team}
+                          </td>
+                          <td className="px-3 py-3 text-center font-mono text-xs text-text-secondary">
+                            {entry.public?.toFixed(4) ?? '—'}
+                          </td>
+                          <td className="px-3 py-3 text-center font-mono text-xs text-text-secondary">
+                            {entry.private?.toFixed(4) ?? '—'}
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            <span className={`font-mono text-xs font-semibold ${entry.average ? 'text-primary-blue' : 'text-text-tertiary'}`}>
+                              {entry.average?.toFixed(4) ?? '—'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-center text-xs text-text-tertiary">
+                            {entry.submissions}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </div>
           </div>
         </section>
       </div>

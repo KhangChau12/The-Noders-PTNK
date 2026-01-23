@@ -29,13 +29,18 @@ export const SITE_CONFIG = {
 }
 
 export const NAVIGATION_ITEMS = [
-  { name: 'Home', href: '/' },
   { name: 'Contest', href: '/contest' },
   { name: 'Education', href: '/education' },
   { name: 'Projects', href: '/projects' },
   { name: 'Posts', href: '/posts' },
-  { name: 'Members', href: '/members' },
-  { name: 'Contact', href: '/contact' },
+  {
+    name: 'About',
+    href: '#',
+    children: [
+      { name: 'Members', href: '/members' },
+      { name: 'Contact', href: '/contact' },
+    ]
+  },
 ]
 
 export const SOCIAL_LINKS = {
