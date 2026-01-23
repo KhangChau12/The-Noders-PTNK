@@ -529,20 +529,20 @@ export default async function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contest">
                 <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90">
-                  Join AI Challenge 2026
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                  Our Contests
+                  <Target className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
               <Link href="/projects">
                 <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Explore Projects
+                  Our Projects
                   <Code className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
-              <Link href="/members">
+              <Link href="/education">
                 <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Meet the Team
-                  <Users className="ml-2 w-4 h-4" />
+                  Our Courses
+                  <BookOpen className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
             </div>
