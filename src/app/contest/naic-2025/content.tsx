@@ -20,7 +20,6 @@ import {
   ExternalLink,
   FileText,
   Medal,
-  Coins,
   Star,
   PlayCircle
 } from 'lucide-react'
@@ -86,25 +85,28 @@ export function NAIC2025Content() {
       rank: loc(t.prizes.list[0].rank),
       prize: loc(t.prizes.list[0].prize),
       bonus: loc(t.prizes.list[0].bonus),
-      icon: <Trophy className="w-8 h-8 text-yellow-500" />,
-      gradient: 'from-yellow-500/20 to-orange-500/20',
-      border: 'border-yellow-500/30'
+      icon: <Trophy className="w-6 h-6 text-yellow-500" />,
+      bg: 'bg-yellow-500/10',
+      border: 'border-yellow-500/30',
+      textColor: 'text-yellow-500'
     },
     {
       rank: loc(t.prizes.list[1].rank),
       prize: loc(t.prizes.list[1].prize),
       bonus: loc(t.prizes.list[1].bonus),
-      icon: <Medal className="w-8 h-8 text-gray-400" />,
-      gradient: 'from-gray-300/20 to-gray-500/20',
-      border: 'border-gray-400/30'
+      icon: <Medal className="w-6 h-6 text-gray-400" />,
+      bg: 'bg-gray-400/10',
+      border: 'border-gray-400/30',
+      textColor: 'text-gray-400'
     },
     {
       rank: loc(t.prizes.list[2].rank),
       prize: loc(t.prizes.list[2].prize),
       bonus: loc(t.prizes.list[2].bonus),
-      icon: <Award className="w-8 h-8 text-amber-600" />,
-      gradient: 'from-amber-600/20 to-orange-700/20',
-      border: 'border-amber-600/30'
+      icon: <Award className="w-6 h-6 text-amber-600" />,
+      bg: 'bg-amber-600/10',
+      border: 'border-amber-600/30',
+      textColor: 'text-amber-600'
     }
   ]
   
@@ -560,41 +562,55 @@ export function NAIC2025Content() {
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-                 {loc(t.prizes.heading)}
-              </h2>
-              <p className="text-text-secondary text-center mb-8">
-                 {loc(t.prizes.subheading)}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {prizes.map((prize, index) => (
-                  <Card key={index} className={`text-center hover-lift bg-gradient-to-br ${prize.gradient} border-2 ${prize.border}`}>
-                    <CardContent className="p-8">
-                      <div className="mb-6">{prize.icon}</div>
-                      <h3 className="text-xl font-bold text-text-primary mb-3 font-mono">
-                        {prize.rank}
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center space-x-2">
-                          <Coins className="w-5 h-5 text-primary-blue" />
-                          <span className="text-2xl font-bold text-primary-blue">{prize.prize}</span>
-                        </div>
-                        <p className="text-text-secondary text-sm">{prize.bonus}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-bold text-text-primary mb-4">
+                  {loc(t.prizes.heading)}
+                </h2>
+                <p className="text-text-secondary">
+                  {loc(t.prizes.subheading)}
+                </p>
               </div>
 
-              <Card className="bg-gradient-to-r from-success/10 to-primary-blue/10 border-success/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-center space-x-3">
-                    <Star className="w-6 h-6 text-success" />
-                    <p className="text-text-primary font-semibold">
-                       {loc(t.prizes.participation)}
+              {/* Prize List */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-primary-blue" />
+                  {lang === 'vi' ? 'Giải thưởng' : 'Prizes'}
+                </h3>
+                <Card className="overflow-hidden border-primary-blue/20">
+                  <div className="divide-y divide-dark-border/30">
+                    {prizes.map((prize, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 hover:bg-dark-surface/30 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-lg ${prize.bg} border ${prize.border} flex items-center justify-center`}>
+                            {prize.icon}
+                          </div>
+                          <div>
+                            <p className={`font-semibold ${prize.textColor}`}>{prize.rank}</p>
+                            <p className="text-text-tertiary text-sm">{prize.bonus}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-text-primary">{prize.prize}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+
+              {/* Participation Reward */}
+              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/30">
+                <CardContent className="py-6 px-8 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Star className="w-5 h-5 text-success" />
+                    <p className="text-text-secondary font-medium">
+                      {lang === 'vi' ? 'Tất cả thí sinh khác' : 'All other participants'}
                     </p>
                   </div>
+                  <p className="font-bold text-text-primary">
+                    {lang === 'vi' ? 'Kinh nghiệm + 10 Club Points' : 'Experience + 10 Club Points'}
+                  </p>
                 </CardContent>
               </Card>
             </div>

@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { Card } from '@/components/Card'
 import { Trophy, Medal, Award, Users, User } from 'lucide-react'
+import { useLanguage } from '@/components/LanguageProvider'
+import { content } from './locale'
 
 interface TeamEntry {
-  rank: number
+  rank: number | null
   team: string
   public: number | null
   private: number | null
@@ -14,7 +16,7 @@ interface TeamEntry {
 }
 
 interface IndividualEntry {
-  rank: number
+  rank: number | null
   name: string
   team: string
   public: number | null
@@ -30,6 +32,8 @@ interface LeaderboardTabsProps {
 
 export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: LeaderboardTabsProps) {
   const [activeTab, setActiveTab] = useState<'team' | 'individual'>('team')
+  const { lang } = useLanguage()
+  const t = content[lang as keyof typeof content] || content.vi
 
   return (
     <div>
@@ -44,7 +48,7 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
           }`}
         >
           <Users className="w-4 h-4" />
-          Theo đội ({teamLeaderboard.length})
+          {t.leaderboard_tabs.team_tab} ({teamLeaderboard.length})
         </button>
         <button
           onClick={() => setActiveTab('individual')}
@@ -55,7 +59,7 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
           }`}
         >
           <User className="w-4 h-4" />
-          Cá nhân ({individualLeaderboard.length})
+          {t.leaderboard_tabs.individual_tab} ({individualLeaderboard.length})
         </button>
       </div>
 
@@ -66,20 +70,20 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
-                  <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">Hạng</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">Đội</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Public</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Private</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Average</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">Submissions</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.rank}</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.team}</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.public}</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.private}</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.average}</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.submissions}</th>
                 </tr>
               </thead>
               <tbody>
-                {teamLeaderboard.map((entry) => (
+                {teamLeaderboard.map((entry, index) => (
                   <tr
-                    key={entry.rank}
+                    key={entry.rank ?? `unranked-${index}`}
                     className={`border-b border-dark-border/50 hover:bg-dark-surface/50 transition-colors ${
-                      entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
+                      entry.rank !== null && entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
                     }`}
                   >
                     <td className="px-4 py-3">
@@ -87,13 +91,13 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
                         {entry.rank === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
                         {entry.rank === 2 && <Medal className="w-5 h-5 text-gray-400" />}
                         {entry.rank === 3 && <Award className="w-5 h-5 text-amber-600" />}
-                        <span className={`font-bold ${entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
-                          #{entry.rank}
+                        <span className={`font-bold ${entry.rank !== null && entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
+                          {entry.rank !== null ? `#${entry.rank}` : '—'}
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`font-medium ${entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
+                      <span className={`font-medium ${entry.rank !== null && entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
                         {entry.team}
                       </span>
                     </td>
@@ -126,21 +130,21 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
             <table className="w-full">
               <thead>
                 <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
-                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">Hạng</th>
-                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">Thí sinh</th>
-                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">Đội</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Public</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Private</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Average</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">Submissions</th>
+                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.rank}</th>
+                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.name}</th>
+                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.team}</th>
+                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.public}</th>
+                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.private}</th>
+                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.average}</th>
+                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.submissions}</th>
                 </tr>
               </thead>
               <tbody>
-                {individualLeaderboard.map((entry) => (
+                {individualLeaderboard.map((entry, index) => (
                   <tr
-                    key={entry.rank}
+                    key={entry.rank ?? `unranked-${index}`}
                     className={`border-b border-dark-border/50 hover:bg-dark-surface/50 transition-colors ${
-                      entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
+                      entry.rank !== null && entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
                     }`}
                   >
                     <td className="px-3 py-3">
@@ -148,13 +152,13 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
                         {entry.rank === 1 && <Trophy className="w-4 h-4 text-yellow-500" />}
                         {entry.rank === 2 && <Medal className="w-4 h-4 text-gray-400" />}
                         {entry.rank === 3 && <Award className="w-4 h-4 text-amber-600" />}
-                        <span className={`font-bold text-sm ${entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
-                          #{entry.rank}
+                        <span className={`font-bold text-sm ${entry.rank !== null && entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
+                          {entry.rank !== null ? `#${entry.rank}` : '—'}
                         </span>
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      <span className={`font-medium text-sm ${entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
+                      <span className={`font-medium text-sm ${entry.rank !== null && entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
                         {entry.name}
                       </span>
                     </td>
