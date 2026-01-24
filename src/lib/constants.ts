@@ -38,6 +38,7 @@ export const NAVIGATION_ITEMS = [
     href: '#',
     children: [
       { name: 'Members', href: '/members' },
+      { name: 'Verify Certificate', href: '/verify' },
       { name: 'Contact', href: '/contact' },
     ]
   },

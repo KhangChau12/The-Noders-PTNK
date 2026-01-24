@@ -26,7 +26,7 @@ interface ImageData {
 interface ImageUploadProps {
   value?: ImageData | null
   onChange: (imageData: ImageData | null) => void
-  usage?: 'avatar' | 'project_thumbnail' | 'news_image' | 'general'
+  usage?: 'avatar' | 'project_thumbnail' | 'news_image' | 'general' | 'certificate'
   maxSize?: number // in bytes, default 5MB
   className?: string
   placeholder?: string
@@ -58,6 +58,12 @@ const USAGE_CONFIG = {
     maxHeight: 1080,
     label: 'Image',
     description: 'General purpose image'
+  },
+  certificate: {
+    maxWidth: 2000,
+    maxHeight: 1414,
+    label: 'Certificate Image',
+    description: 'Certificate image (2000x1414px recommended)'
   }
 }
 

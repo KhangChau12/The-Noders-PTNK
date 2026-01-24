@@ -176,3 +176,73 @@ export interface PostWithRelations extends PostWithAuthor {
   related_post_1?: Post | null
   related_post_2?: Post | null
 }
+
+// =====================================================
+// CERTIFICATE TYPES
+// =====================================================
+
+export interface Certificate {
+  id: string
+  certificate_id: string  // Format: TN-GEN{n}-{XXXX}
+  user_id: string
+  gen_number: number
+  suffix: string
+  image_id: string | null
+  file_url: string | null
+  file_type: 'image' | 'pdf'
+  title: string
+  description: string | null
+  issued_by: string | null
+  issued_at: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CertificateWithMember extends Certificate {
+  member: Profile
+  issuer?: Profile | null
+  image?: {
+    id: string
+    public_url: string
+    mime_type: string
+  } | null
+}
+
+export interface CertificateVerifyResult {
+  valid: boolean
+  error?: string
+  certificate?: {
+    id: string
+    certificate_id: string
+    title: string
+    description: string | null
+    gen_number: number
+    file_url: string | null
+    file_type: string
+    issued_at: string
+  }
+  member?: {
+    id: string
+    username: string
+    full_name: string
+    avatar_url: string | null
+    bio: string | null
+    social_links: SocialLinks | null
+  }
+  issuer?: {
+    id: string
+    username: string
+    full_name: string
+  } | null
+}
+
+export interface CreateCertificateData {
+  user_id: string
+  gen_number: number
+  suffix?: string  // Optional - will be auto-generated if not provided
+  image_id?: string
+  file_url?: string
+  file_type?: 'image' | 'pdf'
+  title?: string
+  description?: string
+}

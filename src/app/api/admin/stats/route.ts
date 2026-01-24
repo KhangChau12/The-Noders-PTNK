@@ -50,11 +50,7 @@ export async function GET(request: NextRequest) {
       membersResult,
       projectsResult,
       postsResult,
-      postStatsResult,
-      postsByCategoryResult,
-      recentPostsResult,
-      recentProjectsResult,
-      newMembersResult
+      postStatsResult
     ] = await Promise.all([
       // Total members and admins
       supabase.from('profiles').select('id, role', { count: 'exact' }),
@@ -68,49 +64,7 @@ export async function GET(request: NextRequest) {
       // Sum of views and upvotes
       supabase.from('posts')
         .select('view_count, upvote_count')
-        .eq('status', 'published'),
-
-      // Posts by category
-      supabase.from('posts')
-        .select('category')
-        .eq('status', 'published'),
-
-      // Recent posts (5 latest)
-      supabase.from('posts')
-        .select(`
-          id,
-          title,
-          title_vi,
-          status,
-          created_at,
-          author:profiles!posts_author_id_fkey(
-            full_name,
-            username
-          )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5),
-
-      // Recent projects (5 latest)
-      supabase.from('projects')
-        .select(`
-          id,
-          title,
-          status,
-          created_at,
-          created_by_profile:profiles!projects_created_by_fkey(
-            full_name,
-            username
-          )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5),
-
-      // New members (5 latest)
-      supabase.from('profiles')
-        .select('id, full_name, username, role, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5)
+        .eq('status', 'published')
     ])
 
     // Calculate member stats
@@ -129,19 +83,6 @@ export async function GET(request: NextRequest) {
     const totalViews = postStatsResult.data?.reduce((sum, post) => sum + (post.view_count || 0), 0) || 0
     const totalUpvotes = postStatsResult.data?.reduce((sum, post) => sum + (post.upvote_count || 0), 0) || 0
 
-    // Calculate posts by category
-    const postsByCategory = {
-      'News': 0,
-      'You may want to know': 0,
-      'Member Spotlight': 0,
-      'Community Activities': 0
-    }
-    postsByCategoryResult.data?.forEach(post => {
-      if (post.category in postsByCategory) {
-        postsByCategory[post.category as keyof typeof postsByCategory]++
-      }
-    })
-
     return NextResponse.json({
       success: true,
       stats: {
@@ -152,12 +93,8 @@ export async function GET(request: NextRequest) {
         totalPosts,
         draftPosts,
         totalViews,
-        totalUpvotes,
-        postsByCategory
-      },
-      recentPosts: recentPostsResult.data || [],
-      recentProjects: recentProjectsResult.data || [],
-      newMembers: newMembersResult.data || []
+        totalUpvotes
+      }
     })
 
   } catch (error) {

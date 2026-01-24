@@ -28,7 +28,8 @@ import {
   Users,
   BookOpen,
   ThumbsUp,
-  Clock
+  Clock,
+  ArrowLeft
 } from 'lucide-react'
 
 interface PostWithAuthor extends Post {
@@ -161,6 +162,14 @@ export default function AdminPostsPage() {
     <ProtectedRoute>
       <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-7xl">
+        {/* Back to Dashboard */}
+        <Link href="/admin">
+          <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -172,11 +181,6 @@ export default function AdminPostsPage() {
                 View and manage all posts from all members
               </p>
             </div>
-            <Link href="/admin">
-              <Button variant="secondary" size="sm">
-                Back to Dashboard
-              </Button>
-            </Link>
           </div>
         </div>
 

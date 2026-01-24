@@ -25,8 +25,10 @@ import {
   ExternalLink,
   Archive,
   Play,
-  Pause
+  Pause,
+  ArrowLeft
 } from 'lucide-react'
+import Link from 'next/link'
 
 interface Project {
   id: string
@@ -203,6 +205,14 @@ function ProjectManagementPage() {
     <ProtectedRoute requireAdmin={true}>
       <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
+          {/* Back to Dashboard */}
+          <Link href="/admin">
+            <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>

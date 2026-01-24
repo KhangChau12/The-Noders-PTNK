@@ -15,6 +15,9 @@ module.exports = {
         'accent-gray': '#6B7280',
         'accent-cyan': '#06B6D4',
         'accent-green': '#10B981',
+        'accent-purple': '#8B5CF6',
+        'accent-pink': '#EC4899',
+        'accent-orange': '#F97316',
         
         // Dark Theme
         'dark-bg': '#0F172A',

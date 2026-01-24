@@ -4,20 +4,18 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { useLanguage } from '@/components/LanguageProvider'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
+import { Card, CardContent } from '@/components/Card'
 import { Button } from '@/components/Button'
-import { Badge } from '@/components/Badge'
 import { Loading } from '@/components/Loading'
 import {
   Users,
   FileText,
   Shield,
   RefreshCw,
-  TrendingUp,
   Eye,
   ThumbsUp,
   FileEdit,
-  Calendar,
+  Award,
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
@@ -31,52 +29,12 @@ interface AdminStats {
   draftPosts: number
   totalViews: number
   totalUpvotes: number
-  postsByCategory: {
-    'News': number
-    'You may want to know': number
-    'Member Spotlight': number
-    'Community Activities': number
-  }
-}
-
-interface RecentPost {
-  id: string
-  title: string
-  title_vi: string
-  status: string
-  created_at: string
-  author: {
-    full_name: string
-    username: string
-  }
-}
-
-interface RecentProject {
-  id: string
-  title: string
-  status: string
-  created_at: string
-  created_by_profile: {
-    full_name: string
-    username: string
-  }
-}
-
-interface NewMember {
-  id: string
-  full_name: string
-  username: string
-  role: string
-  created_at: string
 }
 
 function AdminDashboardContent() {
   const { session } = useAuth()
   const { localize } = useLanguage()
   const [stats, setStats] = useState<AdminStats | null>(null)
-  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([])
-  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([])
-  const [newMembers, setNewMembers] = useState<NewMember[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -97,9 +55,6 @@ function AdminDashboardContent() {
 
       if (data.success) {
         setStats(data.stats)
-        setRecentPosts(data.recentPosts || [])
-        setRecentProjects(data.recentProjects || [])
-        setNewMembers(data.newMembers || [])
       } else {
         setError(data.error || 'Failed to fetch stats')
       }
@@ -148,7 +103,7 @@ function AdminDashboardContent() {
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto">
+      <div className="container mx-auto max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -157,7 +112,7 @@ function AdminDashboardContent() {
               Admin Dashboard
             </h1>
             <p className="text-text-secondary mt-2">
-              Manage club members, projects, posts, and view statistics.
+              Overview of system performance and quick management actions.
             </p>
           </div>
 
@@ -168,377 +123,198 @@ function AdminDashboardContent() {
             disabled={loading}
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Reload
+            Refresh
           </Button>
         </div>
 
-        {/* Stats Overview - Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <Card>
-            <CardContent className="p-6">
+        {/* Key Statistics - Simplified Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+          <Card className="border-l-4 border-l-accent-purple bg-dark-surface/50 hover:bg-dark-surface transition-colors">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-text-secondary text-sm font-medium">Total Members</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalMembers}</p>
+                  <p className="text-text-secondary text-xs font-bold uppercase tracking-wider">Members</p>
+                  <p className="text-2xl font-bold text-accent-purple mt-1">{stats.totalMembers}</p>
+                  <p className="text-xs text-text-tertiary mt-1">{stats.adminCount} Admins</p>
                 </div>
-                <div className="p-3 bg-primary-blue/20 rounded-full">
-                  <Users className="w-6 h-6 text-primary-blue" />
+                <div className="p-2 bg-accent-purple/10 rounded-lg">
+                  <Users className="w-6 h-6 text-accent-purple" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="border-l-4 border-l-accent-pink bg-dark-surface/50 hover:bg-dark-surface transition-colors">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-text-secondary text-sm font-medium">Admin Users</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.adminCount}</p>
+                  <p className="text-text-secondary text-xs font-bold uppercase tracking-wider">Projects</p>
+                  <p className="text-2xl font-bold text-accent-pink mt-1">{stats.activeProjects}</p>
+                  <p className="text-xs text-text-tertiary mt-1">of {stats.totalProjects} Total</p>
                 </div>
-                <div className="p-3 bg-accent-green/20 rounded-full">
-                  <Shield className="w-6 h-6 text-accent-green" />
+                <div className="p-2 bg-accent-pink/10 rounded-lg">
+                  <FileText className="w-6 h-6 text-accent-pink" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="border-l-4 border-l-accent-cyan bg-dark-surface/50 hover:bg-dark-surface transition-colors">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-text-secondary text-sm font-medium">Total Projects</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalProjects}</p>
+                  <p className="text-text-secondary text-xs font-bold uppercase tracking-wider">Posts</p>
+                  <p className="text-2xl font-bold text-accent-cyan mt-1">{stats.totalPosts}</p>
+                  <p className="text-xs text-text-tertiary mt-1">{stats.draftPosts} Drafts</p>
                 </div>
-                <div className="p-3 bg-accent-cyan/20 rounded-full">
-                  <FileText className="w-6 h-6 text-accent-cyan" />
+                <div className="p-2 bg-accent-cyan/10 rounded-lg">
+                  <FileEdit className="w-6 h-6 text-accent-cyan" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="border-l-4 border-l-primary-blue bg-dark-surface/50 hover:bg-dark-surface transition-colors">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-text-secondary text-sm font-medium">Active Projects</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.activeProjects}</p>
+                  <p className="text-text-secondary text-xs font-bold uppercase tracking-wider">Views</p>
+                  <p className="text-2xl font-bold text-primary-blue mt-1">{stats.totalViews.toLocaleString()}</p>
+                  <p className="text-xs text-text-tertiary mt-1">Total Views</p>
                 </div>
-                <div className="p-3 bg-warning/20 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-warning" />
-                </div>
-              </div>
-              <div className="mt-4 text-sm text-text-secondary">
-                {stats.totalProjects - stats.activeProjects} completed/archived
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Stats Overview - Row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-text-secondary text-sm font-medium">Published Posts</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalPosts}</p>
-                </div>
-                <div className="p-3 bg-success/20 rounded-full">
-                  <FileEdit className="w-6 h-6 text-success" />
+                <div className="p-2 bg-primary-blue/10 rounded-lg">
+                  <Eye className="w-6 h-6 text-primary-blue" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="border-l-4 border-l-accent-orange bg-dark-surface/50 hover:bg-dark-surface transition-colors">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-text-secondary text-sm font-medium">Draft Posts</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.draftPosts}</p>
+                  <p className="text-text-secondary text-xs font-bold uppercase tracking-wider">Upvotes</p>
+                  <p className="text-2xl font-bold text-accent-orange mt-1">{stats.totalUpvotes.toLocaleString()}</p>
+                  <p className="text-xs text-text-tertiary mt-1">Total Likes</p>
                 </div>
-                <div className="p-3 bg-text-tertiary/20 rounded-full">
-                  <FileEdit className="w-6 h-6 text-text-tertiary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-text-secondary text-sm font-medium">Total Views</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalViews.toLocaleString()}</p>
-                </div>
-                <div className="p-3 bg-accent-purple/20 rounded-full">
-                  <Eye className="w-6 h-6 text-accent-purple" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-text-secondary text-sm font-medium">Total Upvotes</p>
-                  <p className="text-2xl font-bold text-text-primary">{stats.totalUpvotes.toLocaleString()}</p>
-                </div>
-                <div className="p-3 bg-primary-blue/20 rounded-full">
-                  <ThumbsUp className="w-6 h-6 text-primary-blue" />
+                <div className="p-2 bg-accent-orange/10 rounded-lg">
+                  <ThumbsUp className="w-6 h-6 text-accent-orange" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Quick Actions & Posts by Category */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Link href="/admin/users">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <Users className="w-4 h-4 mr-2" />
-                      Manage Members
-                    </Button>
-                  </Link>
-                  <Link href="/admin/projects">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Manage Projects
-                    </Button>
-                  </Link>
-                  <Link href="/admin/posts">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <FileEdit className="w-4 h-4 mr-2" />
-                      Manage Posts
-                    </Button>
-                  </Link>
-                  <Link href="/members">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <Users className="w-4 h-4 mr-2" />
-                      View All Members
-                    </Button>
-                  </Link>
-                  <Link href="/projects">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <FileText className="w-4 h-4 mr-2" />
-                      View All Projects
-                    </Button>
-                  </Link>
-                  <Link href="/posts">
-                    <Button variant="secondary" size="sm" className="w-full justify-start">
-                      <FileEdit className="w-4 h-4 mr-2" />
-                      View All Posts
-                    </Button>
-                  </Link>
+        {/* Main Actions Area */}
+        <h2 className="text-xl font-bold text-text-primary mb-6 flex items-center">
+          <div className="w-2 h-8 bg-gradient-to-b from-primary-blue to-accent-cyan rounded-full mr-3"></div>
+          Management Center
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Members Action Card */}
+          <Link href="/admin/users" className="block group">
+            <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-primary-blue/50 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-blue/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-primary-blue/20 transition-colors"></div>
+              
+              <div className="p-8 relative z-10 flex items-start space-x-6">
+                <div className="p-4 bg-primary-blue/10 rounded-2xl group-hover:bg-primary-blue/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-primary-blue/5">
+                  <Users className="w-10 h-10 text-primary-blue" />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Posts by Category */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Posts by Category</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">News</span>
-                    <Badge variant="primary" size="sm">{stats.postsByCategory['News']}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Do You Know?</span>
-                    <Badge variant="tech" size="sm">{stats.postsByCategory['You may want to know']}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Member Spotlight</span>
-                    <Badge variant="success" size="sm">{stats.postsByCategory['Member Spotlight']}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-text-secondary">Activities</span>
-                    <Badge variant="warning" size="sm">{stats.postsByCategory['Community Activities']}</Badge>
-                  </div>
+                <div>
+                  <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary-blue transition-colors">
+                    Manage Members
+                  </h3>
+                  <p className="text-text-secondary leading-relaxed mb-4">
+                    View member list, assign roles, and manage account permissions for the club.
+                  </p>
+                  <span className="text-primary-blue text-sm font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                    Access Members <ArrowRight className="w-4 h-4 ml-1" />
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column - Recent Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Recent Posts */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recent Posts</CardTitle>
-                  <Link href="/posts">
-                    <Button variant="ghost" size="sm">
-                      View All <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {recentPosts.length === 0 ? (
-                  <p className="text-text-secondary text-center py-4">No posts yet</p>
-                ) : (
-                  <div className="space-y-4">
-                    {recentPosts.map((post) => (
-                      <div key={post.id} className="flex items-start justify-between py-3 border-b border-dark-border last:border-b-0">
-                        <div className="flex-1 min-w-0">
-                          <Link href={`/posts/${post.id}`}>
-                            <h4 className="text-sm font-medium text-text-primary hover:text-primary-blue truncate">
-                              {localize(post.title, post.title_vi)}
-                            </h4>
-                          </Link>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-text-tertiary">
-                              by {post.author?.full_name || 'Unknown'}
-                            </span>
-                            <span className="text-xs text-text-tertiary">•</span>
-                            <span className="text-xs text-text-tertiary">
-                              {new Date(post.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <Badge
-                          variant={post.status === 'published' ? 'success' : 'secondary'}
-                          size="sm"
-                          className="ml-2 flex-shrink-0"
-                        >
-                          {post.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Recent Projects */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recent Projects</CardTitle>
-                  <Link href="/projects">
-                    <Button variant="ghost" size="sm">
-                      View All <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {recentProjects.length === 0 ? (
-                  <p className="text-text-secondary text-center py-4">No projects yet</p>
-                ) : (
-                  <div className="space-y-4">
-                    {recentProjects.map((project) => (
-                      <div key={project.id} className="flex items-start justify-between py-3 border-b border-dark-border last:border-b-0">
-                        <div className="flex-1 min-w-0">
-                          <Link href={`/projects/${project.id}`}>
-                            <h4 className="text-sm font-medium text-text-primary hover:text-primary-blue truncate">
-                              {project.title}
-                            </h4>
-                          </Link>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-text-tertiary">
-                              by {project.created_by_profile?.full_name || 'Unknown'}
-                            </span>
-                            <span className="text-xs text-text-tertiary">•</span>
-                            <span className="text-xs text-text-tertiary">
-                              {new Date(project.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <Badge
-                          variant={project.status === 'active' ? 'success' : 'secondary'}
-                          size="sm"
-                          className="ml-2 flex-shrink-0"
-                        >
-                          {project.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* New Members */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>New Members</CardTitle>
-                  <Link href="/members">
-                    <Button variant="ghost" size="sm">
-                      View All <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {newMembers.length === 0 ? (
-                  <p className="text-text-secondary text-center py-4">No members yet</p>
-                ) : (
-                  <div className="space-y-4">
-                    {newMembers.map((member) => (
-                      <div key={member.id} className="flex items-start justify-between py-3 border-b border-dark-border last:border-b-0">
-                        <div className="flex-1 min-w-0">
-                          <Link href={`/members/${member.username}`}>
-                            <h4 className="text-sm font-medium text-text-primary hover:text-primary-blue truncate">
-                              {member.full_name}
-                            </h4>
-                          </Link>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-text-tertiary">
-                              @{member.username}
-                            </span>
-                            <span className="text-xs text-text-tertiary">•</span>
-                            <span className="text-xs text-text-tertiary">
-                              Joined {new Date(member.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <Badge
-                          variant={member.role === 'admin' ? 'primary' : 'secondary'}
-                          size="sm"
-                          className="ml-2 flex-shrink-0"
-                        >
-                          {member.role}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Warning Note */}
-        <Card className="mt-8 border-warning/20 bg-warning/5">
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-warning/20 rounded-full">
-                <Shield className="w-5 h-5 text-warning" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-text-primary mb-1">Admin Access</h3>
-                <p className="text-sm text-text-secondary">
-                  You have administrative privileges. Use these powers responsibly to maintain
-                  the club's community and ensure all members have a positive experience.
-                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </Link>
+
+          {/* Projects Action Card */}
+          <Link href="/admin/projects" className="block group">
+            <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-pink/50 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-pink/20 transition-colors"></div>
+              
+              <div className="p-8 relative z-10 flex items-start space-x-6">
+                <div className="p-4 bg-accent-pink/10 rounded-2xl group-hover:bg-accent-pink/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-pink/5">
+                  <FileText className="w-10 h-10 text-accent-pink" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-pink transition-colors">
+                    Manage Projects
+                  </h3>
+                  <p className="text-text-secondary leading-relaxed mb-4">
+                    Oversee club projects, update development status, and highlight featured work.
+                  </p>
+                  <span className="text-accent-pink text-sm font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                    Access Projects <ArrowRight className="w-4 h-4 ml-1" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Posts Action Card */}
+          <Link href="/admin/posts" className="block group">
+            <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-cyan/50 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent-cyan/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-cyan/20 transition-colors"></div>
+              
+              <div className="p-8 relative z-10 flex items-start space-x-6">
+                <div className="p-4 bg-accent-cyan/10 rounded-2xl group-hover:bg-accent-cyan/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-cyan/5">
+                  <FileEdit className="w-10 h-10 text-accent-cyan" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-cyan transition-colors">
+                    Manage Posts
+                  </h3>
+                  <p className="text-text-secondary leading-relaxed mb-4">
+                    Create content, review drafts, and publish updates to the news feed.
+                  </p>
+                  <span className="text-accent-cyan text-sm font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                    Access Posts <ArrowRight className="w-4 h-4 ml-1" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Certificates Action Card */}
+          <Link href="/admin/certificates" className="block group">
+            <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-green/50 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent-green/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-green/20 transition-colors"></div>
+              
+              <div className="p-8 relative z-10 flex items-start space-x-6">
+                <div className="p-4 bg-accent-green/10 rounded-2xl group-hover:bg-accent-green/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-green/5">
+                  <Award className="w-10 h-10 text-accent-green" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-green transition-colors">
+                    Manage Certificates
+                  </h3>
+                  <p className="text-text-secondary leading-relaxed mb-4">
+                    Issue new certificates, verify existing ones, and manage completion records.
+                  </p>
+                  <span className="text-accent-green text-sm font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                    Access Certificates <ArrowRight className="w-4 h-4 ml-1" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Footer Note */}
+        <div className="mt-12 text-center">
+           <p className="text-text-tertiary text-sm">
+             The Noders PTNK Admin System
+           </p>
+        </div>
       </div>
     </div>
   )

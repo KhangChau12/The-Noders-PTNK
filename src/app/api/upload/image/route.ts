@@ -12,7 +12,8 @@ const USAGE_CONFIGS: Record<string, ImageProcessConfig> = {
   avatar: { maxWidth: 400, maxHeight: 400, quality: 90 },
   project_thumbnail: { maxWidth: 1200, maxHeight: 800, quality: 95 },
   news_image: { maxWidth: 1600, maxHeight: 1200, quality: 95 },
-  general: { maxWidth: 1920, maxHeight: 1080, quality: 90 }
+  general: { maxWidth: 1920, maxHeight: 1080, quality: 90 },
+  certificate: { maxWidth: 2000, maxHeight: 1414, quality: 95 } // Certificate size 2000x1414
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
