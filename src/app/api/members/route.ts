@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('profiles')
       .select('*')
-      .limit(50)
+      .limit(100)
 
     if (role && role !== 'all') {
       query = query.eq('role', role)

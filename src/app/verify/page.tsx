@@ -6,55 +6,59 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
+import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import {
   Award,
   Search,
   ShieldCheck,
   ArrowRight,
-  Info
+  Info,
+  CheckCircle2,
+  Lock,
+  FileCheck
 } from 'lucide-react'
 import { useLanguage } from '@/components/LanguageProvider'
 
 const locale = {
   en: {
     title: 'Certificate Verification',
-    subtitle: 'Verify the authenticity of The Noders PTNK certificates',
+    subtitle: 'Verify the authenticity and validity of The Noders PTNK certificates',
     placeholder: 'Enter certificate ID (e.g., TN-GEN0-H8AU)',
     verify: 'Verify Certificate',
-    help: 'How to find your certificate ID?',
-    helpText: 'The certificate ID is printed on the bottom of your certificate in the format TN-GEN{X}-{XXXX}',
-    format: 'Certificate ID Format',
+    help: 'Where is my ID?',
+    helpText: 'Found at the bottom left of your certificate.',
+    format: 'ID Format Guide',
     formatExample: 'TN-GEN0-ABCD',
-    formatDesc: 'TN = The Noders, GEN{X} = Generation number, {XXXX} = Unique code',
-    invalid: 'Please enter a valid certificate ID',
+    formatDesc: 'The Noders ID structure',
+    invalid: 'Please enter a valid certificate ID format',
     features: {
-      title: 'What you can verify',
+      title: 'Verification Coverage',
       items: [
-        'Authentic certificate from The Noders PTNK',
-        'Member information and profile',
-        'Certificate issue date',
-        'Generation and membership status'
+        'Official Authenticity Signature',
+        'Member Profile Validation',
+        'Issue Date & Expiry Check',
+        'Generation Status confirmation'
       ]
     }
   },
   vi: {
-    title: 'Xác thực chứng chỉ',
-    subtitle: 'Xác minh tính xác thực của chứng chỉ The Noders PTNK',
+    title: 'Tra cứu chứng chỉ',
+    subtitle: 'Hệ thống xác thực và kiểm tra thông tin chứng chỉ The Noders PTNK',
     placeholder: 'Nhập mã chứng chỉ (VD: TN-GEN0-H8AU)',
-    verify: 'Xác thực',
-    help: 'Tìm mã chứng chỉ ở đâu?',
-    helpText: 'Mã chứng chỉ được in ở cuối chứng chỉ của bạn theo định dạng TN-GEN{X}-{XXXX}',
-    format: 'Định dạng mã chứng chỉ',
+    verify: 'Kiểm tra ngay',
+    help: 'Mã ID ở đâu?',
+    helpText: 'Mã ID nằm ở góc dưới bên trái của chứng chỉ.',
+    format: 'Cấu trúc mã ID',
     formatExample: 'TN-GEN0-ABCD',
-    formatDesc: 'TN = The Noders, GEN{X} = Số thế hệ, {XXXX} = Mã duy nhất',
-    invalid: 'Vui lòng nhập mã chứng chỉ hợp lệ',
+    formatDesc: 'Cấu trúc định danh The Noders',
+    invalid: 'Vui lòng nhập đúng định dạng mã chứng chỉ',
     features: {
-      title: 'Thông tin có thể xác minh',
+      title: 'Thông tin xác thực',
       items: [
-        'Chứng chỉ chính thức từ The Noders PTNK',
-        'Thông tin và hồ sơ thành viên',
-        'Ngày cấp chứng chỉ',
-        'Thế hệ và tình trạng thành viên'
+        'Chữ ký số xác thực từ Ban điều hành',
+        'Đối chiếu hồ sơ thành viên gốc',
+        'Kiểm tra ngày cấp và hiệu lực',
+        'Xác nhận thế hệ và phân quyền'
       ]
     }
   }
@@ -85,105 +89,129 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary-blue to-accent-purple mb-6">
-            <ShieldCheck className="w-10 h-10 text-white" />
+    <>
+      <NeuralNetworkBackground />
+      <div className="relative min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 z-10">
+        
+        {/* Background Gradients */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-blue/20 rounded-full blur-[100px] pointer-events-none -z-10" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-purple/20 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+        <div className="container mx-auto max-w-4xl">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold font-heading text-text-primary mb-6 tracking-tight">
+              {t.title}
+            </h1>
+            <p className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
+              {t.subtitle}
+            </p>
           </div>
-          <h1 className="text-4xl font-bold text-text-primary mb-4">
-            {t.title}
-          </h1>
-          <p className="text-xl text-text-secondary max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
-        </div>
 
-        {/* Verification Form */}
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Certificate ID
-                </label>
-                <div className="flex gap-4">
-                  <Input
-                    value={certificateId}
-                    onChange={(e) => {
-                      setCertificateId(e.target.value.toUpperCase())
-                      setError('')
-                    }}
-                    placeholder={t.placeholder}
-                    className="flex-1 font-mono text-lg uppercase"
-                    icon={<Award className="w-5 h-5" />}
-                  />
-                  <Button type="submit" size="lg">
-                    <Search className="w-5 h-5 mr-2" />
-                    {t.verify}
-                  </Button>
-                </div>
-                {error && (
-                  <p className="text-error text-sm mt-2">{error}</p>
-                )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Help Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Format Guide */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Info className="w-5 h-5 text-primary-blue" />
-                {t.format}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="p-4 bg-dark-surface rounded-lg mb-4">
-                <code className="text-2xl font-mono text-primary-blue font-bold">
-                  {t.formatExample}
-                </code>
-              </div>
-              <p className="text-text-secondary text-sm">
-                {t.formatDesc}
-              </p>
-              <div className="mt-4 p-4 bg-primary-blue/10 border border-primary-blue/20 rounded-lg">
-                <p className="text-sm text-text-secondary">
-                  <strong className="text-text-primary">{t.help}</strong>
-                  <br />
-                  {t.helpText}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ShieldCheck className="w-5 h-5 text-success" />
-                {t.features.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {t.features.items.map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <ArrowRight className="w-3 h-3 text-success" />
+          {/* Main Verification Input */}
+          <div className="max-w-2xl mx-auto mb-16 relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary-blue via-accent-purple to-accent-pink rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <Card className="relative border-dark-border/50 bg-dark-bg/80 backdrop-blur-xl">
+              <CardContent className="p-8">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-text-secondary mb-3 uppercase tracking-wider">
+                      Certificate ID
+                    </label>
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="flex-1 relative">
+                        <Input
+                          value={certificateId}
+                          onChange={(e) => {
+                            setCertificateId(e.target.value.toUpperCase())
+                            setError('')
+                          }}
+                          placeholder={t.placeholder}
+                          className="h-14 text-lg font-mono uppercase bg-dark-surface border-dark-border focus:border-primary-blue pl-12 transition-all"
+                          icon={<Award className="w-6 h-6 text-text-tertiary" />}
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        size="lg" 
+                        className="h-14 px-8 text-lg bg-primary-blue hover:bg-primary-blue/90 shadow-lg shadow-primary-blue/25 transition-all hover:scale-105"
+                      >
+                        <Search className="w-5 h-5 mr-2" />
+                        {t.verify}
+                      </Button>
                     </div>
-                    <span className="text-text-secondary">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+                    {error && (
+                      <div className="flex items-center gap-2 mt-3 text-red-500 bg-red-500/10 p-3 rounded-lg text-sm border border-red-500/20 animate-in fade-in slide-in-from-top-1">
+                         <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                         {error}
+                      </div>
+                    )}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Format Card */}
+            <Card className="bg-dark-surface/50 border-dark-border/50 hover:border-primary-blue/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2.5 rounded-lg bg-primary-blue/10">
+                    <Info className="w-5 h-5 text-primary-blue" />
+                  </div>
+                  <h3 className="font-semibold text-text-primary">{t.format}</h3>
+                </div>
+                <div className="bg-dark-bg p-3 rounded-md border border-dark-border mb-3 text-center">
+                   <code className="text-xl font-mono font-bold text-primary-blue tracking-wide">{t.formatExample}</code>
+                </div>
+                <p className="text-sm text-text-secondary">{t.formatDesc}</p>
+              </CardContent>
+            </Card>
+
+            {/* Help Card */}
+             <Card className="bg-dark-surface/50 border-dark-border/50 hover:border-accent-purple/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2.5 rounded-lg bg-accent-purple/10">
+                    <CheckCircle2 className="w-5 h-5 text-accent-purple" />
+                  </div>
+                  <h3 className="font-semibold text-text-primary">{t.help}</h3>
+                </div>
+                 <p className="text-sm text-text-secondary leading-relaxed flex items-start gap-2">
+                    <span className="mt-1 text-accent-purple">•</span>
+                    {t.helpText}
+                 </p>
+                 <div className="mt-4 text-xs text-text-tertiary">
+                    Example: <span className="text-text-secondary">TN-GEN5-X9Y2</span>
+                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Features Card - Spans 1 col on desktop */}
+            <Card className="bg-dark-surface/50 border-dark-border/50 hover:border-accent-green/30 transition-colors">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                   <div className="p-2.5 rounded-lg bg-accent-green/10">
+                    <Lock className="w-5 h-5 text-accent-green" />
+                  </div>
+                  <h3 className="font-semibold text-text-primary">{t.features.title}</h3>
+                </div>
+                <ul className="space-y-2">
+                  {t.features.items.slice(0, 3).map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-text-secondary">
+                      <FileCheck className="w-4 h-4 text-accent-green mt-0.5 flex-shrink-0" />
+                      <span className="line-clamp-1" title={item}>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
+
