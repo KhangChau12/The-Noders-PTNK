@@ -174,6 +174,15 @@ export function NAIC2025Content() {
                    <span>{loc(t.hero.stats.date)}</span>
                 </div>
               </div>
+
+              <div className="mt-8">
+                <Link href="https://the-noders-competition-platform.vercel.app/competitions/28f402dd-6e61-4d7f-816f-d802e1478679" target="_blank" rel="noopener noreferrer">
+                  <Button variant="secondary" className="group">
+                    {loc(t.hero.competitionDetail)}
+                    <ExternalLink className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

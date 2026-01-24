@@ -110,7 +110,8 @@ export const content = {
       ]
     },
     buttons: {
-      register: 'Đăng ký ngay'
+      register: 'Đăng ký ngay',
+      competitionDetail: 'Chi tiết cuộc thi'
     }
   },
   en: {
@@ -224,7 +225,8 @@ export const content = {
       ]
     },
     buttons: {
-      register: 'Register Now'
+      register: 'Register Now',
+      competitionDetail: 'Competition Detail'
     }
   }
 }

@@ -19,7 +19,8 @@ import {
   Lightbulb,
   Medal,
   BarChart3,
-  Globe
+  Globe,
+  ExternalLink
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import { LeaderboardTabs } from './LeaderboardTabs'
@@ -246,6 +247,15 @@ export default function PAIC2026Content() {
                   <Trophy className="w-5 h-5 text-primary-blue" />
                   <span>{t.stats.prizepool}</span>
                 </div>
+              </div>
+              
+              <div className="mt-8">
+                <Link href="https://the-noders-competition-platform.vercel.app/competitions/e51e4314-854d-4a80-8520-044bf8b069e0" target="_blank" rel="noopener noreferrer">
+                  <Button variant="secondary" className="group">
+                    {t.buttons.competitionDetail}
+                    <ExternalLink className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

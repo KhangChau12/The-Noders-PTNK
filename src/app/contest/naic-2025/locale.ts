@@ -3,6 +3,7 @@ export const translations = {
   hero: {
     backButton: { en: "Back to Competitions", vi: "Trở về danh sách kỳ thi" },
     badge: { en: "Internal • Ended", vi: "Nội bộ • Đã kết thúc" },
+    competitionDetail: { en: "Competition Detail", vi: "Chi tiết cuộc thi" },
     titlePrefix: { en: "Noders AI Competition", vi: "Noders AI Competition" },
     description: {
        en: "Our internal training ground where Noders members level up their AI skills through real competition. Build IELTS Writing scoring models, compete on the leaderboard, and earn both knowledge and rewards in a supportive learning environment.",
