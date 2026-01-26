@@ -26,6 +26,7 @@ import {
   Lightbulb,
   Award,
   Users,
+  Code,
   BookOpen,
   ThumbsUp,
   Clock,
@@ -46,7 +47,8 @@ const categories = [
   { id: 'News', name: 'News', icon: TrendingUp },
   { id: 'You may want to know', name: 'Do You Know?', icon: Lightbulb },
   { id: 'Member Spotlight', name: 'Member Spotlight', icon: Award },
-  { id: 'Community Activities', name: 'Community Activities', icon: Users }
+  { id: 'Community Activities', name: 'Community Activities', icon: Users },
+  { id: 'Tech Sharing', name: 'Tech Sharing', icon: Code },
 ]
 
 const statuses = [

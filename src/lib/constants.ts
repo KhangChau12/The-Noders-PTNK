@@ -70,6 +70,7 @@ export const POST_CATEGORIES = [
   'You may want to know',
   'Member Spotlight',
   'Community Activities',
+  'Tech Sharing',
 ] as const
 
 export const BLOCK_TYPES = {

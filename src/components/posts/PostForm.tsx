@@ -16,6 +16,7 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'You may want to know': 'Do You Know?',
   'Member Spotlight': 'Member Spotlight',
   'Community Activities': 'Community Activities',
+  'Tech Sharing': 'Tech Sharing',
 }
 
 interface PostFormProps {

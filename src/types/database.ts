@@ -95,7 +95,7 @@ export interface Post {
   summary: string
   summary_vi: string
   thumbnail_image_id: string | null
-  category: 'News' | 'You may want to know' | 'Member Spotlight' | 'Community Activities'
+  category: 'News' | 'You may want to know' | 'Member Spotlight' | 'Community Activities' | 'Tech Sharing'
   author_id: string
   status: 'draft' | 'published' | 'archived'
   related_post_id_1: string | null

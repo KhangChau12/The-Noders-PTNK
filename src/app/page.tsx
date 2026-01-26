@@ -292,6 +292,8 @@ export default async function HomePage() {
         return 'success'
       case 'Community Activities':
         return 'warning'
+      case 'Tech Sharing':
+        return 'tech'
       default:
         return 'secondary'
     }

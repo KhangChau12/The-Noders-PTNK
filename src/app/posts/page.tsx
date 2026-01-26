@@ -30,6 +30,7 @@ import {
   X,
   ChevronDown,
   Check,
+  Code,
 } from "lucide-react";
 
 const categories = [
@@ -52,6 +53,12 @@ const categories = [
     name: "Community Activities",
     icon: Users,
     color: "text-accent-purple",
+  },
+  {
+    id: "Tech Sharing",
+    name: "Tech Sharing",
+    icon: Code,
+    color: "text-accent-cyan",
   },
 ];
 
@@ -80,6 +87,10 @@ function CategoryBadge({ category }: { category: Post["category"] }) {
     "Community Activities": {
       label: "Activities",
       variant: "warning" as const,
+    },
+    "Tech Sharing": {
+      label: "Tech Sharing",
+      variant: "tech" as const,
     },
   };
 
