@@ -34,7 +34,9 @@ export default function ContestPage() {
         { icon: <Calendar className="w-4 h-4" />, text: '05 - 18 Jan 2026' }
       ],
       gradient: 'from-accent-cyan/10 to-primary-blue/10',
-      border: 'border-accent-cyan/30'
+      border: 'border-accent-cyan/30',
+      videoUrl: 'https://www.youtube.com/embed/cFs5njLot7k',
+      videoTitle: 'PAIC 2026 Workshop'
     },
     {
       id: 'naic-2025',
@@ -48,7 +50,9 @@ export default function ContestPage() {
         { icon: <Calendar className="w-4 h-4" />, text: '28 Nov - 28 Dec 2025' }
       ],
       gradient: 'from-primary-blue/10 to-accent-cyan/10',
-      border: 'border-primary-blue/30'
+      border: 'border-primary-blue/30',
+      videoUrl: 'https://www.youtube.com/embed/zN5i0p9qJqI',
+      videoTitle: 'NAIC 2025 Rules & Q&A'
     }
   ]
 
@@ -111,22 +115,36 @@ export default function ContestPage() {
                   <Card
                     key={competition.id}
                     variant="hover"
-                    className={`hover-lift bg-gradient-to-br ${competition.gradient} border ${competition.border}`}
+                    className={`hover-lift bg-gradient-to-br ${competition.gradient} border ${competition.border} flex flex-col h-full`}
                   >
-                    <CardContent className="p-8">
+                    <CardContent className="p-8 flex flex-col flex-grow">
                       <div className="mb-6">
                         <Badge variant={competition.badgeVariant} className="mb-4">
                           {competition.badge}
                         </Badge>
-                        <h3 className="text-2xl font-bold text-text-primary mb-3">
+                        <h3 className="text-2xl font-bold text-text-primary mb-4">
                           {competition.title}
                         </h3>
+
+                        {/* Video Section */}
+                        {competition.videoUrl && (
+                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-dark-border/30 mb-4 bg-black/20">
+                            <iframe
+                              className="absolute top-0 left-0 w-full h-full"
+                              src={competition.videoUrl}
+                              title={competition.videoTitle}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        )}
+
                         <p className="text-text-secondary leading-relaxed">
                           {competition.shortDescription}
                         </p>
                       </div>
 
-                      <div className="space-y-3 mb-6">
+                      <div className="space-y-3 mb-6 mt-auto">
                         {competition.stats.map((stat, index) => (
                           <div key={index} className="flex items-center space-x-2 text-text-secondary">
                             <div className="text-primary-blue">
@@ -137,12 +155,14 @@ export default function ContestPage() {
                         ))}
                       </div>
 
-                      <Link href={`/contest/${competition.slug}`}>
-                        <Button variant="secondary" className="w-full group">
-                          Learn More
-                          <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </Button>
-                      </Link>
+                      <div>
+                        <Link href={`/contest/${competition.slug}`}>
+                          <Button variant="secondary" className="w-full group">
+                            Learn More
+                            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </Button>
+                        </Link>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
