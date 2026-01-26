@@ -86,7 +86,7 @@ export default function MembersPage() {
                   {[
                     { label: "All", value: "all" },
                     { label: "Members", value: "member" },
-                    { label: "Admins", value: "admin" },
+                    { label: "Core Team", value: "admin" },
                   ].map((option) => (
                     <ClickableBadge
                       key={option.value}
@@ -144,7 +144,7 @@ export default function MembersPage() {
                           {member.role === "admin" && (
                             <div className="absolute top-3 right-3 z-10">
                               <Badge variant="primary" size="sm" className="shadow-lg shadow-primary-blue/20 backdrop-blur-md">
-                                Admin
+                                Core Team
                               </Badge>
                             </div>
                           )}

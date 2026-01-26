@@ -10,6 +10,7 @@ import { Button } from '@/components/Button'
 import { Loading } from '@/components/Loading'
 import { Avatar } from '@/components/Avatar'
 import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase'
 import {
   ArrowLeft,
   Mail,
@@ -26,49 +27,77 @@ import {
   Code,
   ExternalLink,
   Clock,
-  BookOpen
+  BookOpen,
+  ChevronDown
 } from 'lucide-react'
+
+interface Certificate {
+  id: string
+  certificate_id: string
+  title: string
+  gen_number: number
+  issued_at: string
+}
+
+function MemberCertificates({ certificates }: { certificates: Certificate[] }) {
+  const hasCertificates = certificates && certificates.length > 0
+
+  return (
+    <Card className="mb-8 border-l-4 border-l-accent-purple bg-dark-surface/50 hover:bg-dark-surface transition-colors">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+           <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+            <Award className="w-5 h-5 text-accent-purple" />
+            Certificates & Achievements
+          </h3>
+          <Badge variant="secondary" className="bg-accent-purple/10 text-accent-purple border-accent-purple/20">
+             {hasCertificates ? certificates.length : 0} Verified
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {hasCertificates ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {certificates.map((cert) => (
+               <Link key={cert.id} href={`/verify/${cert.certificate_id}`}>
+                  <div className="bg-dark-bg p-4 rounded-xl border border-dark-border hover:border-accent-purple/50 transition-all group">
+                     <div className="flex items-start justify-between mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-accent-purple/10 flex items-center justify-center group-hover:bg-accent-purple/20 transition-colors">
+                           <Award className="w-5 h-5 text-accent-purple" />
+                        </div>
+                        <Badge variant="outline" size="sm" className="font-mono text-xs">
+                           {cert.certificate_id}
+                        </Badge>
+                     </div>
+                     <h4 className="text-text-primary font-medium group-hover:text-accent-purple transition-colors line-clamp-1">{cert.title}</h4>
+                     <p className="text-text-tertiary text-xs mt-1">Issued {new Date(cert.issued_at).toLocaleDateString()}</p>
+                  </div>
+               </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="w-12 h-12 rounded-full bg-dark-bg border border-dark-border flex items-center justify-center mx-auto mb-3">
+              <Award className="w-6 h-6 text-text-tertiary opacity-50" />
+            </div>
+            <h4 className="text-text-primary font-medium mb-1">No Certificates Yet</h4>
+            <p className="text-text-tertiary text-sm max-w-sm mx-auto">
+              This member hasn't added any certificates or achievements.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
 
 interface SkillChartProps {
   skills: string[]
 }
 
-function SkillChart({ skills }: SkillChartProps) {
-  if (!skills || skills.length === 0) return null
 
-  const skillsWithCategories = skills.map((skill, index) => ({
-    name: skill,
-    category: getSkillCategory(skill)
-  }))
 
-  return (
-    <div className="flex flex-wrap gap-2">
-      {skillsWithCategories.map((skill, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <Badge variant="tech" size="sm">
-            {skill.name}
-          </Badge>
-          <span className="text-xs text-text-tertiary capitalize">
-            {skill.category}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
 
-function getSkillCategory(skill: string): string {
-  const frontendSkills = ['React', 'Next.js', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind']
-  const backendSkills = ['Node.js', 'Python', 'FastAPI', 'Express', 'Django', 'Java', 'C#']
-  const aiMlSkills = ['Machine Learning', 'TensorFlow', 'PyTorch', 'AI', 'NLP', 'Computer Vision']
-  const devopsSkills = ['Docker', 'Kubernetes', 'AWS', 'GCP', 'CI/CD', 'DevOps']
-
-  if (frontendSkills.some(s => skill.toLowerCase().includes(s.toLowerCase()))) return 'frontend'
-  if (backendSkills.some(s => skill.toLowerCase().includes(s.toLowerCase()))) return 'backend'
-  if (aiMlSkills.some(s => skill.toLowerCase().includes(s.toLowerCase()))) return 'ai/ml'
-  if (devopsSkills.some(s => skill.toLowerCase().includes(s.toLowerCase()))) return 'devops'
-  return 'other'
-}
 
 interface ProjectHistoryProps {
   projects: any[]
@@ -96,14 +125,24 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
                 <Link
                   key={index}
                   href={`/projects/${project.id}`}
-                  className="block p-4 rounded-lg bg-dark-surface hover:bg-dark-border transition-colors"
+                  className="group block p-4 rounded-lg bg-dark-surface border border-dark-border hover:bg-dark-border/50 transition-all duration-200"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-text-primary mb-1">
+                  <div className="flex gap-4">
+                    {project.thumbnail_url && (
+                      <div className="w-32 h-24 relative rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border/30">
+                        <Image
+                          src={project.thumbnail_url}
+                          alt={project.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-medium text-text-primary mb-2 group-hover:text-primary-blue transition-colors text-lg truncate">
                         {project.title}
                       </h5>
-                      <p className="text-sm text-text-secondary mb-2 line-clamp-2">
+                      <p className="text-sm text-text-secondary mb-3 line-clamp-2">
                         {project.description}
                       </p>
                       <div className="flex items-center gap-4 text-xs text-text-tertiary">
@@ -121,16 +160,6 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
                         </Badge>
                       </div>
                     </div>
-                    {project.thumbnail_url && (
-                      <div className="w-16 h-12 relative rounded overflow-hidden flex-shrink-0">
-                        <Image
-                          src={project.thumbnail_url}
-                          alt={project.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
                   </div>
                 </Link>
               )
@@ -162,14 +191,24 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
                 <Link
                   key={index}
                   href={`/projects/${project.id}`}
-                  className="block px-4 py-3 rounded-lg bg-dark-surface border hover:bg-dark-border transition-colors"
+                  className="group block p-4 rounded-lg bg-dark-surface border border-dark-border hover:bg-dark-border/50 transition-all duration-200"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-text-primary mb-1">
+                  <div className="flex gap-4">
+                     {project.thumbnail_url && (
+                      <div className="w-32 h-24 relative rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border/30">
+                        <Image
+                          src={project.thumbnail_url}
+                          alt={project.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-medium text-text-primary mb-2 group-hover:text-primary-blue transition-colors text-lg truncate">
                         {project.title}
                       </h5>
-                      <p className="text-sm text-text-secondary mb-2 line-clamp-2">
+                      <p className="text-sm text-text-secondary mb-3 line-clamp-2">
                         {project.description}
                       </p>
                       <div className="flex items-center gap-4 text-xs text-text-tertiary">
@@ -179,16 +218,6 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
                         </Badge>
                       </div>
                     </div>
-                    {project.thumbnail_url && (
-                      <div className="w-16 h-12 relative rounded overflow-hidden flex-shrink-0">
-                        <Image
-                          src={project.thumbnail_url}
-                          alt={project.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
                   </div>
                 </Link>
               )
@@ -206,6 +235,8 @@ interface MemberPostsProps {
 }
 
 function MemberPosts({ posts, memberName }: MemberPostsProps) {
+  const [visibleCount, setVisibleCount] = useState(3)
+
   if (!posts || posts.length === 0) {
     return (
       <div className="text-center py-12">
@@ -237,9 +268,11 @@ function MemberPosts({ posts, memberName }: MemberPostsProps) {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   }
 
+  const visiblePosts = posts.slice(0, visibleCount)
+
   return (
     <div className="space-y-4">
-      {posts.map((post) => {
+      {visiblePosts.map((post) => {
         const thumbnailSrc = post.thumbnail_image?.public_url || post.thumbnail_url
         const readingTime = calculateReadingTime(post.content || '')
 
@@ -308,6 +341,18 @@ function MemberPosts({ posts, memberName }: MemberPostsProps) {
           </Link>
         )
       })}
+
+      {visibleCount < posts.length && (
+        <div className="text-center pt-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => setVisibleCount(prev => prev + 3)}
+            className="w-full"
+          >
+            Load More Posts <ChevronDown className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -375,16 +420,20 @@ export default function MemberProfilePage() {
 
   const { member, loading, error } = useMember(username);
   const [posts, setPosts] = useState<any[]>([])
+  const [certificates, setCertificates] = useState<Certificate[]>([])
   const [postsLoading, setPostsLoading] = useState(true)
 
   console.log(member);
 
-  // Fetch member's posts with full data
+  // Fetch member's posts and certificates
   useEffect(() => {
-    const fetchMemberPosts = async () => {
+    const fetchData = async () => {
       if (!member?.id) return
 
       try {
+        const supabase = createClient()
+        
+        // Fetch Posts
         const { postQueries } = await import('@/lib/queries')
         const { posts: fetchedPosts, error: postsError } = await postQueries.getUserPosts(member.id)
 
@@ -393,14 +442,26 @@ export default function MemberProfilePage() {
           const publishedPosts = fetchedPosts.filter(p => p.status === 'published')
           setPosts(publishedPosts)
         }
+
+        // Fetch Certificates
+        const { data: certs } = await supabase
+          .from('certificates')
+          .select('id, certificate_id, title, gen_number, issued_at')
+          .eq('user_id', member.id)
+          .order('issued_at', { ascending: false })
+        
+        if (certs) {
+          setCertificates(certs)
+        }
+
       } catch (error) {
-        console.error('Error fetching member posts:', error)
+        console.error('Error fetching data:', error)
       } finally {
         setPostsLoading(false)
       }
     }
 
-    fetchMemberPosts()
+    fetchData()
   }, [member?.id])
 
   if (loading) {
@@ -482,7 +543,7 @@ export default function MemberProfilePage() {
                 </h1>
                 <p className="text-text-secondary mb-1">@{member.username}</p>
                 <Badge variant={member.role === 'admin' ? 'primary' : 'secondary'} className="mb-4">
-                  {member.role === 'admin' ? 'Admin' : 'Member'}
+                  {member.role === 'admin' ? 'Core Team' : 'Member'}
                 </Badge>
 
                 {/* Bio */}
@@ -582,21 +643,8 @@ export default function MemberProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Skills */}
-            {member.skills && member.skills.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <Code className="w-4 h-4" />
-                    Skills & Expertise
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  <SkillChart skills={member.skills} />
-                </CardContent>
-              </Card>
-            )}
-
+            {/* Skills - REMOVED per request */}
+            
             {/* Quick Stats */}
             <Card>
               <CardHeader>
@@ -616,66 +664,58 @@ export default function MemberProfilePage() {
                     {postsLoading ? '...' : posts.length}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Created Projects</span>
-                  <span className="font-semibold text-text-primary">
-                    {member.contributed_projects?.filter(a => a.role_in_project === 'Creator').length || 0}
-                  </span>
-                </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Certificates - Top Importance */}
+            <MemberCertificates certificates={certificates} />
+
             {/* Project History */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-xl font-semibold text-text-primary">Project Portfolio</h3>
-              </CardHeader>
-              <CardContent>
-                {totalProjects > 0 ? (
+            {totalProjects > 0 && (
+              <Card>
+                <CardHeader>
+                  <h3 className="text-xl font-semibold text-text-primary">Project Portfolio</h3>
+                </CardHeader>
+                <CardContent>
                   <ProjectHistory
                     projects={member.contributed_projects}
                     username={member.username}
                   />
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-4xl mb-4 opacity-50">📁</div>
-                    <p className="text-text-secondary">No projects yet</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Published Articles */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    Published Articles
-                  </h3>
-                  {posts.length > 0 && (
+            {posts.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+                      <BookOpen className="w-5 h-5" />
+                      Published Articles
+                    </h3>
                     <span className="text-sm text-text-tertiary">
                       {posts.length} {posts.length === 1 ? 'article' : 'articles'}
                     </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {postsLoading ? (
-                  <div className="text-center py-8">
-                    <Loading size="md" />
                   </div>
-                ) : (
-                  <MemberPosts
-                    posts={posts}
-                    memberName={member.full_name || member.username}
-                  />
-                )}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  {postsLoading ? (
+                    <div className="text-center py-8">
+                      <Loading size="md" />
+                    </div>
+                  ) : (
+                    <MemberPosts
+                      posts={posts}
+                      memberName={member.full_name || member.username}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Contact Section */}
             <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
