@@ -6,7 +6,7 @@ import { Badge } from '@/components/Badge'
 import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
 import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
-import { Code, Users, ArrowRight, Github, ExternalLink, Calendar, Clock, Newspaper, Target, BookOpen } from 'lucide-react'
+import { Code, Users, ArrowRight, Github, ExternalLink, Calendar, Clock, Newspaper, Target, BookOpen, Trophy, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { TECH_STACK_COLORS } from '@/lib/constants'
 
@@ -16,6 +16,7 @@ interface Stats {
   postsShared: number
   totalViews: number
   competitionsHeld: number
+  contestParticipants: number
 }
 
 interface Project {
@@ -105,7 +106,7 @@ async function getStats(): Promise<Stats> {
       .select('view_count')
       .eq('status', 'published')
 
-    const totalViews = postsData?.reduce((sum, post) => sum + (post.view_count || 0), 0) || 0
+    const totalViews = postsData?.reduce((sum, post: any) => sum + (post.view_count || 0), 0) || 0
 
     // For competitions, we have NAIC 2025 and PAIC 2026
     const competitionsCount = 2
@@ -115,7 +116,8 @@ async function getStats(): Promise<Stats> {
       activeMembers: membersCount || 0,
       postsShared: postsCount || 0,
       totalViews: totalViews,
-      competitionsHeld: competitionsCount
+      competitionsHeld: competitionsCount,
+      contestParticipants: 79
     }
   } catch (error) {
     console.error('Failed to fetch stats:', error)
@@ -125,7 +127,8 @@ async function getStats(): Promise<Stats> {
       activeMembers: 15,
       postsShared: 25,
       totalViews: 0,
-      competitionsHeld: 2
+      competitionsHeld: 2,
+      contestParticipants: 79
     }
   }
 }
@@ -250,11 +253,12 @@ export default async function HomePage() {
   ])
 
   const statsData = [
-    { label: 'Active Projects', value: stats.activeProjects, key: 'activeProjects' },
-    { label: 'Active Members', value: stats.activeMembers, key: 'activeMembers' },
-    { label: 'Competitions Held', value: stats.competitionsHeld, key: 'competitionsHeld' },
-    { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared' },
-    { label: 'Total Views', value: stats.totalViews, key: 'totalViews' }
+    { label: 'Members', value: stats.activeMembers, key: 'activeMembers', icon: Users },
+    { label: 'Products', value: stats.activeProjects, key: 'activeProjects', icon: Code },
+    { label: 'Contest Participants', value: stats.contestParticipants, key: 'contestParticipants', icon: Trophy },
+    { label: 'Competitions Held', value: stats.competitionsHeld, key: 'competitionsHeld', icon: Target },
+    { label: 'Posts Shared', value: stats.postsShared, key: 'postsShared', icon: Newspaper },
+    { label: 'Total Views', value: stats.totalViews, key: 'totalViews', icon: Eye }
   ]
 
   // Helper function to get project status badge variant
@@ -588,37 +592,32 @@ export default async function HomePage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
             {statsData.map((stat, index) => (
               <div key={stat.key} className="group relative">
-                <div className="relative h-full bg-gradient-to-br from-dark-surface to-dark-surface/50 border border-dark-border rounded-xl p-8 transition-all duration-500 hover:border-primary-blue/50 hover:shadow-2xl hover:shadow-primary-blue/20 hover:-translate-y-1">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary-blue/20 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  <div className="absolute top-4 left-4 text-4xl font-bold text-primary-blue/10 group-hover:text-primary-blue/20 transition-colors duration-500">
-                    {String(index + 1).padStart(2, '0')}
-                  </div>
-
-                  <div className="relative z-10 text-center pt-8">
-                    <div className="text-3xl md:text-4xl font-bold mb-3 text-primary-blue">
-                      <CounterAnimation end={stat.value} />
+                {/* Decorative background glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                        
+                <Card className="relative h-full overflow-hidden bg-dark-bg/50 backdrop-blur-sm border-dark-border hover:border-primary-blue/30 transition-all duration-300">
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <CardContent className="p-5 flex flex-col items-center justify-center relative z-10 min-h-[140px]">
+                    {/* Watermark Icon */}
+                    <div className="absolute -bottom-6 -right-6 text-primary-blue opacity-10 group-hover:opacity-[0.15] transition-all duration-500 transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 pointer-events-none">
+                       <stat.icon className="w-32 h-32" strokeWidth={1} />
                     </div>
 
-                    <div className="text-text-secondary text-sm md:text-base font-medium">
+                    <div className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary mb-2 relative z-20">
+                       <CounterAnimation end={stat.value} />
+                    </div>
+
+                    <div className="text-[10px] md:text-xs font-bold text-text-secondary uppercase tracking-widest text-center relative z-20">
                       {stat.label}
                     </div>
-
-                    <div className="mt-6 h-1 bg-dark-border rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary-blue to-accent-cyan rounded-full animate-fill-bar"
-                        style={{
-                          animationDelay: `${index * 0.2}s`
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/5 group-hover:to-accent-cyan/5 transition-all duration-500 pointer-events-none" />
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             ))}
           </div>
