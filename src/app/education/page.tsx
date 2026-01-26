@@ -9,9 +9,8 @@ import {
   Users,
   Calendar,
   Building2,
-  BookOpen,
-  Lightbulb,
-  Target
+  Play,
+  ExternalLink
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
@@ -37,7 +36,8 @@ export default function EducationPage() {
         { icon: <Building2 className="w-4 h-4" />, text: 'The Noders PTNK × PRISEE' }
       ],
       gradient: 'from-primary-blue/10 to-accent-cyan/10',
-      border: 'border-primary-blue/30'
+      border: 'border-primary-blue/30',
+      canvaEmbed: 'https://www.canva.com/design/DAG6aB5X6q0/9rrWO6b8nUd1G_NSfJvOrA/view?embed'
     }
   ]
 
@@ -86,44 +86,81 @@ export default function EducationPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-8">
                 {programs.map((program) => (
                   <Card
                     key={program.id}
                     variant="hover"
-                    className={`hover-lift bg-gradient-to-br ${program.gradient} border ${program.border}`}
+                    className={`hover-lift bg-gradient-to-br ${program.gradient} border ${program.border} overflow-hidden`}
                   >
-                    <CardContent className="p-8">
-                      <div className="mb-6">
-                        <Badge variant={program.badgeVariant} className="mb-4">
-                          {program.badge}
-                        </Badge>
-                        <h3 className="text-2xl font-bold text-text-primary mb-3">
-                          {program.title}
-                        </h3>
-                        <p className="text-text-secondary leading-relaxed">
-                          {program.shortDescription}
-                        </p>
-                      </div>
-
-                      <div className="space-y-3 mb-6">
-                        {program.stats.map((stat, index) => (
-                          <div key={index} className="flex items-center space-x-2 text-text-secondary">
-                            <div className="text-primary-blue">
-                              {stat.icon}
-                            </div>
-                            <span className="text-sm">{stat.text}</span>
+                    <div className="flex flex-col lg:flex-row">
+                      {/* Slide Preview */}
+                      {program.canvaEmbed && (
+                        <div className="lg:w-1/2 xl:w-3/5 relative bg-dark-bg overflow-hidden">
+                          <div className="aspect-[4/3] relative">
+                            <iframe
+                              src={program.canvaEmbed}
+                              allowFullScreen
+                              allow="fullscreen"
+                              className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] border-0 scale-[1.01]"
+                              title={`${program.title} - Slide Preview`}
+                            />
                           </div>
-                        ))}
-                      </div>
+                          <div className="absolute bottom-3 left-3">
+                            <Badge variant="secondary" className="bg-dark-bg/80 backdrop-blur-sm text-xs">
+                              <Play className="w-3 h-3 mr-1" />
+                              Session 1 Preview
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
 
-                      <Link href={`/education/${program.slug}`}>
-                        <Button variant="secondary" className="w-full group">
-                          Learn More
-                          <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </Button>
-                      </Link>
-                    </CardContent>
+                      {/* Content */}
+                      <CardContent className={`p-6 lg:p-8 flex flex-col justify-between ${program.canvaEmbed ? 'lg:w-1/2 xl:w-2/5' : 'w-full'}`}>
+                        <div>
+                          <Badge variant={program.badgeVariant} className="mb-4">
+                            {program.badge}
+                          </Badge>
+                          <h3 className="text-xl lg:text-2xl font-bold text-text-primary mb-3">
+                            {program.title}
+                          </h3>
+                          <p className="text-text-secondary leading-relaxed text-sm lg:text-base mb-6">
+                            {program.shortDescription}
+                          </p>
+
+                          <div className="space-y-2 mb-6">
+                            {program.stats.map((stat, index) => (
+                              <div key={index} className="flex items-center space-x-2 text-text-secondary">
+                                <div className="text-primary-blue">
+                                  {stat.icon}
+                                </div>
+                                <span className="text-sm">{stat.text}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Link href={`/education/${program.slug}`} className="flex-1">
+                            <Button variant="primary" className="w-full group">
+                              Learn More
+                              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+                          </Link>
+                          {program.canvaEmbed && (
+                            <a
+                              href={program.canvaEmbed.replace('?embed', '')}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Button variant="secondary" title="Open slides in new tab">
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </CardContent>
+                    </div>
                   </Card>
                 ))}
               </div>
