@@ -659,7 +659,7 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>05 - 18 Jan</span>
+                    <span>05 Jan - 18 Jan</span>
                   </div>
                 </div>
                 <Link href="/contest/paic-2026">

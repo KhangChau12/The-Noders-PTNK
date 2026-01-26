@@ -110,25 +110,18 @@ export default function ContestPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-8">
                 {competitions.map((competition) => (
                   <Card
                     key={competition.id}
                     variant="hover"
-                    className={`hover-lift bg-gradient-to-br ${competition.gradient} border ${competition.border} flex flex-col h-full`}
+                    className={`hover-lift bg-gradient-to-br ${competition.gradient} border ${competition.border} overflow-hidden`}
                   >
-                    <CardContent className="p-8 flex flex-col flex-grow">
-                      <div className="mb-6">
-                        <Badge variant={competition.badgeVariant} className="mb-4">
-                          {competition.badge}
-                        </Badge>
-                        <h3 className="text-2xl font-bold text-text-primary mb-4">
-                          {competition.title}
-                        </h3>
-
-                        {/* Video Section */}
-                        {competition.videoUrl && (
-                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-dark-border/30 mb-4 bg-black/20">
+                    <div className="flex flex-col lg:flex-row">
+                       {/* Video Section - Left Side */}
+                       {competition.videoUrl && (
+                        <div className="lg:w-1/2 xl:w-3/5 relative bg-dark-bg border-b lg:border-b-0 lg:border-r border-dark-border/30">
+                          <div className="aspect-video relative w-full h-full">
                             <iframe
                               className="absolute top-0 left-0 w-full h-full"
                               src={competition.videoUrl}
@@ -137,62 +130,48 @@ export default function ContestPage() {
                               allowFullScreen
                             />
                           </div>
-                        )}
+                        </div>
+                      )}
 
-                        <p className="text-text-secondary leading-relaxed">
-                          {competition.shortDescription}
-                        </p>
-                      </div>
+                      {/* Content Section - Right Side */}
+                      <CardContent className={`p-6 lg:p-8 flex flex-col justify-between ${competition.videoUrl ? 'lg:w-1/2 xl:w-2/5' : 'w-full'}`}>
+                        <div>
+                          <Badge variant={competition.badgeVariant} className="mb-4">
+                            {competition.badge}
+                          </Badge>
+                          <h3 className="text-xl lg:text-2xl font-bold text-text-primary mb-3">
+                            {competition.title}
+                          </h3>
+                          <p className="text-text-secondary leading-relaxed text-sm lg:text-base mb-6">
+                            {competition.shortDescription}
+                          </p>
 
-                      <div className="space-y-3 mb-6 mt-auto">
-                        {competition.stats.map((stat, index) => (
-                          <div key={index} className="flex items-center space-x-2 text-text-secondary">
-                            <div className="text-primary-blue">
-                              {stat.icon}
-                            </div>
-                            <span className="text-sm">{stat.text}</span>
+                          <div className="space-y-2 mb-6">
+                            {competition.stats.map((stat, index) => (
+                              <div key={index} className="flex items-center space-x-2 text-text-secondary">
+                                <div className="text-primary-blue">
+                                  {stat.icon}
+                                </div>
+                                <span className="text-sm">{stat.text}</span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </div>
 
-                      <div>
-                        <Link href={`/contest/${competition.slug}`}>
-                          <Button variant="secondary" className="w-full group">
-                            Learn More
-                            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
+                        <div>
+                          <Link href={`/contest/${competition.slug}`}>
+                            <Button variant="secondary" className="w-full group">
+                              Learn More
+                              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </div>
                   </Card>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/50">
-          <div className="container mx-auto">
-            <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="p-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-                  Ready to Join?
-                </h2>
-                <p className="text-text-secondary text-lg mb-8 max-w-3xl mx-auto">
-                  Access all our competitions on our dedicated platform.
-                  Register, submit your solutions, and track your progress on the leaderboard.
-                </p>
-                <div className="flex justify-center">
-                  <Link href="https://the-noders-competition-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
-                    <Button size="lg" className="group">
-                      Join Our Contest
-                      <Trophy className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </section>
       </div>
