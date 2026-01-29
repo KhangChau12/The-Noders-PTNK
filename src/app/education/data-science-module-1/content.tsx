@@ -393,7 +393,7 @@ export function DataScienceModule1Content() {
                           {/* Right Column: Content */}
                           <div className="md:w-2/3 xl:w-3/4 p-6 md:p-8 bg-dark-bg/20">
                              <div className="flex items-center mb-6">
-                                <Badge variant="outline" className="text-primary-blue border-primary-blue/30 bg-primary-blue/5">
+                                <Badge variant="default" className="text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
                                   {loc(t.curriculum.topicsLabel)}
                                 </Badge>
                                 <div className="h-px bg-dark-border/40 flex-1 ml-4"></div>
