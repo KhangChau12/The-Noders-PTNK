@@ -1,529 +1,262 @@
 'use client'
 
-import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useProject } from '@/lib/hooks'
-import { Card, CardContent, CardHeader } from '@/components/Card'
+import { Avatar } from '@/components/Avatar'
 import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
+import { Card, CardContent } from '@/components/Card'
 import { Loading } from '@/components/Loading'
-import { Avatar } from '@/components/Avatar'
+import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import {
   ArrowLeft,
-  ExternalLink,
-  Github,
-  Play,
-  Users,
   Calendar,
-  Code,
-  Target,
-  Award,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Info
+  Globe,
+  Github,
+  Layout,
+  Video,
+  Users
 } from 'lucide-react'
-
-interface ImageGalleryProps {
-  images: string[]
-  title: string
-}
-
-function ImageGallery({ images, title }: ImageGalleryProps) {
-  const [currentImage, setCurrentImage] = useState(0)
-  const [showLightbox, setShowLightbox] = useState(false)
-
-  if (!images || images.length === 0) return null
-
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length)
-  }
-
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length)
-  }
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold text-text-primary">Project Gallery</h3>
-
-      {/* Main Image */}
-      <div className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group"
-           onClick={() => setShowLightbox(true)}>
-        <Image
-          src={images[currentImage]}
-          alt={`${title} screenshot ${currentImage + 1}`}
-          fill
-          className="object-cover transition-transform group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <Play className="w-12 h-12 text-white" />
-          </div>
-        </div>
-      </div>
-
-      {/* Thumbnail Navigation */}
-      {images.length > 1 && (
-        <div className="flex space-x-2 overflow-x-auto pb-2">
-          {images.map((image, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImage(index)}
-              className={`relative flex-shrink-0 w-20 h-12 rounded overflow-hidden border-2 transition-colors ${
-                currentImage === index ? 'border-primary-blue' : 'border-transparent'
-              }`}
-            >
-              <Image
-                src={image}
-                alt={`Thumbnail ${index + 1}`}
-                fill
-                className="object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Lightbox */}
-      {showLightbox && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">
-          <button
-            onClick={() => setShowLightbox(false)}
-            className="absolute top-4 right-4 text-white hover:text-text-secondary"
-          >
-            <X className="w-8 h-8" />
-          </button>
-
-          <div className="relative max-w-4xl max-h-[80vh] mx-4">
-            <Image
-              src={images[currentImage]}
-              alt={`${title} screenshot ${currentImage + 1}`}
-              width={1200}
-              height={675}
-              className="object-contain max-h-[80vh] w-auto"
-            />
-
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-text-secondary"
-                >
-                  <ChevronLeft className="w-8 h-8" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-text-secondary"
-                >
-                  <ChevronRight className="w-8 h-8" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-interface VideoPlayerProps {
-  videoUrl?: string | null
-  title: string
-}
-
-function VideoPlayer({ videoUrl, title }: VideoPlayerProps) {
-  if (!videoUrl) return null
-
-  // Extract video ID for YouTube
-  const getYouTubeEmbedUrl = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-    const match = url.match(regExp)
-    return match && match[2].length === 11
-      ? `https://www.youtube.com/embed/${match[2]}`
-      : url
-  }
-
-  const embedUrl = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')
-    ? getYouTubeEmbedUrl(videoUrl)
-    : videoUrl
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-        <Play className="w-5 h-5" />
-        Demo Video
-      </h3>
-      <div className="aspect-video rounded-lg overflow-hidden">
-        <iframe
-          src={embedUrl}
-          title={`${title} - Demo Video`}
-          className="w-full h-full"
-          allowFullScreen
-        />
-      </div>
-    </div>
-  )
-}
 
 export default function ProjectDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const projectId = params.id as string
+  const { project, loading, error } = useProject(params.id as string)
 
-  const { project, loading, error } = useProject(projectId)
-
-  if (loading) {
+  if (loading) return <Loading />
+  
+  if (error || !project) {
     return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <Loading />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-dark-bg text-text-primary">
+         <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Project not found</h2>
+            <Button onClick={() => router.push('/projects')}>Return to Gallery</Button>
+         </div>
       </div>
     )
   }
 
-  if (error || !project) {
+  // Basic date formatting
+  const formattedDate = new Date(project.created_at).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  })
+
+  // Safe contributor rendering helper
+  const renderContributors = () => {
+    if (!project.contributors || project.contributors.length === 0) return null;
+    
     return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <Card className="text-center py-12">
-            <CardContent>
-              <div className="text-6xl mb-4 opacity-50">🔍</div>
-              <h2 className="text-2xl font-bold text-text-primary mb-2">
-                Project Not Found
-              </h2>
-              <p className="text-text-secondary mb-6">
-                The project you're looking for doesn't exist or has been removed.
-              </p>
-              <Button onClick={() => router.push('/projects')}>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-text-secondary uppercase tracking-wider font-semibold flex items-center">
+           <Users className="w-4 h-4 mr-2" />
+           Built by
+        </span>
+        <div className="flex -space-x-3 hover:space-x-1 transition-all duration-300">
+          {project.contributors.map((contributor: any) => {
+             // Handle inconsistent Supabase return types (alias mapping vs raw table name)
+             // Check both 'profile' (typed) and 'profiles' (raw Supabase return)
+             // Also handle if it's returned as an array (sometimes happens with joins)
+             let profileData = contributor.profile || contributor.profiles;
+             
+             if (Array.isArray(profileData)) {
+               profileData = profileData[0];
+             }
+
+             if (!profileData) return null;
+             
+             return (
+              <div key={contributor.id} className="relative group/avatar cursor-pointer">
+                 <Avatar 
+                  src={profileData.avatar_url} 
+                  name={profileData.full_name}
+                  className="w-12 h-12 border-2 border-dark-bg group-hover/avatar:border-primary-blue transition-colors"
+                  size="md"
+                />
+                <div className="absolute opacity-0 group-hover/avatar:opacity-100 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-dark-surface border border-white/10 px-2 py-1 rounded text-xs whitespace-nowrap z-50 pointer-events-none transition-opacity shadow-xl">
+                  <p className="font-bold text-white">{profileData.full_name}</p>
+                  <p className="text-text-secondary">{contributor.role_in_project || 'Member'}</p>
+                </div>
+              </div>
+             )
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-dark-bg text-text-primary relative selection:bg-primary-blue/30">
+      <NeuralNetworkBackground />
+      
+      {/* Cinematic Hero Section */}
+      <div className="relative w-full min-h-[400px] flex items-end py-12">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          {project.thumbnail_url ? (
+            <Image
+              src={project.thumbnail_url}
+              alt={project.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary-blue/20 to-purple-900/20" /> 
+          )}
+          {/* Gradients to ensure text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-bg/50 via-transparent to-transparent" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="container mx-auto px-4 sm:px-6 z-10 w-full">
+            <Link href="/projects" className="inline-block mb-8">
+              <Button variant="ghost" className="hover:bg-white/10 text-white/80 hover:text-white backdrop-blur-sm transition-all border border-transparent hover:border-white/20">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Projects
               </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+            </Link>
 
-  const getStatusConfig = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active':
-        return { label: 'Active', className: 'bg-green-500/20 text-green-400 border border-green-400/30' }
-      case 'completed':
-        return { label: 'Completed', className: 'bg-blue-500/20 text-blue-400 border border-blue-400/30' }
-      case 'archived':
-        return { label: 'Archived', className: 'bg-gray-500/20 text-gray-400 border border-gray-400/30' }
-      default:
-        return { label: 'Active', className: 'bg-green-500/20 text-green-400 border border-green-400/30' }
-    }
-  }
-
-  const statusConfig = getStatusConfig(project.status)
-
-  return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 relative">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-blue/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-accent-cyan/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="container mx-auto relative z-10">
-        {/* Back Navigation */}
-        <div className="mb-8">
-          <Link
-            href="/projects"
-            className="inline-flex items-center text-text-secondary hover:text-primary-blue transition-all duration-300 group"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
-            Back to Projects
-          </Link>
-        </div>
-
-        {/* Enhanced Project Header */}
-        <div className="mb-12 relative">
-          {/* Gradient background card */}
-          <div className="relative overflow-hidden rounded-3xl border-2 border-dark-border/50 bg-gradient-to-br from-dark-surface via-dark-surface/90 to-dark-bg p-8 md:p-12">
-            {/* Glow effect */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-primary-blue to-transparent" />
-            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary-blue/20 rounded-full blur-3xl" />
-
-            <div className="relative">
-              <div className="flex items-start justify-between gap-6 mb-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-4 flex-wrap">
-                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-text-primary via-primary-blue to-text-primary bg-clip-text text-transparent">
-                      {project.title}
-                    </h1>
-                    <div className={`px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-md ${statusConfig.className} shadow-lg`}>
-                      {statusConfig.label}
-                    </div>
-                  </div>
-
-                  {project.description && (
-                    <p className="text-lg text-text-secondary leading-relaxed">
-                      {project.description}
-                    </p>
-                  )}
+            <div className="max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700"> {/* Removed max-w-5xl, using max-w-7xl */}
+              
+              {/* Header Badges & Date */}
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <Badge 
+                  variant={project.status === 'active' ? 'success' : 'secondary'}
+                  className="uppercase tracking-wider text-xs font-bold px-3 py-1"
+                >
+                  {project.status}
+                </Badge>
+                {project.featured && (
+                  <Badge variant="warning" className="uppercase tracking-wider text-xs font-bold px-3 py-1 bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
+                    Featured
+                  </Badge>
+                )}
+                <div className="h-4 w-px bg-white/20 mx-2 hidden sm:block"></div>
+                <div className="flex items-center text-text-secondary text-sm">
+                   <Calendar className="w-4 h-4 mr-2" />
+                   {formattedDate}
                 </div>
               </div>
 
-              {/* Enhanced Project Links */}
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 font-heading leading-tight drop-shadow-xl tracking-tight">
+                {project.title}
+              </h1>
+
+              {/* Description without strict max-width to allow longer lines */}
+              <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed drop-shadow-md pr-4 max-w-none">
+                {project.description}
+              </p>
+
+              {/* Contributors In Hero */}
+               <div className="mb-8">
+                  {renderContributors()}
+               </div>
+
               <div className="flex flex-wrap gap-4">
-                {project.repo_url && (
-                  <a
-                    href={project.repo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      size="lg"
-                      className="bg-dark-bg border-2 border-primary-blue/30 hover:border-primary-blue/60 hover:bg-primary-blue/10 transition-all duration-300 hover:scale-105 shadow-lg"
-                    >
-                      <Github className="w-5 h-5 mr-2" />
-                      View Code
+                {project.demo_url && (
+                  <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
+                    <Button size="lg" className="bg-primary-blue hover:bg-primary-blue/90 border-0 shadow-lg shadow-primary-blue/25 px-8">
+                      <Globe className="w-5 h-5 mr-2" />
+                      Live Demo
                     </Button>
                   </a>
                 )}
-                {project.demo_url && (
-                  <a
-                    href={project.demo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90 shadow-lg shadow-primary-blue/30 hover:shadow-xl hover:shadow-primary-blue/40 transition-all duration-300 hover:scale-105"
-                    >
-                      <ExternalLink className="w-5 h-5 mr-2" />
-                      Use Product
+                
+                {project.repo_url && (
+                  <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
+                    <Button size="lg" variant="ghost" className="bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/10 text-white px-8">
+                      <Github className="w-5 h-5 mr-2" />
+                      Source Code
                     </Button>
                   </a>
                 )}
               </div>
             </div>
-          </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Video Demo */}
-            <VideoPlayer videoUrl={project.video_url} title={project.title} />
-
-            {/* Enhanced Tech Stack */}
-            {project.tech_stack && project.tech_stack.length > 0 && (
-              <Card className="border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-300">
-                <CardHeader>
-                  <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                    <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg">
-                      <Code className="w-5 h-5 text-primary-blue" />
-                    </div>
-                    Technology Stack
-                  </h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-3">
-                    {project.tech_stack.map((tech, index) => {
-                      const techColors: Record<string, string> = {
-                        'React': '#61DAFB',
-                        'Next.js': '#000000',
-                        'TypeScript': '#3178C6',
-                        'JavaScript': '#F7DF1E',
-                        'Python': '#3776AB',
-                        'TensorFlow': '#FF6F00',
-                        'PyTorch': '#EE4C2C',
-                        'Node.js': '#339933',
-                        'Tailwind CSS': '#06B6D4',
-                        'Supabase': '#3ECF8E',
-                      }
-                      const techColor = techColors[tech] || '#6B7280'
-
-                      return (
-                        <div
-                          key={index}
-                          className="relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-110 hover:shadow-xl cursor-default group"
-                          style={{
-                            backgroundColor: `${techColor}20`,
-                            color: techColor,
-                            boxShadow: `0 0 0 1px ${techColor}30`,
-                          }}
-                        >
-                          <div
-                            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                            style={{
-                              boxShadow: `0 0 30px ${techColor}50`,
-                            }}
-                          />
-                          <span className="relative z-10">{tech}</span>
-                        </div>
-                      )
-                    })}
+      <div className="container mx-auto px-4 sm:px-6 py-12 relative z-10">
+        {/* Layout Split: Video Left (60%) / Desc Right (40%) */}
+        {/* Removed items-start to allow columns to stretch, enabling sticky behavior */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 xl:gap-12">
+          
+          {/* Left Column: Demo Video (60%) - Sticky */}
+          <div className="lg:col-span-3">
+             <div className="sticky top-24 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+                  <Video className="w-6 h-6 mr-3 text-accent-purple" />
+                  Project Demo
+                </h2>
+                
+                {project.video_url ? (
+                   <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/50 aspect-video relative group">
+                    <iframe
+                      src={project.video_url.replace('watch?v=', 'embed/')}
+                      title={`${project.title} Demo`}
+                      className="w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Project Details */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Project Details
-                </h3>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {project.details ? (
-                  <div
-                    className="prose prose-invert max-w-none text-text-secondary"
-                    dangerouslySetInnerHTML={{ __html: project.details }}
-                    style={{
-                      color: 'rgb(156 163 175)'
-                    }}
-                  />
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-text-tertiary">
-                      No project details available. Please edit the project to add detailed information.
-                    </p>
+                  <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-dark-surface/50 aspect-video relative group flex items-center justify-center">
+                      {project.thumbnail_url && (
+                        <Image 
+                          src={project.thumbnail_url} 
+                          alt="Background" 
+                          fill 
+                          className="object-cover opacity-20 blur-sm"
+                        />
+                      )}
+                      <div className="text-center p-6 relative z-10">
+                         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/10">
+                            <Video className="w-8 h-8 text-text-secondary" />
+                         </div>
+                         <h3 className="text-xl font-bold text-white mb-2">We are still making demo video</h3>
+                         <p className="text-text-secondary">Check back soon for a walkthrough!</p>
+                      </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Project Info */}
-            <Card className="border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-300">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg">
-                    <Info className="w-4 h-4 text-primary-blue" />
+          {/* Right Column: Description (40%) - Scrolling */}
+          <div className="lg:col-span-2 space-y-8">
+            <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+                <Layout className="w-6 h-6 mr-3 text-primary-blue" />
+                Project Details
+              </h2>
+              <Card padding="none" className="bg-dark-surface/40 backdrop-blur-sm border-white/5 overflow-hidden">
+                <CardContent className="p-6 md:p-8">
+                  <div className="prose prose-invert prose-lg max-w-none text-text-secondary">
+                    {project.details ? (
+                      <div 
+                        dangerouslySetInnerHTML={{ __html: project.details }} 
+                        className="[&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mb-6 [&>h1]:mt-8
+                                   [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mb-4 [&>h2]:mt-8
+                                   [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white [&>h3]:mb-3 [&>h3]:mt-6
+                                   [&>p]:leading-relaxed [&>p]:mb-4
+                                   [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
+                                   [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4
+                                   [&>li]:mb-2
+                                   [&>strong]:text-white [&>strong]:font-semibold
+                                   [&>a]:text-primary-blue [&>a]:underline [&>a]:decoration-primary-blue/30 [&>a]:underline-offset-2 hover:[&>a]:decoration-primary-blue
+                                   [&>blockquote]:border-l-4 [&>blockquote]:border-primary-blue [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:bg-white/5 [&>blockquote]:py-2 [&>blockquote]:pr-4 [&>blockquote]:my-6 [&>blockquote]:rounded-r-lg"
+                      />
+                    ) : (
+                      <p className="italic opacity-60">No detailed description available for this project yet.</p>
+                    )}
                   </div>
-                  Project Information
-                </h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface/30 border border-dark-border/50 hover:border-primary-blue/30 transition-all duration-300 group">
-                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <Calendar className="w-4 h-4 text-primary-blue" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-text-tertiary font-medium">Created</p>
-                    <p className="text-sm text-text-primary font-semibold">
-                      {new Date(project.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface/30 border border-dark-border/50 hover:border-primary-blue/30 transition-all duration-300 group">
-                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <Clock className="w-4 h-4 text-primary-blue" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-text-tertiary font-medium">Status</p>
-                    <div className={`mt-1 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md ${statusConfig.className} shadow-md`}>
-                      {statusConfig.label}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface/30 border border-dark-border/50 hover:border-primary-blue/30 transition-all duration-300 group">
-                  <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                    <Users className="w-4 h-4 text-primary-blue" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-text-tertiary font-medium">Team Size</p>
-                    <p className="text-sm text-text-primary font-semibold">
-                      {project.contributors?.length || 0} contributors
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Enhanced Contributors */}
-            {project.contributors && project.contributors.length > 0 && (
-              <Card className="border-2 border-dark-border hover:border-primary-blue/30 transition-all duration-300">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <div className="p-2 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg">
-                      <Users className="w-4 h-4 text-primary-blue" />
-                    </div>
-                    Contributors
-                  </h3>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {project.contributors.map((contributor) => {
-                    const profile = contributor.profiles
-
-                    return (
-                      <Link
-                        key={contributor.id}
-                        href={`/members/${profile?.username}`}
-                        className="group flex items-center gap-4 p-4 rounded-xl hover:bg-dark-surface/50 transition-all duration-300 border border-transparent hover:border-primary-blue/30 hover:shadow-lg"
-                      >
-                        <div className="relative">
-                          <div className="absolute -inset-1 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity duration-300" />
-                          <div className="relative">
-                            <Avatar
-                              name={profile?.full_name}
-                              src={profile?.avatar_url}
-                              size="md"
-                            />
-                            {profile?.role === 'admin' && (
-                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full flex items-center justify-center shadow-lg">
-                                <Award className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-text-primary text-sm group-hover:text-primary-blue transition-colors">
-                            {profile?.full_name || profile?.username}
-                          </p>
-                          <div className="flex items-center gap-3 mt-2">
-                            <div className="flex-1 max-w-[120px] bg-dark-border rounded-full h-2 overflow-hidden">
-                              <div
-                                className="h-2 rounded-full bg-gradient-to-r from-primary-blue to-accent-cyan transition-all duration-500 shadow-lg"
-                                style={{
-                                  width: `${contributor.contribution_percentage}%`,
-                                  boxShadow: `0 0 10px rgba(59, 130, 246, 0.5)`,
-                                }}
-                              />
-                            </div>
-                            <p className="text-xs font-semibold text-primary-blue">
-                              {contributor.contribution_percentage}%
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  })}
                 </CardContent>
               </Card>
-            )}
-
-            {/* Related Projects */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-text-primary">Related Projects</h3>
-              </CardHeader>
-              <CardContent>
-                <Link
-                  href="/projects"
-                  className="block text-center py-4 text-text-secondary hover:text-primary-blue transition-colors"
-                >
-                  View All Projects →
-                </Link>
-              </CardContent>
-            </Card>
+            </section>
           </div>
+
         </div>
       </div>
     </div>
