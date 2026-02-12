@@ -1,20 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useMembers } from "@/lib/hooks";
 import { Card, CardContent } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { Loading, SkeletonProfile } from "@/components/Loading";
+import { SkeletonProfile } from "@/components/Loading";
 import { MemberFilters } from "@/types/member";
-import { getInitials } from "@/lib/utils";
 import { Avatar } from "@/components/Avatar";
 import { ClickableBadge } from "@/components/ClickableBadge";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { Search, Users, Mail, Facebook, Award, Check, FileText } from "lucide-react";
+import { Search, Users, Award, FileText, Calendar } from "lucide-react";
 
 
 export default function MembersPage() {
@@ -24,22 +22,7 @@ export default function MembersPage() {
     sort_by: "full_name",
     sort_order: "asc",
   });
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
-
   const { members, loading, error } = useMembers(filters);
-
-  const handleCopyEmail = async (email: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    try {
-      await navigator.clipboard.writeText(email);
-      setCopiedEmail(email);
-      setTimeout(() => setCopiedEmail(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy email:', err);
-    }
-  };
 
   const handleSearchChange = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
@@ -116,8 +99,8 @@ export default function MembersPage() {
           {/* Members Grid */}
           <div className="mb-12">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
                   <SkeletonProfile key={i} />
                 ))}
               </div>
@@ -129,17 +112,21 @@ export default function MembersPage() {
                 </CardContent>
               </Card>
             ) : members && members.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {members.map((member) => {
-                  const socialLinks = member.social_links || {};
                   const projectCount = member.contributed_projects?.length || 0;
-                  const postCount = (member as any).posts_count || 0;
+                  const postCount = member.posts_count || 0;
+                  const certCount = member.certificate_count || 0;
+                  const totalViews = member.total_post_views || 0;
+                  const joinDate = new Date(member.created_at).toLocaleDateString('en-US', {
+                    day: '2-digit', month: 'short', year: 'numeric'
+                  });
 
                   return (
-                    <div key={member.id} className="h-full">
-                      <Link href={`/members/${member.username}`} className="h-full block">
-                        <Card variant="interactive" className={`h-full group hover-lift relative overflow-hidden transition-all duration-300 border-dark-border ${member.role === 'admin' ? 'hover:border-primary-blue/60' : 'hover:border-text-secondary/40'}`}>
-                          
+                    <div key={member.id}>
+                      <Link href={`/members/${member.username}`} className="block">
+                        <Card variant="interactive" className={`h-68 group hover-lift relative overflow-hidden transition-all duration-300 border-dark-border ${member.role === 'admin' ? 'hover:border-primary-blue/60' : 'hover:border-text-secondary/40'}`}>
+
                           {/* Admin Badge - Top Right */}
                           {member.role === "admin" && (
                             <div className="absolute top-3 right-3 z-10">
@@ -149,49 +136,58 @@ export default function MembersPage() {
                             </div>
                           )}
 
-                          <CardContent className="p-6 flex flex-col items-center text-center h-full">
-                            {/* Avatar */}
-                            <div className="mb-4 relative">
-                              <div className={`transition-transform duration-300 group-hover:scale-105 ${member.role === 'admin' ? 'p-1 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full' : ''}`}>
+                          <CardContent className="p-5 flex gap-5 h-full">
+                            {/* LEFT COLUMN: Avatar + Name + Role */}
+                            <div className="flex flex-col items-center flex-shrink-0 w-32">
+                              <div className={`transition-transform duration-300 group-hover:scale-105 mb-3 ${member.role === 'admin' ? 'p-1 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full' : ''}`}>
                                 <Avatar
                                   name={member.full_name}
                                   src={member.avatar_url}
-                                  size="xl"
+                                  size="2xl"
                                   className="border-4 border-dark-surface"
                                 />
                               </div>
-                            </div>
-
-                            {/* Info */}
-                            <div className="mb-4 w-full">
-                              <h3 className="text-lg font-bold text-text-primary mb-1 group-hover:text-primary-blue transition-colors truncate px-2">
+                              <h3 className="text-sm font-bold text-text-primary text-center leading-tight group-hover:text-primary-blue transition-colors line-clamp-2">
                                 {member.full_name || member.username}
                               </h3>
-                              <p className="text-sm text-text-tertiary font-mono">@{member.username}</p>
+                              <p className="text-xs text-text-tertiary mt-1 text-center line-clamp-2">
+                                {member.bio || "Member of The Noders PTNK"}
+                              </p>
                             </div>
 
-                            {/* Bio */}
-                            <p className="text-sm text-text-secondary leading-relaxed mb-6 line-clamp-2 min-h-[2.5rem] w-full px-2">
-                              {member.bio || "Member of The Noders PTNK"}
-                            </p>
-
-                            <div className="flex-1" />
-
-                            {/* Stats Divider */}
-                            <div className="w-full border-t border-dark-border/50 mb-4 group-hover:border-primary-blue/20 transition-colors"></div>
-
-                            {/* Clear Stats Row */}
-                            <div className="grid grid-cols-2 gap-4 w-full">
-                              <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-primary-blue/5 transition-colors">
-                                <span className="text-xl font-bold text-text-primary tabular-nums mb-1">{projectCount}</span>
-                                <span className="text-xs text-text-tertiary font-medium uppercase tracking-wider flex items-center gap-1.5">
-                                  <Users className="w-3 h-3" /> Projects
-                                </span>
+                            {/* RIGHT COLUMN: Stats + Info */}
+                            <div className="flex-1 flex flex-col justify-between min-w-0 pt-6">
+                              {/* Joined date */}
+                              <div className="flex items-center gap-1.5 text-xs text-text-tertiary">
+                                <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span>Joined community since: {joinDate}</span>
                               </div>
-                              <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-accent-cyan/5 transition-colors">
-                                <span className="text-xl font-bold text-text-primary tabular-nums mb-1">{postCount}</span>
-                                <span className="text-xs text-text-tertiary font-medium uppercase tracking-wider flex items-center gap-1.5">
-                                  <FileText className="w-3 h-3" /> Posts
+
+                              {/* Stats boxes - 2 columns */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="flex flex-col items-center justify-center p-2.5 rounded-lg bg-dark-bg/30 group-hover:bg-primary-blue/5 transition-colors">
+                                  <span className="text-xl font-bold text-text-primary tabular-nums">{projectCount}</span>
+                                  <span className="text-xs text-text-tertiary font-medium flex items-center gap-1">
+                                    <Users className="w-3 h-3" /> Projects
+                                  </span>
+                                </div>
+                                <div className="flex flex-col items-center justify-center p-2.5 rounded-lg bg-dark-bg/30 group-hover:bg-accent-cyan/5 transition-colors">
+                                  <span className="text-xl font-bold text-text-primary tabular-nums">{certCount}</span>
+                                  <span className="text-xs text-text-tertiary font-medium flex items-center gap-1">
+                                    <Award className="w-3 h-3" /> Certificates
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Posts with views - bottom line */}
+                              <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+                                <FileText className="w-3.5 h-3.5 text-text-tertiary flex-shrink-0" />
+                                <span>
+                                  Wrote <span className="font-semibold text-text-primary">{postCount}</span>{' '}
+                                  {postCount === 1 ? 'post' : 'posts'}
+                                  {totalViews > 0 && (
+                                    <> with <span className="font-semibold text-text-primary">{totalViews.toLocaleString()}</span> views</>
+                                  )}
                                 </span>
                               </div>
                             </div>

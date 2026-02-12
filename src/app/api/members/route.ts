@@ -51,19 +51,30 @@ export async function GET(request: NextRequest) {
       contributionCounts[contrib.user_id] = (contributionCounts[contrib.user_id] || 0) + 1
     })
 
-    // Fetch posts count
+    // Fetch posts count and view counts
     const { data: posts } = await supabase
       .from('posts')
-      .select('author_id')
+      .select('author_id, view_count')
       .eq('status', 'published')
       .in('author_id', memberIds)
 
     const postCounts: Record<string, number> = {}
+    const postViewCounts: Record<string, number> = {}
     posts?.forEach(post => {
       postCounts[post.author_id] = (postCounts[post.author_id] || 0) + 1
+      postViewCounts[post.author_id] = (postViewCounts[post.author_id] || 0) + (post.view_count || 0)
     })
 
-    console.log(posts);
+    // Fetch certificate counts
+    const { data: certs } = await supabase
+      .from('certificates')
+      .select('user_id')
+      .in('user_id', memberIds)
+
+    const certCounts: Record<string, number> = {}
+    certs?.forEach(cert => {
+      certCounts[cert.user_id] = (certCounts[cert.user_id] || 0) + 1
+    })
 
     // Fetch emails from auth.users using admin client
     const { data: usersData } = await supabase.auth.admin.listUsers()
@@ -80,6 +91,8 @@ export async function GET(request: NextRequest) {
       email: emailMap[member.id] || null,
       contributed_projects: Array(contributionCounts[member.id] || 0).fill({}),
       posts_count: postCounts[member.id] || 0,
+      certificate_count: certCounts[member.id] || 0,
+      total_post_views: postViewCounts[member.id] || 0,
       total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)
     }))
 

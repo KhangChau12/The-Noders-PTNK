@@ -81,6 +81,10 @@ export interface ProfileWithProjects extends Profile {
   contributed_projects: (ProjectContributor & {
     project: Project
   })[]
+  posts_count?: number
+  certificate_count?: number
+  total_post_views?: number
+  total_contributions?: number
 }
 
 // =====================================================

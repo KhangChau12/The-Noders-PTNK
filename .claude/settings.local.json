@@ -15,7 +15,8 @@
       "Bash(npx prettier:*)",
       "Bash(tree:*)",
       "Bash(git checkout:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
