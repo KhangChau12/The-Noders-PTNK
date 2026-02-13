@@ -13,6 +13,7 @@ import { Avatar } from '@/components/Avatar'
 import {
   Users,
   Plus,
+  Minus,
   Trash2,
   Mail,
   Calendar,
@@ -46,6 +47,7 @@ interface AuthUser {
     social_links: any
     created_at: string
     updated_at: string
+    contest_count: number
   } | null
 }
 
@@ -489,6 +491,44 @@ function UserManagementPage() {
     }
   }
 
+  const handleContestCountChange = async (userId: string, newCount: number) => {
+    if (newCount < 0) return
+
+    try {
+      if (!session?.access_token) {
+        alert('Authentication required. Please refresh the page.')
+        return
+      }
+
+      // Optimistic update
+      setUsers(prev => prev.map(u => {
+        if (u.id === userId && u.profile) {
+          return { ...u, profile: { ...u.profile, contest_count: newCount } }
+        }
+        return u
+      }))
+
+      const response = await fetch('/api/admin/users/contest-count', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ userId, contest_count: newCount })
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        alert('Failed to update contest count: ' + result.error)
+        await fetchUsers()
+      }
+    } catch (err) {
+      alert('Network error occurred while updating contest count')
+      await fetchUsers()
+    }
+  }
+
   // Auto-load data on first page visit
   useEffect(() => {
     if (!dataLoaded && session) {
@@ -620,6 +660,7 @@ function UserManagementPage() {
                         <th className="text-left py-3 text-text-primary font-semibold">Email</th>
                         <th className="text-left py-3 text-text-primary font-semibold">Role</th>
                         <th className="text-left py-3 text-text-primary font-semibold">Status</th>
+                        <th className="text-left py-3 text-text-primary font-semibold">Contests</th>
                         <th className="text-left py-3 text-text-primary font-semibold">Created</th>
                         <th className="text-right py-3 text-text-primary font-semibold">Actions</th>
                       </tr>
@@ -670,6 +711,26 @@ function UserManagementPage() {
                               <Badge variant={user.email_confirmed_at ? 'success' : 'warning'} size="sm">
                                 {user.email_confirmed_at ? 'Verified' : 'Pending'}
                               </Badge>
+                            </td>
+                            <td className="py-4">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleContestCountChange(user.id, (profile?.contest_count || 0) - 1)}
+                                  disabled={(profile?.contest_count || 0) <= 0}
+                                  className="w-7 h-7 rounded-md border border-dark-border bg-dark-surface hover:bg-dark-border disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                >
+                                  <Minus className="w-3.5 h-3.5 text-text-secondary" />
+                                </button>
+                                <span className="text-text-primary font-semibold tabular-nums w-8 text-center">
+                                  {profile?.contest_count || 0}
+                                </span>
+                                <button
+                                  onClick={() => handleContestCountChange(user.id, (profile?.contest_count || 0) + 1)}
+                                  className="w-7 h-7 rounded-md border border-dark-border bg-dark-surface hover:bg-dark-border flex items-center justify-center transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5 text-text-secondary" />
+                                </button>
+                              </div>
                             </td>
                             <td className="py-4 text-text-secondary text-sm">
                               {new Date(user.created_at).toLocaleDateString()}

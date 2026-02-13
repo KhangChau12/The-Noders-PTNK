@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent, CardHeader } from '@/components/Card'
 import { Badge } from '@/components/Badge'
@@ -17,13 +16,12 @@ import {
   ArrowLeft,
   Save,
   Upload,
+  X,
   Github,
   Linkedin,
-  Twitter,
   Facebook,
   Globe,
   User,
-  Mail,
   Shield,
   Lock,
   Eye,
@@ -46,7 +44,6 @@ function SocialLinksEditor({ socialLinks, onChange }: SocialLinksEditorProps) {
   const socialPlatforms = [
     { key: 'github', label: 'GitHub', icon: Github, placeholder: 'https://github.com/username' },
     { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, placeholder: 'https://linkedin.com/in/username' },
-    { key: 'twitter', label: 'Twitter', icon: Twitter, placeholder: 'https://twitter.com/username' },
     { key: 'facebook', label: 'Facebook', icon: Facebook, placeholder: 'https://facebook.com/username' },
     { key: 'website', label: 'Website', icon: Globe, placeholder: 'https://yourwebsite.com' }
   ]
@@ -103,9 +100,34 @@ function ProfileEditPage() {
   })
 
   const [avatarImage, setAvatarImage] = useState<any>(null)
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+
+  const validateUsername = (value: string): string | null => {
+    if (!value) return 'Username is required'
+    if (value !== value.toLowerCase()) return 'Username must be lowercase'
+    if (/\s/.test(value)) return 'Username cannot contain spaces'
+    if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(value)) return 'Username cannot contain Vietnamese diacritics'
+    if (!/^[a-z0-9._-]+$/.test(value)) return 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'
+    if (value.length < 3) return 'Username must be at least 3 characters'
+    if (value.length > 30) return 'Username must be at most 30 characters'
+    return null
+  }
+
+  const handleUsernameChange = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/\s/g, '')
+    setFormData(prev => ({ ...prev, username: sanitized }))
+    setUsernameError(validateUsername(sanitized))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const uError = validateUsername(formData.username || '')
+    if (uError) {
+      setUsernameError(uError)
+      return
+    }
+
     setLoading(true)
     setError(null)
     setSuccess(false)
@@ -253,78 +275,87 @@ function ProfileEditPage() {
                     </h3>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-text-primary mb-2">
-                          Full Name
-                        </label>
-                        <Input
-                          required
-                          placeholder="Your full name"
-                          value={formData.full_name || ''}
-                          onChange={(e) => handleChange('full_name', e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-text-primary mb-2">
-                          Username
-                        </label>
-                        <Input
-                          required
-                          placeholder="username"
-                          value={formData.username || ''}
-                          onChange={(e) => handleChange('username', e.target.value)}
-                        />
-                      </div>
-                    </div>
-
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">
-                        Email Address
+                        Username
                       </label>
                       <Input
-                        type="email"
-                        value={user?.email || ''}
-                        disabled
-                        className="bg-dark-surface opacity-75"
-                        icon={<Mail className="w-4 h-4" />}
+                        required
+                        placeholder="username"
+                        value={formData.username || ''}
+                        onChange={(e) => handleUsernameChange(e.target.value)}
                       />
-                      <p className="text-xs text-text-tertiary mt-1">
-                        Email cannot be changed. Contact admin if needed.
-                      </p>
+                      {usernameError ? (
+                        <p className="text-xs text-error mt-1">{usernameError}</p>
+                      ) : (
+                        <p className="text-xs text-text-tertiary mt-1">
+                          Lowercase letters, numbers, dots, hyphens, and underscores only
+                        </p>
+                      )}
                     </div>
 
+                    {/* Avatar Upload with Current Preview */}
                     <div>
                       <label className="block text-sm font-medium text-text-primary mb-2">
-                        Bio
+                        Avatar
                       </label>
-                      <textarea
-                        placeholder="Tell us about yourself..."
-                        value={formData.bio || ''}
-                        onChange={(e) => handleChange('bio', e.target.value)}
-                        rows={4}
-                        maxLength={500}
-                        className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
-                      />
-                      <p className="text-xs text-text-tertiary mt-1">
-                        {formData.bio?.length || 0}/500 characters
-                      </p>
+                      {!avatarImage && formData.avatar_url && (
+                        <div className="mb-3 relative group">
+                          <div className="relative overflow-hidden rounded-lg border border-dark-border">
+                            <img
+                              src={formData.avatar_url}
+                              alt="Current avatar"
+                              className="w-full h-40 object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    handleChange('avatar_url', '')
+                                    setAvatarImage(null)
+                                  }}
+                                >
+                                  <Upload className="w-4 h-4 mr-1" />
+                                  Change
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    handleChange('avatar_url', '')
+                                    setAvatarImage(null)
+                                  }}
+                                  className="text-error hover:text-error"
+                                >
+                                  <X className="w-4 h-4 mr-1" />
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-text-tertiary mt-1">Current avatar</p>
+                        </div>
+                      )}
+                      {(!formData.avatar_url || avatarImage) && (
+                        <ImageUpload
+                          value={avatarImage}
+                          onChange={(imageData) => {
+                            setAvatarImage(imageData)
+                            if (imageData) {
+                              handleChange('avatar_url', imageData.public_url)
+                            } else {
+                              handleChange('avatar_url', '')
+                            }
+                          }}
+                          usage="avatar"
+                          placeholder="Upload your avatar"
+                        />
+                      )}
                     </div>
-
-                    <ImageUpload
-                      value={avatarImage}
-                      onChange={(imageData) => {
-                        setAvatarImage(imageData)
-                        if (imageData) {
-                          handleChange('avatar_url', imageData.public_url)
-                        } else {
-                          handleChange('avatar_url', '')
-                        }
-                      }}
-                      usage="avatar"
-                      placeholder="Upload your avatar"
-                    />
                   </CardContent>
                 </Card>
 

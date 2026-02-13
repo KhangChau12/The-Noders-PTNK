@@ -3,7 +3,7 @@
 ## Optimized for Claude Code + Team Development
 
 ```
-ai-agent-club/
+thenodersptnk/
 ├── README.md
 ├── package.json
 ├── next.config.js

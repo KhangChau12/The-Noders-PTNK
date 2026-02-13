@@ -12,7 +12,7 @@ import { MemberFilters } from "@/types/member";
 import { Avatar } from "@/components/Avatar";
 import { ClickableBadge } from "@/components/ClickableBadge";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { Search, Users, Award, FileText, Calendar } from "lucide-react";
+import { Search, Users, Award, FileText, Calendar, GraduationCap } from "lucide-react";
 
 
 export default function MembersPage() {
@@ -118,6 +118,7 @@ export default function MembersPage() {
                   const postCount = member.posts_count || 0;
                   const certCount = member.certificate_count || 0;
                   const totalViews = member.total_post_views || 0;
+                  const contestCount = member.contest_count || 0;
                   const joinDate = new Date(member.created_at).toLocaleDateString('en-US', {
                     day: '2-digit', month: 'short', year: 'numeric'
                   });
@@ -163,18 +164,24 @@ export default function MembersPage() {
                                 <span>Joined community since: {joinDate}</span>
                               </div>
 
-                              {/* Stats boxes - 2 columns */}
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col items-center justify-center p-2.5 rounded-lg bg-dark-bg/30 group-hover:bg-primary-blue/5 transition-colors">
-                                  <span className="text-xl font-bold text-text-primary tabular-nums">{projectCount}</span>
-                                  <span className="text-xs text-text-tertiary font-medium flex items-center gap-1">
+                              {/* Stats boxes - 3 columns */}
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-primary-blue/5 transition-colors">
+                                  <span className="text-lg font-bold text-text-primary tabular-nums">{projectCount}</span>
+                                  <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
                                     <Users className="w-3 h-3" /> Projects
                                   </span>
                                 </div>
-                                <div className="flex flex-col items-center justify-center p-2.5 rounded-lg bg-dark-bg/30 group-hover:bg-accent-cyan/5 transition-colors">
-                                  <span className="text-xl font-bold text-text-primary tabular-nums">{certCount}</span>
-                                  <span className="text-xs text-text-tertiary font-medium flex items-center gap-1">
-                                    <Award className="w-3 h-3" /> Certificates
+                                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-accent-cyan/5 transition-colors">
+                                  <span className="text-lg font-bold text-text-primary tabular-nums">{certCount}</span>
+                                  <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
+                                    <Award className="w-3 h-3" /> Certs
+                                  </span>
+                                </div>
+                                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-accent-purple/5 transition-colors">
+                                  <span className="text-lg font-bold text-text-primary tabular-nums">{contestCount}</span>
+                                  <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
+                                    <GraduationCap className="w-3 h-3" /> Contests
                                   </span>
                                 </div>
                               </div>
@@ -220,10 +227,11 @@ export default function MembersPage() {
                 Interested in Joining?
               </h2>
               <p className="text-text-secondary mb-6">
-                We're always looking for passionate individuals to join our AI
-                community.
+                Follow our community's fanpage to keep up with the newest recruitment information
               </p>
-              <Button size="lg">Learn How to Join</Button>
+              <a href="https://www.facebook.com/thenodersptnk" target="_blank" rel="noopener noreferrer">
+                <Button size="lg">Our Fanpage</Button>
+              </a>
             </CardContent>
           </Card>
         </div>

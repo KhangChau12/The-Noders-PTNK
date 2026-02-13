@@ -28,7 +28,8 @@ import {
   ExternalLink,
   Clock,
   BookOpen,
-  ChevronDown
+  ChevronDown,
+  GraduationCap
 } from 'lucide-react'
 
 interface Certificate {
@@ -518,7 +519,7 @@ export default function MemberProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Sidebar */}
-          <div className="space-y-6">
+          <div className="lg:sticky lg:top-24 lg:self-start">
             {/* Basic Info */}
             <Card>
               <CardContent className="text-center p-8">
@@ -554,7 +555,7 @@ export default function MemberProfilePage() {
                 )}
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-3 gap-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary-blue">
                       {totalProjects}
@@ -566,6 +567,12 @@ export default function MemberProfilePage() {
                       {postsLoading ? '...' : posts.length}
                     </div>
                     <div className="text-xs text-text-tertiary">Posts</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary-blue">
+                      {member.contest_count || 0}
+                    </div>
+                    <div className="text-xs text-text-tertiary">Contests</div>
                   </div>
                 </div>
 
@@ -643,29 +650,6 @@ export default function MemberProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Skills - REMOVED per request */}
-            
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  Statistics
-                </h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Total Projects</span>
-                  <span className="font-semibold text-text-primary">{totalProjects}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Posts Written</span>
-                  <span className="font-semibold text-text-primary">
-                    {postsLoading ? '...' : posts.length}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Main Content */}
@@ -717,38 +701,6 @@ export default function MemberProfilePage() {
               </Card>
             )}
 
-            {/* Contact Section */}
-            <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="text-center p-8">
-                <h3 className="text-xl font-semibold text-text-primary mb-4">
-                  Get In Touch
-                </h3>
-                <p className="text-text-secondary mb-6">
-                  Interested in collaborating or learning more about {member.full_name || member.username}'s work?
-                </p>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <Button asChild variant="secondary">
-                    <a href="mailto:phuckhangtdn@gmail.com" className="flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      Send Email
-                    </a>
-                  </Button>
-                  {socialLinks.github && (
-                    <Button asChild variant="secondary">
-                      <a
-                        href={socialLinks.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        <Github className="w-4 h-4" />
-                        GitHub
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

@@ -46,7 +46,7 @@ export const NAVIGATION_ITEMS = [
 
 export const SOCIAL_LINKS = {
   email: 'phuckhangtdn@gmail.com',
-  facebook: 'https://facebook.com', // Will be updated with real link
+  facebook: 'https://www.facebook.com/thenodersptnk',
 }
 
 export const USER_ROLES = {

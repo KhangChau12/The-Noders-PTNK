@@ -18,7 +18,8 @@ import {
   Facebook,
   PenSquare,
   Shield,
-  ArrowRight
+  ArrowRight,
+  GraduationCap
 } from 'lucide-react'
 import Link from 'next/link'
 import { useMember } from '@/lib/hooks'
@@ -234,63 +235,77 @@ function DashboardContent() {
               </CardContent>
             </Card>
 
-            {/* Vertical Stats Row */}
+            {/* Stats Grid */}
             <div className="space-y-4">
-              <Card className="border-l-4 border-l-primary-blue bg-dark-surface/50 hover:bg-dark-surface transition-colors">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-primary-blue/10 rounded-lg">
-                      <FileText className="w-5 h-5 text-primary-blue" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-text-secondary">Projects</div>
-                      <div className="text-xl font-bold text-text-primary">{userStats.projectsContributed}</div>
-                    </div>
+              {/* Role - Full width, prominent */}
+              <Card className="group relative overflow-hidden bg-dark-surface/50 hover:bg-dark-surface border-dark-border hover:border-accent-green/30 transition-all duration-300">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <div className="relative">
+                    <div className="absolute inset-0 blur-3xl bg-accent-green/20 group-hover:bg-accent-green/35 rounded-full transition-all duration-500 scale-110" />
+                    <Shield className="w-28 h-28 text-accent-green opacity-[0.12] group-hover:opacity-[0.20] transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-500 relative" strokeWidth={1} />
+                  </div>
+                </div>
+                <CardContent className="p-4 flex items-center justify-center relative z-10">
+                  <div className="text-xl font-bold text-text-primary uppercase tracking-wide">
+                    Role: {profile.role === 'admin' ? 'CORETEAM' : 'MEMBER'}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-accent-cyan bg-dark-surface/50 hover:bg-dark-surface transition-colors">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
-                      <PenSquare className="w-5 h-5 text-accent-cyan" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-text-secondary">Posts</div>
-                      <div className="text-xl font-bold text-text-primary">{postsLoading ? '...' : userStats.postsCount}</div>
+              {/* 2x2 Grid for numeric stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="group relative overflow-hidden bg-dark-surface/50 hover:bg-dark-surface border-dark-border hover:border-primary-blue/30 transition-all duration-300">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-3xl bg-primary-blue/20 group-hover:bg-primary-blue/35 rounded-full transition-all duration-500 scale-110" />
+                      <FileText className="w-24 h-24 text-primary-blue opacity-[0.12] group-hover:opacity-[0.20] transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-500 relative" strokeWidth={1} />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center relative z-10 min-h-[90px]">
+                    <div className="text-2xl font-bold text-text-primary">{userStats.projectsContributed}</div>
+                    <div className="text-xs text-text-secondary">Projects</div>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-l-4 border-l-accent-green bg-dark-surface/50 hover:bg-dark-surface transition-colors">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-accent-green/10 rounded-lg">
-                      <Shield className="w-5 h-5 text-accent-green" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-text-secondary">Role</div>
-                      <div className="text-xl font-bold text-text-primary capitalize">{profile.role}</div>
+                <Card className="group relative overflow-hidden bg-dark-surface/50 hover:bg-dark-surface border-dark-border hover:border-accent-cyan/30 transition-all duration-300">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-3xl bg-accent-cyan/20 group-hover:bg-accent-cyan/35 rounded-full transition-all duration-500 scale-110" />
+                      <PenSquare className="w-24 h-24 text-accent-cyan opacity-[0.12] group-hover:opacity-[0.20] transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-500 relative" strokeWidth={1} />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center relative z-10 min-h-[90px]">
+                    <div className="text-2xl font-bold text-text-primary">{postsLoading ? '...' : userStats.postsCount}</div>
+                    <div className="text-xs text-text-secondary">Posts</div>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-l-4 border-l-accent-purple bg-dark-surface/50 hover:bg-dark-surface transition-colors">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-accent-purple/10 rounded-lg">
-                      <Award className="w-5 h-5 text-accent-purple" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-text-secondary">Certificates</div>
-                      <div className="text-xl font-bold text-text-primary">{certificatesCount}</div>
+                <Card className="group relative overflow-hidden bg-dark-surface/50 hover:bg-dark-surface border-dark-border hover:border-accent-purple/30 transition-all duration-300">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-3xl bg-accent-purple/20 group-hover:bg-accent-purple/35 rounded-full transition-all duration-500 scale-110" />
+                      <Award className="w-24 h-24 text-accent-purple opacity-[0.12] group-hover:opacity-[0.20] transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-500 relative" strokeWidth={1} />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center relative z-10 min-h-[90px]">
+                    <div className="text-2xl font-bold text-text-primary">{certificatesCount}</div>
+                    <div className="text-xs text-text-secondary">Certificates</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="group relative overflow-hidden bg-dark-surface/50 hover:bg-dark-surface border-dark-border hover:border-warning/30 transition-all duration-300">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-3xl bg-warning/20 group-hover:bg-warning/35 rounded-full transition-all duration-500 scale-110" />
+                      <GraduationCap className="w-24 h-24 text-warning opacity-[0.12] group-hover:opacity-[0.20] transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-500 relative" strokeWidth={1} />
+                    </div>
+                  </div>
+                  <CardContent className="p-4 flex flex-col items-center justify-center relative z-10 min-h-[90px]">
+                    <div className="text-2xl font-bold text-text-primary">{profile.contest_count || 0}</div>
+                    <div className="text-xs text-text-secondary">Contests</div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
 

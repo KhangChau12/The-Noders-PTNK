@@ -29,6 +29,7 @@ export interface Profile {
   skills: string[] | null
   role: 'admin' | 'member'
   social_links: SocialLinks | null
+  contest_count: number
   created_at: string
   updated_at: string
 }
