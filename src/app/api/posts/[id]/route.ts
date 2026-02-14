@@ -256,6 +256,34 @@ export async function PUT(
       )
     }
 
+    // Auto-regenerate slug if title is updated and current slug is "untitled-..."
+    if (postUpdates.title && post.slug.startsWith('untitled-')) {
+      let newSlug = postUpdates.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+
+      // Ensure slug is unique
+      const { data: existing } = await supabase
+        .from('posts')
+        .select('slug')
+        .like('slug', `${newSlug}%`)
+        .neq('id', id)
+
+      if (existing && existing.length > 0) {
+        const existingSlugs = new Set(existing.map(p => p.slug))
+        if (existingSlugs.has(newSlug)) {
+          let counter = 2
+          while (existingSlugs.has(`${newSlug}-${counter}`)) {
+            counter++
+          }
+          newSlug = `${newSlug}-${counter}`
+        }
+      }
+
+      postUpdates.slug = newSlug
+    }
+
     // If publishing, set published_at
     if (postUpdates.status === 'published' && post.status !== 'published') {
       postUpdates.published_at = new Date().toISOString()

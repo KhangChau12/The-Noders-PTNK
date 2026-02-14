@@ -30,7 +30,8 @@ import {
   BookOpen,
   ThumbsUp,
   Clock,
-  ArrowLeft
+  ArrowLeft,
+  Wrench
 } from 'lucide-react'
 
 interface PostWithAuthor extends Post {
@@ -70,6 +71,7 @@ export default function AdminPostsPage() {
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showFilters, setShowFilters] = useState(false)
+  const [fixingSlugs, setFixingSlugs] = useState(false)
 
   // Check if user is admin
   useEffect(() => {
@@ -150,6 +152,41 @@ export default function AdminPostsPage() {
     }
   }
 
+  const handleUpdateSlugs = async () => {
+    const confirmed = await confirm({
+      title: 'Update All Slugs',
+      message: 'This will regenerate slugs for all posts based on their English title. Duplicate titles will get a numbered suffix.',
+      confirmText: 'Update Slugs',
+      cancelText: 'Cancel',
+      variant: 'danger'
+    })
+
+    if (!confirmed) return
+
+    try {
+      setFixingSlugs(true)
+      const response = await fetch('/api/admin/update-slugs', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        showToast('success', `Updated ${data.updated} slug${data.updated !== 1 ? 's' : ''}${data.skipped ? `, ${data.skipped} already correct` : ''}`)
+        if (data.updated > 0) fetchPosts()
+      } else {
+        showToast('error', data.error || 'Failed to update slugs')
+      }
+    } catch (error) {
+      showToast('error', 'Network error occurred')
+    } finally {
+      setFixingSlugs(false)
+    }
+  }
+
   if (!profile || !isAdmin) {
     return (
       <ProtectedRoute>
@@ -183,6 +220,15 @@ export default function AdminPostsPage() {
                 View and manage all posts from all members
               </p>
             </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleUpdateSlugs}
+              loading={fixingSlugs}
+              icon={<Wrench className="w-4 h-4" />}
+            >
+              Update Slugs
+            </Button>
           </div>
         </div>
 

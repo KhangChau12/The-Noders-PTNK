@@ -179,13 +179,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate slug from title if not provided
-    const postSlug = slug || (title
+    let postSlug = slug || (title
       ? title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '')
-          + '-' + Date.now()
       : 'untitled-' + Date.now())
+
+    // Ensure slug is unique
+    if (!slug) {
+      const { data: existing } = await supabase
+        .from('posts')
+        .select('slug')
+        .like('slug', `${postSlug}%`)
+
+      if (existing && existing.length > 0) {
+        const existingSlugs = new Set(existing.map(p => p.slug))
+        if (existingSlugs.has(postSlug)) {
+          let counter = 2
+          while (existingSlugs.has(`${postSlug}-${counter}`)) {
+            counter++
+          }
+          postSlug = `${postSlug}-${counter}`
+        }
+      }
+    }
 
     // Create post
     const { data: newPost, error: postError } = await supabase

@@ -11,8 +11,10 @@ import { Loading } from '@/components/Loading'
 import { useAuth } from '@/components/AuthProvider'
 import { useLanguage } from '@/components/LanguageProvider'
 import { LanguageDropdown } from '@/components/LanguageDropdown'
+import { useToast } from '@/components/Toast'
 import { Post, PostBlock } from '@/types/database'
 import { postQueries } from '@/lib/queries'
+import { SITE_CONFIG } from '@/lib/constants'
 import {
   Calendar,
   Clock,
@@ -21,7 +23,10 @@ import {
   Eye,
   ArrowLeft,
   Share2,
-  AlertCircle
+  AlertCircle,
+  Facebook,
+  Link2,
+  Check
 } from 'lucide-react'
 
 interface PostWithDetails extends Post {
@@ -179,7 +184,11 @@ export default function PostDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [upvoting, setUpvoting] = useState(false)
   const [showAuthMessage, setShowAuthMessage] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const viewCountIncrementedRef = useRef<string | null>(null)
+  const shareRef = useRef<HTMLDivElement>(null)
+  const { showToast } = useToast()
 
   useEffect(() => {
     fetchPost()
@@ -200,6 +209,23 @@ export default function PostDetailPage() {
 
     incrementViewCount()
   }, [post?.id, post?.status])
+
+  // Close share dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        setShareOpen(false)
+      }
+    }
+
+    if (shareOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [shareOpen])
 
   const fetchPost = async () => {
     try {
@@ -267,6 +293,43 @@ export default function PostDetailPage() {
     }
   }
 
+  const getPostUrl = () => `${SITE_CONFIG.url}/posts/${slug}`
+
+  const handleShareFacebook = () => {
+    const postUrl = encodeURIComponent(getPostUrl())
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${postUrl}`,
+      '_blank',
+      'noopener,noreferrer,width=600,height=400'
+    )
+    setShareOpen(false)
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(getPostUrl())
+      setLinkCopied(true)
+      showToast('success', localize('Link copied to clipboard!', 'Đã sao chép liên kết!'))
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch {
+      showToast('error', localize('Failed to copy link', 'Không thể sao chép liên kết'))
+    }
+    setShareOpen(false)
+  }
+
+  const handleShareClick = () => {
+    // On mobile, use native share sheet for a richer experience
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: localize(post?.title, post?.title_vi),
+        text: localize(post?.summary, post?.summary_vi),
+        url: getPostUrl(),
+      }).catch(() => {})
+      return
+    }
+    // On desktop, toggle dropdown
+    setShareOpen(prev => !prev)
+  }
 
   if (loading) {
     return (
@@ -415,9 +478,46 @@ export default function PostDetailPage() {
               {upvoting ? 'Loading...' : `${upvoteCount} Upvotes`}
             </Button>
 
-            <Button variant="ghost" icon={<Share2 className="w-4 h-4" />}>
-              Share
-            </Button>
+            <div className="relative" ref={shareRef}>
+              <Button
+                variant="ghost"
+                icon={<Share2 className="w-4 h-4" />}
+                onClick={handleShareClick}
+              >
+                {localize('Share', 'Chia sẻ')}
+              </Button>
+
+              {/* Share Dropdown - Desktop only (mobile uses native share) */}
+              {shareOpen && (
+                <div className="absolute right-0 bottom-full mb-2 w-56 py-1 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-50 animate-fade-in">
+                  <button
+                    onClick={handleShareFacebook}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-bg/50 transition-colors text-sm font-medium text-text-primary"
+                  >
+                    <Facebook className="w-4 h-4 text-[#1877F2]" />
+                    <span>{localize('Share to Facebook', 'Chia sẻ lên Facebook')}</span>
+                  </button>
+
+                  <div className="my-1 border-t border-dark-border" />
+
+                  <button
+                    onClick={handleCopyLink}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-bg/50 transition-colors text-sm font-medium text-text-primary"
+                  >
+                    {linkCopied ? (
+                      <Check className="w-4 h-4 text-success" />
+                    ) : (
+                      <Link2 className="w-4 h-4 text-text-tertiary" />
+                    )}
+                    <span>
+                      {linkCopied
+                        ? localize('Copied!', 'Đã sao chép!')
+                        : localize('Copy link', 'Sao chép liên kết')}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </article>
 
