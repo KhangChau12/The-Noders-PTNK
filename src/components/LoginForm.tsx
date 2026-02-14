@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from './AuthProvider'
 import { Button } from './Button'
 import { Input } from './Input'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card'
 import { Mail, Lock, AlertCircle } from 'lucide-react'
 import { validateEmail } from '@/lib/utils'
 
@@ -37,7 +36,7 @@ export function LoginForm() {
 
     try {
       const result = await signIn(email, password)
-      
+
       if (result.error) {
         setError(result.error)
       } else {
@@ -53,23 +52,26 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to access your The Noders PTNK dashboard
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="relative overflow-hidden rounded-2xl bg-dark-bg/50 backdrop-blur-xl border border-dark-border/50 hover:border-primary-blue/20 p-8 animate-fade-in transition-all duration-300 shadow-2xl shadow-black/20">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-text-primary">Welcome Back</h2>
+            <p className="text-sm text-text-secondary mt-1">
+              Sign in to your dashboard
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="flex items-center space-x-2 p-3 bg-error/10 border border-error/20 rounded-lg">
                 <AlertCircle className="w-4 h-4 text-error flex-shrink-0" />
                 <p className="text-sm text-error">{error}</p>
               </div>
             )}
-            
+
             <Input
               label="Email"
               type="email"
@@ -80,7 +82,7 @@ export function LoginForm() {
               disabled={loading}
               required
             />
-            
+
             <Input
               label="Password"
               type="password"
@@ -91,27 +93,27 @@ export function LoginForm() {
               disabled={loading}
               required
             />
-            
+
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 text-base bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90"
               loading={loading}
               disabled={loading}
             >
               Sign In
             </Button>
           </form>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-text-secondary">
-              Don't have an account?{' '}
-              <a href={"/contact"} className="text-primary-blue">
-                Contact an admin to get access
-              </a>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+
+          <div className="my-6 border-t border-dark-border/50" />
+
+          <p className="text-center text-sm text-text-secondary">
+            Don't have an account?{' '}
+            <a href="/contact" className="text-primary-blue hover:text-accent-cyan transition-colors font-medium">
+              Contact an admin
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
