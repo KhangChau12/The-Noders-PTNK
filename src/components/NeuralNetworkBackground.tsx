@@ -98,12 +98,14 @@ function NetworkSVG({
   connections,
   particleLines,
   className,
+  mobile = false,
 }: {
   side: 'left' | 'right' | 'center'
   nodes: typeof leftNodes
   connections: typeof leftConnections
   particleLines: number[]
   className?: string
+  mobile?: boolean
 }) {
   const prefix = `nn-${side}`
 
@@ -179,7 +181,7 @@ function NetworkSVG({
             strokeWidth={width}
             opacity={opacity}
             strokeDasharray="4 4"
-            filter={`url(#${prefix}-soft-glow)`}
+            {...(!mobile && { filter: `url(#${prefix}-soft-glow)` })}
             style={{
               animation: `nn-line-flow ${3 + (i % 4)}s linear infinite`,
               animationDelay: `${(i * 0.7) % 5}s`,
@@ -188,8 +190,8 @@ function NetworkSVG({
         )
       })}
 
-      {/* Traveling particles along connections */}
-      {particleLines.map((lineIdx) => {
+      {/* Traveling particles along connections — desktop only */}
+      {!mobile && particleLines.map((lineIdx) => {
         if (lineIdx >= connections.length) return null
         const conn = connections[lineIdx]
         const from = nodes[conn.from]
@@ -220,18 +222,18 @@ function NetworkSVG({
           r={node.glowR}
           fill={node.r >= 7 ? `url(#${prefix}-node-grad-bright)` : `url(#${prefix}-node-grad)`}
           opacity={node.r >= 7 ? 0.6 : 0.4}
-          filter={`url(#${prefix}-node-glow)`}
+          {...(!mobile && { filter: `url(#${prefix}-node-glow)` })}
         />
       ))}
 
-      {/* Foreground nodes with breathing animation */}
+      {/* Foreground nodes */}
       {nodes.map((node, i) => (
         <circle
           key={`${prefix}-node-${i}`}
           cx={node.cx} cy={node.cy}
           r={node.r}
           fill={node.r >= 7 ? 'rgba(130, 200, 255, 1)' : node.r >= 6 ? 'rgba(96, 165, 250, 1)' : 'rgba(80, 150, 240, 0.9)'}
-          filter={`url(#${prefix}-glow)`}
+          {...(!mobile && { filter: `url(#${prefix}-glow)` })}
         />
       ))}
     </svg>
@@ -257,13 +259,14 @@ export function NeuralNetworkBackground() {
         className="hidden md:block right-0 translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
       />
 
-      {/* Mobile: single centered network */}
+      {/* Mobile: single centered network, no filters or particles */}
       <NetworkSVG
         side="center"
         nodes={leftNodes}
         connections={leftConnections}
         particleLines={leftParticleLines}
         className="block md:hidden left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[380px] h-[420px]"
+        mobile
       />
 
       {/* Center Glow Background */}
