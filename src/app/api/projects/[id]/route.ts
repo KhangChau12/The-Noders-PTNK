@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
@@ -178,6 +179,8 @@ export async function PUT(
         .eq('role_in_project', 'Creator')
     }
 
+    revalidatePath('/projects')
+
     return NextResponse.json({
       success: true,
       message: 'Project updated successfully',
@@ -264,6 +267,8 @@ export async function DELETE(
         { status: 500 }
       )
     }
+
+    revalidatePath('/projects')
 
     return NextResponse.json({
       success: true,

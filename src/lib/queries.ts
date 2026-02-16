@@ -25,8 +25,6 @@ export const projectQueries = {
       const response = await fetch(`/api/projects?${params}`)
       const result = await response.json();
 
-      console.log(result);
-
       if (!result.success) {
         return { projects: null, error: { message: result.error } }
       }
@@ -798,8 +796,6 @@ export const postQueries = {
       })
 
       const result = await response.json()
-
-      console.log(result);
 
       if (!result.success) {
         return { post: null, error: { message: result.error } }

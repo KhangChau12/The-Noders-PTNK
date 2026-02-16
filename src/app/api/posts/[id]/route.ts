@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase'
 
 // GET /api/posts/[id] - Get specific post with blocks
@@ -304,6 +305,8 @@ export async function PUT(
       )
     }
 
+    revalidatePath('/posts')
+
     return NextResponse.json({
       success: true,
       message: 'Post updated successfully',
@@ -398,6 +401,8 @@ export async function DELETE(
         { status: 500 }
       )
     }
+
+    revalidatePath('/posts')
 
     return NextResponse.json({
       success: true,

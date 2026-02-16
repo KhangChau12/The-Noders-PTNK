@@ -423,8 +423,7 @@ export default function PostsPage() {
   const fetchAuthors = useCallback(async () => {
     try {
       setAuthorsLoading(true);
-      // Add timestamp to bypass any caching
-      const response = await fetch(`/api/posts/authors?_t=${Date.now()}`);
+      const response = await fetch(`/api/posts/authors`);
       const data = await response.json();
 
       if (data.success) {

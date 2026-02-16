@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
@@ -64,11 +65,18 @@ export async function GET(request: NextRequest) {
       contributors: project.project_contributors || []
     })) || []
 
-    return NextResponse.json({
-      success: true,
-      projects: projectsWithContributors,
-      total: projectsWithContributors.length
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        projects: projectsWithContributors,
+        total: projectsWithContributors.length
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
+        }
+      }
+    )
 
   } catch (error) {
     console.error('Error fetching projects:', error)
@@ -195,6 +203,8 @@ export async function POST(request: NextRequest) {
           Math.max(0, 100 - contributors.reduce((sum: number, c: any) => sum + (c.contribution_percentage || 0), 0)) : 100,
         role_in_project: 'Creator'
       })
+
+    revalidatePath('/projects')
 
     return NextResponse.json({
       success: true,

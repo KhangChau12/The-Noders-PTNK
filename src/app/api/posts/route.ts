@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase'
-
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
 // GET /api/posts - List posts with filtering
 export async function GET(request: NextRequest) {
@@ -97,9 +95,7 @@ export async function GET(request: NextRequest) {
       }
     }, {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
       }
     })
 
@@ -230,6 +226,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    revalidatePath('/posts')
 
     return NextResponse.json({
       success: true,

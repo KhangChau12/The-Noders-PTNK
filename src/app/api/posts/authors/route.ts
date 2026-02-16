@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
 // GET /api/posts/authors - Get list of authors who have published posts
 export async function GET() {
   try {
@@ -34,8 +31,6 @@ export async function GET() {
     // Get unique authors and count their posts
     const authorMap = new Map()
 
-    console.log(authors);
-
     authors?.forEach((post: any) => {
       if (post.author) {
         const authorId = post.author.id
@@ -62,9 +57,7 @@ export async function GET() {
       authors: uniqueAuthors
     }, {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60'
       }
     })
 
