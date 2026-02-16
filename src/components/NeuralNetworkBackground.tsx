@@ -97,17 +97,19 @@ function NetworkSVG({
   nodes,
   connections,
   particleLines,
+  className,
 }: {
-  side: 'left' | 'right'
+  side: 'left' | 'right' | 'center'
   nodes: typeof leftNodes
   connections: typeof leftConnections
   particleLines: number[]
+  className?: string
 }) {
   const prefix = `nn-${side}`
 
   return (
     <svg
-      className={`absolute ${side === 'left' ? 'left-0 -translate-x-[15%]' : 'right-0 translate-x-[15%]'} top-1/2 -translate-y-1/2 w-[450px] h-[500px] md:w-[750px] md:h-[550px] lg:w-[850px] lg:h-[600px]`}
+      className={`absolute ${className}`}
       viewBox="0 0 600 500"
     >
       <defs>
@@ -239,17 +241,29 @@ function NetworkSVG({
 export function NeuralNetworkBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {/* Desktop: left + right networks */}
       <NetworkSVG
         side="left"
         nodes={leftNodes}
         connections={leftConnections}
         particleLines={leftParticleLines}
+        className="hidden md:block left-0 -translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
       />
       <NetworkSVG
         side="right"
         nodes={rightNodes}
         connections={rightConnections}
         particleLines={rightParticleLines}
+        className="hidden md:block right-0 translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
+      />
+
+      {/* Mobile: single centered network */}
+      <NetworkSVG
+        side="center"
+        nodes={leftNodes}
+        connections={leftConnections}
+        particleLines={leftParticleLines}
+        className="block md:hidden left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[380px] h-[420px]"
       />
 
       {/* Center Glow Background */}
