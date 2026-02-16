@@ -115,8 +115,8 @@ function NetworkSVG({
       viewBox="0 0 600 500"
     >
       <defs>
-        <filter id={`${prefix}-glow`}>
-          <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+        <filter id={`${prefix}-glow`} x="-100%" y="-100%" width="400%" height="400%">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
