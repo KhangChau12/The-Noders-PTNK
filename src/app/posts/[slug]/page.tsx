@@ -524,23 +524,49 @@ export default function PostDetailPage() {
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-2xl font-bold text-text-primary mb-6">Related Posts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {relatedPosts.map((related) => (
-                <Link key={related.id} href={`/posts/${related.slug}`}>
-                  <Card variant="interactive" className="h-full hover-lift">
-                    <CardContent className="p-4">
-                      <CategoryBadge category={related.category} />
-                      <h3 className="text-lg font-semibold text-text-primary mt-3 mb-2 line-clamp-2">
-                        {localize(related.title, related.title_vi)}
-                      </h3>
-                      <p className="text-sm text-text-secondary line-clamp-2">
-                        {localize(related.summary, related.summary_vi)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+            <h2 className="text-2xl font-bold text-text-primary mb-6">{localize('Related Posts', 'Bài viết liên quan')}</h2>
+            <div className="space-y-4">
+              {relatedPosts.map((related) => {
+                const thumbnailSrc = (related as any).thumbnail_image?.public_url
+                return (
+                  <Link key={related.id} href={`/posts/${related.slug}`} className="group block">
+                    <article className="flex gap-4 p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
+                      {/* Thumbnail */}
+                      <div className="flex-shrink-0 w-48 h-36 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+                        {thumbnailSrc ? (
+                          <img
+                            src={thumbnailSrc}
+                            alt={(related as any).thumbnail_image?.alt_text || localize(related.title, related.title_vi)}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-text-tertiary">
+                            <svg className="w-8 h-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <CategoryBadge category={related.category} />
+                        <h3 className="font-semibold text-text-primary text-base mt-2 mb-1 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                          {localize(related.title, related.title_vi)}
+                        </h3>
+                        <p className="text-sm text-text-secondary line-clamp-2 mb-2">
+                          {localize(related.summary, related.summary_vi)}
+                        </p>
+                        {related.reading_time > 0 && (
+                          <div className="flex items-center gap-1 text-xs text-text-tertiary">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{related.reading_time} {localize('min read', 'phút đọc')}</span>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}

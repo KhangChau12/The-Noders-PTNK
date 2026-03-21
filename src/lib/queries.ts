@@ -728,7 +728,7 @@ export const postQueries = {
 
       const { data, error } = await supabase
         .from('posts')
-        .select('id, title, summary, slug, category, reading_time, published_at, author_id')
+        .select('id, title, title_vi, summary, summary_vi, slug, category, reading_time, published_at, author_id, thumbnail_image_id, thumbnail_image:thumbnail_image_id(id, public_url, alt_text)')
         .eq('status', 'published')
         .eq('category', category)
         .neq('id', postId)
