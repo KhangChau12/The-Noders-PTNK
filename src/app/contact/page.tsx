@@ -69,10 +69,10 @@ export default function ContactPage() {
             "YOUR_WEB3FORMS_ACCESS_KEY",
           name: formData.name,
           email: formData.email,
-          subject: `🔔 The Noders PTNK - ${subjectOptions.find((s) => s.value === formData.subject)?.label}`,
+          subject: `🔔 The Noders Community - ${subjectOptions.find((s) => s.value === formData.subject)?.label}`,
           message: `
 ═══════════════════════════════════════
-🌟 NEW MESSAGE FROM THE NODERS PTNK WEBSITE
+🌟 NEW MESSAGE FROM THE NODERS COMMUNITY WEBSITE
 ═══════════════════════════════════════
 
 📋 INQUIRY TYPE: ${subjectOptions.find((s) => s.value === formData.subject)?.label}
@@ -85,7 +85,7 @@ export default function ContactPage() {
 ${formData.message}
 
 ═══════════════════════════════════════
-📧 Sent via The Noders PTNK Contact Form
+📧 Sent via The Noders Community Contact Form
 🌐 Website: ${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}
 ⏰ Timestamp: ${new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
 ═══════════════════════════════════════
@@ -124,7 +124,7 @@ ${formData.message}
               </h1>
 
               <p className="text-text-secondary text-lg mb-8">
-                Thank you for reaching out to The Noders PTNK. We've received
+                Thank you for reaching out to The Noders Community. We've received
                 your message and will get back to you within 24 hours.
               </p>
 
@@ -141,10 +141,10 @@ ${formData.message}
                     Go Home
                   </a>
                   <a
-                    href="/projects"
+                    href="/products"
                     className="hover:text-primary-blue transition-colors"
                   >
-                    Browse Projects
+                    Browse Products
                   </a>
                 </div>
               </div>
@@ -209,7 +209,7 @@ ${formData.message}
                         rel="noopener noreferrer"
                         className="text-text-secondary hover:text-primary-blue transition-colors"
                       >
-                        The Noders PTNK
+                        The Noders Community
                       </a>
                     </div>
                   </div>

@@ -316,7 +316,7 @@ function DashboardContent() {
                <CardContent className="p-0">
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                    {/* My Projects */}
-                   <Link href="/dashboard/projects" className="group block h-full">
+                   <Link href="/dashboard/products" className="group block h-full">
                      <div className="h-full p-6 rounded-xl border-2 border-dark-border bg-dark-surface hover:border-primary-blue hover:bg-dark-surface/80 transition-all duration-300 relative overflow-hidden">
                        <div className="absolute top-0 right-0 w-24 h-24 bg-primary-blue/5 rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:bg-primary-blue/10 transition-colors"></div>
                        

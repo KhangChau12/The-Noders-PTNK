@@ -32,7 +32,7 @@ export default function ProjectDetailPage() {
       <div className="min-h-screen flex items-center justify-center bg-dark-bg text-text-primary">
          <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Project not found</h2>
-            <Button onClick={() => router.push('/projects')}>Return to Gallery</Button>
+            <Button onClick={() => router.push('/products')}>Return to Gallery</Button>
          </div>
       </div>
     )
@@ -113,7 +113,7 @@ export default function ProjectDetailPage() {
 
         {/* Hero Content */}
         <div className="container mx-auto px-4 sm:px-6 z-10 w-full">
-            <Link href="/projects" className="inline-block mb-8">
+            <Link href="/products" className="inline-block mb-8">
               <Button variant="ghost" className="hover:bg-white/10 text-white/80 hover:text-white backdrop-blur-sm transition-all border border-transparent hover:border-white/20">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Projects

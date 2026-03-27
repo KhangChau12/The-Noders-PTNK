@@ -4,7 +4,7 @@ import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'Privacy Policy',
-  description: 'Privacy Policy for The Noders PTNK website and services.',
+  description: 'Privacy Policy for The Noders Community website and services.',
   url: '/privacy',
   noIndex: true,
 })

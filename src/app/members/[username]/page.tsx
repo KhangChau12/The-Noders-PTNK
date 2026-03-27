@@ -125,7 +125,7 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
               return (
                 <Link
                   key={index}
-                  href={`/projects/${project.id}`}
+                  href={`/products/${project.id}`}
                   className="group block p-4 rounded-lg bg-dark-surface border border-dark-border hover:bg-dark-border/50 transition-all duration-200"
                 >
                   <div className="flex gap-4">
@@ -168,7 +168,7 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
           </div>
           {contributedProjects.length > 3 && (
             <Link
-              href="/projects"
+              href="/products"
               className="block text-center text-primary-blue hover:text-primary-blue/80 transition-colors mt-4"
             >
               View all contributed projects →
@@ -191,7 +191,7 @@ function ProjectHistory({ projects, username }: ProjectHistoryProps) {
               return (
                 <Link
                   key={index}
-                  href={`/projects/${project.id}`}
+                  href={`/products/${project.id}`}
                   className="group block p-4 rounded-lg bg-dark-surface border border-dark-border hover:bg-dark-border/50 transition-all duration-200"
                 >
                   <div className="flex gap-4">
@@ -384,7 +384,7 @@ function ActivityTimeline({ member }: ActivityTimelineProps) {
     {
       date: new Date(member.created_at).toDateString(),
       type: 'join',
-      title: 'Joined The Noders PTNK',
+      title: 'Joined The Noders Community',
       description: `Welcome ${member.full_name || member.username} to the team!`
     }
   ]

@@ -22,7 +22,7 @@ export const projectQueries = {
         params.append('offset', filters.offset.toString())
       }
 
-      const response = await fetch(`/api/projects?${params}`)
+      const response = await fetch(`/api/products?${params}`)
       const result = await response.json();
 
       if (!result.success) {
@@ -143,7 +143,7 @@ export const projectQueries = {
         return { project: null, error: { message: 'Authentication required' } }
       }
 
-      const response = await fetch('/api/projects', {
+      const response = await fetch('/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ export const projectQueries = {
         return { project: null, error: { message: 'Authentication required' } }
       }
 
-      const response = await fetch(`/api/projects/${id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export const projectQueries = {
         return { error: { message: 'Authentication required' } }
       }
 
-      const response = await fetch(`/api/projects/${id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -338,7 +338,7 @@ export const projectQueries = {
   // Contributor management functions
   async getProjectContributors(projectId: string) {
     try {
-      const response = await fetch(`/api/projects/${projectId}/contributors`)
+      const response = await fetch(`/api/products/${projectId}/contributors`)
       const result = await response.json()
 
       if (!result.success) {
@@ -357,7 +357,7 @@ export const projectQueries = {
         return { contributor: null, error: { message: 'Authentication required' } }
       }
 
-      const response = await fetch(`/api/projects/${projectId}/contributors`, {
+      const response = await fetch(`/api/products/${projectId}/contributors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -384,7 +384,7 @@ export const projectQueries = {
         return { contributor: null, error: { message: 'Authentication required' } }
       }
 
-      const response = await fetch(`/api/projects/${projectId}/contributors`, {
+      const response = await fetch(`/api/products/${projectId}/contributors`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -411,7 +411,7 @@ export const projectQueries = {
         return { error: { message: 'Authentication required' } }
       }
 
-      const response = await fetch(`/api/projects/${projectId}/contributors?contributor_id=${contributorId}`, {
+      const response = await fetch(`/api/products/${projectId}/contributors?contributor_id=${contributorId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`

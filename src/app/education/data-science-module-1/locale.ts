@@ -30,7 +30,7 @@ export const translations = {
       },
       organizers: {
         title: { en: "Organizers", vi: "Tổ chức" },
-        desc: { en: "The Noders PTNK × PRISEE", vi: "The Noders PTNK × PRISEE" }
+        desc: { en: "The Noders Community × PRISEE", vi: "The Noders Community × PRISEE" }
       },
       duration: {
         title: { en: "Duration", vi: "Thời lượng" },

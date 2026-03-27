@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
-  keywords: ['AI', 'Machine Learning', 'Workshop', 'Club', 'Projects', 'Portfolio'],
+  keywords: ['AI', 'Machine Learning', 'Workshop', 'Club', 'Products', 'Portfolio'],
   authors: [{ name: SITE_CONFIG.name }],
   creator: SITE_CONFIG.name,
   verification: {

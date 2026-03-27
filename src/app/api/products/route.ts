@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         role_in_project: 'Creator'
       })
 
-    revalidatePath('/projects')
+    revalidatePath('/products')
 
     return NextResponse.json({
       success: true,

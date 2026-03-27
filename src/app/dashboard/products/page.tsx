@@ -218,7 +218,7 @@ function MemberProjectsPage() {
                 </Button>
               </a>
             )}
-            <a href={`/projects/${project.id}`}>
+            <a href={`/products/${project.id}`}>
               <Button variant="ghost" size="sm">
                 <Eye className="w-4 h-4" />
               </Button>
@@ -418,10 +418,10 @@ function MemberProjectsPage() {
                     <p className="text-text-secondary mb-4">
                       Join existing projects and collaborate with other members.
                     </p>
-                    <a href="/projects">
+                    <a href="/products">
                       <Button>
                         <FileText className="w-4 h-4 mr-2" />
-                        Browse Projects
+                        Browse Products
                       </Button>
                     </a>
                   </CardContent>

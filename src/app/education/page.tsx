@@ -15,7 +15,7 @@ import {
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: 'Education - The Noders PTNK',
+  title: 'Education - The Noders Community',
   description: 'Join workshops and mini-courses designed for high school students serious about AI and Data Science. Build practical skills through structured learning paths.',
   keywords: ['AI education', 'data science course', 'student workshop', 'PTNK training', 'machine learning course'],
   url: '/education',
@@ -33,7 +33,7 @@ export default function EducationPage() {
       stats: [
         { icon: <Users className="w-4 h-4" />, text: 'High School Students (Grade 10-11)' },
         { icon: <Calendar className="w-4 h-4" />, text: '4 sessions × 1.5h • Jan 2026' },
-        { icon: <Building2 className="w-4 h-4" />, text: 'The Noders PTNK × PRISEE' }
+        { icon: <Building2 className="w-4 h-4" />, text: 'The Noders Community × PRISEE' }
       ],
       gradient: 'from-primary-blue/10 to-accent-cyan/10',
       border: 'border-primary-blue/30',

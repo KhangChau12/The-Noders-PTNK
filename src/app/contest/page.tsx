@@ -14,8 +14,8 @@ import {
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: 'Competitions - The Noders PTNK',
-  description: 'Join The Noders PTNK competitions and practice AI skills through hands-on challenges. Learn by doing with our internal and public AI competitions.',
+  title: 'Competitions - The Noders Community',
+  description: 'Join The Noders Community competitions and practice AI skills through hands-on challenges. Learn by doing with our internal and public AI competitions.',
   keywords: ['AI competition', 'machine learning contest', 'student competition', 'PTNK challenge', 'learn by doing'],
   url: '/contest',
 })
@@ -73,7 +73,7 @@ export default function ContestPage() {
               </p>
 
               <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-                At The Noders PTNK, we believe the best way to master AI is through hands-on practice.
+                At The Noders Community, we believe the best way to master AI is through hands-on practice.
                 Our competitions provide real-world challenges where you can apply your knowledge,
                 learn from experience, and grow alongside passionate peers.
               </p>

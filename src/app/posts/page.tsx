@@ -582,7 +582,7 @@ export default function PostsPage() {
             </h1>
             <p className="text-text-secondary text-lg max-w-3xl mx-auto">
               Stay updated with the latest news, educational content, member
-              spotlights, and community activities from The Noders PTNK.
+              spotlights, and community activities from The Noders Community.
             </p>
           </div>
 

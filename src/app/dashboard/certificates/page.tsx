@@ -118,7 +118,7 @@ export default function MyCertificatesPage() {
                   My Certificates
                 </h1>
                 <p className="text-text-secondary">
-                  View and manage your verified achievements from The Noders PTNK.
+                  View and manage your verified achievements from The Noders Community.
                 </p>
               </div>
             </div>

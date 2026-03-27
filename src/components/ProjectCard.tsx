@@ -32,7 +32,7 @@ export function ProjectCard({ project, showStats = true }: ProjectCardProps) {
   const statusConfig = getStatusConfig(project.status || 'active')
 
   return (
-    <Link href={`/projects/${project.id}`}>
+    <Link href={`/products/${project.id}`}>
       <Card
         variant="interactive"
         padding="none"

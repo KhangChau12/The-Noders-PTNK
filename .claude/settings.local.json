@@ -20,7 +20,18 @@
       "Bash(npx next build:*)",
       "Bash(wc -l:*)",
       "Bash(sort:*)",
-      "Bash(ls -la \"d:\\\\Khang\\\\The Noders PTNK\\\\Product\\\\The Noders PTNK\\\\public\\\\images\\\\education\"\" 2>/dev/null || echo \"Directory may not exist \")"
+      "Bash(ls -la \"d:\\\\Khang\\\\The Noders PTNK\\\\Product\\\\The Noders PTNK\\\\public\\\\images\\\\education\"\" 2>/dev/null || echo \"Directory may not exist \")",
+      "Bash(grep -rn \"''Projects''\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -rn '\"\"Projects\"\"' src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -n \"''Projects''\\\\|\"\"Projects\"\"\" src/app/layout.tsx src/app/login/page.tsx \"src/app/products/[id]/layout.tsx\" src/lib/constants.ts)",
+      "Bash(sed -i \"s/''Projects'', ''Portfolio''/''Products'', ''Portfolio''/\" src/app/layout.tsx)",
+      "Bash(sed -i \"s/{ name: ''Projects'', url: ''\\\\/products'' }/{ name: ''Products'', url: ''\\\\/products'' }/\" \"src/app/products/[id]/layout.tsx\")",
+      "Bash(sed -i \"s/{ name: ''Projects'', href: ''\\\\/products'' }/{ name: ''Products'', href: ''\\\\/products'' }/\" src/lib/constants.ts)",
+      "Bash(sed -i 's/Browse Projects/Browse Products/g' src/app/contact/page.tsx src/app/dashboard/products/page.tsx src/app/not-found.tsx)",
+      "Bash(sed -i 's/Our Projects/Our Products/g' src/app/page.tsx src/app/products/layout.tsx src/app/products/page.tsx)",
+      "Bash(sed -i 's/View All Projects/View All Products/g' src/app/page.tsx)",
+      "Bash(sed -i \"s/title: ''Our Projects''/title: ''Our Products''/\" src/app/products/layout.tsx)",
+      "Bash(sed -i 's/innovative projects created/innovative products created/g' src/app/products/layout.tsx src/app/products/page.tsx)"
     ],
     "deny": [],
     "ask": []

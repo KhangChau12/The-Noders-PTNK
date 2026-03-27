@@ -4,7 +4,7 @@ import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'Terms of Service',
-  description: 'Terms of Service and usage policies for The Noders PTNK website and services.',
+  description: 'Terms of Service and usage policies for The Noders Community website and services.',
   url: '/terms',
   noIndex: true, // Don't index terms page
 })
@@ -23,7 +23,7 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-text-secondary">
-                By accessing and using The Noders PTNK website, you accept and agree to be bound by the terms
+                By accessing and using The Noders Community website, you accept and agree to be bound by the terms
                 and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </CardContent>
@@ -35,7 +35,7 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-text-secondary mb-4">
-                Permission is granted to temporarily access the materials (information or software) on The Noders PTNK's
+                Permission is granted to temporarily access the materials (information or software) on The Noders Community's
                 website for personal, non-commercial use only.
               </p>
               <p className="text-text-secondary">
@@ -57,7 +57,7 @@ export default function TermsPage() {
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-text-secondary">
                 Members may post content including but not limited to projects, blog posts, and comments. You retain
-                ownership of your content, but grant The Noders PTNK a license to display and distribute your content
+                ownership of your content, but grant The Noders Community a license to display and distribute your content
                 on our platform.
               </p>
             </CardContent>
@@ -84,7 +84,7 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-text-secondary">
-                The materials on The Noders PTNK's website are provided on an 'as is' basis. The Noders PTNK makes
+                The materials on The Noders Community's website are provided on an 'as is' basis. The Noders Community makes
                 no warranties, expressed or implied, and hereby disclaims and negates all other warranties including,
                 without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose,
                 or non-infringement of intellectual property or other violation of rights.
@@ -98,9 +98,9 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-text-secondary">
-                In no event shall The Noders PTNK or its suppliers be liable for any damages (including, without limitation,
+                In no event shall The Noders Community or its suppliers be liable for any damages (including, without limitation,
                 damages for loss of data or profit, or due to business interruption) arising out of the use or inability
-                to use the materials on The Noders PTNK's website.
+                to use the materials on The Noders Community's website.
               </p>
             </CardContent>
           </Card>
@@ -111,7 +111,7 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-text-secondary">
-                The Noders PTNK may revise these terms of service for its website at any time without notice.
+                The Noders Community may revise these terms of service for its website at any time without notice.
                 By using this website you are agreeing to be bound by the then current version of these terms of service.
               </p>
             </CardContent>

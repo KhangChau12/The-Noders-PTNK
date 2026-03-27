@@ -322,9 +322,9 @@ export default async function HomePage() {
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="container mx-auto text-center relative z-10">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-[family-name:var(--font-shrikhand)] mb-4">
+            <h1 className="text-4xl md:text-5xl font-[family-name:var(--font-shrikhand)] mb-4 whitespace-nowrap">
               <span className="gradient-text">
-                THE NODERS PTNK
+                THE NODERS COMMUNITY
               </span>
             </h1>
 
@@ -348,9 +348,9 @@ export default async function HomePage() {
                   <Target className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
-              <Link href="/projects">
+              <Link href="/products">
                 <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Our Projects
+                  Our Products
                   <Code className="ml-2 w-4 h-4" />
                 </Button>
               </Link>
@@ -384,7 +384,7 @@ export default async function HomePage() {
                   <iframe
                     className="absolute inset-0 w-full h-full"
                     src="https://www.youtube.com/embed/cFs5njLot7k"
-                    title="The Noders PTNK Latest Event"
+                    title="The Noders Community Latest Event"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
@@ -606,7 +606,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {recentProjects.map((project) => (
-              <Link key={project.id} href={`/projects/${project.id}`} className="block group">
+              <Link key={project.id} href={`/products/${project.id}`} className="block group">
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 border-2 border-dark-border/50 hover:border-primary-blue/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 h-full flex flex-col backdrop-blur-sm hover:-translate-y-2">
 
                   {/* Animated gradient background */}
@@ -771,9 +771,9 @@ export default async function HomePage() {
 
           {recentProjects.length >= 1 && (
             <div className="text-center mt-12">
-              <Link href="/projects">
+              <Link href="/products">
                 <Button variant="secondary" size="lg" className="group">
-                  View All Projects
+                  View All Products
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </Button>
               </Link>

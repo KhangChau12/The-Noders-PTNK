@@ -22,7 +22,7 @@ import { useLanguage } from '@/components/LanguageProvider'
 const locale = {
   en: {
     title: 'Certificate Verification',
-    subtitle: 'Verify the authenticity and validity of The Noders PTNK certificates',
+    subtitle: 'Verify the authenticity and validity of The Noders Community certificates',
     placeholder: 'Enter certificate ID (e.g., TN-GEN0-H8AU)',
     verify: 'Verify Certificate',
     help: 'Where is my ID?',
@@ -43,7 +43,7 @@ const locale = {
   },
   vi: {
     title: 'Tra cứu chứng chỉ',
-    subtitle: 'Hệ thống xác thực và kiểm tra thông tin chứng chỉ The Noders PTNK',
+    subtitle: 'Hệ thống xác thực và kiểm tra thông tin chứng chỉ The Noders Community',
     placeholder: 'Nhập mã chứng chỉ (VD: TN-GEN0-H8AU)',
     verify: 'Kiểm tra ngay',
     help: 'Mã ID ở đâu?',

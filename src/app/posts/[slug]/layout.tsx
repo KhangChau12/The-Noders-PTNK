@@ -40,14 +40,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return generateSEOMetadata({
     title: post.title,
-    description: post.summary || `Read ${post.title} on The Noders PTNK blog`,
+    description: post.summary || `Read ${post.title} on The Noders Community blog`,
     keywords: [post.category, 'blog post', 'tech article'],
     image: post.thumbnail_image?.public_url,
     url: `/posts/${post.slug}`,
     type: 'article',
     publishedTime: post.published_at || post.created_at,
     modifiedTime: post.updated_at,
-    author: post.author?.full_name || 'The Noders PTNK',
+    author: post.author?.full_name || 'The Noders Community',
   })
 }
 
@@ -91,7 +91,7 @@ async function PostStructuredData({ slug }: { slug: string }) {
     image: post.thumbnail_image?.public_url,
     publishedTime: post.published_at || post.created_at,
     modifiedTime: post.updated_at,
-    author: post.author?.full_name || 'The Noders PTNK',
+    author: post.author?.full_name || 'The Noders Community',
   })
 
   const breadcrumbSchema = generateBreadcrumbSchema([

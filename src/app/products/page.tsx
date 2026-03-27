@@ -4,7 +4,7 @@ import ProjectsClient from '@/components/ProjectsClient'
 async function getInitialProjects() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/projects`, {
+    const res = await fetch(`${baseUrl}/api/products`, {
       next: { revalidate: 60 }
     })
     if (!res.ok) return []
@@ -26,10 +26,10 @@ export default async function ProjectsPage() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
-              Our Projects
+              Our Products
             </h1>
             <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Explore the innovative projects created by our The Noders PTNK members.
+              Explore the innovative products created by our The Noders Community members.
               From machine learning models to web applications, discover our collaborative work.
             </p>
           </div>

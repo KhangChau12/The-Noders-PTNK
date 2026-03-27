@@ -26,7 +26,7 @@ import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'Noders AI Competition 2025 - Internal Competition',
-  description: 'Internal AI competition for The Noders PTNK members. Build IELTS Writing scoring models and compete for cash prizes in a supportive learning environment.',
+  description: 'Internal AI competition for The Noders Community members. Build IELTS Writing scoring models and compete for cash prizes in a supportive learning environment.',
   keywords: ['internal competition', 'AI challenge', 'Noders PTNK', 'machine learning', 'IELTS scoring'],
   url: '/contest/naic-2025',
 })

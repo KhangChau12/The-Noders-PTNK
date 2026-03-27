@@ -33,10 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return generateSEOMetadata({
     title: project.title,
-    description: project.description || `Check out ${project.title} - A project by The Noders PTNK`,
+    description: project.description || `Check out ${project.title} - A product by The Noders Community`,
     keywords: [...(project.tech_stack || []), 'student project', 'tech project'],
     image: project.thumbnail_image?.public_url || project.thumbnail_url,
-    url: `/projects/${project.id}`,
+    url: `/products/${project.id}`,
   })
 }
 
@@ -70,7 +70,7 @@ async function ProjectStructuredData({ id }: { id: string }) {
   const projectSchema = generateProjectSchema({
     name: project.title,
     description: project.description || '',
-    url: `/projects/${project.id}`,
+    url: `/products/${project.id}`,
     image: project.thumbnail_image?.public_url || project.thumbnail_url,
     dateCreated: project.created_at,
     techStack: project.tech_stack || [],
@@ -78,8 +78,8 @@ async function ProjectStructuredData({ id }: { id: string }) {
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: '/' },
-    { name: 'Projects', url: '/projects' },
-    { name: project.title, url: `/projects/${project.id}` },
+    { name: 'Products', url: '/products' },
+    { name: project.title, url: `/products/${project.id}` },
   ])
 
   return (

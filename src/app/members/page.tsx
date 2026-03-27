@@ -43,7 +43,7 @@ export default function MembersPage() {
               Meet Our Team
             </h1>
             <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Get to know the passionate individuals behind The Noders PTNK. Our
+              Get to know the passionate individuals behind The Noders Community. Our
               diverse team brings together expertise from various fields to
               create amazing projects.
             </p>
@@ -152,7 +152,7 @@ export default function MembersPage() {
                                 {member.full_name || member.username}
                               </h3>
                               <p className="text-xs text-text-tertiary mt-1 text-center line-clamp-2">
-                                {member.bio || "Member of The Noders PTNK"}
+                                {member.bio || "Member of The Noders Community"}
                               </p>
                             </div>
 

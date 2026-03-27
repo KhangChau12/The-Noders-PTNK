@@ -30,7 +30,7 @@ const locale = {
   en: {
     loading: 'Verifying certificate...',
     valid: 'Certificate Verified',
-    validDesc: 'This is an authentic certificate issued by The Noders PTNK',
+    validDesc: 'This is an authentic certificate issued by The Noders Community',
     invalid: 'Certificate Not Found',
     invalidDesc: 'We could not find a certificate with this ID. Please check the ID and try again.',
     backToVerify: 'Back to Verification',
@@ -45,7 +45,7 @@ const locale = {
   vi: {
     loading: 'Đang xác thực chứng chỉ...',
     valid: 'Chứng chỉ hợp lệ',
-    validDesc: 'Đây là chứng chỉ chính thức được cấp bởi The Noders PTNK',
+    validDesc: 'Đây là chứng chỉ chính thức được cấp bởi The Noders Community',
     invalid: 'Không tìm thấy chứng chỉ',
     invalidDesc: 'Chúng tôi không tìm thấy chứng chỉ với mã này. Vui lòng kiểm tra lại mã và thử lại.',
     backToVerify: 'Quay lại',
@@ -94,7 +94,7 @@ export default function VerifyResultPage() {
     if (navigator.share) {
       navigator.share({
         title: `Certificate Verification - ${certificateId}`,
-        text: `Verify The Noders PTNK certificate: ${certificateId}`,
+        text: `Verify The Noders Community certificate: ${certificateId}`,
         url: window.location.href
       })
     } else {

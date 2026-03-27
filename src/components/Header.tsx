@@ -40,7 +40,7 @@ export function Header() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
               <span className="font-[family-name:var(--font-shrikhand)] text-text-primary text-2xl">
-                The Noders <span className="text-primary-blue">PTNK</span>
+                The Noders <span className="text-primary-blue">Community</span>
               </span>
             </Link>
           </div>

@@ -237,7 +237,7 @@ function AdminDashboardContent() {
           </Link>
 
           {/* Projects Action Card */}
-          <Link href="/admin/projects" className="block group">
+          <Link href="/admin/products" className="block group">
             <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-pink/50 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-pink/20 transition-colors"></div>
               
@@ -312,7 +312,7 @@ function AdminDashboardContent() {
         {/* Footer Note */}
         <div className="mt-12 text-center">
            <p className="text-text-tertiary text-sm">
-             The Noders PTNK Admin System
+             The Noders Community Admin System
            </p>
         </div>
       </div>

@@ -179,7 +179,7 @@ export async function PUT(
         .eq('role_in_project', 'Creator')
     }
 
-    revalidatePath('/projects')
+    revalidatePath('/products')
 
     return NextResponse.json({
       success: true,
@@ -268,7 +268,7 @@ export async function DELETE(
       )
     }
 
-    revalidatePath('/projects')
+    revalidatePath('/products')
 
     return NextResponse.json({
       success: true,

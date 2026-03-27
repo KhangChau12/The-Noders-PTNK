@@ -7,7 +7,7 @@ export const content = {
     },
     title: 'PAIC 2026',
     subtitle: 'PTNK AI Challenge 2026',
-    description: 'PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do The Noders PTNK community tổ chức, được xây dựng theo hình thức thi đấu tương tự VOAI / VAIC / IOAI, với advisor là thầy Nguyễn Thành Lộc.',
+    description: 'PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do The Noders Community community tổ chức, được xây dựng theo hình thức thi đấu tương tự VOAI / VAIC / IOAI, với advisor là thầy Nguyễn Thành Lộc.',
     stats: {
       teams_participants: '24 đội • 54 thí sinh',
       date: '05 - 18 Tháng 1, 2026',
@@ -19,7 +19,7 @@ export const content = {
     },
     overview: {
       title: 'Giới thiệu chung',
-      intro: 'PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do The Noders PTNK community tổ chức, được xây dựng theo hình thức thi đấu tương tự VOAI / VAIC / IOAI, với advisor là thầy Nguyễn Thành Lộc.',
+      intro: 'PAIC 2026 là kỳ thi AI dành cho học sinh Phổ thông Năng khiếu do The Noders Community community tổ chức, được xây dựng theo hình thức thi đấu tương tự VOAI / VAIC / IOAI, với advisor là thầy Nguyễn Thành Lộc.',
       goals_title: 'MỤC TIÊU CUỘC THI',
       goals: [
         'Trải nghiệm quy trình xây dựng và đánh giá mô hình AI thực tế',
@@ -122,7 +122,7 @@ export const content = {
     },
     title: 'PAIC 2026',
     subtitle: 'PTNK AI Challenge 2026',
-    description: 'PAIC 2026 is an AI competition for PTNK students organized by The Noders PTNK community, built in a competition format similar to VOAI / VAIC / IOAI, with advisor Mr. Nguyen Thanh Loc.',
+    description: 'PAIC 2026 is an AI competition for PTNK students organized by The Noders Community community, built in a competition format similar to VOAI / VAIC / IOAI, with advisor Mr. Nguyen Thanh Loc.',
     stats: {
       teams_participants: '24 teams • 54 participants',
       date: 'Jan 05 - 18, 2026',
@@ -134,7 +134,7 @@ export const content = {
     },
     overview: {
       title: 'Overview',
-      intro: 'PAIC 2026 is an AI competition for PTNK students organized by The Noders PTNK community, built in a competition format similar to VOAI / VAIC / IOAI, with advisor Mr. Nguyen Thanh Loc.',
+      intro: 'PAIC 2026 is an AI competition for PTNK students organized by The Noders Community community, built in a competition format similar to VOAI / VAIC / IOAI, with advisor Mr. Nguyen Thanh Loc.',
       goals_title: 'COMPETITION GOALS',
       goals: [
         'Experience the process of building and evaluating real-world AI models',

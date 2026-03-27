@@ -5,7 +5,7 @@ export default function LoadingPage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <Loading />
-        <p className="text-text-secondary mt-4">Loading The Noders PTNK...</p>
+        <p className="text-text-secondary mt-4">Loading The Noders Community...</p>
       </div>
     </div>
   )

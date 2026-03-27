@@ -173,7 +173,7 @@ export function createPostTemplate(
 title: "${metadata.title || 'New Post Title'}"
 excerpt: "${metadata.excerpt || 'Post excerpt...'}"
 category: "${metadata.category || 'announcement'}"
-author: "${metadata.author || 'The Noders PTNK'}"
+author: "${metadata.author || 'The Noders Community'}"
 date: "${metadata.date || new Date().toISOString().split('T')[0]}"
 tags: [${(metadata.tags || []).map(tag => `"${tag}"`).join(', ')}]
 featured: ${metadata.featured || false}

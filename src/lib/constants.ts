@@ -1,5 +1,5 @@
 export const SITE_CONFIG = {
-  name: 'The Noders PTNK',
+  name: 'The Noders Community',
   shortName: 'The Noders',
   description: 'A technology club at VNUHCM High School for the Gifted, building practical AI solutions, organizing workshops, and connecting young developers in PTNK.',
   tagline: 'Connecting Minds, Creating Intelligence',
@@ -21,7 +21,7 @@ export const SITE_CONFIG = {
     'machine learning',
     'student projects'
   ],
-  author: 'The Noders PTNK',
+  author: 'The Noders Community',
   twitterHandle: '@thenoders_ptnk',
   ogImage: 'https://qaiziusbqefdgnebbocm.supabase.co/storage/v1/object/public/images/e72a4551-46a2-40c3-a9b9-ac91540e5003/1759994134563-v9qulq24k8.png',
   locale: 'en_US',
@@ -31,7 +31,7 @@ export const SITE_CONFIG = {
 export const NAVIGATION_ITEMS = [
   { name: 'Contest', href: '/contest' },
   { name: 'Education', href: '/education' },
-  { name: 'Projects', href: '/projects' },
+  { name: 'Products', href: '/products' },
   { name: 'Posts', href: '/posts' },
   {
     name: 'About',

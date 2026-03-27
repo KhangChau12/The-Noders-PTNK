@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return generateSEOMetadata({
     title: member.full_name || member.username,
-    description: member.bio || `${member.full_name || member.username} - Member of The Noders PTNK technology club`,
+    description: member.bio || `${member.full_name || member.username} - Member of The Noders Community technology club`,
     keywords: ['team member', 'developer', 'PTNK student', ...skillsKeywords],
     image: member.avatar_url,
     url: `/members/${member.username}`,
