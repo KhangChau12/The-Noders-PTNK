@@ -13,7 +13,7 @@ export const translations = {
     },
     stats: {
       target: { en: "High School Students (Grade 10-11)", vi: "Học sinh THPT (Lớp 10-11)" },
-      date: { en: "January 2026", vi: "Tháng 1 / 2026" },
+      date: { en: "April 2026", vi: "Tháng 4 / 2026" },
       sessions: { en: "4 Sessions × 1.5 hours", vi: "4 Buổi × 1.5 giờ" }
     }
   },
@@ -34,7 +34,7 @@ export const translations = {
       },
       duration: {
         title: { en: "Duration", vi: "Thời lượng" },
-        desc: { en: "4 sessions (Jan 2026)", vi: "4 buổi (Tháng 1/2026)" }
+        desc: { en: "4 sessions (Apr 2026)", vi: "4 buổi (Tháng 4/2026)" }
       }
     }
   },
@@ -160,6 +160,10 @@ export const translations = {
         ]
       }
     ]
+  },
+  registration: {
+    heading: { en: "Register Now", vi: "Đăng ký tham gia" },
+    subheading: { en: "Fill out the form below to register for the course", vi: "Điền vào form bên dưới để đăng ký tham gia khóa học" }
   },
   materials: {
     heading: { en: "Course Material", vi: "Tài liệu khóa học" },

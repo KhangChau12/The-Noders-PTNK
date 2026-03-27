@@ -40,6 +40,7 @@ export function DataScienceModule1Content() {
   const sessions = [
     {
       number: 1,
+      date: "05/04/2026",
       title: loc(t.curriculum.sessions[0].title),
       objective: loc(t.curriculum.sessions[0].objective),
       topics: [
@@ -69,6 +70,7 @@ export function DataScienceModule1Content() {
     },
     {
       number: 2,
+      date: "08/04/2026",
       title: loc(t.curriculum.sessions[1].title),
       objective: loc(t.curriculum.sessions[1].objective),
       topics: [
@@ -94,6 +96,7 @@ export function DataScienceModule1Content() {
     },
     {
       number: 3,
+      date: "12/04/2026",
       title: loc(t.curriculum.sessions[2].title),
       objective: loc(t.curriculum.sessions[2].objective),
       topics: [
@@ -123,6 +126,7 @@ export function DataScienceModule1Content() {
     },
     {
       number: 4,
+      date: "15/04/2026",
       title: loc(t.curriculum.sessions[3].title),
       objective: loc(t.curriculum.sessions[3].objective),
       topics: [
@@ -225,7 +229,7 @@ export function DataScienceModule1Content() {
               <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
                 {loc(t.hero.description)}
               </p>
-              <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
+              <div className="flex flex-wrap justify-center gap-4 text-text-secondary mb-8">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-primary-blue" />
                   <span>{loc(t.hero.stats.target)}</span>
@@ -239,6 +243,11 @@ export function DataScienceModule1Content() {
                   <span>{loc(t.hero.stats.sessions)}</span>
                 </div>
               </div>
+              <a href="#register">
+                <Button variant="primary" className="px-8 py-3 text-base font-semibold">
+                  {loc(t.registration.heading)}
+                </Button>
+              </a>
             </div>
           </div>
         </section>
@@ -383,9 +392,13 @@ export function DataScienceModule1Content() {
                                 {session.title}
                               </h3>
                               
-                              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white/90 text-sm border border-white/10">
+                              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white/90 text-sm border border-white/10 mb-3">
                                 <Target className="w-4 h-4 mr-2 text-accent-cyan" />
                                 <span className="line-clamp-2 md:line-clamp-none leading-snug">{session.objective}</span>
+                              </div>
+                              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white/90 text-sm border border-white/10">
+                                <Calendar className="w-4 h-4 mr-2 text-yellow-300" />
+                                <span>{session.date}</span>
                               </div>
                             </div>
                           </div>
@@ -519,6 +532,33 @@ export function DataScienceModule1Content() {
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Registration Form */}
+        <section id="register" className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+          <div className="container mx-auto">
+            <div className="max-w-5xl mx-auto text-center">
+              <h2 className="text-3xl font-bold text-text-primary mb-4">
+                {loc(t.registration.heading)}
+              </h2>
+              <p className="text-text-secondary mb-8">
+                {loc(t.registration.subheading)}
+              </p>
+              <div className="overflow-x-auto flex justify-center">
+                <iframe
+                  src="https://docs.google.com/forms/d/e/1FAIpQLSeZ3Z6GB-bRbK_6RYOdpqVCZTpbwT_InYgbaLW7D6qxPcvWpg/viewform?embedded=true"
+                  width="900"
+                  height="2400"
+                  frameBorder="0"
+                  marginHeight={0}
+                  marginWidth={0}
+                  style={{ width: '100%', minWidth: '320px' }}
+                >
+                  Đang tải…
+                </iframe>
               </div>
             </div>
           </div>

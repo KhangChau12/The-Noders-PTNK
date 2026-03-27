@@ -19,7 +19,8 @@
       "Bash(npx tsc:*)",
       "Bash(npx next build:*)",
       "Bash(wc -l:*)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(ls -la \"d:\\\\Khang\\\\The Noders PTNK\\\\Product\\\\The Noders PTNK\\\\public\\\\images\\\\education\"\" 2>/dev/null || echo \"Directory may not exist \")"
     ],
     "deny": [],
     "ask": []

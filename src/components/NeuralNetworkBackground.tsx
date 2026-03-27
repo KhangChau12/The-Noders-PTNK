@@ -1,11 +1,16 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 /**
  * Neural Network Background Component
  *
  * Displays an animated neural network pattern with floating nodes,
  * glowing connections, and traveling data particles.
  * Uses fixed positioning so it stays in place while content scrolls.
+ *
+ * Automatically simplifies on low-end devices (≤4 CPU cores) or when
+ * the user has enabled prefers-reduced-motion.
  *
  * Usage:
  * <NeuralNetworkBackground />
@@ -88,9 +93,9 @@ const rightConnections = [
   { from: 16, to: 10 }, { from: 16, to: 9 },
 ]
 
-// Select some connections to have traveling particles
-const leftParticleLines = [0, 3, 6, 8, 11, 14, 17, 22]
-const rightParticleLines = [1, 4, 7, 9, 12, 15, 20, 25]
+// Select some connections to have traveling particles (reduced from 8 to 5 per side)
+const leftParticleLines = [0, 6, 8, 14, 22]
+const rightParticleLines = [1, 7, 9, 15, 25]
 
 function NetworkSVG({
   side,
@@ -99,6 +104,7 @@ function NetworkSVG({
   particleLines,
   className,
   mobile = false,
+  simplified = false,
 }: {
   side: 'left' | 'right' | 'center'
   nodes: typeof leftNodes
@@ -106,8 +112,12 @@ function NetworkSVG({
   particleLines: number[]
   className?: string
   mobile?: boolean
+  simplified?: boolean
 }) {
   const prefix = `nn-${side}`
+  // In simplified mode: no filters, no particles, animate only every other line
+  const useFilters = !mobile && !simplified
+  const showParticles = !mobile && !simplified
 
   return (
     <svg
@@ -115,27 +125,31 @@ function NetworkSVG({
       viewBox="0 0 600 500"
     >
       <defs>
-        <filter id={`${prefix}-glow`} x="-100%" y="-100%" width="400%" height="400%">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-        <filter id={`${prefix}-node-glow`}>
-          <feGaussianBlur stdDeviation="20" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-        <filter id={`${prefix}-soft-glow`}>
-          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
+        {useFilters && (
+          <>
+            <filter id={`${prefix}-glow`} x="-100%" y="-100%" width="400%" height="400%">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id={`${prefix}-node-glow`}>
+              <feGaussianBlur stdDeviation="20" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id={`${prefix}-soft-glow`}>
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </>
+        )}
         <radialGradient id={`${prefix}-node-grad`}>
           <stop offset="0%" stopColor="rgba(96, 165, 250, 0.5)" />
           <stop offset="40%" stopColor="rgba(96, 165, 250, 0.2)" />
@@ -148,24 +162,12 @@ function NetworkSVG({
           <stop offset="60%" stopColor="rgba(59, 130, 246, 0.1)" />
           <stop offset="100%" stopColor="rgba(59, 130, 246, 0)" />
         </radialGradient>
-
-        {/* Define paths for traveling particles */}
-        {connections.map((conn, i) => {
-          const from = nodes[conn.from]
-          const to = nodes[conn.to]
-          return (
-            <path
-              key={`${prefix}-path-${i}`}
-              id={`${prefix}-path-${i}`}
-              d={`M${from.cx},${from.cy} L${to.cx},${to.cy}`}
-              fill="none"
-            />
-          )
-        })}
       </defs>
 
       {/* Connection lines with dash animation */}
       {connections.map((conn, i) => {
+        // In simplified mode, animate only every other line to halve animation count
+        if (simplified && i % 2 !== 0) return null
         const from = nodes[conn.from]
         const to = nodes[conn.to]
         const dist = Math.sqrt((to.cx - from.cx) ** 2 + (to.cy - from.cy) ** 2)
@@ -181,17 +183,18 @@ function NetworkSVG({
             strokeWidth={width}
             opacity={opacity}
             strokeDasharray="4 4"
-            {...(!mobile && { filter: `url(#${prefix}-soft-glow)` })}
+            {...(useFilters && { filter: `url(#${prefix}-soft-glow)` })}
             style={{
               animation: `nn-line-flow ${3 + (i % 4)}s linear infinite`,
               animationDelay: `${(i * 0.7) % 5}s`,
+              willChange: 'stroke-dashoffset',
             }}
           />
         )
       })}
 
-      {/* Traveling particles along connections — desktop only */}
-      {!mobile && particleLines.map((lineIdx) => {
+      {/* Traveling particles along connections — desktop + non-simplified only */}
+      {showParticles && particleLines.map((lineIdx) => {
         if (lineIdx >= connections.length) return null
         const conn = connections[lineIdx]
         const from = nodes[conn.from]
@@ -209,6 +212,7 @@ function NetworkSVG({
               offsetPath: `path("M${from.cx},${from.cy} L${to.cx},${to.cy}")`,
               animation: `nn-particle-travel ${duration}s ease-in-out infinite`,
               animationDelay: `${(lineIdx * 1.3) % 8}s`,
+              willChange: 'offset-distance, opacity',
             }}
           />
         )
@@ -222,7 +226,7 @@ function NetworkSVG({
           r={node.glowR}
           fill={node.r >= 7 ? `url(#${prefix}-node-grad-bright)` : `url(#${prefix}-node-grad)`}
           opacity={node.r >= 7 ? 0.6 : 0.4}
-          {...(!mobile && { filter: `url(#${prefix}-node-glow)` })}
+          {...(useFilters && { filter: `url(#${prefix}-node-glow)` })}
         />
       ))}
 
@@ -233,7 +237,7 @@ function NetworkSVG({
           cx={node.cx} cy={node.cy}
           r={node.r}
           fill={node.r >= 7 ? 'rgba(130, 200, 255, 1)' : node.r >= 6 ? 'rgba(96, 165, 250, 1)' : 'rgba(80, 150, 240, 0.9)'}
-          {...(!mobile && { filter: `url(#${prefix}-glow)` })}
+          {...(useFilters && { filter: `url(#${prefix}-glow)` })}
         />
       ))}
     </svg>
@@ -241,6 +245,14 @@ function NetworkSVG({
 }
 
 export function NeuralNetworkBackground() {
+  const [simplified, setSimplified] = useState(false)
+
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const lowEnd = typeof navigator !== 'undefined' && navigator.hardwareConcurrency <= 4
+    setSimplified(prefersReduced || lowEnd)
+  }, [])
+
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {/* Desktop: left + right networks */}
@@ -250,6 +262,7 @@ export function NeuralNetworkBackground() {
         connections={leftConnections}
         particleLines={leftParticleLines}
         className="hidden md:block left-0 -translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
+        simplified={simplified}
       />
       <NetworkSVG
         side="right"
@@ -257,6 +270,7 @@ export function NeuralNetworkBackground() {
         connections={rightConnections}
         particleLines={rightParticleLines}
         className="hidden md:block right-0 translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
+        simplified={simplified}
       />
 
       {/* Mobile: single centered network, no filters or particles */}
@@ -274,7 +288,7 @@ export function NeuralNetworkBackground() {
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] opacity-15 md:opacity-20"
         style={{
           background: 'radial-gradient(circle, rgba(96, 165, 250, 0.4) 0%, rgba(59, 130, 246, 0.2) 35%, transparent 65%)',
-          filter: 'blur(80px)',
+          filter: simplified ? 'blur(40px)' : 'blur(80px)',
         }}
       />
     </div>
