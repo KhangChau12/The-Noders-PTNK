@@ -357,11 +357,11 @@ export function DataScienceModule1Content() {
 
               <div className="space-y-8">
                 {sessions.map((session, index) => (
-                  <div key={index} className="relative group">
+                  <Link key={index} href={`/education/data-science-module-1/session/${session.number}`} className="relative group block">
                     {/* Glow Effect */}
                     <div className={`absolute inset-0 bg-gradient-to-r ${session.gradient} rounded-2xl opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-500`}></div>
-                    
-                    <Card className="relative overflow-hidden border-dark-border/40 bg-dark-surface/40 backdrop-blur-md hover:border-primary-blue/30 transition-all duration-300">
+
+                    <Card className="relative overflow-hidden border-dark-border/40 bg-dark-surface/40 backdrop-blur-md hover:border-primary-blue/30 transition-all duration-300 cursor-pointer">
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row h-full">
                           {/* Left Column: Header */}
@@ -391,11 +391,7 @@ export function DataScienceModule1Content() {
                               <h3 className="text-2xl font-bold text-white mb-4 leading-tight">
                                 {session.title}
                               </h3>
-                              
-                              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white/90 text-sm border border-white/10 mb-3">
-                                <Target className="w-4 h-4 mr-2 text-accent-cyan" />
-                                <span className="line-clamp-2 md:line-clamp-none leading-snug">{session.objective}</span>
-                              </div>
+
                               <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white/90 text-sm border border-white/10">
                                 <Calendar className="w-4 h-4 mr-2 text-yellow-300" />
                                 <span>{session.date}</span>
@@ -410,6 +406,10 @@ export function DataScienceModule1Content() {
                                   {loc(t.curriculum.topicsLabel)}
                                 </Badge>
                                 <div className="h-px bg-dark-border/40 flex-1 ml-4"></div>
+                                <span className="ml-4 inline-flex items-center gap-1 text-xs text-text-secondary/60 group-hover:text-primary-blue transition-colors">
+                                  {lang === 'vi' ? 'Xem chi tiết' : 'View details'}
+                                  <ArrowLeft className="w-3 h-3 rotate-180 group-hover:translate-x-0.5 transition-transform" />
+                                </span>
                              </div>
 
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
@@ -435,7 +435,7 @@ export function DataScienceModule1Content() {
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
