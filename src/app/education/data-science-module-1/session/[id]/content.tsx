@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/Button'
-import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { useLanguage } from '@/components/LanguageProvider'
 import { translations } from '../../locale'
@@ -18,7 +17,7 @@ interface SessionData {
 const sessionData: Record<number, SessionData> = {
   1: {
     canvaUrl: 'https://www.canva.com/design/DAG6aB5X6q0/9rrWO6b8nUd1G_NSfJvOrA/view?embed',
-    youtubeUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    youtubeUrl: 'https://www.youtube.com/embed/vGEgixKR8lA',
     docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSkZwunwjs_JaDrjxMIAKNRTq-unp00QmxSDL6_e6aeiQJppYmVmKdo48udm4KYGehPcRW7ZcDaGAVd/pub?embedded=true',
   },
   2: { canvaUrl: null, youtubeUrl: null, docsUrl: null },
@@ -33,12 +32,6 @@ const sessionDates: Record<number, string> = {
   4: '15/04/2026',
 }
 
-const sessionGradients: Record<number, string> = {
-  1: 'from-primary-blue/20 to-accent-cyan/10',
-  2: 'from-accent-cyan/20 to-primary-blue/10',
-  3: 'from-success/20 to-accent-cyan/10',
-  4: 'from-warning/20 to-success/10',
-}
 
 function ComingSoonPlaceholder({ label }: { label: string }) {
   return (
@@ -64,7 +57,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
         <div className="text-center">
           <p className="text-text-secondary mb-4">Session not found.</p>
           <Link href="/education/data-science-module-1">
-            <Button variant="outline">Back to Module 1</Button>
+            <Button variant="secondary">Back to Module 1</Button>
           </Link>
         </div>
       </div>
@@ -76,7 +69,6 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
   const title = loc(sessionInfo.title)
   const objective = loc(sessionInfo.objective)
   const date = sessionDates[id]
-  const gradient = sessionGradients[id]
 
   return (
     <div className="min-h-screen bg-dark-bg relative overflow-hidden">
@@ -87,7 +79,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
         {/* Header */}
         <div className="mb-8">
           <Link href="/education/data-science-module-1">
-            <Button variant="outline" className="mb-6 group">
+            <Button variant="secondary" className="mb-6 group">
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
               {lang === 'vi' ? 'Quay lại Module 1' : 'Back to Module 1'}
             </Button>
