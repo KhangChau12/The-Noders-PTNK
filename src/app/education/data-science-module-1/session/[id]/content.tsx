@@ -12,6 +12,7 @@ interface SessionData {
   canvaUrl: string | null
   youtubeUrl: string | null
   docsUrl: string | null
+  colabUrl: string | null
 }
 
 const sessionData: Record<number, SessionData> = {
@@ -19,10 +20,16 @@ const sessionData: Record<number, SessionData> = {
     canvaUrl: 'https://www.canva.com/design/DAG6aB5X6q0/9rrWO6b8nUd1G_NSfJvOrA/view?embed',
     youtubeUrl: 'https://www.youtube.com/embed/vGEgixKR8lA',
     docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSkZwunwjs_JaDrjxMIAKNRTq-unp00QmxSDL6_e6aeiQJppYmVmKdo48udm4KYGehPcRW7ZcDaGAVd/pub?embedded=true',
+    colabUrl: null,
   },
-  2: { canvaUrl: null, youtubeUrl: null, docsUrl: null },
-  3: { canvaUrl: null, youtubeUrl: null, docsUrl: null },
-  4: { canvaUrl: null, youtubeUrl: null, docsUrl: null },
+  2: {
+    canvaUrl: 'https://www.canva.com/design/DAG5xorKDtg/I5_Ma3gPGtLuC4CXcnyWrw/view?embed',
+    youtubeUrl: 'https://www.youtube.com/embed/81h3Bysu6oc',
+    docsUrl: 'https://docs.google.com/document/d/1yCDZZXdyOvgzfz1emm-U0j47cBc6-UAz9ygD0dCaLbM/pub?embedded=true',
+    colabUrl: 'https://colab.research.google.com/drive/1An4g-yczGnwz75e0B7Akpezzz8G1XrGX?usp=sharing',
+  },
+  3: { canvaUrl: null, youtubeUrl: null, docsUrl: null, colabUrl: null },
+  4: { canvaUrl: null, youtubeUrl: null, docsUrl: null, colabUrl: null },
 }
 
 const sessionDates: Record<number, string> = {
@@ -196,6 +203,22 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
             </div>
           </div>
         </section>
+
+        {/* Colab Button */}
+        {session.colabUrl && (
+          <a
+            href={session.colabUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#F9AB00]/10 hover:bg-[#F9AB00]/20 border border-[#F9AB00]/30 hover:border-[#F9AB00]/60 text-[#F9AB00] font-semibold text-base transition-all duration-200 group"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 1.97a4.079 4.079 0 0 0-5.476 5.476l-1.97 1.97a6.5 6.5 0 0 1 9.416-9.416zm-11.124 7.504 1.97-1.97a4.079 4.079 0 0 0 5.476-5.476l1.97-1.97a6.5 6.5 0 0 1-9.416 9.416z"/>
+            </svg>
+            {lang === 'vi' ? 'Mở bài Lab trên Google Colab' : 'Open Lab on Google Colab'}
+            <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </a>
+        )}
       </div>
     </div>
   )
