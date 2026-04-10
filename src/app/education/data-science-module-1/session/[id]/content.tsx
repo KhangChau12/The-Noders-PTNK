@@ -25,7 +25,7 @@ const sessionData: Record<number, SessionData> = {
   2: {
     canvaUrl: 'https://www.canva.com/design/DAG5xorKDtg/I5_Ma3gPGtLuC4CXcnyWrw/view?embed',
     youtubeUrl: 'https://www.youtube.com/embed/81h3Bysu6oc',
-    docsUrl: 'https://docs.google.com/document/d/1yCDZZXdyOvgzfz1emm-U0j47cBc6-UAz9ygD0dCaLbM/pub?embedded=true',
+    docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSKQSyxomwwYJQ4XooC-cBqGKJsaFwOzTtVRwBQPDIt6osNxrzj_LJDd9Sj8mnbD_3RqPxE6oG8Gdau/pub?embedded=true',
     colabUrl: 'https://colab.research.google.com/drive/1An4g-yczGnwz75e0B7Akpezzz8G1XrGX?usp=sharing',
   },
   3: { canvaUrl: null, youtubeUrl: null, docsUrl: null, colabUrl: null },
