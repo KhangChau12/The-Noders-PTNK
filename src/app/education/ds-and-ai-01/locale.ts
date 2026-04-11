@@ -3,9 +3,9 @@ export const translations = {
   hero: {
     backButton: { en: "Back to Education", vi: "Trở về trang Giáo dục" },
     badge: { en: "Mini-Course • Coming Soon", vi: "Khóa học ngắn • Sắp ra mắt" },
-    title: { 
-      prefix: { en: "Introduction to Data Science", vi: "Introduction to Data Science" },
-      suffix: { en: "Module 1", vi: "Module 1" }
+    title: {
+      prefix: { en: "Introduction to Data Science and", vi: "Introduction to Data Science and" },
+      suffix: { en: "Artificial Intelligence", vi: "Artificial Intelligence" }
     },
     description: { 
       en: "Build a solid foundation in data science thinking and gain comprehensive knowledge of the 3 pillars of data (Structured Data, Computer Vision, NLP). This course focuses on problem fundamentals, standard data processing workflows, and practical applications to give you the most hands-on perspective of the field.", 

@@ -59,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/education/data-science-module-1`,
+      url: `${baseUrl}/education/ds-and-ai-01`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,

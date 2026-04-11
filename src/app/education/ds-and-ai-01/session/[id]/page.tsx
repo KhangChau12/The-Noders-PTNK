@@ -13,10 +13,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const title = sessionTitles[id] ?? `Session ${id}`
   return generateSEOMetadata({
-    title: `Session ${id}: ${title} — Data Science Module 1`,
-    description: `Session ${id} of Data Science Module 1: ${title}. Slides, video recording, and lecture notes.`,
+    title: `Session ${id}: ${title} — DS & AI`,
+    description: `Session ${id} of DS & AI: ${title}. Slides, video recording, and lecture notes.`,
     keywords: ['data science', 'session', title],
-    url: `/education/data-science-module-1/session/${id}`,
+    url: `/education/ds-and-ai-01/session/${id}`,
     image: '/images/education/data-science-module-1/cover.png',
   })
 }

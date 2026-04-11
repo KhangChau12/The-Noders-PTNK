@@ -565,7 +565,7 @@ export default async function HomePage() {
                     <span>4 × 1.5h</span>
                   </div>
                 </div>
-                <Link href="/education/data-science-module-1">
+                <Link href="/education/ds-and-ai-01">
                   <Button variant="secondary" size="sm" className="w-full group/btn">
                     Learn More
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />

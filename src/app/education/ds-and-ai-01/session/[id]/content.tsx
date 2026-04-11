@@ -63,7 +63,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
       <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <div className="text-center">
           <p className="text-text-secondary mb-4">Session not found.</p>
-          <Link href="/education/data-science-module-1">
+          <Link href="/education/ds-and-ai-01">
             <Button variant="secondary">Back to Module 1</Button>
           </Link>
         </div>
@@ -85,7 +85,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/education/data-science-module-1">
+          <Link href="/education/ds-and-ai-01">
             <Button variant="secondary" className="mb-6 group">
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
               {lang === 'vi' ? 'Quay lại Module 1' : 'Back to Module 1'}
@@ -94,7 +94,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
 
           <div className="flex flex-wrap items-center gap-3 mb-3">
             <Badge variant="default" className="text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
-              Data Science Module 1
+              DS &amp; AI
             </Badge>
             <Badge variant="default" className={`border bg-transparent ${id === 1 ? 'text-accent-cyan border-accent-cyan/30' : id === 2 ? 'text-accent-cyan border-accent-cyan/30' : id === 3 ? 'text-success border-success/30' : 'text-warning border-warning/30'}`}>
               Session {id}

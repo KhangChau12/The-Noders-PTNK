@@ -357,7 +357,7 @@ export function DataScienceModule1Content() {
 
               <div className="space-y-8">
                 {sessions.map((session, index) => (
-                  <Link key={index} href={`/education/data-science-module-1/session/${session.number}`} className="relative group block">
+                  <Link key={index} href={`/education/ds-and-ai-01/session/${session.number}`} className="relative group block">
                     {/* Glow Effect */}
                     <div className={`absolute inset-0 bg-gradient-to-r ${session.gradient} rounded-2xl opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-500`}></div>
 

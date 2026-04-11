@@ -25,10 +25,10 @@ export default function EducationPage() {
   const programs = [
     {
       id: 'data-science-module-1',
-      slug: 'data-science-module-1',
+      slug: 'ds-and-ai-01',
       badge: 'Mini-Course • Coming Soon',
       badgeVariant: 'warning' as const,
-      title: 'Introduction to Data Science - Module 1',
+      title: 'Introduction to Data Science and Artificial Intelligence',
       shortDescription: 'Build a solid foundation in data science thinking and gain comprehensive knowledge of the 3 pillars of data (Structured, Vision, NLP). Focus on problem fundamentals, standard data processing workflows, and practical applications.',
       stats: [
         { icon: <Users className="w-4 h-4" />, text: 'High School Students (Grade 10-11)' },
