@@ -29,7 +29,7 @@ const sessionData: Record<number, SessionData> = {
     colabUrl: 'https://colab.research.google.com/drive/1An4g-yczGnwz75e0B7Akpezzz8G1XrGX?usp=sharing',
   },
   3: { 
-    canvaUrl: 'https://canva.link/r9khsrj8toficy1', 
+    canvaUrl: 'https://www.canva.com/design/DAG6gEMB0TM/jGfQyCUd3g1brWst6WF_9w/view?embed', 
     youtubeUrl: 'https://www.youtube.com/watch?v=jSQLXLTBEhE', 
     docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSA4oO7kdPIkTDd5OUd0bMxwBMkqLhU27y5eR9iz2ymTjPUQRCvDpQ6DTGO4Xl_fK1IcyV6ZVlkfgAW/pub?embedded=true', 
     colabUrl: 'https://colab.research.google.com/drive/1lD1AMTLALgHB4AQ8DjQ94N3iBSpeACoO?usp=sharing' 
