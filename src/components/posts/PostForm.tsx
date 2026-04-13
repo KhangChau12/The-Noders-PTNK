@@ -8,7 +8,7 @@ import { Badge } from '@/components/Badge'
 import { LanguageTabs, LanguageTabPanel, Language, ValidationStatus } from '@/components/LanguageTabs'
 import { POST_CATEGORIES } from '@/lib/constants'
 import { Post } from '@/types/database'
-import { X, Upload, Image as ImageIcon } from 'lucide-react'
+import { X, Upload, CalendarDays } from 'lucide-react'
 
 // Display name mapping for categories
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
@@ -28,7 +28,7 @@ interface PostFormProps {
     summary_vi: string
     category: string
     thumbnail_image_id?: string
-    published_at?: string | null
+    timeline_date?: string | null
   }) => Promise<void>
   saving?: boolean
   session: any
@@ -40,8 +40,8 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const [summary, setSummary] = useState(post?.summary || '')
   const [summary_vi, setSummaryVi] = useState(post?.summary_vi || '')
   const [category, setCategory] = useState<string>(post?.category || POST_CATEGORIES[0])
-  const [publishedDate, setPublishedDate] = useState(
-    post?.published_at ? post.published_at.split('T')[0] : ''
+  const [timelineDate, setTimelineDate] = useState(
+    post?.published_at?.split('T')[0] || post?.created_at?.split('T')[0] || ''
   )
   const [thumbnailImageId, setThumbnailImageId] = useState<string | undefined>(
     post?.thumbnail_image_id || undefined
@@ -61,7 +61,7 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
         setThumbnailUrl(existingUrl)
       }
 
-      setPublishedDate(post.published_at ? post.published_at.split('T')[0] : '')
+      setTimelineDate(post.published_at?.split('T')[0] || post.created_at?.split('T')[0] || '')
     }
   }, [post])
 
@@ -139,8 +139,13 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
       summary_vi,
       category,
       thumbnail_image_id: thumbnailImageId,
-      published_at: publishedDate || null
+      timeline_date: timelineDate || null
     })
+  }
+
+  const setToday = () => {
+    const today = new Date().toISOString().split('T')[0]
+    setTimelineDate(today)
   }
 
   return (
@@ -251,31 +256,46 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
             </div>
           </div>
 
-          {/* Published Date */}
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
-              Published Date (optional)
-            </label>
-            <div className="flex items-center gap-2 max-w-md">
+          {/* Timeline Date */}
+          <div className="rounded-lg border border-dark-border bg-dark-surface/40 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CalendarDays className="w-4 h-4 text-primary-blue" />
+              <label className="text-sm font-medium text-text-secondary">
+                Timeline Date (optional)
+              </label>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <Input
                 type="date"
-                value={publishedDate}
-                onChange={(e) => setPublishedDate(e.target.value)}
-                className="w-full"
+                value={timelineDate}
+                onChange={(e) => setTimelineDate(e.target.value)}
+                className="w-full sm:max-w-xs"
               />
-              {publishedDate && (
+              <div className="flex items-center gap-2">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setPublishedDate('')}
+                  onClick={setToday}
                 >
-                  Clear
+                  Today
                 </Button>
-              )}
+                {timelineDate && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTimelineDate('')}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
             </div>
+
             <p className="text-xs text-text-tertiary mt-2">
-              Leave empty to use today when publishing.
+              If set, this date will override created, published, and updated timestamps together.
             </p>
           </div>
 

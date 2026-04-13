@@ -78,17 +78,39 @@ function EditPostPage() {
     summary_vi: string
     category: string
     thumbnail_image_id?: string
-    published_at?: string | null
+    timeline_date?: string | null
   }) => {
     try {
       setSaving(true)
 
+      const { timeline_date, ...baseData } = data
+      const timelineIso = timeline_date ? `${timeline_date}T12:00:00.000Z` : null
+
+      const payload = timelineIso
+        ? {
+            ...baseData,
+            created_at: timelineIso,
+            published_at: timelineIso,
+            updated_at: timelineIso,
+          }
+        : baseData
+
       // Optimistic update
       if (post) {
-        setPost({ ...post, ...data } as Post)
+        setPost({
+          ...post,
+          ...baseData,
+          ...(timelineIso
+            ? {
+                created_at: timelineIso,
+                published_at: timelineIso,
+                updated_at: timelineIso,
+              }
+            : {}),
+        } as Post)
       }
 
-      const { post: updatedPost, error } = await postQueries.updatePost(postId, data, session)
+      const { post: updatedPost, error } = await postQueries.updatePost(postId, payload, session)
 
       if (error) {
         showToast('error', 'Failed to update post: ' + error.message)

@@ -217,7 +217,8 @@ export async function PUT(
     const updates = await request.json()
     const allowedFields = [
       'title', 'title_vi', 'summary', 'summary_vi', 'thumbnail_image_id', 'category', 'slug',
-      'status', 'related_post_id_1', 'related_post_id_2', 'reading_time', 'featured', 'published_at'
+      'status', 'related_post_id_1', 'related_post_id_2', 'reading_time', 'featured', 'published_at',
+      'created_at', 'updated_at'
     ]
 
     // Filter only allowed fields
@@ -257,29 +258,41 @@ export async function PUT(
       )
     }
 
-    if ('published_at' in postUpdates) {
-      const publishedAt = postUpdates.published_at
+    const normalizeDateField = (field: 'created_at' | 'published_at' | 'updated_at') => {
+      if (!(field in postUpdates)) {
+        return null
+      }
 
-      if (publishedAt === '' || publishedAt === null) {
-        postUpdates.published_at = null
-      } else if (typeof publishedAt === 'string') {
-        const normalized = /^\d{4}-\d{2}-\d{2}$/.test(publishedAt)
-          ? `${publishedAt}T12:00:00.000Z`
-          : publishedAt
+      const fieldValue = postUpdates[field]
 
-        const parsedDate = new Date(normalized)
+      if (fieldValue === '' || fieldValue === null) {
+        postUpdates[field] = null
+        return null
+      }
 
-        if (Number.isNaN(parsedDate.getTime())) {
-          return NextResponse.json(
-            { success: false, error: 'Invalid published date format' },
-            { status: 400 }
-          )
-        }
+      if (typeof fieldValue !== 'string') {
+        return `${field} has invalid format`
+      }
 
-        postUpdates.published_at = parsedDate.toISOString()
-      } else {
+      const normalized = /^\d{4}-\d{2}-\d{2}$/.test(fieldValue)
+        ? `${fieldValue}T12:00:00.000Z`
+        : fieldValue
+
+      const parsedDate = new Date(normalized)
+      if (Number.isNaN(parsedDate.getTime())) {
+        return `${field} has invalid format`
+      }
+
+      postUpdates[field] = parsedDate.toISOString()
+      return null
+    }
+
+    const dateFields: Array<'created_at' | 'published_at' | 'updated_at'> = ['created_at', 'published_at', 'updated_at']
+    for (const field of dateFields) {
+      const dateFieldError = normalizeDateField(field)
+      if (dateFieldError) {
         return NextResponse.json(
-          { success: false, error: 'Invalid published date format' },
+          { success: false, error: dateFieldError },
           { status: 400 }
         )
       }
