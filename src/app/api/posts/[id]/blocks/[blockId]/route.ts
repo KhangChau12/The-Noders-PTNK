@@ -116,13 +116,6 @@ export async function PUT(
     // Update content if provided
     if (content) {
       // Validate content based on type
-      if (existingBlock.type === 'text' && content.word_count > 800) {
-        return NextResponse.json(
-          { success: false, error: 'Text block cannot exceed 800 words' },
-          { status: 400 }
-        )
-      }
-
       blockUpdates.content = content
     }
 

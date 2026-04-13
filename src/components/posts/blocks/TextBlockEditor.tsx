@@ -26,20 +26,19 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
 
   const wordCount = countWords(html.replace(/<[^>]*>/g, ''))
   const wordCountVi = countWords(html_vi.replace(/<[^>]*>/g, ''))
-  const isValid = (wordCount > 0 && wordCount <= 350) || (wordCountVi > 0 && wordCountVi <= 350)
+  const isValid = wordCount > 0 || wordCountVi > 0
   const hasChanges = html !== (content?.html || '') || html_vi !== (content?.html_vi || '')
 
   // Validation status for tabs
   const getStatus = (lang: Language): ValidationStatus => {
     const count = lang === 'en' ? wordCount : wordCountVi
-    if (count > 350) return 'error'
     if (count === 0) return 'empty'
     return 'valid'
   }
 
   const handleSave = () => {
     if (!isValid) {
-      alert('Text must be between 1 and 350 words')
+      alert('Text must contain at least 1 word')
       return
     }
 
@@ -80,9 +79,8 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
             onChange={setHtml}
             placeholder="Write your content in English... Use the toolbar to format text with bold, italic, headers, colors and more."
           />
-          <p className={`text-sm mt-3 ${wordCount > 350 ? 'text-error' : 'text-text-tertiary'}`}>
-            {wordCount}/350 words
-            {wordCount > 350 && ' - Exceeds maximum'}
+          <p className="text-sm mt-3 text-text-tertiary">
+            {wordCount} words
           </p>
         </LanguageTabPanel>
 
@@ -92,9 +90,8 @@ export function TextBlockEditor({ content, onSave, onDelete, onCancel, isNew }: 
             onChange={setHtmlVi}
             placeholder="Viết nội dung bằng tiếng Việt... Sử dụng thanh công cụ để định dạng văn bản với in đậm, in nghiêng, tiêu đề, màu sắc và hơn thế nữa."
           />
-          <p className={`text-sm mt-3 ${wordCountVi > 350 ? 'text-error' : 'text-text-tertiary'}`}>
-            {wordCountVi}/350 từ
-            {wordCountVi > 350 && ' - Vượt quá giới hạn'}
+          <p className="text-sm mt-3 text-text-tertiary">
+            {wordCountVi} từ
           </p>
         </LanguageTabPanel>
 

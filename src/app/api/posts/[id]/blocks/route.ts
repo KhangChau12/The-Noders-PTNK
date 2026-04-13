@@ -148,12 +148,6 @@ export async function POST(
           { status: 400 }
         )
       }
-      if (content.word_count > 800) {
-        return NextResponse.json(
-          { success: false, error: 'Text block cannot exceed 800 words' },
-          { status: 400 }
-        )
-      }
     }
 
     if (type === 'quote' && !content.quote) {

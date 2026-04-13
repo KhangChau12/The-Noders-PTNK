@@ -56,10 +56,6 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       if (!content || !content.html || !content.html_vi || typeof content.word_count !== 'number' || typeof content.word_count_vi !== 'number') {
         return { valid: false, error: 'Text block requires content in both English and Vietnamese' }
       }
-      // enforce per-language word limit (adjust as needed)
-      if (content.word_count > 350 || content.word_count_vi > 350) {
-        return { valid: false, error: 'Text block cannot exceed 350 words per language' }
-      }
     }
 
     if (type === 'quote') {
