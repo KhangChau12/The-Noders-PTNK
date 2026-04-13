@@ -185,7 +185,7 @@ export async function PUT(
     // Check if post exists and get user role
     const { data: post, error: checkError } = await supabase
       .from('posts')
-      .select('author_id, status')
+      .select('author_id, status, slug')
       .eq('id', id)
       .single()
 
@@ -258,7 +258,7 @@ export async function PUT(
     }
 
     // Auto-regenerate slug if title is updated and current slug is "untitled-..."
-    if (postUpdates.title && post.slug.startsWith('untitled-')) {
+    if (postUpdates.title && post.slug?.startsWith('untitled-')) {
       let newSlug = postUpdates.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
