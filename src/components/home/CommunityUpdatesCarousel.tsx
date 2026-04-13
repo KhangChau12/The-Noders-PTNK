@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
-import { ArrowRight, Calendar, Clock, ChevronLeft, ChevronRight, Newspaper } from 'lucide-react'
+import { ArrowRight, Calendar, Clock, ChevronLeft, ChevronRight, Eye, Newspaper } from 'lucide-react'
 
 type CommunityPost = {
   id: string
@@ -15,6 +15,7 @@ type CommunityPost = {
   slug: string
   category: string
   reading_time: number
+  view_count?: number
   published_at: string
   thumbnail_image?: {
     public_url?: string
@@ -37,7 +38,6 @@ function formatDate(dateString: string): string {
 export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null)
   const pointerStartXRef = useRef(0)
-  const pointerStartScrollLeftRef = useRef(0)
   const dragDistanceRef = useRef(0)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -103,13 +103,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       left: direction === 'next' ? step : -step,
       behavior: 'smooth',
     })
-
-    window.setTimeout(() => {
-      const current = scrollerRef.current
-      if (current) {
-        wrapScrollPosition(current)
-      }
-    }, 420)
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -118,7 +111,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
 
     dragDistanceRef.current = 0
     pointerStartXRef.current = event.clientX
-    pointerStartScrollLeftRef.current = scroller.scrollLeft
     setIsDragging(true)
     scroller.setPointerCapture(event.pointerId)
   }
@@ -129,8 +121,11 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
 
     const deltaX = event.clientX - pointerStartXRef.current
     dragDistanceRef.current = Math.max(dragDistanceRef.current, Math.abs(deltaX))
-    scroller.scrollLeft = pointerStartScrollLeftRef.current - deltaX
+    scroller.scrollLeft -= deltaX
     wrapScrollPosition(scroller)
+
+    // Re-anchor pointer delta after each move to avoid jump when wrapping at segment edges.
+    pointerStartXRef.current = event.clientX
   }
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -160,7 +155,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       <div className="relative z-10 flex items-center justify-between gap-4 px-5 pt-5 md:px-6 md:pt-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-blue mb-2">Community Feed</p>
-          <p className="text-sm text-text-tertiary">Auto-scrolls and loops through the latest 5 community updates.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -188,7 +182,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       <div className="relative z-10 px-5 pb-5 pt-5 md:px-6 md:pb-6">
         <div
           ref={scrollerRef}
-          className={`no-scrollbar flex gap-6 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+          className={`no-scrollbar flex gap-6 overflow-x-auto pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -250,6 +244,10 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
                         <span>{post.reading_time} min read</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>{post.view_count ?? 0} views</span>
                       </div>
                     </div>
 

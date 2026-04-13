@@ -54,6 +54,7 @@ interface NewsPost {
   slug: string
   category: string
   reading_time: number
+  view_count: number
   published_at: string
   author?: {
     username: string
