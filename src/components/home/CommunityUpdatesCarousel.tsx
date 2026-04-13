@@ -26,7 +26,7 @@ interface CommunityUpdatesCarouselProps {
   posts: CommunityPost[]
 }
 
-const AUTOPLAY_SPEED_PX_PER_SEC = 24
+const AUTOPLAY_SPEED_PX_PER_SEC = 12
 const AUTOPLAY_PAUSE_AFTER_INTERACTION = 7000
 
 function formatDate(dateString: string): string {
@@ -137,9 +137,10 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
     const gap = 24
     const step = firstCard ? firstCard.offsetWidth + gap : scroller.clientWidth * 0.5
 
-    setIsPaused(true)
+    setIsPaused(false)
     if (interactionTimeoutRef.current) {
       window.clearTimeout(interactionTimeoutRef.current)
+      interactionTimeoutRef.current = null
     }
 
     scroller.scrollBy({
@@ -154,9 +155,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       }
     }, 420)
 
-    interactionTimeoutRef.current = window.setTimeout(() => {
-      setIsPaused(false)
-    }, AUTOPLAY_PAUSE_AFTER_INTERACTION)
+    // Keep autoplay running continuously after manual navigation.
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
