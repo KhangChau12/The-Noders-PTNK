@@ -26,7 +26,7 @@ interface CommunityUpdatesCarouselProps {
   posts: CommunityPost[]
 }
 
-const AUTOPLAY_SPEED_PX_PER_SEC = 48
+const AUTOPLAY_SPEED_PX_PER_SEC = 24
 const AUTOPLAY_PAUSE_AFTER_INTERACTION = 7000
 
 function formatDate(dateString: string): string {
@@ -245,8 +245,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         <div
           ref={scrollerRef}
           className={`no-scrollbar flex gap-6 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -262,7 +260,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                 key={`${post.id}-${index}`}
                 variant="interactive"
                 padding="none"
-                className="group/card flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-[calc(100vw-2.5rem)] md:w-[calc(50vw-3.25rem)] lg:w-[calc(50vw-4rem)] xl:w-[calc(50%-0.75rem)]"
+                className="group/card flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-full md:w-[calc(50%-0.75rem)]"
                 data-carousel-card="true"
                 aria-hidden={!isOriginal}
               >
@@ -325,7 +323,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-4 text-xs text-text-tertiary">
-          <span>Hover to pause. Use arrows to browse manually.</span>
+          <span>Auto-playing continuously. Use arrows or drag to browse manually.</span>
           <span>{isPaused ? 'Paused' : 'Playing'}</span>
         </div>
       </div>
