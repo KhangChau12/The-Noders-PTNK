@@ -332,7 +332,7 @@ export default async function HomePage() {
             </h1>
 
             <p className="text-lg text-text-secondary mb-3">
-              Technology Community with students from PTNK
+              A student technology community at VNUHCM High School for the Gifted
             </p>
 
             <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-text-primary">
@@ -340,8 +340,7 @@ export default async function HomePage() {
             </h2>
 
             <p className="text-lg text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-              Where innovation meets collaboration at VNUHCM High School for the Gifted.
-              Just like nodes in a neural network collaborate to create powerful intelligence, we connect to build an outstanding developer community.
+              We build AI products, host workshops and DS/AI mini-courses, organize AI competitions, guide students through AI learning roadmaps, and grow a community passionate about coding and AI.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
