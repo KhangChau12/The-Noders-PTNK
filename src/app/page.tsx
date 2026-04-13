@@ -136,7 +136,7 @@ async function getStats(): Promise<Stats> {
   }
 }
 
-// Fetch recent projects from database
+// Fetch Recent Products from database
 async function getRecentProjects(): Promise<Project[]> {
   try {
     const supabase = createClient()
@@ -174,7 +174,7 @@ async function getRecentProjects(): Promise<Project[]> {
       .limit(3)
 
     if (error) {
-      console.error('Error fetching recent projects:', error)
+      console.error('Error fetching Recent Products:', error)
       return []
     }
 
@@ -194,7 +194,7 @@ async function getRecentProjects(): Promise<Project[]> {
       thumbnail_image: project.thumbnail_image
     })) || []
   } catch (error) {
-    console.error('Failed to fetch recent projects:', error)
+    console.error('Failed to fetch Recent Products:', error)
     return []
   }
 }
@@ -595,12 +595,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Recent Projects Section */}
+      {/* Recent Products Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Recent Projects
+              Recent Products
             </h2>
             <p className="text-text-secondary text-lg max-w-3xl mx-auto">
               Check out some of our latest innovations and collaborative efforts.

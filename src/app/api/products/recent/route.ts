@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createClient()
 
-    // Get recent projects with contributors and creator info
+    // Get Recent Products with contributors and creator info
     const { data: projects, error } = await supabase
       .from('projects')
       .select(`
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       .limit(3)
 
     if (error) {
-      console.error('Error fetching recent projects:', error)
+      console.error('Error fetching Recent Products:', error)
       return NextResponse.json(
         { error: 'Failed to fetch projects' },
         { status: 500 }
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Error fetching recent projects:', error)
+    console.error('Error fetching Recent Products:', error)
     return NextResponse.json(
       { error: 'Failed to fetch projects' },
       { status: 500 }
