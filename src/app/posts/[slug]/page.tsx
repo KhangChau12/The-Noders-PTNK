@@ -102,21 +102,36 @@ function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
 
     case 'image':
       const imageContent = block.content as { image_id: string; caption?: string; alt_text?: string }
-      const blockImage = (block as any).image
+      const blockImage = (block as any).image as {
+        public_url?: string
+        alt_text?: string
+        width?: number
+        height?: number
+      } | undefined
       return (
         <div className="mb-8">
-          <div className="aspect-video relative overflow-hidden rounded-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+          <div className="w-full rounded-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 overflow-hidden">
             {blockImage?.public_url ? (
-              <Image
-                src={blockImage.public_url}
-                alt={imageContent.alt_text || blockImage.alt_text || 'Post image'}
-                fill
-                className="object-cover"
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-              />
+              blockImage.width && blockImage.height ? (
+                <Image
+                  src={blockImage.public_url}
+                  alt={imageContent.alt_text || blockImage.alt_text || 'Post image'}
+                  width={blockImage.width}
+                  height={blockImage.height}
+                  className="w-full h-auto"
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                />
+              ) : (
+                <img
+                  src={blockImage.public_url}
+                  alt={imageContent.alt_text || blockImage.alt_text || 'Post image'}
+                  className="w-full h-auto"
+                  loading="lazy"
+                />
+              )
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
+              <div className="w-full min-h-[220px] flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
                 <svg
                   className="w-12 h-12 mb-2 opacity-60"
                   fill="none"

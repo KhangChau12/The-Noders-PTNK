@@ -105,11 +105,11 @@ export function ImageBlockEditor({ content, image, onSave, onDelete, onCancel, i
         <div className="space-y-3">
           {/* Image Upload */}
           {imageUrl ? (
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden">
+            <div className="relative w-full rounded-lg overflow-hidden bg-dark-surface/40">
               <img
                 src={imageUrl}
                 alt="Post image"
-                className="w-full h-full object-cover"
+                className="w-full h-auto"
               />
               <button
                 type="button"
