@@ -10,6 +10,7 @@ import { Code, Users, ArrowRight, Github, ExternalLink, Calendar, Clock, Newspap
 import { createClient } from '@/lib/supabase'
 import { TECH_STACK_COLORS } from '@/lib/constants'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
+import { CommunityUpdatesCarousel } from '@/components/home/CommunityUpdatesCarousel'
 
 interface Stats {
   activeProjects: number
@@ -222,8 +223,9 @@ async function getRecentPosts(): Promise<NewsPost[]> {
         )
       `)
       .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(2)
+      .eq('category', 'Community Activities')
+      .order('published_at', { ascending: false })
+      .limit(5)
 
     if (error) {
       console.error('Error fetching recent posts:', error)
@@ -787,85 +789,25 @@ export default async function HomePage() {
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Latest News & Updates
+              Latest Community Activities
             </h2>
             <p className="text-text-secondary max-w-3xl mx-auto">
-              Stay up to date with our latest announcements, project showcases, and community highlights.
+              Stay up to date with our latest community moments, activities, and highlights.
             </p>
           </div>
 
-          <div className={`grid gap-8 mb-8 ${recentPosts.length === 1 ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-            {recentPosts.map((post) => (
-              <Card key={post.id} variant="interactive" className="hover-lift group">
-                <Link href={`/posts/${post.slug}`}>
-                  <div className="aspect-video relative rounded-t-lg overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
-                    {post.thumbnail_image?.public_url ? (
-                      <Image
-                        src={post.thumbnail_image.public_url as string}
-                        alt={post.thumbnail_image.alt_text || post.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Newspaper className="w-12 h-12 text-primary-blue group-hover:scale-105 transition-transform duration-300" />
-                      </div>
-                    )}
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                  <CardContent className="pt-4">
-                    <Badge variant={getCategoryBadgeVariant(post.category) as any} size="sm" className="mb-3">
-                      {getCategoryDisplayName(post.category)}
-                    </Badge>
-                    <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                      {post.title || 'Untitled Post'}
-                    </h3>
-                    <p className="text-text-secondary text-sm mb-4 line-clamp-2 leading-relaxed">
-                      {post.summary || 'No summary available'}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(post.published_at)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {post.reading_time} min read
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-primary-blue text-sm font-medium">Read More</span>
-                      <ArrowRight className="w-4 h-4 text-primary-blue group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </CardContent>
-                </Link>
-              </Card>
-            ))}
+          <CommunityUpdatesCarousel posts={recentPosts} />
 
-            {/* View all posts CTA */}
-            <Card variant="interactive" className="hover-lift group">
-              <Link href="/posts">
-                <CardContent className="p-8 text-center h-full flex flex-col justify-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                    <Newspaper className="w-8 h-8 text-primary-blue" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2">
-                    View All Posts
-                  </h3>
-                  <p className="text-text-secondary text-sm mb-4 leading-relaxed">
-                    Discover more stories, updates, and insights from our community
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-primary-blue group-hover:text-accent-cyan transition-colors duration-300">
-                    <span className="text-sm font-medium">Browse All Posts</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
-          </div>
+          {recentPosts.length > 0 && (
+            <div className="text-center mt-10">
+              <Button asChild variant="secondary" size="lg" className="group">
+                <Link href="/posts">
+                  View All Posts
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -248,6 +248,15 @@ pre code {
   animation: slideInRight 0.3s ease-out;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Neural Network Background Animations */
 @keyframes nn-line-flow {
   0% { stroke-dashoffset: 20; }
@@ -259,4 +268,14 @@ pre code {
   10% { opacity: 1; }
   90% { opacity: 1; }
   100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes community-carousel {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-community-carousel {
+  animation: community-carousel 34s linear infinite;
+  will-change: transform;
 }
