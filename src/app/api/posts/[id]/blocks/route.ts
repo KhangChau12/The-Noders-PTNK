@@ -235,10 +235,26 @@ export async function POST(
       )
     }
 
+    let blockWithImage = newBlock
+    if (type === 'image' && content?.image_id) {
+      const { data: imageData } = await supabase
+        .from('images')
+        .select('id, public_url, alt_text, width, height')
+        .eq('id', content.image_id)
+        .single()
+
+      if (imageData) {
+        blockWithImage = {
+          ...newBlock,
+          image: imageData
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Block created successfully',
-      block: newBlock
+      block: blockWithImage
     })
 
   } catch (error) {

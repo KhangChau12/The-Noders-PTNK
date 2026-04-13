@@ -38,6 +38,9 @@ interface PostWithDetails extends Post {
   }
   thumbnail_image?: {
     public_url: string
+    alt_text?: string | null
+    width?: number
+    height?: number
   }
 }
 
@@ -400,15 +403,25 @@ export default function PostDetailPage() {
         <article>
           {/* Thumbnail */}
           {thumbnailSrc && (
-            <div className="aspect-video relative overflow-hidden rounded-lg mb-8 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-              <Image
-                src={thumbnailSrc}
-                alt={post.thumbnail_image?.alt_text || post.title}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-              />
+            <div className="w-full overflow-hidden rounded-lg mb-8 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+              {post.thumbnail_image?.width && post.thumbnail_image?.height ? (
+                <Image
+                  src={thumbnailSrc}
+                  alt={post.thumbnail_image?.alt_text || post.title}
+                  width={post.thumbnail_image.width}
+                  height={post.thumbnail_image.height}
+                  priority
+                  className="w-full h-auto"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                />
+              ) : (
+                <img
+                  src={thumbnailSrc}
+                  alt={post.thumbnail_image?.alt_text || post.title}
+                  className="w-full h-auto"
+                  loading="eager"
+                />
+              )}
             </div>
           )}
 

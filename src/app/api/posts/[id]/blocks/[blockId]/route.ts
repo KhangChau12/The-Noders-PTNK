@@ -146,10 +146,30 @@ export async function PUT(
       )
     }
 
+    let blockWithImage = updatedBlock
+    if (updatedBlock?.type === 'image') {
+      const imageId = (updatedBlock.content as any)?.image_id
+
+      if (imageId) {
+        const { data: imageData } = await supabase
+          .from('images')
+          .select('id, public_url, alt_text, width, height')
+          .eq('id', imageId)
+          .single()
+
+        if (imageData) {
+          blockWithImage = {
+            ...updatedBlock,
+            image: imageData
+          }
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Block updated successfully',
-      block: updatedBlock
+      block: blockWithImage
     })
 
   } catch (error) {
