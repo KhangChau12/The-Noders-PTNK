@@ -26,9 +26,6 @@ interface CommunityUpdatesCarouselProps {
   posts: CommunityPost[]
 }
 
-const AUTOPLAY_SPEED_PX_PER_SEC = 12
-const AUTOPLAY_PAUSE_AFTER_INTERACTION = 7000
-
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     month: 'short',
@@ -39,12 +36,10 @@ function formatDate(dateString: string): string {
 
 export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null)
-  const interactionTimeoutRef = useRef<number | null>(null)
   const pointerStartXRef = useRef(0)
   const pointerStartScrollLeftRef = useRef(0)
   const dragDistanceRef = useRef(0)
   const [isDragging, setIsDragging] = useState(false)
-  const [isPaused, setIsPaused] = useState(false)
 
   const loopedPosts = useMemo(() => [...posts, ...posts, ...posts], [posts])
 
@@ -61,40 +56,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       scroller.scrollLeft = scroller.scrollLeft - segmentWidth
     }
   }
-
-  useEffect(() => {
-    const scroller = scrollerRef.current
-    if (!scroller || posts.length === 0) return
-
-    let animationFrame = 0
-    let lastTick = performance.now()
-
-    const tick = (timestamp: number) => {
-      const deltaSeconds = Math.max(0, (timestamp - lastTick) / 1000)
-      lastTick = timestamp
-
-      if (!isPaused && !isDragging && scroller) {
-        scroller.scrollLeft += AUTOPLAY_SPEED_PX_PER_SEC * deltaSeconds
-        wrapScrollPosition(scroller)
-      }
-
-      animationFrame = window.requestAnimationFrame(tick)
-    }
-
-    animationFrame = window.requestAnimationFrame(tick)
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame)
-    }
-  }, [isPaused, isDragging, posts.length])
-
-  useEffect(() => {
-    return () => {
-      if (interactionTimeoutRef.current) {
-        window.clearTimeout(interactionTimeoutRef.current)
-      }
-    }
-  }, [])
 
   useEffect(() => {
     const scroller = scrollerRef.current
@@ -134,14 +95,9 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
     wrapScrollPosition(scroller)
 
     const firstCard = scroller.querySelector<HTMLElement>('[data-carousel-card]')
-    const gap = 24
-    const step = firstCard ? firstCard.offsetWidth + gap : scroller.clientWidth * 0.5
-
-    setIsPaused(false)
-    if (interactionTimeoutRef.current) {
-      window.clearTimeout(interactionTimeoutRef.current)
-      interactionTimeoutRef.current = null
-    }
+    const scrollerStyle = window.getComputedStyle(scroller)
+    const gap = parseFloat(scrollerStyle.columnGap || scrollerStyle.gap || '0') || 0
+    const step = firstCard ? firstCard.getBoundingClientRect().width + gap : scroller.clientWidth
 
     scroller.scrollBy({
       left: direction === 'next' ? step : -step,
@@ -154,19 +110,16 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         wrapScrollPosition(current)
       }
     }, 420)
-
-    // Keep autoplay running continuously after manual navigation.
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const scroller = scrollerRef.current
-    if (!scroller || event.pointerType === 'touch') return
+    if (!scroller) return
 
     dragDistanceRef.current = 0
     pointerStartXRef.current = event.clientX
     pointerStartScrollLeftRef.current = scroller.scrollLeft
     setIsDragging(true)
-    setIsPaused(true)
     scroller.setPointerCapture(event.pointerId)
   }
 
@@ -187,14 +140,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
     setIsDragging(false)
     scroller.releasePointerCapture(event.pointerId)
     wrapScrollPosition(scroller)
-
-    if (interactionTimeoutRef.current) {
-      window.clearTimeout(interactionTimeoutRef.current)
-    }
-
-    interactionTimeoutRef.current = window.setTimeout(() => {
-      setIsPaused(false)
-    }, AUTOPLAY_PAUSE_AFTER_INTERACTION)
   }
 
   const handleClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -322,8 +267,8 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-4 text-xs text-text-tertiary">
-          <span>Auto-playing continuously. Use arrows or drag to browse manually.</span>
-          <span>{isPaused ? 'Paused' : 'Playing'}</span>
+          <span>Drag with mouse or touch, or use arrows to move exactly one post each time.</span>
+          <span>Manual</span>
         </div>
       </div>
     </div>
