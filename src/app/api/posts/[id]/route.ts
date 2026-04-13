@@ -11,7 +11,7 @@ export async function GET(
     const { id } = params
 
     // Check if authenticated and set session for RLS
-    const supabase = createClient()
+    const supabase: any = createClient()
     const authHeader = request.headers.get('authorization')
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -61,8 +61,8 @@ export async function GET(
 
     // Fetch images for image blocks efficiently (single query)
     const imageIds = blocks
-      ?.filter(b => b.type === 'image' && b.content)
-      .map(b => (b.content as any).image_id)
+      ?.filter((b: any) => b.type === 'image' && b.content)
+      .map((b: any) => (b.content as any).image_id)
       .filter(Boolean) || []
 
     // Create a Map for O(1) lookup instead of array.find()
@@ -73,11 +73,11 @@ export async function GET(
         .select('id, public_url, alt_text, width, height')
         .in('id', imageIds)
 
-      imageData?.forEach(img => imageMap.set(img.id, img))
+      imageData?.forEach((img: any) => imageMap.set(img.id, img))
     }
 
     // Add image data to blocks using Map for faster lookup
-    const blocksWithImages = blocks?.map(block => {
+    const blocksWithImages = blocks?.map((block: any) => {
       if (block.type === 'image' && block.content) {
         const imageId = (block.content as any).image_id
         return {
@@ -166,7 +166,7 @@ export async function PUT(
     const token = authHeader.replace('Bearer ', '')
 
     // Verify user
-    const authClient = createClient()
+    const authClient: any = createClient()
     const { data: { user }, error: authError } = await authClient.auth.getUser(token)
     if (authError || !user) {
       return NextResponse.json(
@@ -176,7 +176,7 @@ export async function PUT(
     }
 
     // Create client with session for RLS
-    const supabase = createClient()
+    const supabase: any = createClient()
     await supabase.auth.setSession({
       access_token: token,
       refresh_token: token
@@ -217,7 +217,7 @@ export async function PUT(
     const updates = await request.json()
     const allowedFields = [
       'title', 'title_vi', 'summary', 'summary_vi', 'thumbnail_image_id', 'category', 'slug',
-      'status', 'related_post_id_1', 'related_post_id_2', 'reading_time', 'featured'
+      'status', 'related_post_id_1', 'related_post_id_2', 'reading_time', 'featured', 'published_at'
     ]
 
     // Filter only allowed fields
@@ -257,6 +257,34 @@ export async function PUT(
       )
     }
 
+    if ('published_at' in postUpdates) {
+      const publishedAt = postUpdates.published_at
+
+      if (publishedAt === '' || publishedAt === null) {
+        postUpdates.published_at = null
+      } else if (typeof publishedAt === 'string') {
+        const normalized = /^\d{4}-\d{2}-\d{2}$/.test(publishedAt)
+          ? `${publishedAt}T12:00:00.000Z`
+          : publishedAt
+
+        const parsedDate = new Date(normalized)
+
+        if (Number.isNaN(parsedDate.getTime())) {
+          return NextResponse.json(
+            { success: false, error: 'Invalid published date format' },
+            { status: 400 }
+          )
+        }
+
+        postUpdates.published_at = parsedDate.toISOString()
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Invalid published date format' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Auto-regenerate slug if title is updated and current slug is "untitled-..."
     if (postUpdates.title && post.slug?.startsWith('untitled-')) {
       let newSlug = postUpdates.title
@@ -272,7 +300,7 @@ export async function PUT(
         .neq('id', id)
 
       if (existing && existing.length > 0) {
-        const existingSlugs = new Set(existing.map(p => p.slug))
+        const existingSlugs = new Set(existing.map((p: any) => p.slug))
         if (existingSlugs.has(newSlug)) {
           let counter = 2
           while (existingSlugs.has(`${newSlug}-${counter}`)) {
@@ -286,7 +314,7 @@ export async function PUT(
     }
 
     // If publishing, set published_at
-    if (postUpdates.status === 'published' && post.status !== 'published') {
+    if (postUpdates.status === 'published' && post.status !== 'published' && !postUpdates.published_at) {
       postUpdates.published_at = new Date().toISOString()
     }
 
@@ -342,7 +370,7 @@ export async function DELETE(
     const token = authHeader.replace('Bearer ', '')
 
     // Verify user
-    const authClient = createClient()
+    const authClient: any = createClient()
     const { data: { user }, error: authError } = await authClient.auth.getUser(token)
     if (authError || !user) {
       return NextResponse.json(
@@ -352,7 +380,7 @@ export async function DELETE(
     }
 
     // Create client with session for RLS
-    const supabase = createClient()
+    const supabase: any = createClient()
     await supabase.auth.setSession({
       access_token: token,
       refresh_token: token

@@ -28,6 +28,7 @@ interface PostFormProps {
     summary_vi: string
     category: string
     thumbnail_image_id?: string
+    published_at?: string | null
   }) => Promise<void>
   saving?: boolean
   session: any
@@ -39,6 +40,9 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
   const [summary, setSummary] = useState(post?.summary || '')
   const [summary_vi, setSummaryVi] = useState(post?.summary_vi || '')
   const [category, setCategory] = useState<string>(post?.category || POST_CATEGORIES[0])
+  const [publishedDate, setPublishedDate] = useState(
+    post?.published_at ? post.published_at.split('T')[0] : ''
+  )
   const [thumbnailImageId, setThumbnailImageId] = useState<string | undefined>(
     post?.thumbnail_image_id || undefined
   )
@@ -56,6 +60,8 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
       if (existingUrl) {
         setThumbnailUrl(existingUrl)
       }
+
+      setPublishedDate(post.published_at ? post.published_at.split('T')[0] : '')
     }
   }, [post])
 
@@ -132,7 +138,8 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
       summary,
       summary_vi,
       category,
-      thumbnail_image_id: thumbnailImageId
+      thumbnail_image_id: thumbnailImageId,
+      published_at: publishedDate || null
     })
   }
 
@@ -242,6 +249,34 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Published Date */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Published Date (optional)
+            </label>
+            <div className="flex items-center gap-2 max-w-md">
+              <Input
+                type="date"
+                value={publishedDate}
+                onChange={(e) => setPublishedDate(e.target.value)}
+                className="w-full"
+              />
+              {publishedDate && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPublishedDate('')}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-text-tertiary mt-2">
+              Leave empty to use today when publishing.
+            </p>
           </div>
 
           {/* Thumbnail */}

@@ -78,6 +78,7 @@ function EditPostPage() {
     summary_vi: string
     category: string
     thumbnail_image_id?: string
+    published_at?: string | null
   }) => {
     try {
       setSaving(true)
