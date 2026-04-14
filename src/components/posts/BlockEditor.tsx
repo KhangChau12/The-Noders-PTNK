@@ -10,7 +10,7 @@ import { TextBlockEditor } from './blocks/TextBlockEditor'
 import { QuoteBlockEditor } from './blocks/QuoteBlockEditor'
 import { ImageBlockEditor } from './blocks/ImageBlockEditor'
 import { YouTubeBlockEditor } from './blocks/YouTubeBlockEditor'
-import { Plus, Type, Image, Youtube, AlertCircle } from 'lucide-react'
+import { Plus, Type, Image, Youtube, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react'
 
 interface BlockEditorProps {
   blocks: PostBlock[]
@@ -24,6 +24,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   const { confirm } = useConfirm()
   const [addingBlockType, setAddingBlockType] = useState<string | null>(null)
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null)
+  const [reorderingBlockId, setReorderingBlockId] = useState<string | null>(null)
   const [optimisticUpdates, setOptimisticUpdates] = useState<Set<string>>(new Set())
 
   const imageBlockCount = blocks.filter(b => b.type === 'image').length
@@ -261,6 +262,57 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
     }
   }
 
+  const handleMoveBlock = async (blockId: string, direction: 'up' | 'down') => {
+    if (reorderingBlockId) {
+      return
+    }
+
+    const currentBlocks = [...blocks]
+    const currentIndex = currentBlocks.findIndex(block => block.id === blockId)
+
+    if (currentIndex === -1) {
+      return
+    }
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    if (targetIndex < 0 || targetIndex >= currentBlocks.length) {
+      return
+    }
+
+    const reorderedBlocks = [...currentBlocks]
+    ;[reorderedBlocks[currentIndex], reorderedBlocks[targetIndex]] = [reorderedBlocks[targetIndex], reorderedBlocks[currentIndex]]
+
+    onBlocksChange(reorderedBlocks)
+    setReorderingBlockId(blockId)
+
+    try {
+      const response = await fetch(`/api/posts/${postId}/blocks/reorder`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ blockId, direction })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        onBlocksChange(result.blocks || reorderedBlocks)
+        showToast('success', 'Block order updated successfully!')
+      } else {
+        onBlocksChange(currentBlocks)
+        showToast('error', 'Failed to reorder blocks: ' + result.error)
+      }
+    } catch (error) {
+      onBlocksChange(currentBlocks)
+      showToast('error', 'Error reordering blocks. Please try again.')
+      console.error('Reorder block error:', error)
+    } finally {
+      setReorderingBlockId(null)
+    }
+  }
+
   const handleDeleteBlock = async (blockId: string) => {
     const confirmed = await confirm({
       title: 'Delete Block',
@@ -328,8 +380,6 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   }
 
   const renderBlock = (block: PostBlock) => {
-    const isSaving = savingBlockId === block.id
-
     switch (block.type) {
       case 'text':
         return (
@@ -388,7 +438,43 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Existing Blocks */}
-        {blocks.map(renderBlock)}
+        {blocks.map((block, index) => {
+          const isFirst = index === 0
+          const isLast = index === blocks.length - 1
+          const isReordering = reorderingBlockId === block.id
+
+          return (
+            <div key={block.id} className="space-y-2">
+              <div className="flex items-center justify-end gap-1 pr-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => handleMoveBlock(block.id, 'up')}
+                  disabled={isFirst || isReordering || !!reorderingBlockId}
+                  aria-label="Move block up"
+                  title="Move block up"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => handleMoveBlock(block.id, 'down')}
+                  disabled={isLast || isReordering || !!reorderingBlockId}
+                  aria-label="Move block down"
+                  title="Move block down"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </div>
+              {renderBlock(block)}
+            </div>
+          )
+        })}
 
         {/* Add New Block */}
         {addingBlockType ? (
