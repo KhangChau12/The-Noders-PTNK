@@ -358,7 +358,7 @@ export default async function HomePage() {
 
       {/* Latest News Section */}
       <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8 bg-dark-surface/50">
-        <div className="container mx-auto">
+        <div className="mx-auto w-full max-w-[1600px]">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Latest Community Activities
@@ -384,7 +384,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 xl:gap-7 max-w-none mx-auto">
             {recentProjects.map((project) => (
               <Link key={project.id} href={`/products/${project.id}`} className="block group">
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 border-2 border-dark-border/50 hover:border-primary-blue/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 h-full flex flex-col backdrop-blur-sm sm:hover:-translate-y-2">
