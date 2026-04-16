@@ -16,7 +16,6 @@ import {
   Search,
   Calendar,
   User,
-  ArrowRight,
   TrendingUp,
   Users,
   Lightbulb,
@@ -196,11 +195,6 @@ function PostCard({
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" className="p-0 h-auto">
-              Read More <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
-          </div>
         </CardContent>
       </Link>
     </Card>
