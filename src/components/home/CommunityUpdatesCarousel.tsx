@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
-import { ArrowRight, Calendar, Clock, ChevronLeft, ChevronRight, Eye, Newspaper } from 'lucide-react'
+import { Calendar, Clock, ChevronLeft, ChevronRight, Eye, Newspaper, ArrowRight } from 'lucide-react'
 
 type CommunityPost = {
   id: string
@@ -74,7 +74,17 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
     const setInitialPosition = () => {
       const segmentWidth = scroller.scrollWidth / 3
       if (Number.isFinite(segmentWidth) && segmentWidth > 0) {
-        scroller.scrollLeft = segmentWidth
+        const firstCard = scroller.querySelector<HTMLElement>('[data-carousel-card]')
+        const scrollerStyle = window.getComputedStyle(scroller)
+        const gap = parseFloat(scrollerStyle.columnGap || scrollerStyle.gap || '0') || 0
+        const firstCardWidth = firstCard?.getBoundingClientRect().width || 0
+        const cardStep = firstCardWidth + gap
+
+        // Keep mobile layout aligned, and offset by half card on wider layouts.
+        const shouldOffsetHalfCard = firstCardWidth > 0 && firstCardWidth <= scroller.clientWidth * 0.75
+        const initialOffset = shouldOffsetHalfCard ? cardStep / 2 : 0
+
+        scroller.scrollLeft = segmentWidth + initialOffset
       }
     }
 
@@ -158,6 +168,13 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/posts"
+            className="group hidden sm:inline-flex items-center gap-2 rounded-full border border-primary-blue/30 bg-dark-bg/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue"
+          >
+            View All Posts
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
           <Button
             type="button"
             variant="ghost"
@@ -180,6 +197,15 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       </div>
 
       <div className="relative z-10 px-5 pb-5 pt-5 md:px-6 md:pb-6">
+        <div className="mb-3 flex sm:hidden justify-end">
+          <Link
+            href="/posts"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-primary-blue/30 bg-dark-bg/60 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue"
+          >
+            View All Posts
+            <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </div>
         <div
           ref={scrollerRef}
           className={`no-scrollbar flex gap-6 overflow-x-auto pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
@@ -198,10 +224,16 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                 key={`${post.id}-${index}`}
                 variant="interactive"
                 padding="none"
-                className="group/card flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-full md:w-[calc(50%-0.75rem)]"
+                className="group/card relative flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-full md:w-[calc(50%-0.75rem)]"
                 data-carousel-card="true"
                 aria-hidden={!isOriginal}
               >
+                <Link
+                  href={`/posts/${post.slug}`}
+                  aria-label={`Read post: ${post.title || 'Untitled Post'}`}
+                  className="absolute inset-0 z-10"
+                  tabIndex={isOriginal ? 0 : -1}
+                />
                 <div className="flex h-full flex-col">
                   <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
                     {post.thumbnail_image?.public_url ? (
@@ -251,12 +283,6 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                       </div>
                     </div>
 
-                    <Button asChild variant="secondary" size="sm" className="mt-5 w-full group/btn">
-                      <Link href={`/posts/${post.slug}`}>
-                        View Detail
-                        <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                      </Link>
-                    </Button>
                   </CardContent>
                 </div>
               </Card>

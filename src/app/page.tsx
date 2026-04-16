@@ -438,17 +438,6 @@ export default async function HomePage() {
           </div>
 
           <CommunityUpdatesCarousel posts={recentPosts} />
-
-          {recentPosts.length > 0 && (
-            <div className="text-center mt-10">
-              <Button asChild variant="secondary" size="lg" className="group">
-                <Link href="/posts">
-                  View All Posts
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </Button>
-            </div>
-          )}
         </div>
       </section>
 
