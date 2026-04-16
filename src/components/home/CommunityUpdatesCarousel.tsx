@@ -162,7 +162,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
     <div className="relative overflow-hidden rounded-3xl border border-dark-border/70 bg-gradient-to-br from-dark-surface/80 to-dark-bg/90 shadow-2xl shadow-primary-blue/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.12),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.1),_transparent_30%)]" />
 
-      <div className="relative z-10 flex items-center justify-between gap-4 px-5 pt-5 md:px-6 md:pt-6">
+      <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-4 sm:gap-4 sm:px-5 sm:pt-5 md:px-6 md:pt-6">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-blue mb-2">Community Feed</p>
         </div>
@@ -196,7 +196,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         </div>
       </div>
 
-      <div className="relative z-10 px-5 pb-5 pt-5 md:px-6 md:pb-6">
+      <div className="relative z-10 px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5 md:px-6 md:pb-6">
         <div className="mb-3 flex sm:hidden justify-end">
           <Link
             href="/posts"
@@ -208,7 +208,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
         </div>
         <div
           ref={scrollerRef}
-          className={`no-scrollbar flex gap-6 overflow-x-auto pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+          className={`no-scrollbar flex gap-4 sm:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -224,7 +224,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                 key={`${post.id}-${index}`}
                 variant="interactive"
                 padding="none"
-                className="group/card relative flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-full md:w-[calc(50%-0.75rem)]"
+                className="group/card relative flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-[92%] sm:w-full md:w-[calc(50%-0.75rem)]"
                 data-carousel-card="true"
                 aria-hidden={!isOriginal}
               >
@@ -259,8 +259,8 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                     </div>
                   </div>
 
-                  <CardContent className="flex flex-1 flex-col p-5 md:p-6">
-                    <h3 className="mb-2 line-clamp-2 text-xl font-bold leading-tight text-text-primary group-hover/card:text-primary-blue transition-colors">
+                  <CardContent className="flex flex-1 flex-col p-4 sm:p-5 md:p-6">
+                    <h3 className="mb-2 line-clamp-2 text-lg sm:text-xl font-bold leading-tight text-text-primary group-hover/card:text-primary-blue transition-colors">
                       {post.title || 'Untitled Post'}
                     </h3>
 
@@ -268,7 +268,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                       {post.summary || 'No summary available'}
                     </p>
 
-                    <div className="mt-auto flex items-center gap-4 text-xs text-text-tertiary">
+                    <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-text-tertiary">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-3.5 w-3.5" />
                         <span>{formatDate(post.published_at)}</span>
@@ -290,9 +290,9 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
           })}
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-4 text-xs text-text-tertiary">
+        <div className="mt-4 flex flex-col items-start gap-2 text-xs text-text-tertiary sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <span>Drag with mouse or touch, or use arrows to move exactly one post each time.</span>
-          <span>Manual</span>
+          <span className="hidden sm:inline">Manual</span>
         </div>
       </div>
     </div>

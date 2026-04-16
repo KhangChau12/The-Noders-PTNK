@@ -8,7 +8,6 @@ import { SITE_CONFIG } from '@/lib/constants'
 import { generateMetadata as generateSEOMetadata, generateOrganizationSchema } from '@/lib/seo'
 import { Code, Users, ArrowRight, Github, ExternalLink, Calendar, Clock, Newspaper, Target, BookOpen, Trophy, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { TECH_STACK_COLORS } from '@/lib/constants'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import { CommunityUpdatesCarousel } from '@/components/home/CommunityUpdatesCarousel'
 
@@ -25,18 +24,10 @@ interface Project {
   id: string
   title: string
   description: string
-  tech_stack: string[]
   status: string
   repo_url?: string
   demo_url?: string
   thumbnail_url?: string
-  created_at: string
-  contributors: any[]
-  created_by_profile?: {
-    username: string
-    full_name: string
-    avatar_url?: string
-  }
   thumbnail_image?: {
     id: string
     filename: string
@@ -141,27 +132,17 @@ async function getRecentProjects(): Promise<Project[]> {
   try {
     const supabase = createClient()
 
-    // Get featured projects (up to 3) with contributors and creator info
+    // Get featured projects (up to 3) with only fields needed for homepage cards
     const { data: projects, error } = await supabase
       .from('projects')
       .select(`
-        *,
-        created_by_profile:profiles!created_by(
-          username,
-          full_name,
-          avatar_url
-        ),
-        project_contributors(
-          id,
-          contribution_percentage,
-          role_in_project,
-          profiles(
-            id,
-            username,
-            full_name,
-            avatar_url
-          )
-        ),
+        id,
+        title,
+        description,
+        status,
+        repo_url,
+        demo_url,
+        thumbnail_url,
         thumbnail_image:images(
           id,
           public_url,
@@ -183,14 +164,10 @@ async function getRecentProjects(): Promise<Project[]> {
       id: project.id,
       title: project.title,
       description: project.description,
-      tech_stack: project.tech_stack || [],
       status: project.status,
       repo_url: project.repo_url,
       demo_url: project.demo_url,
       thumbnail_url: project.thumbnail_url,
-      created_at: project.created_at,
-      contributors: project.project_contributors || [],
-      created_by_profile: project.created_by_profile,
       thumbnail_image: project.thumbnail_image
     })) || []
   } catch (error) {
@@ -238,14 +215,6 @@ async function getRecentPosts(): Promise<NewsPost[]> {
     console.error('Failed to fetch recent posts:', error)
     return []
   }
-}
-
-// Helper function to get initials
-function getInitials(name?: string): string {
-  if (!name) return '?'
-  const words = name.trim().split(' ')
-  if (words.length === 1) return words[0].charAt(0).toUpperCase()
-  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
 }
 
 export default async function HomePage() {
@@ -303,12 +272,6 @@ export default async function HomePage() {
     }
   }
 
-  // Helper function to format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
-
   return (
     <>
       {/* JSON-LD Structured Data */}
@@ -322,7 +285,7 @@ export default async function HomePage() {
       <NeuralNetworkBackground />
       <div className="min-h-screen relative z-10">
       {/* Hero & Stats Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-14 px-4 sm:px-6 sm:py-20 lg:px-8 overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/10 to-dark-bg" />
 
@@ -337,8 +300,8 @@ export default async function HomePage() {
 
         <div className="container mx-auto relative z-10">
           {/* Hero Content */}
-          <div className="text-center mb-12 md:mb-16 mx-auto">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[0.95] font-[family-name:var(--font-shrikhand)] mb-4 whitespace-nowrap">
+          <div className="text-center mb-10 md:mb-16 mx-auto">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.02] sm:leading-[0.95] font-[family-name:var(--font-shrikhand)] mb-4 px-2 break-words">
               <span className="gradient-text">
                 THE NODERS COMMUNITY
               </span>
@@ -348,11 +311,11 @@ export default async function HomePage() {
               A student technology community at VNUHCM High School for the Gifted
             </p>
 
-            <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-text-primary max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-5 sm:mb-6 text-text-primary max-w-4xl mx-auto px-1">
               Connecting Minds • Creating Intelligence
             </h2>
 
-            <p className="text-lg text-text-secondary mb-6 leading-relaxed max-w-4xl mx-auto">
+            <p className="text-base sm:text-lg text-text-secondary mb-4 sm:mb-6 leading-relaxed max-w-4xl mx-auto px-1">
               We build AI products, host workshops and DS/AI mini-courses, organize AI competitions, guide students through AI learning roadmaps, and grow a community passionate about coding and AI.
             </p>
           </div>
@@ -360,7 +323,7 @@ export default async function HomePage() {
           {/* Stats Content */}
           <div>
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 max-w-7xl mx-auto">
             {statsData.map((stat, index) => (
               <div key={stat.key} className="group relative">
                 {/* Decorative background glow */}
@@ -371,17 +334,17 @@ export default async function HomePage() {
                   {/* Subtle gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
-                  <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center relative z-10 min-h-[110px]">
+                  <CardContent className="p-2.5 sm:p-4 flex flex-col items-center justify-center relative z-10 min-h-[98px] sm:min-h-[110px]">
                     {/* Watermark Icon */}
                     <div className="absolute -bottom-6 -right-6 text-primary-blue opacity-10 group-hover:opacity-[0.15] transition-all duration-500 transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 pointer-events-none">
                        <stat.icon className="w-24 h-24 sm:w-32 sm:h-32" strokeWidth={1} />
                     </div>
 
-                    <div className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary mb-1 relative z-20">
+                    <div className="text-lg sm:text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary mb-1 relative z-20">
                        <CounterAnimation end={stat.value} />
                     </div>
 
-                    <div className="text-[9px] md:text-[11px] font-semibold text-text-secondary uppercase tracking-[0.18em] text-center relative z-20">
+                    <div className="text-[10px] md:text-[11px] font-semibold text-text-secondary uppercase tracking-[0.14em] md:tracking-[0.18em] text-center relative z-20 leading-tight">
                       {stat.label}
                     </div>
                   </CardContent>
@@ -394,13 +357,13 @@ export default async function HomePage() {
       </section>
 
       {/* Latest News Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/50">
+      <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8 bg-dark-surface/50">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Latest Community Activities
             </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
               Stay up to date with our latest community moments, activities, and highlights.
             </p>
           </div>
@@ -410,21 +373,21 @@ export default async function HomePage() {
       </section>
 
       {/* Recent Products Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Recent Products
             </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
               Check out some of our latest innovations and collaborative efforts.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 max-w-7xl mx-auto">
             {recentProjects.map((project) => (
               <Link key={project.id} href={`/products/${project.id}`} className="block group">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 border-2 border-dark-border/50 hover:border-primary-blue/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 h-full flex flex-col backdrop-blur-sm hover:-translate-y-2">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 border-2 border-dark-border/50 hover:border-primary-blue/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 h-full flex flex-col backdrop-blur-sm sm:hover:-translate-y-2">
 
                   {/* Animated gradient background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/0 via-accent-cyan/0 to-purple-500/0 group-hover:from-primary-blue/5 group-hover:via-accent-cyan/5 group-hover:to-purple-500/5 transition-all duration-700 pointer-events-none" />
@@ -454,7 +417,7 @@ export default async function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-blue/20 via-accent-cyan/5 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
 
                     {/* Status badge with glow */}
-                    <div className="absolute top-4 right-4 z-10">
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
                       <Badge
                         variant={getStatusVariant(project.status)}
                         size="sm"
@@ -465,7 +428,7 @@ export default async function HomePage() {
                     </div>
 
                     {/* Quick action buttons on hover */}
-                    <div className="absolute bottom-4 right-4 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                    <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 translate-y-0 sm:translate-y-2 sm:group-hover:translate-y-0">
                       {project.repo_url && (
                         <div className="p-2 rounded-lg bg-dark-bg/90 backdrop-blur-md border border-primary-blue/30 shadow-lg hover:scale-110 transition-transform duration-200">
                           <Github className="w-4 h-4 text-primary-blue" />
@@ -480,103 +443,46 @@ export default async function HomePage() {
                   </div>
 
                   {/* Content section */}
-                  <div className="p-6 flex-1 flex flex-col relative z-10">
+                  <div className="p-4 sm:p-6 flex-1 flex flex-col relative z-10">
                     {/* Title with gradient hover effect */}
-                    <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:bg-gradient-to-r group-hover:from-primary-blue group-hover:to-accent-cyan group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 line-clamp-2 leading-tight">
+                    <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 group-hover:bg-gradient-to-r group-hover:from-primary-blue group-hover:to-accent-cyan group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 line-clamp-2 leading-tight">
                       {project.title}
                     </h3>
 
-                    {/* Description */}
+                    {/* Description is intentionally longer to help users scan project context quickly */}
                     {project.description && (
-                      <p className="text-text-secondary/90 mb-4 line-clamp-2 leading-relaxed text-sm">
+                      <p className="text-text-secondary/90 mb-4 sm:mb-5 line-clamp-4 leading-relaxed text-sm sm:text-[15px]">
                         {project.description}
                       </p>
                     )}
 
-                    {/* Tech Stack */}
-                    {project.tech_stack && project.tech_stack.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {project.tech_stack.slice(0, 5).map((tech) => {
-                          const techColor = TECH_STACK_COLORS[tech] || '#6B7280'
-                          return (
-                            <div
-                              key={tech}
-                              className="relative px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 hover:scale-110 cursor-default group/tech"
-                              style={{
-                                backgroundColor: `${techColor}20`,
-                                color: techColor,
-                                border: `1.5px solid ${techColor}35`,
-                              }}
-                            >
-                              <div
-                                className="absolute inset-0 rounded-lg opacity-0 group-hover/tech:opacity-100 transition-opacity duration-300"
-                                style={{
-                                  boxShadow: `0 0 20px ${techColor}40`,
-                                }}
-                              />
-                              <span className="relative z-10">{tech}</span>
-                            </div>
-                          )
-                        })}
-                        {project.tech_stack.length > 5 && (
-                          <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-dark-border/50 text-text-secondary border border-dark-border">
-                            +{project.tech_stack.length - 5}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Contributors section - improved */}
-                    {project.contributors && project.contributors.length > 0 && (
-                      <div className="mt-auto pt-4 border-t border-dark-border/60 group-hover:border-primary-blue/30 transition-colors duration-300">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {/* Avatars */}
-                            <div className="flex -space-x-3">
-                              {project.contributors.slice(0, 4).map((contributor, idx) => {
-                                const profile = contributor.profiles || contributor.profile
-                                const initial = getInitials(profile?.full_name || profile?.username)
-                                const colors = ['from-primary-blue to-accent-cyan', 'from-accent-cyan to-purple-500', 'from-purple-500 to-pink-500', 'from-pink-500 to-primary-blue']
-                                return (
-                                  <div
-                                    key={contributor.id || idx}
-                                    className={`w-10 h-10 rounded-full bg-gradient-to-br ${colors[idx % colors.length]} p-0.5 ring-2 ring-dark-bg transition-all duration-300 group-hover:scale-110 shadow-lg`}
-                                    title={`${profile?.full_name || profile?.username} - ${contributor.contribution_percentage}%`}
-                                    style={{ zIndex: 4 - idx }}
-                                  >
-                                    <div className="w-full h-full bg-dark-surface rounded-full flex items-center justify-center text-xs text-white font-bold">
-                                      {initial}
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                              {project.contributors.length > 4 && (
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dark-border to-dark-surface flex items-center justify-center text-xs text-text-secondary font-bold ring-2 ring-dark-bg shadow-lg">
-                                  +{project.contributors.length - 4}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Team count */}
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Team</span>
-                              <span className="text-sm font-bold text-primary-blue">{project.contributors.length} {project.contributors.length === 1 ? 'Member' : 'Members'}</span>
-                            </div>
-                          </div>
-
-                          {/* View arrow */}
-                          <div className="text-primary-blue opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
-                            <ArrowRight className="w-5 h-5" />
-                          </div>
+                    <div className="mt-auto pt-4 border-t border-dark-border/60 group-hover:border-primary-blue/30 transition-colors duration-300">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {project.repo_url && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-blue/30 bg-primary-blue/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary-blue">
+                              <Github className="w-3.5 h-3.5" />
+                              Source
+                            </span>
+                          )}
+                          {project.demo_url && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-cyan/30 bg-accent-cyan/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent-cyan">
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              Live Demo
+                            </span>
+                          )}
+                          {!project.repo_url && !project.demo_url && (
+                            <span className="inline-flex items-center rounded-full border border-dark-border bg-dark-bg/40 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                              Product Details
+                            </span>
+                          )}
                         </div>
 
-                        {/* Created date */}
-                        <div className="flex items-center gap-2 mt-3 text-xs text-text-tertiary">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>Created {formatDate(project.created_at)}</span>
+                        <div className="text-primary-blue opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
+                          <ArrowRight className="w-5 h-5" />
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Hover border glow */}
@@ -601,18 +507,18 @@ export default async function HomePage() {
       </section>
 
       {/* Our Programs Section - Contests & Education Combined */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+      <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8 bg-dark-surface/30">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
               Our Programs
             </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
               Competitions to challenge yourself and courses to build your skills
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8 max-w-7xl mx-auto">
             {/* PAIC 2026 Card */}
             <Card variant="hover" className="hover-lift group bg-gradient-to-br from-accent-cyan/10 to-primary-blue/10 border border-accent-cyan/30">
               <CardContent className="p-6">
