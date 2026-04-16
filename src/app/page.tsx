@@ -321,59 +321,13 @@ export default async function HomePage() {
 
       <NeuralNetworkBackground />
       <div className="min-h-screen relative z-10">
-      {/* Hero Section */}
+      {/* Hero & Stats Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-[family-name:var(--font-shrikhand)] mb-4 whitespace-nowrap">
-              <span className="gradient-text">
-                THE NODERS COMMUNITY
-              </span>
-            </h1>
-
-            <p className="text-lg text-text-secondary mb-3">
-              A student technology community at VNUHCM High School for the Gifted
-            </p>
-
-            <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-text-primary">
-              Connecting Minds • Creating Intelligence
-            </h2>
-
-            <p className="text-lg text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-              We build AI products, host workshops and DS/AI mini-courses, organize AI competitions, guide students through AI learning roadmaps, and grow a community passionate about coding and AI.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contest">
-                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-primary-blue to-accent-cyan hover:from-primary-blue/90 hover:to-accent-cyan/90">
-                  Our Contests
-                  <Target className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-              <Link href="/products">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Our Products
-                  <Code className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-              <Link href="/education">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Our Courses
-                  <BookOpen className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section - Our Journey So Far */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/20 to-dark-bg" />
+        <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/10 to-dark-bg" />
 
         {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
+        <div className="absolute inset-0 opacity-[0.02]" style={{
           backgroundImage: `
             linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
             linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)
@@ -382,45 +336,59 @@ export default async function HomePage() {
         }} />
 
         <div className="container mx-auto relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Our Journey So Far
+          {/* Hero Content */}
+          <div className="text-center mb-12 md:mb-16 mx-auto">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[0.95] font-[family-name:var(--font-shrikhand)] mb-4 whitespace-nowrap">
+              <span className="gradient-text">
+                THE NODERS COMMUNITY
+              </span>
+            </h1>
+
+            <p className="text-lg text-text-secondary mb-3 max-w-4xl mx-auto">
+              A student technology community at VNUHCM High School for the Gifted
+            </p>
+
+            <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-text-primary max-w-4xl mx-auto">
+              Connecting Minds • Creating Intelligence
             </h2>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto leading-relaxed">
-              From innovative projects to growing community, here's what we've achieved together
+
+            <p className="text-lg text-text-secondary mb-6 leading-relaxed max-w-4xl mx-auto">
+              We build AI products, host workshops and DS/AI mini-courses, organize AI competitions, guide students through AI learning roadmaps, and grow a community passionate about coding and AI.
             </p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
+          {/* Stats Content */}
+          <div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 max-w-7xl mx-auto">
             {statsData.map((stat, index) => (
               <div key={stat.key} className="group relative">
                 {/* Decorative background glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                         
-                <Card className="relative h-full overflow-hidden bg-dark-bg/50 backdrop-blur-sm border-dark-border hover:border-primary-blue/30 transition-all duration-300">
+                <Card className="relative h-full overflow-hidden bg-dark-surface/70 backdrop-blur-sm border border-dark-border/60 hover:border-primary-blue/40 transition-all duration-300">
                   {/* Subtle gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
-                  <CardContent className="p-5 flex flex-col items-center justify-center relative z-10 min-h-[140px]">
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center relative z-10 min-h-[110px]">
                     {/* Watermark Icon */}
                     <div className="absolute -bottom-6 -right-6 text-primary-blue opacity-10 group-hover:opacity-[0.15] transition-all duration-500 transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 pointer-events-none">
-                       <stat.icon className="w-32 h-32" strokeWidth={1} />
+                       <stat.icon className="w-24 h-24 sm:w-32 sm:h-32" strokeWidth={1} />
                     </div>
 
-                    <div className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary mb-2 relative z-20">
+                    <div className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary mb-1 relative z-20">
                        <CounterAnimation end={stat.value} />
                     </div>
 
-                    <div className="text-[10px] md:text-xs font-bold text-text-secondary uppercase tracking-widest text-center relative z-20">
+                    <div className="text-[9px] md:text-[11px] font-semibold text-text-secondary uppercase tracking-[0.18em] text-center relative z-20">
                       {stat.label}
                     </div>
                   </CardContent>
                 </Card>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -620,11 +588,12 @@ export default async function HomePage() {
 
           {recentProjects.length >= 1 && (
             <div className="text-center mt-12">
-              <Link href="/products">
-                <Button variant="secondary" size="lg" className="group">
-                  View All Products
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </Button>
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 rounded-full border border-primary-blue/40 bg-dark-surface/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/70 hover:text-primary-blue hover:shadow-lg hover:shadow-primary-blue/20"
+              >
+                View All Products
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </div>
           )}
@@ -745,17 +714,19 @@ export default async function HomePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-            <Link href="/contest">
-              <Button variant="secondary" size="lg" className="group">
-                All Contests
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+            <Link
+              href="/contest"
+              className="inline-flex items-center gap-2 rounded-full border border-primary-blue/40 bg-dark-surface/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/70 hover:text-primary-blue hover:shadow-lg hover:shadow-primary-blue/20"
+            >
+              All Contests
+              <ArrowRight className="h-4 w-4 transition-transform duration-300" />
             </Link>
-            <Link href="/education">
-              <Button variant="secondary" size="lg" className="group">
-                All Courses
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+            <Link
+              href="/education"
+              className="inline-flex items-center gap-2 rounded-full border border-primary-blue/40 bg-dark-surface/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/70 hover:text-primary-blue hover:shadow-lg hover:shadow-primary-blue/20"
+            >
+              All Courses
+              <ArrowRight className="h-4 w-4 transition-transform duration-300" />
             </Link>
           </div>
         </div>
