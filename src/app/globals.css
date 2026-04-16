@@ -166,9 +166,9 @@
 
 /* Glass morphism */
 .glass {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(39, 52, 74, 0.78);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid rgba(61, 78, 104, 0.55);
 }
 
 /* Gradient text */

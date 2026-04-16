@@ -19,13 +19,13 @@ module.exports = {
         'accent-pink': '#EC4899',
         'accent-orange': '#F97316',
         
-        // Dark Theme
-        'dark-bg': '#0F172A',
-        'dark-surface': '#1E293B',
-        'dark-border': '#334155',
-        'text-primary': '#F8FAFC',
-        'text-secondary': '#CBD5E1',
-        'text-tertiary': '#94A3B8',
+        // Dark Theme (softer navy tone)
+        'dark-bg': '#1B2333',
+        'dark-surface': '#27344A',
+        'dark-border': '#3D4E68',
+        'text-primary': '#F3F7FF',
+        'text-secondary': '#D4DDEC',
+        'text-tertiary': '#A8B6CD',
         
         // Semantic Colors
         success: '#059669',
