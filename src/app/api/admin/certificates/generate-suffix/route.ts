@@ -3,7 +3,9 @@ import { createClient } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
-// GET /api/admin/certificates/generate-suffix - Generate unique random suffix
+const SIMPLE_CERTIFICATE_PATTERN = /^C(\d{4})$/
+
+// GET /api/admin/certificates/generate-suffix - Get next sequential certificate number
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
@@ -27,53 +29,42 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get gen_number from query params (optional, for checking uniqueness)
-    const { searchParams } = new URL(request.url)
-    const genNumber = searchParams.get('gen')
+    const { data, error } = await supabase
+      .from('certificates')
+      .select('certificate_id')
+      .like('certificate_id', 'C%')
 
-    // Generate random 4-character suffix
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let suffix = ''
-    let attempts = 0
-    const maxAttempts = 100
-
-    while (attempts < maxAttempts) {
-      suffix = ''
-      for (let i = 0; i < 4; i++) {
-        suffix += chars.charAt(Math.floor(Math.random() * chars.length))
-      }
-
-      // If gen_number is provided, check if the certificate ID already exists
-      if (genNumber) {
-        const certificateId = `TN-GEN${genNumber}-${suffix}`
-        const { data: existing } = await supabase
-          .from('certificates')
-          .select('id')
-          .eq('certificate_id', certificateId)
-          .single()
-
-        if (!existing) {
-          // Unique suffix found
-          break
-        }
-      } else {
-        // No gen_number provided, just return random suffix
-        break
-      }
-
-      attempts++
-    }
-
-    if (attempts >= maxAttempts) {
+    if (error) {
       return NextResponse.json(
-        { success: false, error: 'Could not generate unique suffix' },
+        { success: false, error: error.message },
         { status: 500 }
       )
     }
 
+    let maxSequence = -1
+    for (const row of data || []) {
+      const match = SIMPLE_CERTIFICATE_PATTERN.exec(row.certificate_id)
+      if (!match) continue
+
+      const sequence = parseInt(match[1], 10)
+      if (!Number.isNaN(sequence)) {
+        maxSequence = Math.max(maxSequence, sequence)
+      }
+    }
+
+    if (maxSequence >= 9999) {
+      return NextResponse.json(
+        { success: false, error: 'Certificate range is full (C0000-C9999)' },
+        { status: 400 }
+      )
+    }
+
+    const suffix = String(maxSequence + 1).padStart(4, '0')
+
     return NextResponse.json({
       success: true,
-      suffix
+      suffix,
+      certificate_id: `C${suffix}`
     })
 
   } catch (error) {

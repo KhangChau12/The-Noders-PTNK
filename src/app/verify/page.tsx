@@ -2,63 +2,77 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
+import { Card, CardContent } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import {
-  Award,
-  Search,
   ShieldCheck,
-  ArrowRight,
+  Search,
   Info,
   CheckCircle2,
-  Lock,
-  FileCheck
+  FileCheck,
+  BadgeCheck,
+  ScanLine
 } from 'lucide-react'
 import { useLanguage } from '@/components/LanguageProvider'
 
 const locale = {
   en: {
     title: 'Certificate Verification',
-    subtitle: 'Verify the authenticity and validity of The Noders Community certificates',
-    placeholder: 'Enter certificate ID (e.g., TN-GEN0-H8AU)',
+    subtitle: 'Validate certificate authenticity issued by The Noders Community in a few seconds.',
+    placeholder: 'Enter certificate ID (e.g., C0007)',
     verify: 'Verify Certificate',
-    help: 'Where is my ID?',
-    helpText: 'Found at the bottom left of your certificate.',
-    format: 'ID Format Guide',
-    formatExample: 'TN-GEN0-ABCD',
-    formatDesc: 'The Noders ID structure',
-    invalid: 'Please enter a valid certificate ID format',
+    format: 'ID Format',
+    formatExample: 'C0007',
+    formatDesc: 'One letter C + 4 digits, from C0000 to C9999.',
+    invalid: 'Please enter a valid certificate ID (C0000-C9999).',
+    helperTitle: 'Where to find the ID?',
+    helperDesc: 'The certificate ID appears at the lower-left area of each certificate file.',
+    verifiedTitle: 'What will be checked',
+    stepsTitle: 'How verification works',
+    steps: [
+      'Enter the certificate ID and submit verification.',
+      'The system checks against official records in the database.',
+      'You receive certificate details and member identity results.'
+    ],
+    trustTitle: 'Official verification portal',
+    trustDesc: 'Built for transparent validation across education and competition certificates.',
     features: {
       title: 'Verification Coverage',
       items: [
-        'Official Authenticity Signature',
-        'Member Profile Validation',
-        'Issue Date & Expiry Check',
-        'Generation Status confirmation'
+        'Certificate identity and title',
+        'Issued date and certificate file',
+        'Member profile mapping'
       ]
     }
   },
   vi: {
     title: 'Tra cứu chứng chỉ',
-    subtitle: 'Hệ thống xác thực và kiểm tra thông tin chứng chỉ The Noders Community',
-    placeholder: 'Nhập mã chứng chỉ (VD: TN-GEN0-H8AU)',
+    subtitle: 'Xác thực nhanh tính hợp lệ của chứng chỉ do The Noders Community cấp.',
+    placeholder: 'Nhập mã chứng chỉ (VD: C0007)',
     verify: 'Kiểm tra ngay',
-    help: 'Mã ID ở đâu?',
-    helpText: 'Mã ID nằm ở góc dưới bên trái của chứng chỉ.',
-    format: 'Cấu trúc mã ID',
-    formatExample: 'TN-GEN0-ABCD',
-    formatDesc: 'Cấu trúc định danh The Noders',
-    invalid: 'Vui lòng nhập đúng định dạng mã chứng chỉ',
+    format: 'Định dạng mã',
+    formatExample: 'C0007',
+    formatDesc: '1 chữ C + 4 chữ số, từ C0000 đến C9999.',
+    invalid: 'Vui lòng nhập đúng mã chứng chỉ (C0000-C9999).',
+    helperTitle: 'Tìm mã chứng chỉ ở đâu?',
+    helperDesc: 'Mã chứng chỉ nằm ở khu vực góc dưới bên trái trên file chứng chỉ.',
+    verifiedTitle: 'Thông tin sẽ được đối chiếu',
+    stepsTitle: 'Quy trình xác thực',
+    steps: [
+      'Nhập mã chứng chỉ và gửi yêu cầu xác thực.',
+      'Hệ thống đối chiếu với dữ liệu chứng chỉ chính thức.',
+      'Trả về kết quả xác thực và thông tin thành viên liên quan.'
+    ],
+    trustTitle: 'Cổng xác thực chính thức',
+    trustDesc: 'Được xây dựng để minh bạch việc xác thực chứng chỉ học tập và thi đấu.',
     features: {
       title: 'Thông tin xác thực',
       items: [
-        'Chữ ký số xác thực từ Ban điều hành',
-        'Đối chiếu hồ sơ thành viên gốc',
-        'Kiểm tra ngày cấp và hiệu lực',
-        'Xác nhận thế hệ và phân quyền'
+        'Mã chứng chỉ và tên chứng chỉ',
+        'Ngày cấp và tệp chứng chỉ',
+        'Đối chiếu hồ sơ thành viên'
       ]
     }
   }
@@ -78,8 +92,8 @@ export default function VerifyPage() {
 
     const id = certificateId.trim().toUpperCase()
 
-    // Validate format: TN-GEN{X}-{XXXX}
-    const pattern = /^TN-GEN\d+-[A-Z0-9]{4}$/
+    // Validate format: C0000 - C9999
+    const pattern = /^C\d{4}$/
     if (!pattern.test(id)) {
       setError(t.invalid)
       return
@@ -88,124 +102,138 @@ export default function VerifyPage() {
     router.push(`/verify/${id}`)
   }
 
+  const normalizedPreview = certificateId.trim().toUpperCase()
+
   return (
     <>
       <NeuralNetworkBackground />
-      <div className="relative min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 z-10">
-        
-        {/* Background Gradients */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-blue/20 rounded-full blur-[100px] pointer-events-none -z-10" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-purple/20 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="relative min-h-screen z-10 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="absolute top-24 left-1/4 w-80 h-80 bg-primary-blue/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-accent-cyan/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="container mx-auto max-w-4xl">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold font-heading text-text-primary mb-6 tracking-tight">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-8 md:mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/10 border border-primary-blue/20 text-primary-blue text-sm font-medium mb-5">
+              <ShieldCheck className="w-4 h-4" />
+              {t.trustTitle}
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary tracking-tight mb-4">
               {t.title}
             </h1>
-            <p className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
+            <p className="text-text-secondary text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
               {t.subtitle}
             </p>
           </div>
 
-          {/* Main Verification Input */}
-          <div className="max-w-2xl mx-auto mb-16 relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary-blue via-accent-purple to-accent-pink rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <Card className="relative border-dark-border/50 bg-dark-bg/80 backdrop-blur-xl">
-              <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+            <Card className="lg:col-span-7 bg-dark-bg/75 backdrop-blur-xl border-dark-border/60">
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
-                    <label className="block text-sm font-semibold text-text-secondary mb-3 uppercase tracking-wider">
-                      Certificate ID
-                    </label>
-                    <div className="flex flex-col md:flex-row gap-4">
-                      <div className="flex-1 relative">
-                        <Input
-                          value={certificateId}
-                          onChange={(e) => {
-                            setCertificateId(e.target.value.toUpperCase())
-                            setError('')
-                          }}
-                          placeholder={t.placeholder}
-                          className="h-14 text-lg font-mono uppercase bg-dark-surface border-dark-border focus:border-primary-blue pl-12 transition-all"
-                          icon={<Award className="w-6 h-6 text-text-tertiary" />}
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        size="lg" 
-                        className="h-14 px-8 text-lg bg-primary-blue hover:bg-primary-blue/90 shadow-lg shadow-primary-blue/25 transition-all hover:scale-105"
-                      >
-                        <Search className="w-5 h-5 mr-2" />
-                        {t.verify}
-                      </Button>
+                    <h2 className="text-xl md:text-2xl font-semibold text-text-primary mb-2">
+                      {t.verify}
+                    </h2>
+                    <p className="text-sm md:text-base text-text-secondary">
+                      {t.trustDesc}
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <Input
+                    value={certificateId}
+                    onChange={(e) => {
+                      setCertificateId(e.target.value.toUpperCase())
+                      setError('')
+                    }}
+                    placeholder={t.placeholder}
+                    className="h-14 text-lg font-mono tracking-wide uppercase"
+                    icon={<ScanLine className="w-5 h-5" />}
+                  />
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                    <div className="text-text-tertiary">
+                      {t.format}: <span className="text-primary-blue font-mono font-semibold">{t.formatExample}</span>
                     </div>
-                    {error && (
-                      <div className="flex items-center gap-2 mt-3 text-red-500 bg-red-500/10 p-3 rounded-lg text-sm border border-red-500/20 animate-in fade-in slide-in-from-top-1">
-                         <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                         {error}
+                    {normalizedPreview && (
+                      <div className="px-3 py-1.5 rounded-md border border-primary-blue/30 bg-primary-blue/10 text-primary-blue font-mono font-semibold">
+                        {normalizedPreview}
                       </div>
                     )}
                   </div>
+
+                  {error && (
+                    <div className="flex items-start gap-2 p-3 rounded-lg border border-error/30 bg-error/10 text-error text-sm">
+                      <Info className="w-4 h-4 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <Button type="submit" size="lg" className="w-full md:w-auto md:min-w-[220px] h-12">
+                    <Search className="w-4 h-4 mr-2" />
+                    {t.verify}
+                  </Button>
                 </form>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Format Card */}
-            <Card className="bg-dark-surface/50 border-dark-border/50 hover:border-primary-blue/30 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-lg bg-primary-blue/10">
-                    <Info className="w-5 h-5 text-primary-blue" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                  <div className="rounded-xl border border-dark-border bg-dark-surface/50 p-4">
+                    <div className="flex items-center gap-2 mb-2 text-text-primary font-medium">
+                      <Info className="w-4 h-4 text-primary-blue" />
+                      {t.helperTitle}
+                    </div>
+                    <p className="text-sm text-text-secondary leading-relaxed">{t.helperDesc}</p>
                   </div>
-                  <h3 className="font-semibold text-text-primary">{t.format}</h3>
-                </div>
-                <div className="bg-dark-bg p-3 rounded-md border border-dark-border mb-3 text-center">
-                   <code className="text-xl font-mono font-bold text-primary-blue tracking-wide">{t.formatExample}</code>
-                </div>
-                <p className="text-sm text-text-secondary">{t.formatDesc}</p>
-              </CardContent>
-            </Card>
 
-            {/* Help Card */}
-             <Card className="bg-dark-surface/50 border-dark-border/50 hover:border-accent-purple/30 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-lg bg-accent-purple/10">
-                    <CheckCircle2 className="w-5 h-5 text-accent-purple" />
+                  <div className="rounded-xl border border-dark-border bg-dark-surface/50 p-4">
+                    <div className="flex items-center gap-2 mb-2 text-text-primary font-medium">
+                      <BadgeCheck className="w-4 h-4 text-accent-green" />
+                      {t.verifiedTitle}
+                    </div>
+                    <ul className="space-y-2">
+                      {t.features.items.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-text-secondary">
+                          <CheckCircle2 className="w-4 h-4 mt-0.5 text-accent-green flex-shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <h3 className="font-semibold text-text-primary">{t.help}</h3>
                 </div>
-                 <p className="text-sm text-text-secondary leading-relaxed flex items-start gap-2">
-                    <span className="mt-1 text-accent-purple">•</span>
-                    {t.helpText}
-                 </p>
-                 <div className="mt-4 text-xs text-text-tertiary">
-                    Example: <span className="text-text-secondary">TN-GEN5-X9Y2</span>
-                 </div>
               </CardContent>
             </Card>
 
-            {/* Features Card - Spans 1 col on desktop */}
-            <Card className="bg-dark-surface/50 border-dark-border/50 hover:border-accent-green/30 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                   <div className="p-2.5 rounded-lg bg-accent-green/10">
-                    <Lock className="w-5 h-5 text-accent-green" />
-                  </div>
-                  <h3 className="font-semibold text-text-primary">{t.features.title}</h3>
-                </div>
-                <ul className="space-y-2">
-                  {t.features.items.slice(0, 3).map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-text-secondary">
-                      <FileCheck className="w-4 h-4 text-accent-green mt-0.5 flex-shrink-0" />
-                      <span className="line-clamp-1" title={item}>{item}</span>
-                    </li>
+            <Card className="lg:col-span-5 bg-dark-surface/70 border-dark-border/60">
+              <CardContent className="p-6 md:p-8 h-full">
+                <h3 className="text-lg md:text-xl font-semibold text-text-primary mb-4">
+                  {t.stepsTitle}
+                </h3>
+
+                <div className="space-y-4 mb-8">
+                  {t.steps.map((step, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 rounded-lg border border-dark-border bg-dark-bg/60">
+                      <div className="w-7 h-7 rounded-full bg-primary-blue/15 text-primary-blue text-sm font-semibold flex items-center justify-center flex-shrink-0">
+                        {idx + 1}
+                      </div>
+                      <p className="text-sm text-text-secondary leading-relaxed">{step}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
+                <div className="rounded-xl border border-primary-blue/20 bg-gradient-to-br from-primary-blue/10 to-transparent p-5">
+                  <h4 className="text-sm font-semibold text-text-primary uppercase tracking-wide mb-3">
+                    {t.format}
+                  </h4>
+                  <div className="font-mono text-3xl font-bold text-primary-blue tracking-wider mb-2">
+                    {t.formatExample}
+                  </div>
+                  <p className="text-sm text-text-secondary mb-4">
+                    {t.formatDesc}
+                  </p>
+                  <div className="text-xs text-text-tertiary flex items-center gap-2">
+                    <FileCheck className="w-3.5 h-3.5" />
+                    {t.features.title}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

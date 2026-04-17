@@ -188,7 +188,7 @@ export interface PostWithRelations extends PostWithAuthor {
 
 export interface Certificate {
   id: string
-  certificate_id: string  // Format: TN-GEN{n}-{XXXX}
+  certificate_id: string  // Format: C0000 - C9999
   user_id: string
   gen_number: number
   suffix: string
@@ -244,7 +244,7 @@ export interface CertificateVerifyResult {
 export interface CreateCertificateData {
   user_id: string
   gen_number: number
-  suffix?: string  // Optional - will be auto-generated if not provided
+  suffix?: string  // Optional 4-digit number, auto-generated in sequence if not provided
   image_id?: string
   file_url?: string
   file_type?: 'image' | 'pdf'

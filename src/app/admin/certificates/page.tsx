@@ -6,7 +6,6 @@ import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
-import { Badge } from '@/components/Badge'
 import { Loading } from '@/components/Loading'
 import { Avatar } from '@/components/Avatar'
 import {
@@ -20,7 +19,6 @@ import {
   RefreshCw,
   ExternalLink,
   Copy,
-  Shuffle,
   ArrowLeft
 } from 'lucide-react'
 import { useToast } from '@/components/Toast'
@@ -71,7 +69,6 @@ interface CertificateData {
 
 interface CreateCertificateFormData {
   user_id: string
-  gen_number: number
   suffix: string
   image_id: string
   file_url: string
@@ -90,7 +87,6 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   const { showToast } = useToast()
   const [formData, setFormData] = useState<CreateCertificateFormData>({
     user_id: '',
-    gen_number: 0,
     suffix: '',
     image_id: '',
     file_url: '',
@@ -102,7 +98,6 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [generatingSuffix, setGeneratingSuffix] = useState(false)
 
   const handleChange = (field: keyof CreateCertificateFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -125,27 +120,6 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
     }
   }
 
-  const generateRandomSuffix = async () => {
-    try {
-      setGeneratingSuffix(true)
-      const response = await fetch(`/api/admin/certificates/generate-suffix?gen=${formData.gen_number}`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        }
-      })
-      const result = await response.json()
-      if (result.success) {
-        setFormData(prev => ({ ...prev, suffix: result.suffix }))
-      } else {
-        showToast('error', 'Failed to generate suffix')
-      }
-    } catch {
-      showToast('error', 'Network error')
-    } finally {
-      setGeneratingSuffix(false)
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -165,7 +139,6 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
         },
         body: JSON.stringify({
           user_id: formData.user_id,
-          gen_number: formData.gen_number,
           suffix: formData.suffix || undefined,
           image_id: formData.image_id || undefined,
           file_url: formData.file_url || undefined,
@@ -187,7 +160,6 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
           setUploadedImage(null)
           setFormData({
             user_id: '',
-            gen_number: 0,
             suffix: '',
             image_id: '',
             file_url: '',
@@ -206,9 +178,10 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
     }
   }
 
-  const previewCertificateId = formData.suffix
-    ? `TN-GEN${formData.gen_number}-${formData.suffix.toUpperCase()}`
-    : `TN-GEN${formData.gen_number}-????`
+  const normalizedSuffix = formData.suffix.replace(/\D/g, '').slice(0, 4)
+  const previewCertificateId = normalizedSuffix
+    ? `C${normalizedSuffix.padStart(4, '0')}`
+    : 'C0000'
 
   if (!isOpen) return null
 
@@ -270,51 +243,21 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                 </select>
               </div>
 
-              {/* Generation Number and Suffix */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Certificate Number */}
+              <div>
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">
-                    Generation Number *
+                    Certificate Number (Optional)
                   </label>
                   <Input
-                    type="number"
-                    required
-                    min={0}
-                    value={formData.gen_number}
-                    onChange={(e) => handleChange('gen_number', parseInt(e.target.value) || 0)}
-                    placeholder="0"
+                    value={formData.suffix}
+                    onChange={(e) => handleChange('suffix', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="Auto (0000 -> 9999)"
+                    maxLength={4}
+                    className="font-mono"
                   />
                   <p className="text-xs text-text-tertiary mt-1">
-                    Gen 0, Gen 1, Gen 2...
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Suffix (4 characters)
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={formData.suffix}
-                      onChange={(e) => handleChange('suffix', e.target.value.toUpperCase().slice(0, 4))}
-                      placeholder="AUTO"
-                      maxLength={4}
-                      className="flex-1 font-mono uppercase"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={generateRandomSuffix}
-                      disabled={generatingSuffix}
-                    >
-                      {generatingSuffix ? (
-                        <div className="w-4 h-4 border-2 border-text-tertiary/30 border-t-text-tertiary rounded-full animate-spin" />
-                      ) : (
-                        <Shuffle className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-text-tertiary mt-1">
-                    Leave empty for auto-generate
+                    Leave empty for auto sequence. Manual value must be 4 digits (0000-9999).
                   </p>
                 </div>
               </div>
@@ -407,7 +350,6 @@ function CertificateManagementPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedGen, setSelectedGen] = useState<string>('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [dataLoaded, setDataLoaded] = useState(false)
@@ -424,7 +366,6 @@ function CertificateManagementPage() {
 
       const params = new URLSearchParams()
       if (searchTerm) params.set('search', searchTerm)
-      if (selectedGen !== 'all') params.set('gen', selectedGen)
 
       const response = await fetch(`/api/admin/certificates?${params.toString()}`, {
         headers: {
@@ -518,15 +459,6 @@ function CertificateManagementPage() {
     }
   }, [session])
 
-  useEffect(() => {
-    if (dataLoaded) {
-      fetchCertificates()
-    }
-  }, [selectedGen])
-
-  // Get unique gen numbers for filter
-  const genNumbers = [...new Set(certificates.map(c => c.gen_number))].sort((a, b) => a - b)
-
   const filteredCertificates = certificates.filter(cert =>
     cert.certificate_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cert.member?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -612,41 +544,12 @@ function CertificateManagementPage() {
           {dataLoaded && (
             <Card className="mb-6">
               <CardContent className="p-4">
-                <div className="flex flex-wrap gap-4 items-center">
-                  <div className="flex-1 min-w-[200px]">
-                    <Input
-                      placeholder="Search by ID or member name..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      icon={<Search className="w-4 h-4" />}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedGen('all')}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        selectedGen === 'all'
-                          ? 'bg-primary-blue text-white'
-                          : 'bg-dark-surface text-text-secondary hover:text-text-primary'
-                      }`}
-                    >
-                      All Gens
-                    </button>
-                    {genNumbers.map(gen => (
-                      <button
-                        key={gen}
-                        onClick={() => setSelectedGen(gen.toString())}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                          selectedGen === gen.toString()
-                            ? 'bg-primary-blue text-white'
-                            : 'bg-dark-surface text-text-secondary hover:text-text-primary'
-                        }`}
-                      >
-                        Gen {gen}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <Input
+                  placeholder="Search by ID or member name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  icon={<Search className="w-4 h-4" />}
+                />
               </CardContent>
             </Card>
           )}
@@ -678,7 +581,6 @@ function CertificateManagementPage() {
                       <tr className="border-b border-dark-border">
                         <th className="text-left py-3 text-text-primary font-semibold">Certificate ID</th>
                         <th className="text-left py-3 text-text-primary font-semibold">Member</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Gen</th>
                         <th className="text-left py-3 text-text-primary font-semibold">Title</th>
                         <th className="text-left py-3 text-text-primary font-semibold">Issued</th>
                         <th className="text-right py-3 text-text-primary font-semibold">Actions</th>
@@ -717,11 +619,6 @@ function CertificateManagementPage() {
                                 </p>
                               </div>
                             </div>
-                          </td>
-                          <td className="py-4">
-                            <Badge variant="primary">
-                              Gen {cert.gen_number}
-                            </Badge>
                           </td>
                           <td className="py-4 text-text-secondary">
                             {cert.title}

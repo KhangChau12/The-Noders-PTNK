@@ -1,6 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 
+const SIMPLE_CERTIFICATE_PATTERN = /^C(\d{4})$/
+
+async function getNextSequentialCertificate(supabase: ReturnType<typeof createClient>) {
+  const { data, error } = await supabase
+    .from('certificates')
+    .select('certificate_id')
+    .like('certificate_id', 'C%')
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  let maxSequence = -1
+  for (const row of data || []) {
+    const match = SIMPLE_CERTIFICATE_PATTERN.exec(row.certificate_id)
+    if (!match) continue
+
+    const sequence = parseInt(match[1], 10)
+    if (!Number.isNaN(sequence)) {
+      maxSequence = Math.max(maxSequence, sequence)
+    }
+  }
+
+  if (maxSequence >= 9999) {
+    return null
+  }
+
+  const nextSuffix = String(maxSequence + 1).padStart(4, '0')
+  return {
+    suffix: nextSuffix,
+    certificateId: `C${nextSuffix}`
+  }
+}
+
 // GET /api/admin/certificates - Get all certificates (admin only)
 export async function GET(request: NextRequest) {
   try {
@@ -188,90 +222,111 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (gen_number === undefined || gen_number === null) {
-      return NextResponse.json(
-        { success: false, error: 'Generation number is required' },
-        { status: 400 }
-      )
-    }
+    // Generate or validate suffix as 4 digits (0000-9999)
+    let finalSuffix: string
+    let certificate_id: string
+    const isManualSuffix = suffix !== undefined && suffix !== null && String(suffix).trim() !== ''
 
-    // Generate or validate suffix
-    let finalSuffix = suffix
-    if (!finalSuffix) {
-      // Generate random 4-character suffix
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-      finalSuffix = ''
-      for (let i = 0; i < 4; i++) {
-        finalSuffix += chars.charAt(Math.floor(Math.random() * chars.length))
-      }
-    } else {
-      // Validate suffix format
-      if (!/^[A-Z0-9]{4}$/.test(finalSuffix.toUpperCase())) {
+    if (isManualSuffix) {
+      const normalizedSuffix = String(suffix).replace(/\D/g, '').slice(0, 4)
+      if (!/^\d{4}$/.test(normalizedSuffix)) {
         return NextResponse.json(
-          { success: false, error: 'Suffix must be exactly 4 alphanumeric characters' },
+          { success: false, error: 'Certificate number must be exactly 4 digits (0000-9999)' },
           { status: 400 }
         )
       }
-      finalSuffix = finalSuffix.toUpperCase()
+
+      finalSuffix = normalizedSuffix
+      certificate_id = `C${finalSuffix}`
     }
 
-    // Generate certificate ID
-    const certificate_id = `TN-GEN${gen_number}-${finalSuffix}`
+    let certificate = null
+    let lastCreateError: { message: string; code?: string } | null = null
 
-    // Check if certificate ID already exists
-    const { data: existing } = await supabase
-      .from('certificates')
-      .select('id')
-      .eq('certificate_id', certificate_id)
-      .single()
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (!isManualSuffix) {
+        const nextCertificate = await getNextSequentialCertificate(supabase)
 
-    if (existing) {
-      return NextResponse.json(
-        { success: false, error: `Certificate ID ${certificate_id} already exists. Please try a different suffix.` },
-        { status: 400 }
-      )
-    }
+        if (!nextCertificate) {
+          return NextResponse.json(
+            { success: false, error: 'Certificate range is full (C0000-C9999)' },
+            { status: 400 }
+          )
+        }
 
-    // Create certificate
-    const { data: certificate, error: createError } = await supabase
-      .from('certificates')
-      .insert({
-        certificate_id,
-        user_id,
-        gen_number,
-        suffix: finalSuffix,
-        image_id: image_id || null,
-        file_url: file_url || null,
-        file_type,
-        title,
-        description: description || null,
-        issued_by: user.id,
-        issued_at: new Date().toISOString()
-      })
-      .select(`
-        id,
-        certificate_id,
-        gen_number,
-        suffix,
-        file_url,
-        file_type,
-        title,
-        description,
-        issued_at,
-        created_at,
-        member:profiles!certificates_user_id_fkey(
+        finalSuffix = nextCertificate.suffix
+        certificate_id = nextCertificate.certificateId
+      }
+
+      // Check if certificate ID already exists
+      const { data: existing } = await supabase
+        .from('certificates')
+        .select('id')
+        .eq('certificate_id', certificate_id)
+        .single()
+
+      if (existing) {
+        if (isManualSuffix) {
+          return NextResponse.json(
+            { success: false, error: `Certificate ID ${certificate_id} already exists. Please try a different suffix.` },
+            { status: 400 }
+          )
+        }
+
+        // Auto mode: try getting the next slot again.
+        continue
+      }
+
+      const { data: createdCertificate, error: createError } = await supabase
+        .from('certificates')
+        .insert({
+          certificate_id,
+          user_id,
+          gen_number: typeof gen_number === 'number' ? gen_number : 0,
+          suffix: finalSuffix,
+          image_id: image_id || null,
+          file_url: file_url || null,
+          file_type,
+          title,
+          description: description || null,
+          issued_by: user.id,
+          issued_at: new Date().toISOString()
+        })
+        .select(`
           id,
-          username,
-          full_name,
-          avatar_url
-        )
-      `)
-      .single()
+          certificate_id,
+          gen_number,
+          suffix,
+          file_url,
+          file_type,
+          title,
+          description,
+          issued_at,
+          created_at,
+          member:profiles!certificates_user_id_fkey(
+            id,
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .single()
 
-    if (createError) {
-      console.error('Error creating certificate:', createError)
+      if (!createError) {
+        certificate = createdCertificate
+        break
+      }
+
+      lastCreateError = createError
+      if (isManualSuffix || createError.code !== '23505') {
+        break
+      }
+    }
+
+    if (!certificate) {
+      console.error('Error creating certificate:', lastCreateError)
       return NextResponse.json(
-        { success: false, error: createError.message },
+        { success: false, error: lastCreateError?.message || 'Failed to create certificate' },
         { status: 500 }
       )
     }
