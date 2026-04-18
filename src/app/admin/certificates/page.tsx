@@ -175,10 +175,11 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
       }
 
       setAutoFillingNumber(true)
-      const response = await fetch('/api/admin/certificates/generate-suffix', {
+      const response = await fetch(`/api/admin/certificates/generate-suffix?t=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
-        }
+        },
+        cache: 'no-store'
       })
 
       const result = await response.json()

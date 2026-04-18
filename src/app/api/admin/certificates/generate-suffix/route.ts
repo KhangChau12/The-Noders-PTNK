@@ -65,13 +65,26 @@ export async function GET(request: NextRequest) {
       success: true,
       suffix,
       certificate_id: `C${suffix}`
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     })
 
   } catch (error) {
     console.error('Error generating suffix:', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }
     )
   }
 }
