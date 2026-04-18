@@ -112,6 +112,16 @@ export async function GET(request: NextRequest) {
         image:images!certificates_image_id_fkey(
           id,
           public_url,
+          original_name,
+          file_size,
+          width,
+          height,
+          alt_text,
+            original_name,
+            file_size,
+            width,
+            height,
+            alt_text,
           mime_type
         )
       `)

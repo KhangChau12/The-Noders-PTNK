@@ -11,6 +11,7 @@ import { Avatar } from '@/components/Avatar'
 import {
   Award,
   Plus,
+  PencilLine,
   Trash2,
   Search,
   AlertCircle,
@@ -63,6 +64,11 @@ interface CertificateData {
   image: {
     id: string
     public_url: string
+    original_name: string
+    file_size: number
+    width?: number
+    height?: number
+    alt_text?: string
     mime_type: string
   } | null
 }
@@ -120,21 +126,32 @@ function getMemberLabel(member: Profile) {
   return `${member.full_name} (@${member.username})`
 }
 
-function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members }: {
+function CertificateModal({
+  isOpen,
+  mode,
+  certificate,
+  onClose,
+  onSaved,
+  members
+}: {
   isOpen: boolean
+  mode: 'create' | 'edit'
+  certificate?: CertificateData | null
   onClose: () => void
-  onCertificateCreated: () => void
+  onSaved: () => void
   members: Profile[]
 }) {
   const { session } = useAuth()
   const { showToast } = useToast()
+  const isEditMode = mode === 'edit'
+
   const [formData, setFormData] = useState<CreateCertificateFormData>({
     user_id: '',
     suffix: '',
     image_id: '',
     file_url: '',
     file_type: 'image',
-    title: 'Chứng nhận hoàn thành khóa học',
+    title: '',
     description: ''
   })
   const [uploadedImage, setUploadedImage] = useState<ImageData | null>(null)
@@ -145,6 +162,24 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [initialAutoFillAttempted, setInitialAutoFillAttempted] = useState(false)
+
+  const resetForm = () => {
+    setFormData({
+      user_id: '',
+      suffix: '',
+      image_id: '',
+      file_url: '',
+      file_type: 'image',
+      title: '',
+      description: ''
+    })
+    setUploadedImage(null)
+    setMemberSearch('')
+    setMemberDropdownOpen(false)
+    setError(null)
+    setSuccess(false)
+    setInitialAutoFillAttempted(false)
+  }
 
   const handleChange = (field: keyof CreateCertificateFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -189,7 +224,9 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
       }
 
       setFormData(prev => ({ ...prev, suffix: result.suffix }))
-      showToast('success', `Auto-filled next number: ${result.certificate_id}`)
+      if (!isEditMode) {
+        showToast('success', `Auto-filled next number: ${result.certificate_id}`)
+      }
     } catch {
       showToast('error', 'Network error while getting next certificate number')
     } finally {
@@ -199,17 +236,43 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
 
   useEffect(() => {
     if (!isOpen) {
-      setMemberSearch('')
-      setMemberDropdownOpen(false)
-      setInitialAutoFillAttempted(false)
+      resetForm()
       return
     }
 
-    if (!formData.suffix && !autoFillingNumber && !initialAutoFillAttempted) {
+    if (certificate) {
+      const memberLabel = getMemberLabel(certificate.member as Profile)
+      setFormData({
+        user_id: certificate.member?.id || '',
+        suffix: certificate.suffix || '',
+        image_id: certificate.image?.id || certificate.image_id || '',
+        file_url: certificate.file_url || certificate.image?.public_url || '',
+        file_type: certificate.file_type,
+        title: certificate.title,
+        description: certificate.description || ''
+      })
+      setMemberSearch(memberLabel)
+      setMemberDropdownOpen(false)
+      setUploadedImage(certificate.image ? {
+        id: certificate.image.id,
+        filename: certificate.image.original_name || certificate.image.id,
+        original_name: certificate.image.original_name || certificate.image.id,
+        public_url: certificate.image.public_url,
+        file_size: certificate.image.file_size || 0,
+        width: certificate.image.width,
+        height: certificate.image.height,
+        alt_text: certificate.image.alt_text
+      } : null)
+      setInitialAutoFillAttempted(true)
+      return
+    }
+
+    resetForm()
+    if (!initialAutoFillAttempted) {
       setInitialAutoFillAttempted(true)
       void fillNextCertificateNumber()
     }
-  }, [isOpen, formData.suffix, autoFillingNumber, initialAutoFillAttempted])
+  }, [isOpen, certificate?.id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -222,50 +285,44 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
         return
       }
 
-      const response = await fetch('/api/admin/certificates', {
-        method: 'POST',
+      const endpoint = isEditMode && certificate ? `/api/admin/certificates/${certificate.id}` : '/api/admin/certificates'
+      const method = isEditMode ? 'PUT' : 'POST'
+      const payload: Record<string, unknown> = {
+        user_id: formData.user_id,
+        image_id: formData.image_id || undefined,
+        file_url: formData.file_url || undefined,
+        file_type: formData.file_type,
+        title: formData.title,
+        description: formData.description || undefined
+      }
+
+      if (!isEditMode) {
+        payload.suffix = formData.suffix || undefined
+      }
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          user_id: formData.user_id,
-          suffix: formData.suffix || undefined,
-          image_id: formData.image_id || undefined,
-          file_url: formData.file_url || undefined,
-          file_type: formData.file_type,
-          title: formData.title,
-          description: formData.description || undefined
-        })
+        body: JSON.stringify(payload)
       })
 
       const result = await response.json()
 
       if (result.success) {
         setSuccess(true)
-        showToast('success', `Certificate ${result.certificate.certificate_id} created!`)
+        showToast('success', `Certificate ${result.certificate.certificate_id} ${isEditMode ? 'updated' : 'created'}!`)
         setTimeout(() => {
-          onCertificateCreated()
+          onSaved()
           onClose()
-          setSuccess(false)
-          setUploadedImage(null)
-          setMemberSearch('')
-          setMemberDropdownOpen(false)
-          setInitialAutoFillAttempted(false)
-          setFormData({
-            user_id: '',
-            suffix: '',
-            image_id: '',
-            file_url: '',
-            file_type: 'image',
-            title: 'Chứng nhận hoàn thành khóa học',
-            description: ''
-          })
-        }, 1500)
+          resetForm()
+        }, 1200)
       } else {
-        setError(result.error || 'Failed to create certificate')
+        setError(result.error || `Failed to ${isEditMode ? 'update' : 'create'} certificate`)
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -273,9 +330,9 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   }
 
   const normalizedSuffix = formData.suffix.replace(/\D/g, '').slice(0, 4)
-  const previewCertificateId = normalizedSuffix
-    ? `C${normalizedSuffix.padStart(4, '0')}`
-    : 'C0000'
+  const previewCertificateId = isEditMode
+    ? (certificate?.certificate_id || 'C0000')
+    : (normalizedSuffix ? `C${normalizedSuffix.padStart(4, '0')}` : 'C0000')
   const filteredMembers = members.filter(member => matchesMemberSearch(member, memberSearch))
   const selectedMember = members.find(member => member.id === formData.user_id) || null
 
@@ -287,13 +344,10 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              Create Certificate
+              {isEditMode ? <PencilLine className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              {isEditMode ? 'Edit Certificate' : 'Create Certificate'}
             </CardTitle>
-            <button
-              onClick={onClose}
-              className="text-text-tertiary hover:text-text-primary"
-            >
+            <button onClick={onClose} className="text-text-tertiary hover:text-text-primary">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -303,23 +357,28 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
             <div className="text-center py-8">
               <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-text-primary mb-2">
-                Certificate Created!
+                Certificate {isEditMode ? 'Updated!' : 'Created!'}
               </h3>
               <p className="text-text-secondary">
-                The certificate has been issued successfully.
+                The certificate has been {isEditMode ? 'updated' : 'issued'} successfully.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Certificate ID Preview */}
               <div className="p-4 bg-primary-blue/10 border border-primary-blue/30 rounded-lg text-center">
-                <p className="text-sm text-text-secondary mb-1">Certificate ID Preview</p>
+                <p className="text-sm text-text-secondary mb-1">
+                  {isEditMode ? 'Certificate ID' : 'Certificate ID Preview'}
+                </p>
                 <p className="text-2xl font-mono font-bold text-primary-blue">
                   {previewCertificateId}
                 </p>
+                {isEditMode && (
+                  <p className="text-xs text-text-tertiary mt-2">
+                    Certificate ID is fixed. You can update the file, member, title, and description.
+                  </p>
+                )}
               </div>
 
-              {/* Member Selection */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Member *
@@ -393,8 +452,7 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                 </p>
               </div>
 
-              {/* Certificate Number */}
-              <div>
+              {!isEditMode ? (
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">
                     Certificate Number (Optional)
@@ -410,9 +468,22 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                     Auto-filled by default when the form opens. You can still edit it manually (0000-9999).
                   </p>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Certificate Number
+                  </label>
+                  <Input
+                    value={formData.suffix}
+                    disabled
+                    className="font-mono"
+                  />
+                  <p className="text-xs text-text-tertiary mt-1">
+                    Certificate number is fixed for old certificates.
+                  </p>
+                </div>
+              )}
 
-              {/* Certificate File Upload */}
               <ImageUpload
                 value={uploadedImage}
                 onChange={handleImageChange}
@@ -421,7 +492,6 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                 maxSize={10 * 1024 * 1024}
               />
 
-              {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Certificate Title
@@ -429,11 +499,10 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                 <Input
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
-                  placeholder="Course Completion Certificate"
+                  placeholder={isEditMode ? 'Course Completion Certificate' : 'Enter certificate title'}
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Description (Optional)
@@ -457,29 +526,20 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
               )}
 
               <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1"
-                >
+                <Button type="submit" disabled={loading} className="flex-1">
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      Creating...
+                      {isEditMode ? 'Saving...' : 'Creating...'}
                     </>
                   ) : (
                     <>
-                      <Award className="w-4 h-4 mr-2" />
-                      Issue Certificate
+                      {isEditMode ? <PencilLine className="w-4 h-4 mr-2" /> : <Award className="w-4 h-4 mr-2" />}
+                      {isEditMode ? 'Save Changes' : 'Issue Certificate'}
                     </>
                   )}
                 </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={onClose}
-                  disabled={loading}
-                >
+                <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
                   Cancel
                 </Button>
               </div>
@@ -501,6 +561,8 @@ function CertificateManagementPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingCertificate, setEditingCertificate] = useState<CertificateData | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [dataLoaded, setDataLoaded] = useState(false)
 
@@ -598,6 +660,12 @@ function CertificateManagementPage() {
     }
   }
 
+  const openEditModal = (certificate: CertificateData) => {
+    setShowCreateModal(false)
+    setEditingCertificate(certificate)
+    setShowEditModal(true)
+  }
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     showToast('success', 'Copied to clipboard!')
@@ -668,7 +736,11 @@ function CertificateManagementPage() {
                   Refresh
                 </Button>
               )}
-              <Button onClick={() => setShowCreateModal(true)}>
+              <Button onClick={() => {
+                setShowEditModal(false)
+                setEditingCertificate(null)
+                setShowCreateModal(true)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Issue Certificate
               </Button>
@@ -781,6 +853,14 @@ function CertificateManagementPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                onClick={() => openEditModal(cert)}
+                                title="Edit Certificate"
+                              >
+                                <PencilLine className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => window.open(`/verify/${cert.certificate_id}`, '_blank')}
                                 title="View Certificate"
                               >
@@ -823,10 +903,24 @@ function CertificateManagementPage() {
           ) : null}
 
           {/* Create Certificate Modal */}
-          <CreateCertificateModal
+          <CertificateModal
             isOpen={showCreateModal}
             onClose={() => setShowCreateModal(false)}
-            onCertificateCreated={fetchCertificates}
+            mode="create"
+            onSaved={fetchCertificates}
+            members={members}
+          />
+
+          {/* Edit Certificate Modal */}
+          <CertificateModal
+            isOpen={showEditModal}
+            onClose={() => {
+              setShowEditModal(false)
+              setEditingCertificate(null)
+            }}
+            mode="edit"
+            certificate={editingCertificate}
+            onSaved={fetchCertificates}
             members={members}
           />
         </div>

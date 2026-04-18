@@ -155,6 +155,11 @@ export async function GET(
         image:images!certificates_image_id_fkey(
           id,
           public_url,
+          original_name,
+          file_size,
+          width,
+          height,
+          alt_text,
           mime_type
         )
       `)
@@ -176,6 +181,155 @@ export async function GET(
 
   } catch (error) {
     console.error('Error fetching certificate:', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT /api/admin/certificates/[id] - Update a certificate (admin only)
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const supabase = createClient()
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid token' },
+        { status: 401 }
+      )
+    }
+
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: token
+    })
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || !profile || profile.role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'Admin access required' },
+        { status: 403 }
+      )
+    }
+
+    const body = await request.json()
+    const {
+      user_id,
+      image_id,
+      file_url,
+      file_type,
+      title,
+      description
+    } = body
+
+    const updates: {
+      user_id?: string
+      image_id?: string | null
+      file_url?: string | null
+      file_type?: 'image' | 'pdf'
+      title?: string
+      description?: string | null
+      updated_at: string
+    } = {
+      updated_at: new Date().toISOString()
+    }
+
+    if (user_id !== undefined) updates.user_id = user_id
+    if (image_id !== undefined) updates.image_id = image_id || null
+    if (file_url !== undefined) updates.file_url = file_url || null
+    if (file_type !== undefined) updates.file_type = file_type
+    if (title !== undefined) updates.title = title
+    if (description !== undefined) updates.description = description || null
+
+    if (user_id !== undefined) {
+      const { data: memberExists } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user_id)
+        .single()
+
+      if (!memberExists) {
+        return NextResponse.json(
+          { success: false, error: 'Selected member not found' },
+          { status: 400 }
+        )
+      }
+    }
+
+    const { data: certificate, error: updateError } = await supabase
+      .from('certificates')
+      .update(updates)
+      .eq('id', id)
+      .select(`
+        id,
+        certificate_id,
+        gen_number,
+        suffix,
+        file_url,
+        file_type,
+        title,
+        description,
+        issued_at,
+        created_at,
+        member:profiles!certificates_user_id_fkey(
+          id,
+          username,
+          full_name,
+          avatar_url
+        ),
+        issuer:profiles!certificates_issued_by_fkey(
+          id,
+          username,
+          full_name
+        ),
+        image:images!certificates_image_id_fkey(
+          id,
+          public_url,
+          original_name,
+          file_size,
+          width,
+          height,
+          alt_text,
+          mime_type
+        )
+      `)
+      .single()
+
+    if (updateError) {
+      console.error('Error updating certificate:', updateError)
+      return NextResponse.json(
+        { success: false, error: updateError.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      certificate
+    })
+  } catch (error) {
+    console.error('Error updating certificate:', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
