@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
@@ -565,6 +565,7 @@ function CertificateManagementPage() {
   const [editingCertificate, setEditingCertificate] = useState<CertificateData | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [dataLoaded, setDataLoaded] = useState(false)
+  const autoLoadedRef = useRef(false)
 
   const fetchCertificates = async () => {
     try {
@@ -676,6 +677,15 @@ function CertificateManagementPage() {
       fetchMembers()
     }
   }, [session])
+
+  useEffect(() => {
+    if (!session?.access_token || autoLoadedRef.current || dataLoaded) {
+      return
+    }
+
+    autoLoadedRef.current = true
+    void fetchCertificates()
+  }, [session, dataLoaded])
 
   const filteredCertificates = certificates.filter(cert =>
     cert.certificate_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
