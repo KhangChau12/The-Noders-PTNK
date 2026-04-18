@@ -181,43 +181,27 @@ export function Header() {
                 if (hasChildren) {
                   return (
                     <div key={item.name} className="space-y-1">
-                      <button
-                        onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
-                        className={cn(
-                          'relative w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 flex items-center justify-between',
-                          isActive
-                            ? 'text-white bg-gradient-to-r from-primary-blue to-accent-cyan shadow-lg shadow-primary-blue/20'
-                            : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface/50 border border-transparent hover:border-dark-border/50'
-                        )}
-                      >
-                        <span>{item.name}</span>
-                        <ChevronDown className={cn(
-                          'w-4 h-4 transition-transform duration-200',
-                          openDropdown === item.name && 'rotate-180'
-                        )} />
-                      </button>
-                      {openDropdown === item.name && (
-                        <div className="pl-4 space-y-1">
-                          {item.children?.map((child) => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              onClick={() => {
-                                setIsMenuOpen(false)
-                                setOpenDropdown(null)
-                              }}
-                              className={cn(
-                                'block px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200',
-                                pathname === child.href
-                                  ? 'text-primary-blue bg-primary-blue/10'
-                                  : 'text-text-secondary hover:text-text-primary hover:bg-dark-border/30'
-                              )}
-                            >
-                              {child.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
+                      {item.children?.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            setOpenDropdown(null)
+                          }}
+                          className={cn(
+                            'relative block px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 group',
+                            pathname === child.href
+                              ? 'text-white bg-gradient-to-r from-primary-blue to-accent-cyan shadow-lg shadow-primary-blue/20'
+                              : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface/50 border border-transparent hover:border-dark-border/50'
+                          )}
+                        >
+                          <span className="relative z-10">{child.name}</span>
+                          {pathname !== child.href && (
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/5 group-hover:to-accent-cyan/5 transition-all duration-300" />
+                          )}
+                        </Link>
+                      ))}
                     </div>
                   )
                 }
