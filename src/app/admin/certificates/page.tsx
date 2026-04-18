@@ -77,6 +77,45 @@ interface CreateCertificateFormData {
   description: string
 }
 
+function normalizeSearchText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function matchesMemberSearch(member: Profile, query: string) {
+  if (!query.trim()) return true
+
+  const normalizedQuery = normalizeSearchText(query)
+  if (!normalizedQuery) return true
+
+  const normalizedName = normalizeSearchText(member.full_name || '')
+  const normalizedUsername = normalizeSearchText(member.username || '')
+  const mergedText = `${normalizedName} ${normalizedUsername}`.trim()
+
+  if (mergedText.includes(normalizedQuery)) {
+    return true
+  }
+
+  const queryTokens = normalizedQuery.split(' ').filter(Boolean)
+  if (queryTokens.length > 0 && queryTokens.every(token => mergedText.includes(token))) {
+    return true
+  }
+
+  const initials = normalizedName
+    .split(' ')
+    .filter(Boolean)
+    .map(part => part[0])
+    .join('')
+
+  return initials.includes(normalizedQuery.replace(/\s+/g, ''))
+}
+
 function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members }: {
   isOpen: boolean
   onClose: () => void
@@ -96,6 +135,8 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   })
   const [uploadedImage, setUploadedImage] = useState<ImageData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [autoFillingNumber, setAutoFillingNumber] = useState(false)
+  const [memberSearch, setMemberSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
@@ -117,6 +158,35 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
         image_id: '',
         file_url: ''
       }))
+    }
+  }
+
+  const fillNextCertificateNumber = async () => {
+    try {
+      if (!session?.access_token) {
+        showToast('error', 'Authentication required. Please refresh the page.')
+        return
+      }
+
+      setAutoFillingNumber(true)
+      const response = await fetch('/api/admin/certificates/generate-suffix', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        }
+      })
+
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        showToast('error', result.error || 'Failed to get next certificate number')
+        return
+      }
+
+      setFormData(prev => ({ ...prev, suffix: result.suffix }))
+      showToast('success', `Auto-filled next number: ${result.certificate_id}`)
+    } catch {
+      showToast('error', 'Network error while getting next certificate number')
+    } finally {
+      setAutoFillingNumber(false)
     }
   }
 
@@ -158,6 +228,7 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
           onClose()
           setSuccess(false)
           setUploadedImage(null)
+          setMemberSearch('')
           setFormData({
             user_id: '',
             suffix: '',
@@ -182,6 +253,7 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   const previewCertificateId = normalizedSuffix
     ? `C${normalizedSuffix.padStart(4, '0')}`
     : 'C0000'
+  const filteredMembers = members.filter(member => matchesMemberSearch(member, memberSearch))
 
   if (!isOpen) return null
 
@@ -228,6 +300,13 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Member *
                 </label>
+                <Input
+                  value={memberSearch}
+                  onChange={(e) => setMemberSearch(e.target.value)}
+                  placeholder="Search member by name or username..."
+                  className="mb-2"
+                  icon={<Search className="w-4 h-4" />}
+                />
                 <select
                   required
                   value={formData.user_id}
@@ -235,12 +314,15 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                   className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
                 >
                   <option value="">Select a member...</option>
-                  {members.map(member => (
+                  {filteredMembers.map(member => (
                     <option key={member.id} value={member.id}>
                       {member.full_name} (@{member.username})
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-text-tertiary mt-1">
+                  {filteredMembers.length} member(s) found.
+                </p>
               </div>
 
               {/* Certificate Number */}
@@ -256,6 +338,23 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                     maxLength={4}
                     className="font-mono"
                   />
+                  <div className="mt-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={fillNextCertificateNumber}
+                      disabled={autoFillingNumber || loading}
+                    >
+                      {autoFillingNumber ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-text-tertiary/30 border-t-text-tertiary rounded-full animate-spin mr-2" />
+                          Auto filling...
+                        </>
+                      ) : (
+                        'Auto Fill Next Number'
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-xs text-text-tertiary mt-1">
                     Leave empty for auto sequence. Manual value must be 4 digits (0000-9999).
                   </p>
