@@ -116,6 +116,10 @@ function matchesMemberSearch(member: Profile, query: string) {
   return initials.includes(normalizedQuery.replace(/\s+/g, ''))
 }
 
+function getMemberLabel(member: Profile) {
+  return `${member.full_name} (@${member.username})`
+}
+
 function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members }: {
   isOpen: boolean
   onClose: () => void
@@ -137,8 +141,10 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
   const [loading, setLoading] = useState(false)
   const [autoFillingNumber, setAutoFillingNumber] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
+  const [memberDropdownOpen, setMemberDropdownOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [initialAutoFillAttempted, setInitialAutoFillAttempted] = useState(false)
 
   const handleChange = (field: keyof CreateCertificateFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -190,6 +196,20 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
     }
   }
 
+  useEffect(() => {
+    if (!isOpen) {
+      setMemberSearch('')
+      setMemberDropdownOpen(false)
+      setInitialAutoFillAttempted(false)
+      return
+    }
+
+    if (!formData.suffix && !autoFillingNumber && !initialAutoFillAttempted) {
+      setInitialAutoFillAttempted(true)
+      void fillNextCertificateNumber()
+    }
+  }, [isOpen, formData.suffix, autoFillingNumber, initialAutoFillAttempted])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -229,6 +249,8 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
           setSuccess(false)
           setUploadedImage(null)
           setMemberSearch('')
+          setMemberDropdownOpen(false)
+          setInitialAutoFillAttempted(false)
           setFormData({
             user_id: '',
             suffix: '',
@@ -254,6 +276,7 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
     ? `C${normalizedSuffix.padStart(4, '0')}`
     : 'C0000'
   const filteredMembers = members.filter(member => matchesMemberSearch(member, memberSearch))
+  const selectedMember = members.find(member => member.id === formData.user_id) || null
 
   if (!isOpen) return null
 
@@ -300,28 +323,72 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Member *
                 </label>
-                <Input
-                  value={memberSearch}
-                  onChange={(e) => setMemberSearch(e.target.value)}
-                  placeholder="Search member by name or username..."
-                  className="mb-2"
-                  icon={<Search className="w-4 h-4" />}
-                />
-                <select
-                  required
-                  value={formData.user_id}
-                  onChange={(e) => handleChange('user_id', e.target.value)}
-                  className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
-                >
-                  <option value="">Select a member...</option>
-                  {filteredMembers.map(member => (
-                    <option key={member.id} value={member.id}>
-                      {member.full_name} (@{member.username})
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <Input
+                    value={memberSearch}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setMemberSearch(value)
+                      setMemberDropdownOpen(true)
+
+                      const exactMatch = members.find(member => {
+                        const label = getMemberLabel(member)
+                        return normalizeSearchText(label) === normalizeSearchText(value)
+                      })
+
+                      if (exactMatch) {
+                        setFormData(prev => ({ ...prev, user_id: exactMatch.id }))
+                      } else {
+                        setFormData(prev => ({ ...prev, user_id: '' }))
+                      }
+                    }}
+                    onFocus={() => setMemberDropdownOpen(true)}
+                    placeholder="Type a name to search and select..."
+                    className="mb-2"
+                    icon={<Search className="w-4 h-4" />}
+                    autoComplete="off"
+                  />
+
+                  {memberDropdownOpen && (
+                    <div className="absolute z-20 mt-1 w-full rounded-lg border border-dark-border bg-dark-bg shadow-xl shadow-black/30 max-h-64 overflow-y-auto">
+                      {filteredMembers.length > 0 ? (
+                        filteredMembers.slice(0, 8).map(member => {
+                          const isSelected = member.id === formData.user_id
+                          return (
+                            <button
+                              key={member.id}
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, user_id: member.id }))
+                                setMemberSearch(getMemberLabel(member))
+                                setMemberDropdownOpen(false)
+                              }}
+                              className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors border-b border-dark-border/50 last:border-b-0 ${
+                                isSelected ? 'bg-primary-blue/10' : 'hover:bg-dark-surface'
+                              }`}
+                            >
+                              <Avatar name={member.full_name} src={member.avatar_url} size="sm" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-text-primary truncate">
+                                  {member.full_name}
+                                </p>
+                                <p className="text-xs text-text-tertiary truncate">
+                                  @{member.username}
+                                </p>
+                              </div>
+                            </button>
+                          )
+                        })
+                      ) : (
+                        <div className="px-3 py-4 text-sm text-text-tertiary">
+                          No members found.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <p className="text-xs text-text-tertiary mt-1">
-                  {filteredMembers.length} member(s) found.
+                  {selectedMember ? `Selected: ${getMemberLabel(selectedMember)}` : `${filteredMembers.length} member(s) found.`}
                 </p>
               </div>
 
@@ -338,25 +405,8 @@ function CreateCertificateModal({ isOpen, onClose, onCertificateCreated, members
                     maxLength={4}
                     className="font-mono"
                   />
-                  <div className="mt-2">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={fillNextCertificateNumber}
-                      disabled={autoFillingNumber || loading}
-                    >
-                      {autoFillingNumber ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-text-tertiary/30 border-t-text-tertiary rounded-full animate-spin mr-2" />
-                          Auto filling...
-                        </>
-                      ) : (
-                        'Auto Fill Next Number'
-                      )}
-                    </Button>
-                  </div>
                   <p className="text-xs text-text-tertiary mt-1">
-                    Leave empty for auto sequence. Manual value must be 4 digits (0000-9999).
+                    Auto-filled by default when the form opens. You can still edit it manually (0000-9999).
                   </p>
                 </div>
               </div>
