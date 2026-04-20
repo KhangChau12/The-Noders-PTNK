@@ -102,6 +102,7 @@ export interface ProfileWithProjects extends Profile {
   total_post_views?: number
   total_contributions?: number
   total_points?: number
+  task_count?: number
   task_stats?: MemberTaskStat[]
 }
 

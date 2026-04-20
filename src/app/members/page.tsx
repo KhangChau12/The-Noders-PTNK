@@ -12,7 +12,7 @@ import { MemberFilters } from "@/types/member";
 import { Avatar } from "@/components/Avatar";
 import { ClickableBadge } from "@/components/ClickableBadge";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { Search, Users, Award, FileText, Calendar, GraduationCap } from "lucide-react";
+import { Search, Award, FileText, Calendar, ClipboardList, Sparkles } from "lucide-react";
 
 
 export default function MembersPage() {
@@ -39,6 +39,10 @@ export default function MembersPage() {
         <div className="container mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary-blue/30 bg-primary-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-blue mb-4">
+              <Sparkles className="w-3.5 h-3.5" />
+              The Noders Community
+            </div>
             <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
               Meet Our Team
             </h1>
@@ -90,9 +94,9 @@ export default function MembersPage() {
           {/* Results Count */}
           {!loading && members && (
             <div className="mb-6">
-              <p className="text-text-secondary">
+              <div className="inline-flex items-center rounded-full border border-dark-border bg-dark-surface/60 px-4 py-2 text-sm text-text-secondary">
                 {members.length} member{members.length !== 1 ? "s" : ""} found
-              </p>
+              </div>
             </div>
           )}
 
@@ -118,7 +122,7 @@ export default function MembersPage() {
                   const postCount = member.posts_count || 0;
                   const certCount = member.certificate_count || 0;
                   const totalViews = member.total_post_views || 0;
-                  const contestCount = member.contest_count || 0;
+                  const taskCount = member.task_count || 0;
                   const joinDate = new Date(member.created_at).toLocaleDateString('en-US', {
                     day: '2-digit', month: 'short', year: 'numeric'
                   });
@@ -126,74 +130,76 @@ export default function MembersPage() {
                   return (
                     <div key={member.id}>
                       <Link href={`/members/${member.id}`} className="block">
-                        <Card variant="interactive" className={`h-68 group hover-lift relative overflow-hidden transition-all duration-300 border-dark-border ${member.role === 'admin' ? 'hover:border-primary-blue/60' : 'hover:border-text-secondary/40'}`}>
+                        <Card
+                          variant="interactive"
+                          className={`group relative h-[305px] overflow-hidden rounded-2xl border-2 bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 transition-all duration-500 ${
+                            member.role === 'admin'
+                              ? 'border-primary-blue/40 hover:border-primary-blue/70 hover:shadow-xl hover:shadow-primary-blue/20'
+                              : 'border-dark-border/70 hover:border-accent-cyan/50 hover:shadow-xl hover:shadow-accent-cyan/10'
+                          }`}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/5 group-hover:to-accent-cyan/5 transition-all duration-500 pointer-events-none" />
 
-                          {/* Admin Badge - Top Right */}
-                          {member.role === "admin" && (
-                            <div className="absolute top-3 right-3 z-10">
-                              <Badge variant="primary" size="sm" className="shadow-lg shadow-primary-blue/20 backdrop-blur-md">
-                                Core Team
-                              </Badge>
+                          <CardContent className="relative z-10 p-4">
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`${member.role === 'admin' ? 'p-0.5 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full' : ''}`}>
+                                  <Avatar
+                                    name={member.full_name}
+                                    src={member.avatar_url}
+                                    size="lg"
+                                    className="border-2 border-dark-surface"
+                                  />
+                                </div>
+                                <div className="min-w-0">
+                                  <h3 className="text-base font-bold text-text-primary truncate group-hover:text-primary-blue transition-colors">
+                                    {member.full_name || member.username}
+                                  </h3>
+                                  <p className="text-xs text-text-secondary truncate">@{member.username}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col items-end">
+                                {member.role === "admin" && (
+                                  <Badge variant="primary" size="sm" className="shadow-lg shadow-primary-blue/20">
+                                    Core Team
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                          )}
 
-                          <CardContent className="p-5 flex gap-5 h-full">
-                            {/* LEFT COLUMN: Avatar + Name + Role */}
-                            <div className="flex flex-col items-center flex-shrink-0 w-32">
-                              <div className={`transition-transform duration-300 group-hover:scale-105 mb-3 ${member.role === 'admin' ? 'p-1 bg-gradient-to-br from-primary-blue to-accent-cyan rounded-full' : ''}`}>
-                                <Avatar
-                                  name={member.full_name}
-                                  src={member.avatar_url}
-                                  size="2xl"
-                                  className="border-4 border-dark-surface"
-                                />
+                            <p className="text-xs text-text-secondary leading-relaxed line-clamp-2 mb-3 min-h-[2rem]">
+                              {member.bio || "Member of The Noders Community"}
+                            </p>
+
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                              <div className="rounded-lg border border-dark-border/70 bg-dark-bg/45 p-1.5 text-center">
+                                <div className="text-sm font-bold text-text-primary tabular-nums">{totalPoints}</div>
+                                <div className="text-[10px] uppercase tracking-wide text-text-secondary/90">Points</div>
                               </div>
-                              <h3 className="text-sm font-bold text-text-primary text-center leading-tight group-hover:text-primary-blue transition-colors line-clamp-2">
-                                {member.full_name || member.username}
-                              </h3>
-                              <p className="text-xs text-text-tertiary mt-1 text-center line-clamp-2">
-                                {member.bio || "Member of The Noders Community"}
-                              </p>
+                              <div className="rounded-lg border border-dark-border/70 bg-dark-bg/45 p-1.5 text-center">
+                                <div className="text-sm font-bold text-text-primary tabular-nums">{certCount}</div>
+                                <div className="text-[10px] uppercase tracking-wide text-text-secondary/90">Certs</div>
+                              </div>
+                              <div className="rounded-lg border border-dark-border/70 bg-dark-bg/45 p-1.5 text-center">
+                                <div className="text-sm font-bold text-text-primary tabular-nums">{taskCount}</div>
+                                <div className="text-[10px] uppercase tracking-wide text-text-secondary/90 flex items-center justify-center gap-1">
+                                  <ClipboardList className="w-3 h-3" /> Tasks
+                                </div>
+                              </div>
                             </div>
 
-                            {/* RIGHT COLUMN: Stats + Info */}
-                            <div className="flex-1 flex flex-col justify-between min-w-0 pt-6">
-                              {/* Joined date */}
-                              <div className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                                <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                                <span>Joined community since: {joinDate}</span>
+                            <div className="space-y-1.5 text-xs text-text-secondary">
+                              <div className="flex items-center gap-1.5 leading-none">
+                                <Calendar className="w-3.5 h-3.5 text-text-secondary/80 flex-shrink-0" />
+                                <span>Joined {joinDate}</span>
                               </div>
-
-                              {/* Stats boxes - 3 columns */}
-                              <div className="grid grid-cols-3 gap-2">
-                                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-primary-blue/5 transition-colors">
-                                  <span className="text-lg font-bold text-text-primary tabular-nums">{totalPoints}</span>
-                                  <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
-                                    <Award className="w-3 h-3" /> Points
-                                  </span>
-                                </div>
-                                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-accent-cyan/5 transition-colors">
-                                  <span className="text-lg font-bold text-text-primary tabular-nums">{certCount}</span>
-                                  <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
-                                    <Award className="w-3 h-3" /> Certs
-                                  </span>
-                                </div>
-                                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-accent-purple/5 transition-colors">
-                                  <span className="text-lg font-bold text-text-primary tabular-nums">{contestCount}</span>
-                                  <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
-                                    <GraduationCap className="w-3 h-3" /> Contests
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Posts with views - bottom line */}
-                              <div className="flex items-center gap-1.5 text-xs text-text-secondary">
-                                <FileText className="w-3.5 h-3.5 text-text-tertiary flex-shrink-0" />
+                              <div className="flex items-center gap-1.5 leading-none">
+                                <FileText className="w-3.5 h-3.5 text-text-secondary/80 flex-shrink-0" />
                                 <span>
-                                  Wrote <span className="font-semibold text-text-primary">{postCount}</span>{' '}
-                                  {postCount === 1 ? 'post' : 'posts'}
+                                  {postCount} {postCount === 1 ? 'post' : 'posts'}
                                   {totalViews > 0 && (
-                                    <> with <span className="font-semibold text-text-primary">{totalViews.toLocaleString()}</span> views</>
+                                    <> • {totalViews.toLocaleString()} views</>
                                   )}
                                 </span>
                               </div>

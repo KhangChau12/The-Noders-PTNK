@@ -6,14 +6,12 @@ export const revalidate = 0
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔄 [API] /api/members called at:', new Date().toISOString())
     const supabase = createAdminClient()
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams
     const role = searchParams.get('role')
     const search = searchParams.get('search')
-    console.log('📝 [API] Query params:', { role, search })
 
     // Fetch profiles
     let query = supabase
@@ -83,8 +81,10 @@ export async function GET(request: NextRequest) {
       .in('member_id', memberIds)
 
     const totalPointsMap: Record<string, number> = {}
+    const taskCountMap: Record<string, number> = {}
     taskPointRows?.forEach(row => {
       totalPointsMap[row.member_id] = (totalPointsMap[row.member_id] || 0) + (row.points || 0)
+      taskCountMap[row.member_id] = (taskCountMap[row.member_id] || 0) + 1
     })
 
     // Fetch emails from auth.users using admin client
@@ -105,10 +105,9 @@ export async function GET(request: NextRequest) {
       certificate_count: certCounts[member.id] || 0,
       total_post_views: postViewCounts[member.id] || 0,
       total_points: totalPointsMap[member.id] || 0,
+      task_count: taskCountMap[member.id] || 0,
       total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)
     }))
-
-    console.log(`✅ [API] Returning ${membersWithData.length} members`)
 
     // Sort: Admins first, then by total points
     const sortedMembers = membersWithData.sort((a, b) => {
