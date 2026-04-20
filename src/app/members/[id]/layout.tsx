@@ -3,19 +3,17 @@ import { createClient } from '@/lib/supabase'
 import { generateMetadata as generateSEOMetadata, generatePersonSchema, generateBreadcrumbSchema } from '@/lib/seo'
 
 interface Props {
-  params: { username: string }
+  params: { id: string }
   children: React.ReactNode
 }
 
-// Generate dynamic metadata for each member
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createClient()
 
-  // Fetch member by username
   const { data: member } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', params.username)
+    .eq('id', params.id)
     .single()
 
   if (!member) {
@@ -32,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: member.bio || `${member.full_name || member.username} - Member of The Noders Community technology club`,
     keywords: ['team member', 'developer', 'PTNK student', ...skillsKeywords],
     image: member.avatar_url,
-    url: `/members/${member.username}`,
+    url: `/members/${member.id}`,
     type: 'profile',
   })
 }
@@ -40,21 +38,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function MemberLayout({ params, children }: Props) {
   return (
     <>
-      {/* Add JSON-LD structured data */}
-      <MemberStructuredData username={params.username} />
+      <MemberStructuredData id={params.id} />
       {children}
     </>
   )
 }
 
-// Server component to add structured data
-async function MemberStructuredData({ username }: { username: string }) {
+async function MemberStructuredData({ id }: { id: string }) {
   const supabase = createClient()
 
   const { data: member } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', username)
+    .eq('id', id)
     .single()
 
   if (!member) return null
@@ -64,28 +60,24 @@ async function MemberStructuredData({ username }: { username: string }) {
     username: member.username,
     bio: member.bio,
     image: member.avatar_url,
-    url: `/members/${member.username}`,
+    url: `/members/${member.id}`,
   })
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Members', url: '/members' },
-    { name: member.full_name || member.username, url: `/members/${member.username}` },
+    { name: member.full_name || member.username, url: `/members/${member.id}` },
   ])
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(personSchema)
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema)
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
     </>
   )

@@ -112,7 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .order('created_at', { ascending: false })
 
   const memberPages = (members || []).map((member) => ({
-    url: `${baseUrl}/members/${member.username}`,
+    url: `${baseUrl}/members/${member.id}`,
     lastModified: new Date(member.updated_at),
     changeFrequency: 'monthly' as const,
     priority: 0.6,

@@ -553,34 +553,22 @@ export const memberQueries = {
     return { members: sortedMembers, error: null }
   },
 
-  // Get single member by username
-  async getMember(username: string) {
-    const supabase = createClient()
-    const { data: member, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('username', username)
-      .single()
+  // Get single member by ID
+  async getMember(id: string) {
+    try {
+      const response = await fetch(`/api/members/${id}`)
+      const result = await response.json()
 
-    if (error || !member) {
-      return { member: null, error }
-    }
+      if (!response.ok || !result.success) {
+        return { member: null, error: { message: result.error || 'Failed to fetch member' } }
+      }
 
-    // Get project contributions for this member
-    const { data: contributions } = await supabase
-      .from('project_contributors')
-      .select(`
-        *,
-        projects(*)
-      `)
-      .eq('user_id', member.id)
-
-    return {
-      member: {
-        ...member,
-        contributed_projects: contributions || [],
-      },
-      error: null
+      return {
+        member: result.member,
+        error: null,
+      }
+    } catch (error) {
+      return { member: null, error: { message: 'Network error occurred' } }
     }
   },
 

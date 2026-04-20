@@ -243,17 +243,17 @@ export function useMembers(filters: MemberFilters = {}) {
 }
 
 // Single member hook
-export function useMember(username: string) {
+export function useMember(id: string) {
   const [member, setMember] = useState<ProfileWithProjects | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchMember = async () => {
-      if (!username) return
+      if (!id) return
       
       setLoading(true)
-      const { member, error } = await memberQueries.getMember(username)
+      const { member, error } = await memberQueries.getMember(id)
       
       if (error) {
         setError(error.message)
@@ -266,7 +266,7 @@ export function useMember(username: string) {
     }
 
     fetchMember()
-  }, [username])
+  }, [id])
 
   return { member, loading, error }
 }

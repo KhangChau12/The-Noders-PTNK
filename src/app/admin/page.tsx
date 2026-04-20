@@ -16,6 +16,7 @@ import {
   ThumbsUp,
   FileEdit,
   Award,
+  ClipboardList,
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
@@ -230,6 +231,30 @@ function AdminDashboardContent() {
                   </p>
                   <span className="text-primary-blue text-sm font-semibold flex items-center group-hover:translate-x-2 transition-transform">
                     Access Members <ArrowRight className="w-4 h-4 ml-1" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Activity Action Card */}
+          <Link href="/admin/activity" className="block group">
+            <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-orange/50 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-accent-orange/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-orange/20 transition-colors"></div>
+
+              <div className="p-8 relative z-10 flex items-start space-x-6">
+                <div className="p-4 bg-accent-orange/10 rounded-2xl group-hover:bg-accent-orange/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-orange/5">
+                  <ClipboardList className="w-10 h-10 text-accent-orange" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-orange transition-colors">
+                    Manage Activity Points
+                  </h3>
+                  <p className="text-text-secondary leading-relaxed mb-4">
+                    Create scored tasks, reuse old task templates, and assign points to multiple members.
+                  </p>
+                  <span className="text-accent-orange text-sm font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                    Open Activity Manager <ArrowRight className="w-4 h-4 ml-1" />
                   </span>
                 </div>
               </div>

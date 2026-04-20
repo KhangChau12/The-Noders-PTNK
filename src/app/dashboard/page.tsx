@@ -34,7 +34,7 @@ interface UserPost {
 
 function DashboardContent() {
   const { user, profile, loading } = useAuth()
-  const {member} = useMember(profile?.username || '') || null;
+  const {member} = useMember(profile?.id || '') || null;
   const [userPosts, setUserPosts] = useState<UserPost[]>([])
   const [postsLoading, setPostsLoading] = useState(true)
   const [certificatesCount, setCertificatesCount] = useState(0)

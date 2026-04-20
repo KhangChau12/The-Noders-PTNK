@@ -30,6 +30,12 @@ export interface MemberActivity {
   }[]
 }
 
+export interface MemberTaskActivity {
+  task_name: string
+  repetitions: number
+  total_points: number
+}
+
 export interface UpdateProfileData {
   full_name?: string
   username?: string

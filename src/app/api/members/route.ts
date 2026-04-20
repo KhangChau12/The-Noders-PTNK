@@ -76,6 +76,17 @@ export async function GET(request: NextRequest) {
       certCounts[cert.user_id] = (certCounts[cert.user_id] || 0) + 1
     })
 
+    // Fetch task points for members
+    const { data: taskPointRows } = await supabase
+      .from('task_log_members')
+      .select('member_id, points')
+      .in('member_id', memberIds)
+
+    const totalPointsMap: Record<string, number> = {}
+    taskPointRows?.forEach(row => {
+      totalPointsMap[row.member_id] = (totalPointsMap[row.member_id] || 0) + (row.points || 0)
+    })
+
     // Fetch emails from auth.users using admin client
     const { data: usersData } = await supabase.auth.admin.listUsers()
     const emailMap: Record<string, string> = {}
@@ -93,6 +104,7 @@ export async function GET(request: NextRequest) {
       posts_count: postCounts[member.id] || 0,
       certificate_count: certCounts[member.id] || 0,
       total_post_views: postViewCounts[member.id] || 0,
+      total_points: totalPointsMap[member.id] || 0,
       total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)
     }))
 

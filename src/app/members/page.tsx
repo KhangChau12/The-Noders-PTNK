@@ -114,7 +114,7 @@ export default function MembersPage() {
             ) : members && members.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {members.map((member) => {
-                  const projectCount = member.contributed_projects?.length || 0;
+                  const totalPoints = member.total_points || 0;
                   const postCount = member.posts_count || 0;
                   const certCount = member.certificate_count || 0;
                   const totalViews = member.total_post_views || 0;
@@ -125,7 +125,7 @@ export default function MembersPage() {
 
                   return (
                     <div key={member.id}>
-                      <Link href={`/members/${member.username}`} className="block">
+                      <Link href={`/members/${member.id}`} className="block">
                         <Card variant="interactive" className={`h-68 group hover-lift relative overflow-hidden transition-all duration-300 border-dark-border ${member.role === 'admin' ? 'hover:border-primary-blue/60' : 'hover:border-text-secondary/40'}`}>
 
                           {/* Admin Badge - Top Right */}
@@ -167,9 +167,9 @@ export default function MembersPage() {
                               {/* Stats boxes - 3 columns */}
                               <div className="grid grid-cols-3 gap-2">
                                 <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-primary-blue/5 transition-colors">
-                                  <span className="text-lg font-bold text-text-primary tabular-nums">{projectCount}</span>
+                                  <span className="text-lg font-bold text-text-primary tabular-nums">{totalPoints}</span>
                                   <span className="text-[10px] text-text-tertiary font-medium flex items-center gap-1">
-                                    <Users className="w-3 h-3" /> Projects
+                                    <Award className="w-3 h-3" /> Points
                                   </span>
                                 </div>
                                 <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-dark-bg/30 group-hover:bg-accent-cyan/5 transition-colors">

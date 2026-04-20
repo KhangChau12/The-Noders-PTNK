@@ -355,7 +355,7 @@ export default function VerifyResultPage() {
               )}
 
               {/* View Profile Button */}
-              <Link href={`/members/${member?.username}`} className="block">
+              <Link href={`/members/${member?.id}`} className="block">
                 <Button variant="secondary" size="sm" className="w-full">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   {t.viewProfile}

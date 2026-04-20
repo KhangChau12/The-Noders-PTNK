@@ -16,6 +16,21 @@ export interface Database {
         Insert: Omit<ProjectContributor, 'id' | 'created_at'>
         Update: Partial<Omit<ProjectContributor, 'id' | 'created_at'>>
       }
+      task_templates: {
+        Row: ActivityTaskTemplate
+        Insert: Omit<ActivityTaskTemplate, 'id'>
+        Update: Partial<Omit<ActivityTaskTemplate, 'id'>>
+      }
+      task_logs: {
+        Row: ActivityTaskLog
+        Insert: Omit<ActivityTaskLog, 'id'>
+        Update: Partial<Omit<ActivityTaskLog, 'id'>>
+      }
+      task_log_members: {
+        Row: ActivityTaskMember
+        Insert: Omit<ActivityTaskMember, 'id'>
+        Update: Partial<Omit<ActivityTaskMember, 'id'>>
+      }
     }
   }
 }
@@ -86,6 +101,39 @@ export interface ProfileWithProjects extends Profile {
   certificate_count?: number
   total_post_views?: number
   total_contributions?: number
+  total_points?: number
+  task_stats?: MemberTaskStat[]
+}
+
+export interface MemberTaskStat {
+  task_name: string
+  repetitions: number
+  total_points: number
+}
+
+// =====================================================
+// ACTIVITY TASK TYPES
+// =====================================================
+
+export interface ActivityTaskTemplate {
+  id: string
+  name: string
+  description: string
+}
+
+export interface ActivityTaskLog {
+  id: string
+  task_template_id: string | null
+  task_name: string
+  task_description: string
+  points: number
+}
+
+export interface ActivityTaskMember {
+  id: string
+  task_log_id: string
+  member_id: string
+  points: number
 }
 
 // =====================================================
