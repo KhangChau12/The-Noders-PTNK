@@ -34,7 +34,11 @@ const sessionData: Record<number, SessionData> = {
     docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSA4oO7kdPIkTDd5OUd0bMxwBMkqLhU27y5eR9iz2ymTjPUQRCvDpQ6DTGO4Xl_fK1IcyV6ZVlkfgAW/pub?embedded=true', 
     colabUrl: 'https://colab.research.google.com/drive/1lD1AMTLALgHB4AQ8DjQ94N3iBSpeACoO?usp=sharing' 
   },
-  4: { canvaUrl: null, youtubeUrl: null, docsUrl: null, colabUrl: null },
+  4: { 
+    canvaUrl: 'https://www.canva.com/design/DAG8VnHsx_8/99IxQ-xH48xY4hfG9USddg/view?embed', 
+    youtubeUrl: 'https://www.youtube.com/embed/TvU_e2Kvp_Y', 
+    docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vScKMjc_YQMo-s-3-8wdkhTGyg8-0yN4ti52thiyH3EQ1B6sb6FP4pGI8kMI4iY2Q5jmsB6qjFxK56U/pub?embedded=true', 
+    colabUrl: 'https://colab.research.google.com/drive/1zKTsGbxZC97R6mrROg6V4F5hZKPDGmW6?usp=sharing' },
 }
 
 const sessionDates: Record<number, string> = {

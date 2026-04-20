@@ -12,7 +12,7 @@ import { MemberFilters } from "@/types/member";
 import { Avatar } from "@/components/Avatar";
 import { ClickableBadge } from "@/components/ClickableBadge";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { Search, Award, FileText, Calendar, ClipboardList, Sparkles } from "lucide-react";
+import { Search, Award, FileText, Calendar, ClipboardList } from "lucide-react";
 
 
 export default function MembersPage() {
@@ -39,10 +39,6 @@ export default function MembersPage() {
         <div className="container mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary-blue/30 bg-primary-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-blue mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              The Noders Community
-            </div>
             <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
               Meet Our Team
             </h1>
