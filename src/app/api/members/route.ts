@@ -110,10 +110,13 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ [API] Returning ${membersWithData.length} members`)
 
-    // Sort: Admins first, then by total contributions
+    // Sort: Admins first, then by total points
     const sortedMembers = membersWithData.sort((a, b) => {
       if (a.role === 'admin' && b.role !== 'admin') return -1
       if (a.role !== 'admin' && b.role === 'admin') return 1
+      if ((b.total_points || 0) !== (a.total_points || 0)) {
+        return (b.total_points || 0) - (a.total_points || 0)
+      }
       return b.total_contributions - a.total_contributions
     })
 

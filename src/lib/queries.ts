@@ -520,6 +520,17 @@ export const memberQueries = {
       postCounts[post.author_id] = (postCounts[post.author_id] || 0) + 1
     })
 
+    // Fetch task points for all members in one query
+    const { data: taskPoints } = await supabase
+      .from('task_log_members')
+      .select('member_id, points')
+      .in('member_id', memberIds)
+
+    const totalPointsMap: Record<string, number> = {}
+    taskPoints?.forEach(row => {
+      totalPointsMap[row.member_id] = (totalPointsMap[row.member_id] || 0) + (row.points || 0)
+    })
+
     // Fetch emails from auth.users for all members in one query
     const { data: users } = await supabase.auth.admin.listUsers()
     const emailMap: Record<string, string> = {}
@@ -535,18 +546,25 @@ export const memberQueries = {
       email: emailMap[member.id] || null,
       contributed_projects: Array(contributionCounts[member.id] || 0).fill({}), // Fake array with correct length
       posts_count: postCounts[member.id] || 0,
+      total_points: totalPointsMap[member.id] || 0,
       total_contributions: (contributionCounts[member.id] || 0) + (postCounts[member.id] || 0)
     }))
 
     // Custom sorting:
     // 1. Admins first, then members
-    // 2. Within each group, sort by total contributions (projects + posts) descending
+    // 2. Within each group, sort by total points descending
+    // 3. Fallback to total contributions descending
     const sortedMembers = membersWithCounts.sort((a, b) => {
       // First, sort by role (admin first)
       if (a.role === 'admin' && b.role !== 'admin') return -1
       if (a.role !== 'admin' && b.role === 'admin') return 1
 
-      // Then, within same role, sort by total contributions (descending)
+      // Then, within same role, sort by points (descending)
+      if ((b.total_points || 0) !== (a.total_points || 0)) {
+        return (b.total_points || 0) - (a.total_points || 0)
+      }
+
+      // Fallback to total contributions (descending)
       return b.total_contributions - a.total_contributions
     })
 

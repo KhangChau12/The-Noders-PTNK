@@ -120,10 +120,17 @@ export async function GET(request: NextRequest) {
       templateUsage.set(log.task_template_id, (templateUsage.get(log.task_template_id) || 0) + 1)
     })
 
-    const templates = (templatesResult.data || []).map((template: any) => ({
-      ...template,
-      usage_count: templateUsage.get(template.id) || 0,
-    }))
+    const templates = (templatesResult.data || [])
+      .map((template: any) => ({
+        ...template,
+        usage_count: templateUsage.get(template.id) || 0,
+      }))
+      .sort((a: any, b: any) => {
+        if (b.usage_count !== a.usage_count) {
+          return b.usage_count - a.usage_count
+        }
+        return a.name.localeCompare(b.name)
+      })
 
     return NextResponse.json({
       success: true,
