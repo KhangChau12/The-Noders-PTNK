@@ -1,0 +1,10 @@
+Graphify quick guide (Windows + VS Code Copilot Chat)
+1) Cai 1 lan toan may: uv tool install graphifyy
+2) Moi repo can bat always-on: graphify vscode install
+3) Tao/cap nhat graph code nhanh: graphify update .
+4) Hoi graph trong terminal: graphify query "show the auth flow"
+5) Doc tong quan: mo graphify-out/GRAPH_REPORT.md, xem do thi tai graphify-out/graph.html
+
+Ghi chu:
+- Neu graphify khong nhan, mo terminal moi hoac them PATH: C:\Users\Admin\.local\bin
+- VS Code Copilot Chat se tu doc .github/copilot-instructions.md sau khi cai vscode install.

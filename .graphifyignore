@@ -1,0 +1,9 @@
+node_modules/
+.next/
+graphify-out/cache/
+*.log
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.gemini/
+.opencode/

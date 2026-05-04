@@ -25,6 +25,7 @@ import {
 import { useToast } from '@/components/Toast'
 import { useConfirm } from '@/components/ConfirmDialog'
 import { ImageUpload } from '@/components/ImageUpload'
+import { PdfUpload } from '@/components/PdfUpload'
 import type { Profile } from '@/types/database'
 import Link from 'next/link'
 
@@ -484,13 +485,60 @@ function CertificateModal({
                 </div>
               )}
 
-              <ImageUpload
-                value={uploadedImage}
-                onChange={handleImageChange}
-                usage="certificate"
-                placeholder="Upload Certificate Image"
-                maxSize={10 * 1024 * 1024}
-              />
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  File Type
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (formData.file_type !== 'image') {
+                        setFormData(prev => ({ ...prev, file_type: 'image', image_id: '', file_url: '' }))
+                        setUploadedImage(null)
+                      }
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
+                      formData.file_type === 'image'
+                        ? 'bg-primary-blue border-primary-blue text-white'
+                        : 'border-dark-border text-text-secondary hover:border-text-tertiary'
+                    }`}
+                  >
+                    Image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (formData.file_type !== 'pdf') {
+                        setFormData(prev => ({ ...prev, file_type: 'pdf', image_id: '', file_url: '' }))
+                        setUploadedImage(null)
+                      }
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
+                      formData.file_type === 'pdf'
+                        ? 'bg-primary-blue border-primary-blue text-white'
+                        : 'border-dark-border text-text-secondary hover:border-text-tertiary'
+                    }`}
+                  >
+                    PDF
+                  </button>
+                </div>
+              </div>
+
+              {formData.file_type === 'image' ? (
+                <ImageUpload
+                  value={uploadedImage}
+                  onChange={handleImageChange}
+                  usage="certificate"
+                  placeholder="Upload Certificate Image"
+                  maxSize={10 * 1024 * 1024}
+                />
+              ) : (
+                <PdfUpload
+                  value={uploadedImage}
+                  onChange={handleImageChange}
+                />
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">

@@ -14,7 +14,8 @@ import {
   Copy,
   Download,
   ArrowLeft,
-  BadgeCheck
+  BadgeCheck,
+  FileText
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -145,7 +146,14 @@ export default function MyCertificatesPage() {
                   <div className="flex flex-col sm:flex-row h-full">
                   {/* Certificate Preview */}
                   <div className="relative overflow-hidden border-b sm:border-b-0 sm:border-r border-dark-border/80 bg-black/20 sm:w-[58%] min-h-[195px] sm:min-h-full">
-                    {cert.image?.public_url || cert.file_url ? (
+                    {cert.file_type === 'pdf' && (cert.image?.public_url || cert.file_url) ? (
+                      <div className="absolute inset-0 flex items-center justify-center flex-col gap-3 bg-dark-bg/50">
+                        <div className="w-16 h-16 flex items-center justify-center bg-error/10 rounded-xl">
+                          <FileText className="w-8 h-8 text-error" />
+                        </div>
+                        <span className="text-sm text-text-secondary font-medium">PDF Certificate</span>
+                      </div>
+                    ) : cert.image?.public_url || cert.file_url ? (
                       <Image
                         src={cert.image?.public_url || cert.file_url || ''}
                         alt={cert.title}
