@@ -14,11 +14,13 @@ import { Avatar } from '@/components/Avatar'
 import {
   ArrowLeft,
   Award,
+  BadgeCheck,
   Calendar,
   Clock,
   BookOpen,
   Users,
   ChevronDown,
+  ExternalLink,
   FileText,
   Github,
   Linkedin,
@@ -47,40 +49,58 @@ function MemberCertificates({ certificates }: { certificates: Certificate[] }) {
             <Award className="w-5 h-5 text-accent-purple" />
             Certificates & Achievements
           </h3>
-          <Badge variant="secondary" className="bg-accent-purple/10 text-accent-purple border-accent-purple/20">
-            {hasCertificates ? certificates.length : 0} Verified
-          </Badge>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-medium text-emerald-400">
+              {hasCertificates ? certificates.length : 0} Verified
+            </span>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         {hasCertificates ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
             {certificates.map((cert) => (
-              <Link key={cert.id} href={`/verify/${cert.certificate_id}`}>
-                <div className="bg-dark-bg p-4 rounded-xl border border-dark-border hover:border-accent-purple/50 transition-all group">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-accent-purple/10 flex items-center justify-center group-hover:bg-accent-purple/20 transition-colors">
+              <Link key={cert.id} href={`/verify/${cert.certificate_id}`} className="h-full">
+                <div className="group relative h-full bg-dark-bg rounded-xl border border-dark-border overflow-hidden transition-all duration-300 hover:border-accent-purple/40 hover:[box-shadow:0_0_20px_-4px_rgba(139,92,246,0.35)]">
+                  {/* left accent bar */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-accent-purple via-indigo-500 to-accent-purple/30 rounded-l-xl" />
+
+                  <div className="flex items-center gap-4 p-4 pl-5 h-full">
+                    {/* icon */}
+                    <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-accent-purple/20 to-indigo-500/20 border border-accent-purple/20 flex items-center justify-center group-hover:from-accent-purple/30 group-hover:to-indigo-500/30 transition-colors">
                       <Award className="w-5 h-5 text-accent-purple" />
                     </div>
-                    <Badge variant="outline" size="sm" className="font-mono text-xs">
-                      {cert.certificate_id}
-                    </Badge>
+
+                    {/* text */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                      <h4 className="text-text-primary font-semibold text-sm leading-snug line-clamp-2 group-hover:text-accent-purple transition-colors">
+                        {cert.title}
+                      </h4>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-[10px] text-text-tertiary bg-dark-surface px-1.5 py-0.5 rounded border border-dark-border truncate max-w-[120px]">
+                          {cert.certificate_id}
+                        </span>
+                        <span className="text-[10px] text-text-tertiary whitespace-nowrap flex-shrink-0">
+                          {new Date(cert.issued_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* external link indicator */}
+                    <ExternalLink className="w-3.5 h-3.5 text-text-tertiary opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity" />
                   </div>
-                  <h4 className="text-text-primary font-medium group-hover:text-accent-purple transition-colors line-clamp-1">
-                    {cert.title}
-                  </h4>
-                  <p className="text-text-tertiary text-xs mt-1">Issued {new Date(cert.issued_at).toLocaleDateString()}</p>
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 rounded-full bg-dark-bg border border-dark-border flex items-center justify-center mx-auto mb-3">
-              <Award className="w-6 h-6 text-text-tertiary opacity-50" />
+          <div className="flex flex-col items-center justify-center py-10 rounded-xl border-2 border-dashed border-dark-border">
+            <div className="w-14 h-14 rounded-full bg-dark-surface border border-dark-border flex items-center justify-center mb-4">
+              <Award className="w-7 h-7 text-text-tertiary opacity-40" />
             </div>
             <h4 className="text-text-primary font-medium mb-1">No Certificates Yet</h4>
-            <p className="text-text-tertiary text-sm max-w-sm mx-auto">
+            <p className="text-text-tertiary text-sm max-w-xs text-center">
               This member hasn't added any certificates or achievements.
             </p>
           </div>
@@ -458,8 +478,12 @@ export default function MemberProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <Card>
-              <CardContent className="text-center p-8">
+            <Card className="overflow-hidden">
+              {/* decorative glow orbs */}
+              <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-primary-blue/35 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent-purple/35 blur-3xl pointer-events-none" />
+
+              <CardContent className="relative text-center p-8">
                 <div className="relative mx-auto mb-6 flex justify-center">
                   <Avatar
                     name={member.full_name}
@@ -467,11 +491,6 @@ export default function MemberProfilePage() {
                     size="xl"
                     className="w-32 h-32"
                   />
-                  {member.role === 'admin' && (
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center">
-                      <Award className="w-4 h-4 text-white" />
-                    </div>
-                  )}
                 </div>
 
                 <h1 className="text-2xl font-bold text-text-primary mb-2">{member.full_name || member.username}</h1>
