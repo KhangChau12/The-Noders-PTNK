@@ -243,13 +243,13 @@ export function DataScienceModule1Content() {
         </div>
 
         {/* Hero Section */}
-        <section className="py-8 px-4 sm:px-6 lg:px-8">
+        <section className="py-6 md:py-8 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
               <Badge variant="warning" className="mb-4">
                 {loc(t.hero.badge)}
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-4">
                 <span className="gradient-text">{loc(t.hero.title.prefix)}</span>
                 <br />
                 <span className="text-text-primary">{loc(t.hero.title.suffix)}</span>
@@ -276,7 +276,7 @@ export function DataScienceModule1Content() {
         </section>
 
         {/* Lecture Video Carousel */}
-        <section id="lectures" className="py-12 px-4 sm:px-6 lg:px-8 relative">
+        <section id="lectures" className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 relative">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
               <LectureVideoCarousel videos={lectureVideos} lang={lang} />
@@ -285,10 +285,10 @@ export function DataScienceModule1Content() {
         </section>
 
         {/* Detailed Curriculum */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary mb-6 md:mb-8 text-center">
                 {loc(t.curriculum.heading)}
               </h2>
 
@@ -302,7 +302,7 @@ export function DataScienceModule1Content() {
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row h-full">
                           {/* Left Column: Header */}
-                          <div className={`md:w-1/3 xl:w-1/4 p-6 md:p-8 bg-gradient-to-br ${session.gradient} relative overflow-hidden flex flex-col justify-between`}>
+                          <div className={`md:w-1/3 xl:w-1/4 p-4 sm:p-6 md:p-8 bg-gradient-to-br ${session.gradient} relative overflow-hidden flex flex-col justify-between`}>
                             {/* Giant Background Icon */}
                             <div className="absolute -bottom-6 -right-6 text-white text-opacity-10 rotate-12 z-0 pointer-events-none origin-bottom-right">
                               <div className="transform scale-[8] opacity-10">
@@ -325,7 +325,7 @@ export function DataScienceModule1Content() {
                                 <span className="text-sm font-medium text-white/80 uppercase tracking-widest">{loc(t.curriculum.sessionLabel)}</span>
                               </div>
                               
-                              <h3 className="text-2xl font-bold text-white mb-4 leading-tight">
+                              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 leading-tight">
                                 {session.title}
                               </h3>
 
@@ -337,8 +337,8 @@ export function DataScienceModule1Content() {
                           </div>
 
                           {/* Right Column: Content */}
-                          <div className="md:w-2/3 xl:w-3/4 p-6 md:p-8 bg-dark-bg/20">
-                             <div className="flex items-center mb-6">
+                          <div className="md:w-2/3 xl:w-3/4 p-4 sm:p-6 md:p-8 bg-dark-bg/20">
+                             <div className="flex items-center mb-4 md:mb-6">
                                 <Badge variant="default" className="text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
                                   {loc(t.curriculum.topicsLabel)}
                                 </Badge>
@@ -349,7 +349,7 @@ export function DataScienceModule1Content() {
                                 </span>
                              </div>
 
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-4 sm:gap-y-6">
                               {session.topics.map((topic, topicIndex) => (
                                 <div key={topicIndex} className="group/topic">
                                   <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center group-hover/topic:text-primary-blue transition-colors">
@@ -380,14 +380,14 @@ export function DataScienceModule1Content() {
         </section>
 
         {/* Course Ended Notice */}
-        <section id="register" className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section id="register" className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-2xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/30 text-warning text-sm font-semibold mb-6">
                 <CheckCircle className="w-4 h-4" />
                 {loc(t.registration.ended.badge)}
               </div>
-              <h2 className="text-3xl font-bold text-text-primary mb-4">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary mb-4">
                 {loc(t.registration.ended.heading)}
               </h2>
               <p className="text-text-secondary leading-relaxed">
