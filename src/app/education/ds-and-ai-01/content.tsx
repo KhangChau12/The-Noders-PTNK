@@ -10,15 +10,7 @@ import {
   ArrowLeft,
   Users,
   Calendar,
-  Target,
-  BookOpen,
-  CheckCircle,
-  Building2,
   Clock,
-  FileText,
-  Download,
-  Presentation,
-  Code,
   Brain,
   Database,
   Eye,
@@ -26,9 +18,10 @@ import {
   BarChart3,
   Zap,
   Layers,
-  Search
+  CheckCircle
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
+import { LectureVideoCarousel } from '@/components/education/LectureVideoCarousel'
 
 export function DataScienceModule1Content() {
   const { lang, setLang, localize } = useLanguage()
@@ -150,6 +143,41 @@ export function DataScienceModule1Content() {
     }
   ]
 
+  const lectureVideos = [
+    {
+      sessionNumber: 1,
+      title: loc(t.lectureVideos.sessions[0].title),
+      date: '05/04/2026',
+      youtubeEmbedUrl: 'https://www.youtube.com/embed/vGEgixKR8lA',
+      sessionUrl: '/education/ds-and-ai-01/session/1',
+      gradient: 'from-primary-blue/30 to-accent-cyan/20',
+    },
+    {
+      sessionNumber: 2,
+      title: loc(t.lectureVideos.sessions[1].title),
+      date: '08/04/2026',
+      youtubeEmbedUrl: 'https://www.youtube.com/embed/81h3Bysu6oc',
+      sessionUrl: '/education/ds-and-ai-01/session/2',
+      gradient: 'from-accent-cyan/30 to-primary-blue/20',
+    },
+    {
+      sessionNumber: 3,
+      title: loc(t.lectureVideos.sessions[2].title),
+      date: '12/04/2026',
+      youtubeEmbedUrl: 'https://www.youtube.com/embed/jSQLXLTBEhE',
+      sessionUrl: '/education/ds-and-ai-01/session/3',
+      gradient: 'from-success/30 to-accent-cyan/20',
+    },
+    {
+      sessionNumber: 4,
+      title: loc(t.lectureVideos.sessions[3].title),
+      date: '15/04/2026',
+      youtubeEmbedUrl: 'https://www.youtube.com/embed/TvU_e2Kvp_Y',
+      sessionUrl: '/education/ds-and-ai-01/session/4',
+      gradient: 'from-warning/30 to-success/20',
+    },
+  ]
+
   const learningOutcomes = [
     { 
       title: loc(t.outcomes.items[0].title), 
@@ -215,131 +243,43 @@ export function DataScienceModule1Content() {
         </div>
 
         {/* Hero Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto text-center">
-              <Badge variant="warning" className="mb-6">
+            <div className="max-w-4xl mx-auto text-center">
+              <Badge variant="warning" className="mb-4">
                 {loc(t.hero.badge)}
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4">
                 <span className="gradient-text">{loc(t.hero.title.prefix)}</span>
                 <br />
                 <span className="text-text-primary">{loc(t.hero.title.suffix)}</span>
               </h1>
-              <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base text-text-secondary mb-5 max-w-2xl mx-auto leading-relaxed">
                 {loc(t.hero.description)}
               </p>
-              <div className="flex flex-wrap justify-center gap-4 text-text-secondary mb-8">
+              <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-primary-blue" />
-                  <span>{loc(t.hero.stats.target)}</span>
+                  <Users className="w-4 h-4 text-primary-blue" />
+                  <span className="text-sm">{loc(t.hero.stats.target)}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5 text-primary-blue" />
-                  <span>{loc(t.hero.stats.date)}</span>
+                  <Calendar className="w-4 h-4 text-primary-blue" />
+                  <span className="text-sm">{loc(t.hero.stats.date)}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5 text-primary-blue" />
-                  <span>{loc(t.hero.stats.sessions)}</span>
+                  <Clock className="w-4 h-4 text-primary-blue" />
+                  <span className="text-sm">{loc(t.hero.stats.sessions)}</span>
                 </div>
               </div>
-              <a href="#register">
-                <Button variant="primary" className="px-8 py-3 text-base font-semibold">
-                  {loc(t.registration.heading)}
-                </Button>
-              </a>
             </div>
           </div>
         </section>
 
-        {/* Overview & Outcomes */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 relative">
+        {/* Lecture Video Carousel */}
+        <section id="lectures" className="py-12 px-4 sm:px-6 lg:px-8 relative">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
-              {/* Flex Container for Landscape Layout */}
-              <div className="flex flex-col xl:flex-row gap-8">
-                
-                {/* Overview Card */}
-                <div className="flex-1">
-                  <div className="relative group h-full">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary-blue to-accent-cyan rounded-2xl opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-500"></div>
-                    <Card className="relative overflow-hidden border-dark-border/40 bg-dark-surface/40 backdrop-blur-md h-full">
-                      <CardContent className="p-8">
-                        <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">
-                          {loc(t.overview.heading)}
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="flex flex-col items-center text-center p-4 rounded-xl bg-dark-surface/30 hover:bg-dark-surface/50 border border-transparent hover:border-primary-blue/20 transition-all">
-                            <div className="w-12 h-12 bg-primary-blue/10 rounded-full flex items-center justify-center text-primary-blue mb-3">
-                              <Target className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-sm font-bold text-text-primary mb-1">{loc(t.overview.cards.target.title)}</h3>
-                            <p className="text-text-secondary text-xs leading-relaxed">
-                             {loc(t.overview.cards.target.desc)}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col items-center text-center p-4 rounded-xl bg-dark-surface/30 hover:bg-dark-surface/50 border border-transparent hover:border-primary-blue/20 transition-all">
-                            <div className="w-12 h-12 bg-primary-blue/10 rounded-full flex items-center justify-center text-primary-blue mb-3">
-                              <BookOpen className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-sm font-bold text-text-primary mb-1">{loc(t.overview.cards.approach.title)}</h3>
-                            <p className="text-text-secondary text-xs leading-relaxed">
-                              {loc(t.overview.cards.approach.desc)}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col items-center text-center p-4 rounded-xl bg-dark-surface/30 hover:bg-dark-surface/50 border border-transparent hover:border-primary-blue/20 transition-all">
-                            <div className="w-12 h-12 bg-primary-blue/10 rounded-full flex items-center justify-center text-primary-blue mb-3">
-                              <Building2 className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-sm font-bold text-text-primary mb-1">{loc(t.overview.cards.organizers.title)}</h3>
-                            <p className="text-text-secondary text-xs leading-relaxed">
-                              {loc(t.overview.cards.organizers.desc)}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col items-center text-center p-4 rounded-xl bg-dark-surface/30 hover:bg-dark-surface/50 border border-transparent hover:border-primary-blue/20 transition-all">
-                            <div className="w-12 h-12 bg-primary-blue/10 rounded-full flex items-center justify-center text-primary-blue mb-3">
-                              <Clock className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-sm font-bold text-text-primary mb-1">{loc(t.overview.cards.duration.title)}</h3>
-                            <p className="text-text-secondary text-xs leading-relaxed">
-                              {loc(t.overview.cards.duration.desc)}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-
-                {/* Learning Outcomes Card */}
-                <div className="flex-1">
-                  <div className="relative group h-full">
-                    <div className="absolute inset-0 bg-gradient-to-br from-success to-accent-cyan rounded-2xl opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-500"></div>
-                    <Card className="relative overflow-hidden border-dark-border/40 bg-dark-surface/40 backdrop-blur-md h-full">
-                      <CardContent className="p-8">
-                        <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">
-                          {loc(t.outcomes.heading)}
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
-                          {learningOutcomes.map((outcome, index) => (
-                            <div key={index} className="flex flex-col items-center text-center p-4 rounded-xl bg-dark-surface/30 hover:bg-dark-surface/50 border border-transparent hover:border-white/10 transition-all h-full justify-center">
-                              <div className={`w-12 h-12 bg-white/5 rounded-full flex items-center justify-center ${outcome.color} mb-3 group-hover:scale-110 transition-transform`}>
-                                {outcome.icon}
-                              </div>
-                              <h3 className="text-sm font-bold text-text-primary mb-1">{outcome.title}</h3>
-                              <p className="text-text-secondary text-xs leading-relaxed">{outcome.desc}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-
-              </div>
+              <LectureVideoCarousel videos={lectureVideos} lang={lang} />
             </div>
           </div>
         </section>
@@ -351,9 +291,6 @@ export function DataScienceModule1Content() {
               <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
                 {loc(t.curriculum.heading)}
               </h2>
-              <p className="text-text-secondary text-center mb-12">
-                {loc(t.curriculum.subheading)}
-              </p>
 
               <div className="space-y-8">
                 {sessions.map((session, index) => (
@@ -442,124 +379,20 @@ export function DataScienceModule1Content() {
           </div>
         </section>
 
-        {/* Course Material */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
-                {loc(t.materials.heading)}
-              </h2>
-
-              <div className="space-y-12">
-                {/* Lecture Notes */}
-                <div>
-                  <h3 className="text-xl font-bold text-text-primary mb-6 flex items-center">
-                    <FileText className="w-6 h-6 mr-3 text-primary-blue" />
-                    {loc(t.materials.sections.notes.title)}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[1, 2, 3, 4].map((num) => (
-                      <div key={`note-${num}`} className="group relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary-blue to-accent-cyan rounded-xl opacity-20 blur-md group-hover:opacity-40 transition-opacity duration-300"></div>
-                        <Card className="relative h-full bg-dark-bg/80 backdrop-blur-sm border-primary-blue/30 hover:border-primary-blue/60 transition-colors">
-                          <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                            <div className="w-12 h-12 rounded-full bg-primary-blue/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                              <FileText className="w-6 h-6 text-primary-blue" />
-                            </div>
-                            <span className="text-text-primary font-bold text-lg mb-1">{loc(t.materials.sections.notes.itemPrefix)} {num}</span>
-                            <span className="text-text-secondary text-sm">{loc(t.materials.sections.notes.sub)}</span>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Teaching Slides */}
-                <div>
-                  <h3 className="text-xl font-bold text-text-primary mb-6 flex items-center">
-                    <Presentation className="w-6 h-6 mr-3 text-accent-cyan" />
-                    {loc(t.materials.sections.slides.title)}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[1, 2, 3, 4].map((num) => (
-                      <div key={`slide-${num}`} className="group relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan to-primary-blue rounded-xl opacity-20 blur-md group-hover:opacity-40 transition-opacity duration-300"></div>
-                        <Card className="relative h-full bg-dark-bg/80 backdrop-blur-sm border-accent-cyan/30 hover:border-accent-cyan/60 transition-colors">
-                          <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full">
-                            <div className="w-12 h-12 rounded-full bg-accent-cyan/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                              <Presentation className="w-6 h-6 text-accent-cyan" />
-                            </div>
-                            <span className="text-text-primary font-bold text-lg mb-1">{loc(t.materials.sections.slides.itemPrefix)} {num}</span>
-                            <span className="text-text-secondary text-sm">{loc(t.materials.sections.slides.sub)}</span>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Practice Notebooks */}
-                <div>
-                  <h3 className="text-xl font-bold text-text-primary mb-6 flex items-center">
-                    <Code className="w-6 h-6 mr-3 text-success" />
-                    {loc(t.materials.sections.notebooks.title)}
-                  </h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {t.materials.sections.notebooks.items.map((item, idx) => (
-                      <Card key={idx} variant="hover" className={`hover-lift bg-gradient-to-br ${idx === 0 ? 'from-primary-blue/10 to-accent-cyan/5 border-primary-blue/30' : idx === 1 ? 'from-accent-cyan/10 to-primary-blue/5 border-accent-cyan/30' : 'from-success/10 to-accent-cyan/5 border-success/30'} h-full`}>
-                        <CardContent className="p-6 flex flex-col h-full">
-                          <div className="flex items-start space-x-4 mb-4">
-                            <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${idx === 0 ? 'from-primary-blue/30 to-accent-cyan/20 border-primary-blue/40 text-primary-blue' : idx === 1 ? 'from-accent-cyan/30 to-primary-blue/20 border-accent-cyan/40 text-accent-cyan' : 'from-success/30 to-accent-cyan/20 border-success/40 text-success'} border rounded-xl flex items-center justify-center`}>
-                              <Code className="w-6 h-6" />
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                              <p className="text-lg font-bold text-text-primary font-mono mb-2 truncate" title={item.title}>
-                                {item.title}
-                              </p>
-                              <p className="text-sm text-text-secondary">
-                                {loc(item.sub)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="pt-4 border-t border-dark-border/30 mt-auto">
-                            <p className="text-xs text-text-secondary">
-                              {loc(item.desc)}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Registration Form */}
+        {/* Course Ended Notice */}
         <section id="register" className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
-            <div className="max-w-5xl mx-auto text-center">
-              <h2 className="text-3xl font-bold text-text-primary mb-4">
-                {loc(t.registration.heading)}
-              </h2>
-              <p className="text-text-secondary mb-8">
-                {loc(t.registration.subheading)}
-              </p>
-              <div className="overflow-x-auto flex justify-center">
-                <iframe
-                  src="https://docs.google.com/forms/d/e/1FAIpQLSeZ3Z6GB-bRbK_6RYOdpqVCZTpbwT_InYgbaLW7D6qxPcvWpg/viewform?embedded=true"
-                  width="900"
-                  height="2400"
-                  frameBorder="0"
-                  marginHeight={0}
-                  marginWidth={0}
-                  style={{ width: '100%', minWidth: '320px' }}
-                >
-                  Đang tải…
-                </iframe>
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/30 text-warning text-sm font-semibold mb-6">
+                <CheckCircle className="w-4 h-4" />
+                {loc(t.registration.ended.badge)}
               </div>
+              <h2 className="text-3xl font-bold text-text-primary mb-4">
+                {loc(t.registration.ended.heading)}
+              </h2>
+              <p className="text-text-secondary leading-relaxed">
+                {loc(t.registration.ended.subheading)}
+              </p>
             </div>
           </div>
         </section>

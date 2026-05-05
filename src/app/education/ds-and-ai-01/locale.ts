@@ -2,14 +2,14 @@
 export const translations = {
   hero: {
     backButton: { en: "Back to Education", vi: "Trở về trang Giáo dục" },
-    badge: { en: "Mini-Course • Coming Soon", vi: "Khóa học ngắn • Sắp ra mắt" },
+    badge: { en: "Mini-Course • Ended", vi: "Khóa học ngắn • Đã kết thúc" },
     title: {
       prefix: { en: "Introduction to Data Science and", vi: "Introduction to Data Science and" },
       suffix: { en: "Artificial Intelligence", vi: "Artificial Intelligence" }
     },
-    description: { 
-      en: "Build a solid foundation in data science thinking and gain comprehensive knowledge of the 3 pillars of data (Structured Data, Computer Vision, NLP). This course focuses on problem fundamentals, standard data processing workflows, and practical applications to give you the most hands-on perspective of the field.", 
-      vi: "Xây dựng nền tảng tư duy khoa học dữ liệu vững chắc và nắm bắt kiến thức toàn diện về 3 trụ cột dữ liệu (Dữ liệu có cấu trúc, Thị giác máy tính, NLP). Khóa học tập trung vào bản chất vấn đề, quy trình xử lý chuẩn và ứng dụng thực tế để mang lại góc nhìn trực quan nhất." 
+    description: {
+      en: "A foundation course covering the 3 pillars of data — Structured Data, Computer Vision, and NLP — organized by The Noders Community × PRISEE.",
+      vi: "Khóa học nền tảng bao quát 3 trụ cột dữ liệu — Dữ liệu có cấu trúc, Thị giác máy tính và NLP — do The Noders Community × PRISEE tổ chức."
     },
     stats: {
       target: { en: "High School Students (Grade 10-11)", vi: "Học sinh THPT (Lớp 10-11)" },
@@ -163,7 +163,24 @@ export const translations = {
   },
   registration: {
     heading: { en: "Register Now", vi: "Đăng ký tham gia" },
-    subheading: { en: "Fill out the form below to register for the course", vi: "Điền vào form bên dưới để đăng ký tham gia khóa học" }
+    subheading: { en: "Fill out the form below to register for the course", vi: "Điền vào form bên dưới để đăng ký tham gia khóa học" },
+    ended: {
+      badge: { en: "Course Ended", vi: "Khóa học đã kết thúc" },
+      heading: { en: "This course has ended", vi: "Khóa học đã kết thúc" },
+      subheading: {
+        en: "Thank you to all participants! All 4 sessions have been recorded — you can watch them back anytime via the lecture recordings carousel above or by visiting each session's detail page.",
+        vi: "Cảm ơn tất cả các bạn đã tham gia! Toàn bộ 4 buổi học đã được ghi lại — bạn có thể xem lại bất cứ lúc nào qua phần video bài giảng phía trên hoặc vào từng trang buổi học."
+      }
+    }
+  },
+  lectureVideos: {
+    heading: { en: "Lecture Recordings", vi: "Video bài giảng" },
+    sessions: [
+      { title: { en: "Data Science Thinking & Standard Workflows", vi: "Tư duy Khoa học Dữ liệu & Quy trình chuẩn" } },
+      { title: { en: "Data Processing & Visualization", vi: "Xử lý & Trực quan hóa Dữ liệu" } },
+      { title: { en: "Computer Vision & Basic Machine Learning", vi: "Thị giác máy tính & Học máy cơ bản" } },
+      { title: { en: "Natural Language Processing & Model Evaluation", vi: "Xử lý Ngôn ngữ tự nhiên & Đánh giá mô hình" } }
+    ]
   },
   materials: {
     heading: { en: "Course Material", vi: "Tài liệu khóa học" },
