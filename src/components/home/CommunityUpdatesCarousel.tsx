@@ -3,10 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Button } from '@/components/Button'
 import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
-import { Calendar, Clock, ChevronLeft, ChevronRight, Eye, Newspaper, ArrowRight } from 'lucide-react'
+import { Calendar, Clock, ChevronLeft, ChevronRight, Eye, Newspaper } from 'lucide-react'
 
 type CommunityPost = {
   id: string
@@ -159,53 +158,29 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-dark-border/70 bg-gradient-to-br from-dark-surface/80 to-dark-bg/90 shadow-2xl shadow-primary-blue/5">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.12),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.1),_transparent_30%)]" />
+    <div>
+      {/* Carousel with arrows flanking the left/right edges (hidden on touch) */}
+      <div className="relative">
+        {/* Left arrow — sits just inside the left edge, overlapping the strip */}
+        <button
+          type="button"
+          aria-label="Previous posts"
+          onClick={() => nudge('prev')}
+          className="absolute -left-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-dark-border bg-dark-surface/90 p-2.5 text-text-secondary shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue lg:flex"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
 
-      <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-4 sm:gap-4 sm:px-5 sm:pt-5 md:px-6 md:pt-6">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-blue mb-2">Community Feed</p>
-        </div>
+        {/* Right arrow */}
+        <button
+          type="button"
+          aria-label="Next posts"
+          onClick={() => nudge('next')}
+          className="absolute -right-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-dark-border bg-dark-surface/90 p-2.5 text-text-secondary shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue lg:flex"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/posts"
-            className="group hidden sm:inline-flex items-center gap-2 rounded-full border border-primary-blue/30 bg-dark-bg/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue"
-          >
-            View All Posts
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => nudge('prev')}
-            className="border border-dark-border/80 bg-dark-bg/60 backdrop-blur-md hover:bg-dark-border/60"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => nudge('next')}
-            className="border border-dark-border/80 bg-dark-bg/60 backdrop-blur-md hover:bg-dark-border/60"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="relative z-10 px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5 md:px-6 md:pb-6">
-        <div className="mb-3 flex sm:hidden justify-end">
-          <Link
-            href="/posts"
-            className="group inline-flex items-center gap-1.5 rounded-full border border-primary-blue/30 bg-dark-bg/60 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue"
-          >
-            View All Posts
-            <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-        </div>
         <div
           ref={scrollerRef}
           className={`no-scrollbar flex gap-4 sm:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
@@ -224,7 +199,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                 key={`${post.id}-${index}`}
                 variant="interactive"
                 padding="none"
-                className="group/card relative flex-shrink-0 overflow-hidden border border-dark-border/70 bg-dark-surface/95 shadow-xl shadow-black/10 w-[92%] sm:w-full md:w-[calc(50%-0.75rem)]"
+                className="group/card relative flex-shrink-0 overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:hover:-translate-y-1 w-[85%] xs:w-[78%] sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)]"
                 data-carousel-card="true"
                 aria-hidden={!isOriginal}
               >
@@ -289,12 +264,11 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
             )
           })}
         </div>
-
-        <div className="mt-4 flex flex-col items-start gap-2 text-xs text-text-tertiary sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <span>Drag with mouse or touch, or use arrows to move exactly one post each time.</span>
-          <span className="hidden sm:inline">Manual</span>
-        </div>
       </div>
+
+      <p className="mt-4 text-center text-xs text-text-tertiary sm:text-left">
+        Drag, swipe, or use the arrows to browse posts.
+      </p>
     </div>
   )
 }

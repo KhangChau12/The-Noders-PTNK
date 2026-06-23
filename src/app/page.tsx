@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/Button'
-import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { CounterAnimation } from '@/components/CounterAnimation'
 import { SITE_CONFIG } from '@/lib/constants'
@@ -59,6 +58,60 @@ interface NewsPost {
     height: number
     alt_text?: string
   }
+}
+
+// ---------------------------------------------------------------------------
+// Shared homepage primitives — one consistent visual system across all sections.
+// ---------------------------------------------------------------------------
+
+// Canonical "view all" link — small, lives in the section header on the right.
+function SectionCTA({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-text-secondary transition-colors duration-300 hover:text-primary-blue"
+    >
+      {label}
+      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+    </Link>
+  )
+}
+
+// Canonical section header: title + optional subtitle on the left, optional CTA
+// link(s) on the right of the same baseline row. One header per section.
+function SectionHeading({
+  title,
+  subtitle,
+  cta,
+}: {
+  title: string
+  subtitle?: string
+  cta?: { href: string; label: string } | { href: string; label: string }[]
+}) {
+  const ctas = cta ? (Array.isArray(cta) ? cta : [cta]) : []
+
+  return (
+    <div className="mb-8 sm:mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="max-w-2xl">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-2">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-text-secondary text-base sm:text-lg leading-relaxed">
+            {subtitle}
+          </p>
+        )}
+      </div>
+
+      {ctas.length > 0 && (
+        <div className="flex items-center gap-5">
+          {ctas.map((item) => (
+            <SectionCTA key={item.href} href={item.href} label={item.label} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // Revalidate every 60 seconds (ISR)
@@ -234,6 +287,55 @@ export default async function HomePage() {
     { label: 'Total Views', value: stats.totalViews, key: 'totalViews', icon: Eye }
   ]
 
+  // Programs (contests + courses) — single source so all cards share one layout.
+  const programs = [
+    {
+      kind: 'Contest',
+      icon: Target,
+      accent: 'text-accent-cyan',
+      badge: 'Public • Ended',
+      badgeVariant: 'primary' as const,
+      title: 'PTNK AI Challenge 2026',
+      description: 'Our flagship public competition. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.',
+      meta: [
+        { icon: Users, label: '24 Teams • 54 Participants' },
+        { icon: Calendar, label: '05 Jan - 18 Jan' },
+      ],
+      href: '/contest/paic-2026',
+      cta: 'View Results',
+    },
+    {
+      kind: 'Contest',
+      icon: Target,
+      accent: 'text-primary-blue',
+      badge: 'Internal • Ended',
+      badgeVariant: 'primary' as const,
+      title: 'Noders AI Competition 2025',
+      description: 'Our internal training ground where members sharpen AI skills through hands-on IELTS scoring challenges.',
+      meta: [
+        { icon: Users, label: '16 Participants' },
+        { icon: Calendar, label: 'Nov - Dec 2025' },
+      ],
+      href: '/contest/naic-2025',
+      cta: 'View Results',
+    },
+    {
+      kind: 'Course',
+      icon: BookOpen,
+      accent: 'text-accent-purple',
+      badge: 'Coming Soon',
+      badgeVariant: 'warning' as const,
+      title: 'Intro to Data Science',
+      description: 'Build a solid foundation in data science thinking. 4-session mini-course focused on fundamentals.',
+      meta: [
+        { icon: Users, label: 'Grade 10-11' },
+        { icon: Clock, label: '4 × 1.5h' },
+      ],
+      href: '/education/ds-and-ai-01',
+      cta: 'Learn More',
+    },
+  ]
+
   // Helper function to get project status badge variant
   const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
@@ -285,178 +387,144 @@ export default async function HomePage() {
       <NeuralNetworkBackground />
       <div className="min-h-screen relative z-10">
       {/* Hero & Stats Section */}
-      <section className="relative py-14 px-4 sm:px-6 sm:py-20 lg:px-8 overflow-hidden">
-        {/* Gradient background */}
+      <section className="relative py-12 px-4 sm:px-6 sm:py-16 lg:px-8 overflow-hidden">
+        {/* Single subtle gradient — lets the global neural-net background show through */}
         <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/10 to-dark-bg" />
-
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: `
-            linear-gradient(rgba(59, 130, 246, 0.5) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59, 130, 246, 0.5) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px'
-        }} />
 
         <div className="container mx-auto relative z-10">
           {/* Hero Content */}
-          <div className="text-center mb-10 md:mb-16 mx-auto">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.02] sm:leading-[0.95] font-[family-name:var(--font-shrikhand)] mb-4 px-2 break-words">
+          <div className="text-center mb-10 sm:mb-14 mx-auto">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] sm:leading-[0.95] font-[family-name:var(--font-shrikhand)] mb-5 px-2 break-words">
               <span className="gradient-text">
                 THE NODERS COMMUNITY
               </span>
             </h1>
 
-            <p className="text-lg text-text-secondary mb-3 max-w-4xl mx-auto">
-              A student technology community at VNUHCM High School for the Gifted
-            </p>
-
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-5 sm:mb-6 text-text-primary max-w-4xl mx-auto px-1">
+            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-text-primary mb-5">
               Connecting Minds • Creating Intelligence
-            </h2>
-
-            <p className="text-base sm:text-lg text-text-secondary mb-4 sm:mb-6 leading-relaxed max-w-4xl mx-auto px-1">
-              We build AI products, host workshops and DS/AI mini-courses, organize AI competitions, guide students through AI learning roadmaps, and grow a community passionate about coding and AI.
             </p>
+
+            <p className="text-base sm:text-lg text-text-secondary leading-relaxed max-w-3xl mx-auto mb-8 px-1">
+              A student tech community at VNUHCM High School for the Gifted. We build AI products, host workshops and DS/AI mini-courses, organize competitions, and grow a community passionate about coding and AI.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <Link href="/products">
+                <Button variant="primary" size="lg" className="w-full sm:w-auto group/cta">
+                  Explore Products
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/cta:translate-x-1" />
+                </Button>
+              </Link>
+              <Link href="/members">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  Meet the Community
+                </Button>
+              </Link>
+            </div>
           </div>
 
-          {/* Stats Content */}
-          <div>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 max-w-7xl mx-auto">
-            {statsData.map((stat, index) => (
-              <div key={stat.key} className="group relative">
-                {/* Decorative background glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                        
-                <Card className="relative h-full overflow-hidden bg-dark-surface/70 backdrop-blur-sm border border-dark-border/60 hover:border-primary-blue/40 transition-all duration-300">
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <CardContent className="p-2.5 sm:p-4 flex flex-col items-center justify-center relative z-10 min-h-[98px] sm:min-h-[110px]">
-                    {/* Watermark Icon */}
-                    <div className="absolute -bottom-6 -right-6 text-primary-blue opacity-10 group-hover:opacity-[0.15] transition-all duration-500 transform -rotate-12 group-hover:-rotate-6 group-hover:scale-110 pointer-events-none">
-                       <stat.icon className="w-24 h-24 sm:w-32 sm:h-32" strokeWidth={1} />
+          {/* Stats band — one cohesive metrics strip */}
+          <div className="max-w-6xl mx-auto rounded-3xl border border-dark-border/50 bg-dark-surface/40 backdrop-blur-sm p-3 sm:p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+              {statsData.map((stat) => (
+                <div
+                  key={stat.key}
+                  className="group relative h-full overflow-hidden rounded-xl border border-dark-border/50 bg-dark-bg/40 transition-all duration-300 hover:border-primary-blue/40"
+                >
+                  <div className="flex flex-col items-center justify-center p-3 sm:p-4 relative z-10 min-h-[96px] sm:min-h-[108px]">
+                    {/* Quiet watermark — background mark, not a focal point */}
+                    <stat.icon
+                      className="absolute -bottom-3 -right-3 w-16 h-16 sm:w-20 sm:h-20 text-primary-blue opacity-[0.06] pointer-events-none"
+                      strokeWidth={1.5}
+                    />
+
+                    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary mb-1.5 relative z-20">
+                      <CounterAnimation end={stat.value} />
                     </div>
 
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary mb-1 relative z-20">
-                       <CounterAnimation end={stat.value} />
-                    </div>
-
-                    <div className="text-[10px] md:text-[11px] font-semibold text-text-secondary uppercase tracking-[0.14em] md:tracking-[0.18em] text-center relative z-20 leading-tight">
+                    <div className="text-[10px] md:text-[11px] font-semibold text-text-tertiary uppercase tracking-[0.14em] md:tracking-[0.16em] text-center relative z-20 leading-tight">
                       {stat.label}
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Latest News Section */}
-      <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8 bg-dark-surface/50">
-        <div className="mx-auto w-full max-w-[1600px]">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Latest Community Activities
-            </h2>
-            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
-              Stay up to date with our latest community moments, activities, and highlights.
-            </p>
-          </div>
+      <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
+        <div className="container mx-auto">
+          <SectionHeading
+            title="Latest Community Activities"
+            subtitle="Stay up to date with our latest community moments, activities, and highlights."
+            cta={{ href: '/posts', label: 'View All Posts' }}
+          />
 
           <CommunityUpdatesCarousel posts={recentPosts} />
         </div>
       </section>
 
       {/* Recent Products Section */}
-      <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8">
+      <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8">
         <div className="container mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Recent Products
-            </h2>
-            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
-              Check out some of our latest innovations and collaborative efforts.
-            </p>
-          </div>
+          <SectionHeading
+            title="Recent Products"
+            subtitle="Check out some of our latest innovations and collaborative efforts."
+            cta={{ href: '/products', label: 'View All Products' }}
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 xl:gap-7 max-w-none mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {recentProjects.map((project) => (
               <Link key={project.id} href={`/products/${project.id}`} className="block group">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark-surface/90 to-dark-bg/90 border-2 border-dark-border/50 hover:border-primary-blue/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-blue/20 h-full flex flex-col backdrop-blur-sm sm:hover:-translate-y-2">
+                <div className="relative overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:group-hover:-translate-y-1 h-full flex flex-col">
 
-                  {/* Animated gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/0 via-accent-cyan/0 to-purple-500/0 group-hover:from-primary-blue/5 group-hover:via-accent-cyan/5 group-hover:to-purple-500/5 transition-all duration-700 pointer-events-none" />
-
-                  {/* Thumbnail with glassmorphism overlay */}
-                  <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary-blue/10 via-accent-cyan/10 to-purple-500/10">
+                  {/* Thumbnail */}
+                  <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
                     {project.thumbnail_image?.public_url || project.thumbnail_url ? (
                       <Image
                         src={(project.thumbnail_image?.public_url || project.thumbnail_url) as string}
                         alt={project.thumbnail_image?.alt_text || project.title}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                         loading="lazy"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10">
-                        <div className="text-center relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary-blue/40 to-accent-cyan/40 blur-2xl group-hover:blur-3xl animate-pulse" />
-                          <Code className="w-20 h-20 text-primary-blue/50 mx-auto mb-2 relative z-10" />
-                          <p className="text-sm text-text-tertiary font-semibold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent relative z-10">No Preview</p>
-                        </div>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Code className="w-14 h-14 text-primary-blue/40" />
                       </div>
                     )}
 
-                    {/* Subtle blue gradient overlay - more transparent */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary-blue/20 via-accent-cyan/5 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+                    {/* Subtle bottom gradient for badge legibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/60 via-transparent to-transparent opacity-60" />
 
-                    {/* Status badge with glow */}
-                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
+                    {/* Status badge */}
+                    <div className="absolute top-4 right-4 z-10">
                       <Badge
                         variant={getStatusVariant(project.status)}
                         size="sm"
-                        className="backdrop-blur-xl bg-dark-bg/80 font-bold text-xs shadow-xl border border-white/10"
+                        className="backdrop-blur-md bg-dark-bg/70 font-bold text-xs border border-white/10"
                       >
                         {project.status}
                       </Badge>
                     </div>
-
-                    {/* Quick action buttons on hover */}
-                    <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 translate-y-0 sm:translate-y-2 sm:group-hover:translate-y-0">
-                      {project.repo_url && (
-                        <div className="p-2 rounded-lg bg-dark-bg/90 backdrop-blur-md border border-primary-blue/30 shadow-lg hover:scale-110 transition-transform duration-200">
-                          <Github className="w-4 h-4 text-primary-blue" />
-                        </div>
-                      )}
-                      {project.demo_url && (
-                        <div className="p-2 rounded-lg bg-dark-bg/90 backdrop-blur-md border border-accent-cyan/30 shadow-lg hover:scale-110 transition-transform duration-200">
-                          <ExternalLink className="w-4 h-4 text-accent-cyan" />
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   {/* Content section */}
-                  <div className="p-4 sm:p-6 flex-1 flex flex-col relative z-10">
-                    {/* Title with gradient hover effect */}
-                    <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 group-hover:bg-gradient-to-r group-hover:from-primary-blue group-hover:to-accent-cyan group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300 line-clamp-2 leading-tight">
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col">
+                    <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-2 line-clamp-2 leading-tight group-hover:text-primary-blue transition-colors duration-300">
                       {project.title}
                     </h3>
 
-                    {/* Description is intentionally longer to help users scan project context quickly */}
                     {project.description && (
-                      <p className="text-text-secondary/90 mb-4 sm:mb-5 line-clamp-4 leading-relaxed text-sm sm:text-[15px]">
+                      <p className="text-text-secondary mb-4 line-clamp-3 leading-relaxed text-sm">
                         {project.description}
                       </p>
                     )}
 
-                    <div className="mt-auto pt-4 border-t border-dark-border/60 group-hover:border-primary-blue/30 transition-colors duration-300">
+                    <div className="mt-auto pt-4 border-t border-dark-border/60">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           {project.repo_url && (
@@ -478,163 +546,77 @@ export default async function HomePage() {
                           )}
                         </div>
 
-                        <div className="text-primary-blue opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
-                          <ArrowRight className="w-5 h-5" />
-                        </div>
+                        <ArrowRight className="w-5 h-5 text-primary-blue opacity-80 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1" />
                       </div>
                     </div>
                   </div>
-
-                  {/* Hover border glow */}
-                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ boxShadow: '0 0 30px rgba(59, 130, 246, 0.3), inset 0 0 30px rgba(6, 182, 212, 0.1)' }} />
                 </div>
               </Link>
             ))}
           </div>
 
-          {recentProjects.length >= 1 && (
-            <div className="text-center mt-12">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 rounded-full border border-primary-blue/40 bg-dark-surface/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/70 hover:text-primary-blue hover:shadow-lg hover:shadow-primary-blue/20"
-              >
-                View All Products
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </div>
-          )}
         </div>
       </section>
 
       {/* Our Programs Section - Contests & Education Combined */}
-      <section className="py-14 px-4 sm:px-6 sm:py-20 lg:px-8 bg-dark-surface/30">
+      <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
         <div className="container mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4">
-              Our Programs
-            </h2>
-            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
-              Competitions to challenge yourself and courses to build your skills
-            </p>
+          <SectionHeading
+            title="Our Programs"
+            subtitle="Competitions to challenge yourself and courses to build your skills."
+            cta={[
+              { href: '/contest', label: 'All Contests' },
+              { href: '/education', label: 'All Courses' },
+            ]}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 max-w-6xl mx-auto">
+            {programs.map((program) => {
+              const Icon = program.icon
+              return (
+                <Link key={program.title} href={program.href} className="block group h-full">
+                  <div className="relative h-full flex flex-col rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm p-6 transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:group-hover:-translate-y-1">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Icon className={`w-5 h-5 ${program.accent}`} />
+                      <span className={`text-xs font-semibold uppercase tracking-[0.15em] ${program.accent}`}>
+                        {program.kind}
+                      </span>
+                    </div>
+
+                    <Badge variant={program.badgeVariant} className="mb-3 self-start">{program.badge}</Badge>
+
+                    <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary-blue transition-colors">
+                      {program.title}
+                    </h3>
+
+                    <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
+                      {program.description}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-5 text-xs text-text-tertiary">
+                      {program.meta.map((item, i) => {
+                        const MetaIcon = item.icon
+                        return (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <MetaIcon className="w-3.5 h-3.5" />
+                            <span>{item.label}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <div className="mt-auto pt-4 border-t border-dark-border/60 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-text-secondary group-hover:text-primary-blue transition-colors">
+                        {program.cta}
+                      </span>
+                      <ArrowRight className="w-5 h-5 text-primary-blue opacity-80 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8 max-w-7xl mx-auto">
-            {/* PAIC 2026 Card */}
-            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-accent-cyan/10 to-primary-blue/10 border border-accent-cyan/30">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-accent-cyan" />
-                  <span className="text-xs font-semibold text-accent-cyan uppercase tracking-wider">Contest</span>
-                </div>
-                <Badge variant="primary" className="mb-3">Public • Ended</Badge>
-                <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-cyan transition-colors">
-                  PTNK AI Challenge 2026
-                </h3>
-                <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
-                  Our flagship public competition. Build IELTS scoring models and compete for cash prizes up to 1,000,000 VNĐ.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-text-tertiary">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>24 Teams • 54 Participants</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>05 Jan - 18 Jan</span>
-                  </div>
-                </div>
-                <Link href="/contest/paic-2026">
-                  <Button variant="secondary" size="sm" className="w-full group/btn">
-                    View Results
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* NAIC 2025 Card */}
-            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border border-primary-blue/30">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-primary-blue" />
-                  <span className="text-xs font-semibold text-primary-blue uppercase tracking-wider">Contest</span>
-                </div>
-                <Badge variant="primary" className="mb-3">Internal • Ended</Badge>
-                <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary-blue transition-colors">
-                  Noders AI Competition 2025
-                </h3>
-                <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
-                  Our internal training ground where members sharpen AI skills through hands-on IELTS scoring challenges.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-text-tertiary">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>16 Participants</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>Nov - Dec 2025</span>
-                  </div>
-                </div>
-                <Link href="/contest/naic-2025">
-                  <Button variant="secondary" size="sm" className="w-full group/btn">
-                    View Results
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Data Science Module 1 Card */}
-            <Card variant="hover" className="hover-lift group bg-gradient-to-br from-purple-500/10 to-primary-blue/10 border border-purple-500/30">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <BookOpen className="w-5 h-5 text-purple-400" />
-                  <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Course</span>
-                </div>
-                <Badge variant="warning" className="mb-3">Coming Soon</Badge>
-                <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-purple-400 transition-colors">
-                  Intro to Data Science
-                </h3>
-                <p className="text-text-secondary text-sm mb-4 leading-relaxed line-clamp-2">
-                  Build a solid foundation in data science thinking. 4-session mini-course focused on fundamentals.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-text-tertiary">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>Grade 10-11</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>4 × 1.5h</span>
-                  </div>
-                </div>
-                <Link href="/education/ds-and-ai-01">
-                  <Button variant="secondary" size="sm" className="w-full group/btn">
-                    Learn More
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-            <Link
-              href="/contest"
-              className="inline-flex items-center gap-2 rounded-full border border-primary-blue/40 bg-dark-surface/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/70 hover:text-primary-blue hover:shadow-lg hover:shadow-primary-blue/20"
-            >
-              All Contests
-              <ArrowRight className="h-4 w-4 transition-transform duration-300" />
-            </Link>
-            <Link
-              href="/education"
-              className="inline-flex items-center gap-2 rounded-full border border-primary-blue/40 bg-dark-surface/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-text-secondary backdrop-blur-md transition-all duration-300 hover:border-primary-blue/70 hover:text-primary-blue hover:shadow-lg hover:shadow-primary-blue/20"
-            >
-              All Courses
-              <ArrowRight className="h-4 w-4 transition-transform duration-300" />
-            </Link>
-          </div>
         </div>
       </section>
     </div>
