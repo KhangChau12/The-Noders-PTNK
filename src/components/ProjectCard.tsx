@@ -36,10 +36,10 @@ export function ProjectCard({ project, showStats = true }: ProjectCardProps) {
       <Card
         variant="interactive"
         padding="none"
-        className="group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-blue/20 border-2 border-transparent hover:border-primary-blue/30 relative"
+        className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary-blue/20 relative"
       >
         {/* Glow effect on hover */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/10 group-hover:to-accent-cyan/10 transition-all duration-500 pointer-events-none" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary-blue/0 to-accent-cyan/0 group-hover:from-primary-blue/10 group-hover:to-accent-cyan/10 transition-all duration-300 pointer-events-none" />
 
         {/* Thumbnail */}
         <div className="relative aspect-video bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 overflow-hidden">

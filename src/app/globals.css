@@ -171,12 +171,22 @@
   border: 1px solid rgba(61, 78, 104, 0.55);
 }
 
-/* Gradient text */
+/* Gradient text — unified with Competition Platform (gradient-brand) */
 .gradient-text {
   background: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Container — matches Competition's standard max-width wrapper */
+.container {
+  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Glow on hover — shared interactive affordance */
+.glow-on-hover {
+  @apply transition-shadow duration-300 hover:shadow-glow-blue-md;
 }
 
 /* Code styling */
@@ -279,3 +289,44 @@ pre code {
   animation: community-carousel 34s linear infinite;
   will-change: transform;
 }
+
+/* ---------------------------------------------------------------------------
+   Shared animations with Competition Platform (kept in sync for consistency)
+   --------------------------------------------------------------------------- */
+@keyframes levitate {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.6); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-levitate { animation: levitate 6s ease-in-out infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-glow { animation: glow 2s ease-in-out infinite; }
+.animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.4s ease-out forwards; }
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }

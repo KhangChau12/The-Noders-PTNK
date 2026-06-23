@@ -5,39 +5,45 @@ import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   icon?: React.ReactNode
   asChild?: boolean
 }
 
+// Unified Button — shares variant set, radius, and interaction model with the
+// Competition Platform's Button so the two products feel identical. Community
+// extras (`icon`, `asChild`) are preserved.
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, icon, children, disabled, asChild, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-blue disabled:pointer-events-none disabled:opacity-50'
+    const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-2 focus:ring-offset-dark-bg disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
 
     const variants = {
-      primary: 'bg-gradient-to-r from-primary-blue to-accent-blue text-white hover:from-accent-blue hover:to-primary-blue hover:shadow-lg hover:shadow-primary-blue/30',
-      secondary: 'bg-dark-surface text-text-primary border border-dark-border hover:bg-dark-border hover:border-primary-blue/30',
-      ghost: 'text-text-secondary hover:bg-dark-surface hover:text-text-primary',
-      danger: 'bg-gradient-to-r from-error to-red-700 text-white hover:from-red-700 hover:to-error hover:shadow-lg hover:shadow-error/30',
+      primary: 'bg-gradient-brand text-white shadow-md hover:shadow-lg hover:shadow-glow-blue-md hover:-translate-y-0.5',
+      secondary: 'bg-dark-surface border border-dark-border text-text-primary hover:bg-bg-elevated hover:border-primary-blue/30',
+      outline: 'border border-dark-border text-text-primary hover:border-primary-blue hover:bg-primary-blue/5 hover:text-primary-blue',
+      ghost: 'text-text-primary hover:bg-dark-surface hover:text-primary-blue',
+      danger: 'bg-error text-white hover:bg-error/90 hover:shadow-lg hover:shadow-error/20',
+      success: 'bg-success text-white hover:bg-success/90 hover:shadow-lg hover:shadow-success/20',
     }
 
     const sizes = {
-      sm: 'h-9 px-3 text-sm rounded-md',
-      md: 'h-10 px-4 py-2 rounded-md',
-      lg: 'h-11 px-8 rounded-md',
+      sm: 'px-3 py-1.5 text-sm',
+      md: 'px-5 py-2.5 text-base',
+      lg: 'px-8 py-3.5 text-lg',
     }
 
     const buttonClasses = cn(
       baseStyles,
       variants[variant],
       sizes[size],
+      loading && 'opacity-70',
       className
     )
 
     if (asChild) {
-      // When asChild is true, we apply the styles to the child element
+      // When asChild is true, apply the styles to the child element
       // and don't render our own button
       const child = children as React.ReactElement
       if (child && child.type) {

@@ -1,41 +1,50 @@
 'use client'
 
-import { HTMLAttributes } from 'react'
+import { HTMLAttributes, forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'hover' | 'interactive'
+  variant?: 'default' | 'hover' | 'interactive' | 'elevated'
   padding?: 'sm' | 'md' | 'lg' | 'none'
 }
 
-function Card({ className, variant = 'default', padding = 'md', ...props }: CardProps) {
-  const baseStyles = 'bg-dark-surface border border-dark-border rounded-xl'
-  
-  const variants = {
-    default: '',
-    hover: 'hover:border-primary-blue transition-colors duration-200',
-    interactive: 'hover:border-primary-blue hover:shadow-lg hover:shadow-primary-blue/10 transition-all duration-200 cursor-pointer',
-  }
-  
-  const paddings = {
-    none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-  }
+// Unified Card — variant set and hover behaviour kept in sync with the
+// Competition Platform's Card. Community extras (`padding` prop + sub-components)
+// are preserved so existing markup keeps working.
+const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = 'default', padding = 'md', ...props }, ref) => {
+    const baseStyles = 'bg-dark-surface border border-dark-border rounded-xl transition-all duration-300'
 
-  return (
-    <div
-      className={cn(
-        baseStyles,
-        variants[variant],
-        paddings[padding],
-        className
-      )}
-      {...props}
-    />
-  )
-}
+    const variants = {
+      default: '',
+      hover: 'hover:border-primary-blue hover:-translate-y-1',
+      interactive: 'hover:border-primary-blue hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-blue/10 cursor-pointer',
+      elevated: 'bg-bg-elevated shadow-xl hover:-translate-y-1',
+    }
+
+    const paddings = {
+      none: '',
+      sm: 'p-4',
+      md: 'p-6',
+      lg: 'p-8',
+    }
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          baseStyles,
+          variants[variant],
+          paddings[padding],
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
+
+Card.displayName = 'Card'
 
 function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
