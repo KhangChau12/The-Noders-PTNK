@@ -159,14 +159,15 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
 
   return (
     <div>
-      {/* Carousel with arrows flanking the left/right edges (hidden on touch) */}
-      <div className="relative">
-        {/* Left arrow — sits just inside the left edge, overlapping the strip */}
+      {/* Carousel with arrows flanking the left/right edges (hidden on touch).
+          The lg gutter keeps the arrows beside the cards instead of over them. */}
+      <div className="relative lg:px-7">
+        {/* Left arrow — sits in the side gutter, only lightly overlapping cards */}
         <button
           type="button"
           aria-label="Previous posts"
           onClick={() => nudge('prev')}
-          className="absolute -left-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-dark-border bg-dark-surface/90 p-2.5 text-text-secondary shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue lg:flex"
+          className="absolute left-0 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-dark-border bg-dark-surface/90 p-2.5 text-text-secondary shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue lg:flex"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -176,7 +177,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
           type="button"
           aria-label="Next posts"
           onClick={() => nudge('next')}
-          className="absolute -right-3 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-dark-border bg-dark-surface/90 p-2.5 text-text-secondary shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue lg:flex"
+          className="absolute right-0 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-full border border-dark-border bg-dark-surface/90 p-2.5 text-text-secondary shadow-lg backdrop-blur-md transition-all duration-300 hover:border-primary-blue/60 hover:text-primary-blue lg:flex"
         >
           <ChevronRight className="h-5 w-5" />
         </button>

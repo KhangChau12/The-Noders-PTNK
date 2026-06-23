@@ -91,7 +91,7 @@ function SectionHeading({
   const ctas = cta ? (Array.isArray(cta) ? cta : [cta]) : []
 
   return (
-    <div className="mb-8 sm:mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-8 sm:mb-10 lg:-mx-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-2">
           {title}
@@ -394,7 +394,7 @@ export default async function HomePage() {
         <div className="container mx-auto relative z-10">
           {/* Hero Content */}
           <div className="text-center mb-10 sm:mb-14 mx-auto">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] sm:leading-[0.95] font-[family-name:var(--font-shrikhand)] mb-5 px-2 break-words">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.05] sm:leading-[1] font-[family-name:var(--font-shrikhand)] mb-5 px-2 break-words">
               <span className="gradient-text">
                 THE NODERS COMMUNITY
               </span>
@@ -404,23 +404,9 @@ export default async function HomePage() {
               Connecting Minds • Creating Intelligence
             </p>
 
-            <p className="text-base sm:text-lg text-text-secondary leading-relaxed max-w-3xl mx-auto mb-8 px-1">
+            <p className="text-base sm:text-lg text-text-secondary leading-relaxed max-w-3xl mx-auto px-1">
               A student tech community at VNUHCM High School for the Gifted. We build AI products, host workshops and DS/AI mini-courses, organize competitions, and grow a community passionate about coding and AI.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              <Link href="/products">
-                <Button variant="primary" size="lg" className="w-full sm:w-auto group/cta">
-                  Explore Products
-                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/cta:translate-x-1" />
-                </Button>
-              </Link>
-              <Link href="/members">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Meet the Community
-                </Button>
-              </Link>
-            </div>
           </div>
 
           {/* Stats band — one cohesive metrics strip */}
@@ -450,6 +436,21 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
+
+          {/* CTA row — sits beneath the stats band */}
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <Link href="/products">
+              <Button variant="primary" size="lg" className="w-full sm:w-auto group/cta">
+                Explore Products
+                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/cta:translate-x-1" />
+              </Button>
+            </Link>
+            <Link href="/contest">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                View Contests
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -475,7 +476,7 @@ export default async function HomePage() {
             cta={{ href: '/products', label: 'View All Products' }}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:px-7">
             {recentProjects.map((project) => (
               <Link key={project.id} href={`/products/${project.id}`} className="block group">
                 <div className="relative overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:group-hover:-translate-y-1 h-full flex flex-col">
@@ -570,7 +571,7 @@ export default async function HomePage() {
             ]}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:px-7">
             {programs.map((program) => {
               const Icon = program.icon
               return (
