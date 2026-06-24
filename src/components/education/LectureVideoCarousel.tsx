@@ -241,7 +241,7 @@ export function LectureVideoCarousel({ videos, lang }: LectureVideoCarouselProps
                     <div className="mt-auto flex gap-2">
                       <button
                         onClick={() => setActiveThumb(index)}
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary-blue/10 hover:bg-primary-blue/20 border border-primary-blue/30 hover:border-primary-blue/60 text-primary-blue text-xs font-semibold transition-all"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 min-h-[44px] rounded-lg bg-primary-blue/10 hover:bg-primary-blue/20 border border-primary-blue/30 hover:border-primary-blue/60 text-primary-blue text-xs font-semibold transition-all"
                         tabIndex={isOriginal ? 0 : -1}
                       >
                         <Play className="w-3 h-3 fill-primary-blue" />
@@ -249,7 +249,7 @@ export function LectureVideoCarousel({ videos, lang }: LectureVideoCarouselProps
                       </button>
                       <Link
                         href={video.sessionUrl}
-                        className="inline-flex items-center justify-center gap-1 py-2 px-3 rounded-lg bg-dark-surface/60 hover:bg-dark-surface border border-dark-border/60 hover:border-dark-border text-text-secondary hover:text-text-primary text-xs font-medium transition-all"
+                        className="inline-flex items-center justify-center gap-1 py-2.5 px-3 min-h-[44px] rounded-lg bg-dark-surface/60 hover:bg-dark-surface border border-dark-border/60 hover:border-dark-border text-text-secondary hover:text-text-primary text-xs font-medium transition-all"
                         tabIndex={isOriginal ? 0 : -1}
                       >
                         <ExternalLink className="w-3 h-3" />

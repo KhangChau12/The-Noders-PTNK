@@ -674,20 +674,20 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
           </div>
 
           {/* Step Indicator */}
-          <div className="flex items-center justify-between mt-8 mb-8 px-4">
+          <div className="flex items-center justify-between mt-6 sm:mt-8 mb-6 sm:mb-8 px-1 sm:px-4">
             {steps.map((step, index) => (
               <div key={index} className="flex items-center flex-1">
-                <div className="flex flex-col items-center flex-1 px-2">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 shadow-md ${index === currentStep
+                <div className="flex flex-col items-center flex-1 px-1 sm:px-2">
+                  <div className={`w-9 h-9 sm:w-12 sm:h-12 shrink-0 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 shadow-md ${index === currentStep
                     ? 'bg-gradient-to-r from-primary-blue to-accent-blue text-white scale-110 shadow-primary-blue/30'
                     : index < currentStep
                       ? 'bg-gradient-to-r from-accent-green to-emerald-500 text-white shadow-accent-green/30'
                       : 'bg-dark-surface border border-dark-border text-text-tertiary hover:border-primary-blue/30 hover:text-text-secondary'
                     }`}>
-                    {index < currentStep ? <CheckCircle className="w-5 h-5" /> : index + 1}
+                    {index < currentStep ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" /> : index + 1}
                   </div>
-                  <div className="text-center mt-3 max-w-[120px]">
-                    <div className={`font-medium text-sm leading-tight ${index === currentStep
+                  <div className="text-center mt-2 sm:mt-3 max-w-[120px]">
+                    <div className={`font-medium text-xs sm:text-sm leading-tight ${index === currentStep
                       ? 'text-primary-blue'
                       : index < currentStep
                         ? 'text-accent-green'
@@ -695,13 +695,14 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                       }`}>
                       {step.title}
                     </div>
-                    <div className="text-text-tertiary text-xs mt-1.5 leading-relaxed">
+                    {/* Description hidden on small screens to avoid cramped wrapping */}
+                    <div className="hidden sm:block text-text-tertiary text-xs mt-1.5 leading-relaxed">
                       {step.description}
                     </div>
                   </div>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`h-px flex-1 mx-6 transition-all duration-300 ${index < currentStep ? 'bg-gradient-to-r from-accent-green to-emerald-500' : 'bg-dark-border'
+                  <div className={`h-px flex-1 mx-2 sm:mx-6 transition-all duration-300 ${index < currentStep ? 'bg-gradient-to-r from-accent-green to-emerald-500' : 'bg-dark-border'
                     }`} />
                 )}
               </div>
@@ -744,18 +745,18 @@ export function ProjectForm({ isOpen, onClose, onSuccess, editProject, mode = 'c
                 </div>
               )}
 
-              <div className="flex justify-between items-center mt-10 pt-6 border-t border-dark-border/50">
+              <div className="flex justify-between items-center gap-2 mt-8 sm:mt-10 pt-6 border-t border-dark-border/50">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={prevStep}
                   disabled={currentStep === 0}
-                  className={`${currentStep === 0 ? 'invisible' : 'visible'} transition-all duration-200`}
+                  className={`${currentStep === 0 ? 'hidden sm:invisible sm:inline-flex' : 'visible'} shrink-0 transition-all duration-200`}
                 >
-                  <span className="mr-2">←</span> Previous
+                  <span className="mr-2">←</span> <span className="hidden xs:inline">Previous</span><span className="xs:hidden">Back</span>
                 </Button>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Button
                     type="button"
                     variant="outline"

@@ -63,27 +63,28 @@ export function Modal({
   }
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
-      {/* Modal */}
+
+      {/* Modal — caps at viewport height and scrolls its body so long content
+          never overflows the screen on mobile. Bottom-sheet on small screens. */}
       <div
         className={cn(
-          'relative w-full mx-4 bg-dark-surface border border-dark-border rounded-xl shadow-xl',
+          'relative w-full mx-0 sm:mx-4 max-h-[92vh] sm:max-h-[85vh] flex flex-col bg-dark-surface border border-dark-border rounded-t-2xl sm:rounded-xl shadow-xl',
           sizes[size],
           className
         )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-dark-border">
-          <div>
+        <div className="flex items-center justify-between gap-3 p-4 sm:p-6 border-b border-dark-border shrink-0">
+          <div className="min-w-0">
             {title && (
-              <h2 className="text-lg font-semibold text-text-primary">
+              <h2 className="text-base sm:text-lg font-semibold text-text-primary truncate">
                 {title}
               </h2>
             )}
@@ -97,14 +98,14 @@ export function Modal({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-auto p-2"
+            className="h-auto p-2 shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6 overflow-y-auto">
           {children}
         </div>
       </div>

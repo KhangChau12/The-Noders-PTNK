@@ -79,7 +79,7 @@ function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
       const processedHTML = processLinksInHTML(htmlField || '')
       return (
         <div
-          className="prose prose-invert max-w-none mb-8"
+          className="prose prose-invert max-w-none mb-8 break-words"
           dangerouslySetInnerHTML={{ __html: processedHTML }}
         />
       )
@@ -89,8 +89,8 @@ function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
       const quoteText = lang === 'vi' ? (quoteContent.quote_vi || quoteContent.quote) : (quoteContent.quote_en || quoteContent.quote)
       return (
         <Card className="bg-primary-blue/5 border-primary-blue/20 mb-8">
-          <CardContent className="p-6">
-            <blockquote className="text-lg italic text-text-primary mb-4">
+          <CardContent className="p-5 sm:p-6">
+            <blockquote className="text-base sm:text-lg italic text-text-primary mb-4 break-words">
               "{quoteText}"
             </blockquote>
             {(quoteContent.author || quoteContent.source) && (
@@ -386,10 +386,10 @@ export default function PostDetailPage() {
   const thumbnailSrc = post.thumbnail_image?.public_url || post.thumbnail_url
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-4xl">
         {/* Back Button & Language Selector */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-5 sm:mb-6 flex items-center justify-between gap-2">
           <Link href="/posts">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -434,17 +434,17 @@ export default function PostDetailPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-3 sm:mb-4 leading-tight break-words">
             {localize(post.title, post.title_vi)}
           </h1>
 
           {/* Summary */}
-          <p className="text-lg text-text-secondary mb-6">
+          <p className="text-base sm:text-lg text-text-secondary mb-5 sm:mb-6">
             {localize(post.summary, post.summary_vi)}
           </p>
 
           {/* Author & Stats */}
-          <div className="flex flex-wrap items-center gap-6 text-sm text-text-tertiary mb-8 pb-8 border-b border-dark-border">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6 text-sm text-text-tertiary mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-dark-border">
             {post.author && (
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
@@ -551,16 +551,16 @@ export default function PostDetailPage() {
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-text-primary mb-6">{localize('Related Posts', 'Bài viết liên quan')}</h2>
-            <div className="space-y-4">
+          <div className="mt-10 sm:mt-12">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-5 sm:mb-6">{localize('Related Posts', 'Bài viết liên quan')}</h2>
+            <div className="space-y-3 sm:space-y-4">
               {relatedPosts.map((related) => {
                 const thumbnailSrc = (related as any).thumbnail_image?.public_url
                 return (
                   <Link key={related.id} href={`/posts/${related.slug}`} className="group block">
-                    <article className="flex gap-4 p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
+                    <article className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
                       {/* Thumbnail */}
-                      <div className="flex-shrink-0 w-48 h-36 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+                      <div className="flex-shrink-0 w-28 h-24 sm:w-48 sm:h-36 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
                         {thumbnailSrc ? (
                           <img
                             src={thumbnailSrc}
@@ -578,10 +578,10 @@ export default function PostDetailPage() {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <CategoryBadge category={related.category} />
-                        <h3 className="font-semibold text-text-primary text-base mt-2 mb-1 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                        <h3 className="font-semibold text-text-primary text-sm sm:text-base mt-1.5 sm:mt-2 mb-1 line-clamp-2 group-hover:text-primary-blue transition-colors">
                           {localize(related.title, related.title_vi)}
                         </h3>
-                        <p className="text-sm text-text-secondary line-clamp-2 mb-2">
+                        <p className="hidden sm:block text-sm text-text-secondary line-clamp-2 mb-2">
                           {localize(related.summary, related.summary_vi)}
                         </p>
                         {related.reading_time > 0 && (

@@ -27,7 +27,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             type={type}
             className={cn(
-              'flex h-10 w-full rounded-md border border-dark-border bg-dark-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+              // text-base on mobile (16px) prevents iOS Safari from auto-zooming
+              // on focus; shrinks to text-sm from sm: up to match desktop sizing.
+              'flex h-11 sm:h-10 w-full rounded-md border border-dark-border bg-dark-surface px-3 py-2 text-base sm:text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
               icon && 'pl-10',
               error && 'border-error focus:ring-error',
               className

@@ -52,7 +52,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-dark-bg/50 backdrop-blur-xl border border-dark-border/50 hover:border-primary-blue/20 p-8 animate-fade-in transition-all duration-300 shadow-2xl shadow-black/20">
+      <div className="relative overflow-hidden rounded-2xl bg-dark-bg/50 backdrop-blur-xl border border-dark-border/50 hover:border-primary-blue/20 p-6 sm:p-8 animate-fade-in transition-all duration-300 shadow-2xl shadow-black/20">
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none" />
 

@@ -24,21 +24,21 @@ interface PageHeroProps {
  */
 export function PageHero({ title, subtitle, description, children }: PageHeroProps) {
   return (
-    <section className="relative py-12 px-4 sm:px-6 sm:py-16 lg:px-8">
+    <section className="relative py-10 px-4 sm:px-6 sm:py-16 lg:px-8">
       <div className="container mx-auto">
         <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading leading-[1.05] mb-5 break-words">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 break-words">
             <span className="gradient-text">{title}</span>
           </h1>
 
           {subtitle && (
-            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-text-primary mb-5">
+            <p className="text-base sm:text-xl md:text-2xl font-semibold text-text-primary mb-4 sm:mb-5">
               {subtitle}
             </p>
           )}
 
           {description && (
-            <p className="text-base sm:text-lg text-text-secondary leading-relaxed">
+            <p className="text-sm sm:text-lg text-text-secondary leading-relaxed">
               {description}
             </p>
           )}

@@ -69,7 +69,7 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
     <>
       {/* Search and Filters */}
       <div className="mb-8">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:items-center justify-between">
           {/* Search */}
           <div className="w-full lg:w-96">
             <Input
@@ -80,13 +80,14 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
             />
           </div>
 
-          {/* Filter and View Controls */}
-          <div className="flex items-center space-x-2">
+          {/* Filter and View Controls — min 44px touch targets on mobile */}
+          <div className="flex items-center justify-between sm:justify-end gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
               icon={<Filter className="w-4 h-4" />}
+              className="min-h-[44px]"
             >
               Filters
             </Button>
@@ -96,7 +97,8 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
                 variant={viewMode === 'grid' ? 'primary' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="rounded-none"
+                aria-label="Grid view"
+                className="rounded-none min-h-[44px] min-w-[44px]"
               >
                 <Grid className="w-4 h-4" />
               </Button>
@@ -104,7 +106,8 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
                 variant={viewMode === 'list' ? 'primary' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="rounded-none"
+                aria-label="List view"
+                className="rounded-none min-h-[44px] min-w-[44px]"
               >
                 <List className="w-4 h-4" />
               </Button>
@@ -127,7 +130,8 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
                       <Badge
                         key={option.value}
                         variant={filters.status === option.value ? 'primary' : 'secondary'}
-                        className="cursor-pointer hover:opacity-80"
+                        size="md"
+                        className="cursor-pointer hover:opacity-80 py-2"
                         onClick={() => handleStatusFilter(option.value)}
                       >
                         {option.label}
@@ -142,7 +146,7 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
                     Sort By
                   </label>
                   <select
-                    className="w-full bg-dark-surface border border-dark-border rounded-md px-3 py-2 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    className="w-full bg-dark-surface border border-dark-border rounded-md px-3 py-2.5 min-h-[44px] text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
                     value={`${filters.sort_by}_${filters.sort_order}`}
                     onChange={(e) => handleSortChange(e.target.value)}
                   >

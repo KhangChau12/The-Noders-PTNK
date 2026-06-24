@@ -199,7 +199,7 @@ export default function AdminPostsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-7xl">
         {/* Back to Dashboard */}
         <Link href="/admin">
@@ -210,13 +210,13 @@ export default function AdminPostsPage() {
         </Link>
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                 Manage All Posts
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-sm sm:text-base text-text-secondary">
                 View and manage all posts from all members
               </p>
             </div>
@@ -226,6 +226,7 @@ export default function AdminPostsPage() {
               onClick={handleUpdateSlugs}
               loading={fixingSlugs}
               icon={<Wrench className="w-4 h-4" />}
+              className="w-full sm:w-auto"
             >
               Update Slugs
             </Button>
@@ -234,8 +235,8 @@ export default function AdminPostsPage() {
 
         {/* Search and Filters */}
         <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-4">
+          <CardContent className="p-5 sm:p-6">
+            <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 lg:items-center justify-between mb-4">
               <div className="w-full lg:w-96">
                 <Input
                   placeholder="Search posts..."
@@ -248,7 +249,7 @@ export default function AdminPostsPage() {
               <Button
                 variant="secondary"
                 onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden"
+                className="lg:hidden w-full"
                 icon={<Filter className="w-4 h-4" />}
               >
                 Filters
@@ -267,7 +268,7 @@ export default function AdminPostsPage() {
                     <button
                       key={status.id}
                       onClick={() => setSelectedStatus(status.id)}
-                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                      className={`px-4 py-2.5 min-h-[44px] rounded-lg border transition-colors ${
                         selectedStatus === status.id
                           ? 'border-primary-blue bg-primary-blue/10 text-primary-blue'
                           : 'border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary'
@@ -291,13 +292,13 @@ export default function AdminPostsPage() {
                       <button
                         key={category.id}
                         onClick={() => setSelectedCategory(category.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                        className={`flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg border transition-colors ${
                           selectedCategory === category.id
                             ? 'border-primary-blue bg-primary-blue/10 text-primary-blue'
                             : 'border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary'
                         }`}
                       >
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-4 h-4 flex-shrink-0" />
                         <span className="text-sm font-medium">{category.name}</span>
                       </button>
                     )
@@ -328,27 +329,31 @@ export default function AdminPostsPage() {
             {/* Posts Table */}
             {posts.length > 0 ? (
               <Card>
+                {/* Scroll hint for mobile */}
+                <p className="lg:hidden text-xs text-text-tertiary text-center pt-3 px-4">
+                  ← Vuốt ngang để xem đầy đủ bảng →
+                </p>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[760px]">
                       <thead className="bg-dark-surface/50 border-b border-dark-border">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
                             Post
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
                             Author
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
                             Status
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
                             Stats
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
                             Date
                           </th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-text-tertiary uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-text-tertiary uppercase tracking-wider">
                             Actions
                           </th>
                         </tr>
@@ -360,7 +365,7 @@ export default function AdminPostsPage() {
                             className="hover:bg-dark-surface/30 transition-colors"
                           >
                             {/* Post Info */}
-                            <td className="px-6 py-4">
+                            <td className="px-4 sm:px-6 py-4">
                               <div className="max-w-md">
                                 <div className="font-medium text-text-primary line-clamp-1 mb-1">
                                   {post.title}
@@ -387,7 +392,7 @@ export default function AdminPostsPage() {
                             </td>
 
                             {/* Author */}
-                            <td className="px-6 py-4">
+                            <td className="px-4 sm:px-6 py-4">
                               <div className="flex items-center gap-2">
                                 <User className="w-4 h-4 text-text-tertiary" />
                                 <span className="text-sm text-text-secondary">
@@ -397,7 +402,7 @@ export default function AdminPostsPage() {
                             </td>
 
                             {/* Status */}
-                            <td className="px-6 py-4">
+                            <td className="px-4 sm:px-6 py-4">
                               <Badge
                                 variant={
                                   post.status === 'published' ? 'success' :
@@ -411,7 +416,7 @@ export default function AdminPostsPage() {
                             </td>
 
                             {/* Stats */}
-                            <td className="px-6 py-4">
+                            <td className="px-4 sm:px-6 py-4">
                               <div className="flex flex-col gap-1 text-xs text-text-tertiary">
                                 <div className="flex items-center gap-1">
                                   <Eye className="w-3 h-3" />
@@ -429,14 +434,14 @@ export default function AdminPostsPage() {
                             </td>
 
                             {/* Date */}
-                            <td className="px-6 py-4">
+                            <td className="px-4 sm:px-6 py-4">
                               <div className="text-sm text-text-tertiary">
                                 {new Date(post.created_at).toLocaleDateString()}
                               </div>
                             </td>
 
                             {/* Actions */}
-                            <td className="px-6 py-4">
+                            <td className="px-4 sm:px-6 py-4">
                               <div className="flex items-center justify-end gap-2">
                                 {post.status === 'published' && (
                                   <Link href={`/posts/${post.slug}`} target="_blank">

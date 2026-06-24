@@ -151,7 +151,7 @@ function MemberProjectsPage() {
         )}
       </div>
 
-      <CardContent className="p-6">
+      <CardContent className="p-5 sm:p-6">
         <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-1">
           {project.title}
         </h3>
@@ -194,11 +194,15 @@ function MemberProjectsPage() {
         )}
 
         {/* Contributors info */}
-        <div className="flex items-center text-sm text-text-tertiary mb-4">
-          <Users className="w-4 h-4 mr-1" />
-          {project.contributors?.length || 0} contributors
-          <Calendar className="w-4 h-4 ml-4 mr-1" />
-          {new Date(project.created_at).toLocaleDateString()}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-tertiary mb-4">
+          <span className="inline-flex items-center">
+            <Users className="w-4 h-4 mr-1" />
+            {project.contributors?.length || 0} contributors
+          </span>
+          <span className="inline-flex items-center">
+            <Calendar className="w-4 h-4 mr-1" />
+            {new Date(project.created_at).toLocaleDateString()}
+          </span>
         </div>
 
         {/* Actions */}
@@ -269,28 +273,28 @@ function MemberProjectsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                 My Projects
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-sm sm:text-base text-text-secondary">
                 Manage your projects and collaborations
               </p>
             </div>
-            <Button onClick={() => setShowCreateModal(true)}>
+            <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Create Project
             </Button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-primary-blue mb-1">
                   {createdProjects.length}
                 </div>
@@ -301,7 +305,7 @@ function MemberProjectsPage() {
             </Card>
 
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-accent-green mb-1">
                   {contributedProjects.length}
                 </div>
@@ -312,7 +316,7 @@ function MemberProjectsPage() {
             </Card>
 
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-accent-cyan mb-1">
                   {createdProjects.filter(p => p.status === 'active').length}
                 </div>
@@ -324,28 +328,28 @@ function MemberProjectsPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center space-x-1 mb-6 bg-dark-surface rounded-lg p-1">
+          <div className="flex items-center gap-1 mb-6 bg-dark-surface rounded-lg p-1">
             <button
               onClick={() => setActiveTab('created')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === 'created'
                   ? 'bg-primary-blue text-white'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <FileText className="w-4 h-4 inline mr-2" />
-              Created Projects ({createdProjects.length})
+              <FileText className="w-4 h-4 hidden sm:inline mr-2" />
+              Created ({createdProjects.length})
             </button>
             <button
               onClick={() => setActiveTab('contributed')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === 'contributed'
                   ? 'bg-primary-blue text-white'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <Users className="w-4 h-4 inline mr-2" />
-              Contributing To ({contributedProjects.length})
+              <Users className="w-4 h-4 hidden sm:inline mr-2" />
+              Contributing ({contributedProjects.length})
             </button>
           </div>
 

@@ -204,10 +204,10 @@ function ProfileEditPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <Button
               onClick={() => router.back()}
               variant="ghost"
@@ -218,17 +218,17 @@ function ProfileEditPage() {
               Back
             </Button>
 
-            <h1 className="text-3xl font-bold text-text-primary">Edit Profile</h1>
-            <p className="text-text-secondary mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Edit Profile</h1>
+            <p className="text-sm sm:text-base text-text-secondary mt-2">
               Update your profile information and preferences.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Profile Preview */}
               <div className="lg:col-span-1">
-                <Card className="sticky top-8">
+                <Card className="lg:sticky lg:top-8">
                   <CardHeader>
                     <h3 className="text-lg font-semibold text-text-primary">Preview</h3>
                   </CardHeader>
@@ -515,11 +515,11 @@ function ProfileEditPage() {
                 </Card>
 
                 {/* Submit */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 sm:flex-none"
+                    className="w-full sm:w-auto sm:flex-none"
                   >
                     {loading ? (
                       <>
@@ -538,6 +538,7 @@ function ProfileEditPage() {
                     type="button"
                     variant="secondary"
                     onClick={() => router.push('/dashboard')}
+                    className="w-full sm:w-auto"
                   >
                     Cancel
                   </Button>

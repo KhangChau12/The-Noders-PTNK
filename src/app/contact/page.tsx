@@ -111,19 +111,19 @@ ${formData.message}
 
   if (success) {
     return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-3xl">
           <Card className="text-center">
-            <CardContent className="p-12">
+            <CardContent className="p-6 sm:p-12">
               <div className="mx-auto w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mb-6">
                 <CheckCircle className="w-8 h-8 text-success" />
               </div>
 
-              <h1 className="text-3xl font-bold text-text-primary mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
                 Message Sent Successfully!
               </h1>
 
-              <p className="text-text-secondary text-lg mb-8">
+              <p className="text-text-secondary text-base sm:text-lg mb-8">
                 Thank you for reaching out to The Noders Community. We've received
                 your message and will get back to you within 24 hours.
               </p>
@@ -158,20 +158,20 @@ ${formData.message}
   return (
     <>
       <NeuralNetworkBackground />
-      <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 z-10">
+      <div className="relative min-h-screen py-10 sm:py-12 px-4 sm:px-6 lg:px-8 z-10">
         <div className="container mx-auto max-w-6xl">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading text-text-primary mb-3 sm:mb-4">
               Contact Us
             </h1>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
+            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
               Have a question, want to join our club, or interested in
               collaboration? We'd love to hear from you!
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Contact Information */}
             <div className="space-y-6">
               {/* Contact Details */}
@@ -319,7 +319,7 @@ ${formData.message}
                       <label className="block text-sm font-medium text-text-primary mb-3">
                         Subject *
                       </label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                         {subjectOptions.map((option) => {
                           const Icon = option.icon;
                           return (
@@ -329,7 +329,7 @@ ${formData.message}
                               onClick={() =>
                                 handleChange("subject", option.value)
                               }
-                              className={`px-3 py-2 flex items-center gap-2 rounded-lg border transition-colors text-left ${
+                              className={`px-3 py-2.5 min-h-[44px] flex items-center gap-2 rounded-lg border transition-colors text-left ${
                                 formData.subject === option.value
                                   ? "border-primary-blue bg-primary-blue/10"
                                   : "border-dark-border hover:border-dark-border/60"
@@ -370,7 +370,7 @@ ${formData.message}
                           handleChange("message", e.target.value)
                         }
                         rows={6}
-                        className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue resize-none"
+                        className="w-full px-3 py-2.5 text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue resize-none"
                       />
                       <p className="text-xs text-text-tertiary mt-1">
                         {formData.message.length}/1000 characters
@@ -378,7 +378,7 @@ ${formData.message}
                     </div>
 
                     {/* Submit */}
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-4">
                       <Button
                         type="submit"
                         disabled={
@@ -387,7 +387,7 @@ ${formData.message}
                           !formData.email ||
                           !formData.message
                         }
-                        className="flex-1 sm:flex-none"
+                        className="w-full sm:w-auto"
                       >
                         {loading ? (
                           <>
@@ -402,7 +402,7 @@ ${formData.message}
                         )}
                       </Button>
 
-                      <p className="text-xs text-text-tertiary self-center">
+                      <p className="text-xs text-text-tertiary sm:self-center">
                         We'll respond within 24 hours
                       </p>
                     </div>
@@ -421,13 +421,13 @@ ${formData.message}
           </div>
 
           {/* Additional Info */}
-          <div className="mt-16 text-center">
+          <div className="mt-10 sm:mt-16 text-center">
             <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="p-8">
-                <h3 className="text-xl font-semibold text-text-primary mb-4">
+              <CardContent className="p-6 sm:p-8">
+                <h3 className="text-lg sm:text-xl font-semibold text-text-primary mb-4">
                   Join Our Community
                 </h3>
-                <p className="text-text-secondary mb-6 max-w-3xl mx-auto">
+                <p className="text-text-secondary text-sm sm:text-base mb-6 max-w-3xl mx-auto">
                   Whether you're a beginner or an expert, we welcome everyone
                   who's passionate about AI and wants to learn, share, and build
                   amazing projects together.

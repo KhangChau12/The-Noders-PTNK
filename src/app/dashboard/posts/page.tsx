@@ -126,9 +126,9 @@ function UserPostsPage() {
           </div>
         )}
 
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2">
                 {post.title}
               </h3>
@@ -143,13 +143,13 @@ function UserPostsPage() {
                 'default'
               }
               size="sm"
-              className="ml-4"
+              className="shrink-0"
             >
               {post.status}
             </Badge>
           </div>
 
-        <div className="flex items-center gap-4 text-sm text-text-tertiary mb-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-tertiary mb-4">
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4" />
             {post.view_count}
@@ -231,28 +231,28 @@ function UserPostsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                 My Posts
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-sm sm:text-base text-text-secondary">
                 Manage your posts and content
               </p>
             </div>
-            <Button onClick={handleCreatePost} disabled={creatingPost}>
+            <Button onClick={handleCreatePost} disabled={creatingPost} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               {creatingPost ? 'Creating...' : 'Create Post'}
             </Button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-primary-blue mb-1">
                   {posts.length}
                 </div>
@@ -263,7 +263,7 @@ function UserPostsPage() {
             </Card>
 
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-accent-green mb-1">
                   {posts.filter(p => p.status === 'published').length}
                 </div>
@@ -274,7 +274,7 @@ function UserPostsPage() {
             </Card>
 
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-accent-yellow mb-1">
                   {posts.filter(p => p.status === 'draft').length}
                 </div>
@@ -285,7 +285,7 @@ function UserPostsPage() {
             </Card>
 
             <Card>
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-4 sm:p-6 text-center">
                 <div className="text-2xl font-bold text-accent-cyan mb-1">
                   {posts.reduce((sum, p) => sum + p.upvote_count, 0)}
                 </div>
@@ -297,32 +297,32 @@ function UserPostsPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center space-x-1 mb-6 bg-dark-surface rounded-lg p-1">
+          <div className="flex items-center gap-1 mb-6 bg-dark-surface rounded-lg p-1">
             <button
               onClick={() => setActiveTab('draft')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === 'draft'
                   ? 'bg-primary-blue text-white'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <FileText className="w-4 h-4 inline mr-2" />
+              <FileText className="w-4 h-4 hidden sm:inline mr-2" />
               Drafts ({posts.filter(p => p.status === 'draft').length})
             </button>
             <button
               onClick={() => setActiveTab('published')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === 'published'
                   ? 'bg-primary-blue text-white'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <Eye className="w-4 h-4 inline mr-2" />
+              <Eye className="w-4 h-4 hidden sm:inline mr-2" />
               Published ({posts.filter(p => p.status === 'published').length})
             </button>
             <button
               onClick={() => setActiveTab('archived')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === 'archived'
                   ? 'bg-primary-blue text-white'
                   : 'text-text-secondary hover:text-text-primary'

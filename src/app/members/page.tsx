@@ -43,7 +43,7 @@ export default function MembersPage() {
           description="Get to know the passionate individuals building, writing, and competing across The Noders Community."
         />
 
-        <section className="pb-12 px-4 sm:px-6 lg:px-8">
+        <section className="pb-10 sm:pb-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
           {/* Controls — search + role filter on one baseline row */}
           <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -66,7 +66,7 @@ export default function MembersPage() {
                   key={option.value}
                   variant={filters.role === option.value ? "primary" : "secondary"}
                   size="md"
-                  className="hover:opacity-80"
+                  className="hover:opacity-80 min-h-[40px] px-4"
                   onClick={() => handleRoleFilter(option.value)}
                 >
                   {option.label}
@@ -198,15 +198,15 @@ export default function MembersPage() {
           </div>
 
           {/* CTA Section */}
-          <div className="relative overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm p-8 text-center">
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+          <div className="relative overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm p-6 sm:p-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3">
               Interested in Joining?
             </h2>
-            <p className="text-text-secondary mb-6 max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-text-secondary mb-5 sm:mb-6 max-w-xl mx-auto">
               Follow our community's fanpage to keep up with the newest recruitment information.
             </p>
             <a href="https://www.facebook.com/thenodersptnk" target="_blank" rel="noopener noreferrer">
-              <Button size="lg">Our Fanpage</Button>
+              <Button size="lg" className="w-full sm:w-auto">Our Fanpage</Button>
             </a>
           </div>
           </div>

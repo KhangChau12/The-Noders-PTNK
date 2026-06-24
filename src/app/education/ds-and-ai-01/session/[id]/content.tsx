@@ -91,9 +91,9 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
       <NeuralNetworkBackground />
 
       {/* Header + Canva — narrower container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8 sm:pb-10">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link href="/education/ds-and-ai-01">
             <Button variant="secondary" className="mb-6 group">
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -110,15 +110,15 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
             </Badge>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">{title}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4 leading-tight break-words">{title}</h1>
 
-          <div className="flex flex-wrap gap-4">
-            <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-dark-surface/60 text-text-secondary text-sm border border-dark-border/40">
-              <Target className="w-4 h-4 mr-2 text-accent-cyan" />
-              {objective}
+          <div className="flex flex-wrap gap-3 sm:gap-4">
+            <div className="inline-flex items-start px-3 py-1.5 rounded-lg bg-dark-surface/60 text-text-secondary text-sm border border-dark-border/40">
+              <Target className="w-4 h-4 mr-2 mt-0.5 text-accent-cyan flex-shrink-0" />
+              <span className="break-words">{objective}</span>
             </div>
             <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-dark-surface/60 text-text-secondary text-sm border border-dark-border/40">
-              <Calendar className="w-4 h-4 mr-2 text-yellow-300" />
+              <Calendar className="w-4 h-4 mr-2 text-yellow-300 flex-shrink-0" />
               {date}
             </div>
           </div>
@@ -126,8 +126,8 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
 
         {/* Canva Slide Section */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-text-primary">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-text-primary">
               {lang === 'vi' ? 'Slide bài giảng' : 'Lecture Slides'}
             </h2>
             {session.canvaUrl && (
@@ -163,12 +163,12 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
       </div>
 
       {/* Video + Docs — wider container, less padding */}
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-4 lg:px-6 pb-16">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-4 lg:px-6 pb-12 sm:pb-16">
         <section>
-          <h2 className="text-xl font-semibold text-text-primary mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-text-primary mb-4">
             {lang === 'vi' ? 'Video & Tài liệu' : 'Video & Materials'}
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-6 items-stretch">
             {/* YouTube — 60% */}
             <div className="lg:col-span-3 flex flex-col">
               <p className="text-sm text-text-secondary mb-2 font-medium">
@@ -198,7 +198,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
                 {lang === 'vi' ? 'Tài liệu bài giảng' : 'Lecture Notes'}
               </p>
               {session.docsUrl ? (
-                <div className="rounded-xl overflow-hidden border border-dark-border/40 bg-dark-surface/20 flex-1">
+                <div className="rounded-xl overflow-hidden border border-dark-border/40 bg-dark-surface/20 flex-1 h-[420px] sm:h-[520px] lg:h-auto">
                   <iframe
                     src={session.docsUrl}
                     className="w-full h-full"

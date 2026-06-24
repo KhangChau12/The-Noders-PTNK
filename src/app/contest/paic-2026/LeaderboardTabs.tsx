@@ -38,36 +38,41 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
   return (
     <div>
       {/* Tab Buttons */}
-      <div className="flex justify-center gap-2 mb-8">
+      <div className="flex justify-center gap-2 mb-6 sm:mb-8">
         <button
           onClick={() => setActiveTab('team')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+          className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 min-h-[44px] rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 ${
             activeTab === 'team'
               ? 'bg-gradient-to-r from-primary-blue to-accent-cyan text-white shadow-lg shadow-primary-blue/30'
               : 'bg-dark-surface/50 text-text-secondary hover:text-text-primary hover:bg-dark-surface border border-dark-border/50'
           }`}
         >
-          <Users className="w-4 h-4" />
-          {t.leaderboard_tabs.team_tab} ({teamLeaderboard.length})
+          <Users className="w-4 h-4 flex-shrink-0" />
+          <span className="truncate">{t.leaderboard_tabs.team_tab} ({teamLeaderboard.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('individual')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+          className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 min-h-[44px] rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 ${
             activeTab === 'individual'
               ? 'bg-gradient-to-r from-primary-blue to-accent-cyan text-white shadow-lg shadow-primary-blue/30'
               : 'bg-dark-surface/50 text-text-secondary hover:text-text-primary hover:bg-dark-surface border border-dark-border/50'
           }`}
         >
-          <User className="w-4 h-4" />
-          {t.leaderboard_tabs.individual_tab} ({individualLeaderboard.length})
+          <User className="w-4 h-4 flex-shrink-0" />
+          <span className="truncate">{t.leaderboard_tabs.individual_tab} ({individualLeaderboard.length})</span>
         </button>
       </div>
+
+      {/* Scroll hint for mobile */}
+      <p className="lg:hidden text-xs text-text-tertiary text-center mb-2">
+        {lang === 'vi' ? '← Vuốt ngang để xem đầy đủ bảng →' : '← Swipe to see full table →'}
+      </p>
 
       {/* Team Leaderboard */}
       {activeTab === 'team' && (
         <Card className="overflow-hidden border-primary-blue/20">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
                   <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.rank}</th>
@@ -127,7 +132,7 @@ export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: Lead
       {activeTab === 'individual' && (
         <Card className="overflow-hidden border-primary-blue/20">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[680px]">
               <thead>
                 <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
                   <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.rank}</th>

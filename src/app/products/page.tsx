@@ -29,7 +29,7 @@ export default async function ProjectsPage() {
           description="Explore the innovative products created by The Noders Community members — from machine learning models to web applications."
         />
 
-        <section className="pb-12 px-4 sm:px-6 lg:px-8">
+        <section className="pb-10 sm:pb-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <ProjectsClient initialProjects={initialProjects} />
           </div>

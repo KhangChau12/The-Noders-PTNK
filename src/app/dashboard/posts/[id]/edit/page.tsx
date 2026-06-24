@@ -327,10 +327,10 @@ function EditPostPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-6xl">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <Link href="/dashboard/posts">
               <Button variant="ghost" size="sm" className="mb-4">
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -338,10 +338,10 @@ function EditPostPage() {
               </Button>
             </Link>
 
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-text-primary">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
                     Edit Post
                   </h1>
                   <Badge
@@ -395,17 +395,18 @@ function EditPostPage() {
           </div>
 
           {/* Action Buttons - Sticky at bottom */}
-          <div className="sticky bottom-0 z-10 mt-8 p-4 bg-dark-surface/95 backdrop-blur-sm rounded-lg border border-dark-border shadow-lg">
-            <div className="flex items-center justify-between">
+          <div className="sticky bottom-0 z-10 mt-8 p-3 sm:p-4 bg-dark-surface/95 backdrop-blur-sm rounded-lg border border-dark-border shadow-lg"
+            style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2 text-sm text-text-tertiary">
-                <Clock className="w-4 h-4" />
+                <Clock className="w-4 h-4 flex-shrink-0" />
                 <span>Reading time: <strong className="text-primary-blue">{calculateReadingTime(blocks)} min</strong></span>
                 {post.reading_time !== calculateReadingTime(blocks) && (
                   <span className="text-xs text-warning">⚠️ Changed</span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {post.status === 'published' ? (
                   <>
                     <Button
@@ -484,8 +485,8 @@ function EditPostPage() {
 
           {/* Stats */}
           <div className="mt-8 p-4 bg-dark-surface rounded-lg border border-dark-border">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 text-sm">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
                 <span className="text-text-tertiary">
                   Views: <strong className="text-text-primary">{post.view_count}</strong>
                 </span>
@@ -493,7 +494,7 @@ function EditPostPage() {
                   Upvotes: <strong className="text-text-primary">{post.upvote_count}</strong>
                 </span>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary-blue" />
+                  <Clock className="w-4 h-4 text-primary-blue flex-shrink-0" />
                   <span className="text-text-tertiary">
                     Reading time: <strong className="text-primary-blue">{calculateReadingTime(blocks)} min</strong>
                     {post.reading_time !== calculateReadingTime(blocks) && (

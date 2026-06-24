@@ -221,9 +221,9 @@ export function DataScienceModule1Content() {
           <div className="flex bg-dark-surface/50 p-1 rounded-lg border border-dark-border/50">
             <button
               onClick={() => setLang('en')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                lang === 'en' 
-                  ? 'bg-primary-blue text-white shadow-lg' 
+              className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-medium transition-all ${
+                lang === 'en'
+                  ? 'bg-primary-blue text-white shadow-lg'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
             >
@@ -231,9 +231,9 @@ export function DataScienceModule1Content() {
             </button>
             <button
               onClick={() => setLang('vi')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                lang === 'vi' 
-                  ? 'bg-primary-blue text-white shadow-lg' 
+              className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-medium transition-all ${
+                lang === 'vi'
+                  ? 'bg-primary-blue text-white shadow-lg'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
             >
@@ -352,8 +352,8 @@ export function DataScienceModule1Content() {
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-4 sm:gap-y-6">
                               {session.topics.map((topic, topicIndex) => (
                                 <div key={topicIndex} className="group/topic">
-                                  <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center group-hover/topic:text-primary-blue transition-colors">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-primary-blue mr-2"></div>
+                                  <h4 className="text-base sm:text-lg font-semibold text-text-primary mb-3 flex items-start group-hover/topic:text-primary-blue transition-colors">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary-blue mr-2 mt-2 flex-shrink-0"></div>
                                     {topic.title}
                                   </h4>
                                   <ul className="space-y-2 pl-3.5 border-l border-dark-border/30">

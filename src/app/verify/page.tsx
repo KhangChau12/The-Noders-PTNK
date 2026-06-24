@@ -117,17 +117,17 @@ export default function VerifyPage() {
               <ShieldCheck className="w-4 h-4" />
               {t.trustTitle}
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary tracking-tight mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading text-text-primary tracking-tight mb-4">
               {t.title}
             </h1>
-            <p className="text-text-secondary text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
+            <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
               {t.subtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
             <Card className="lg:col-span-7 bg-dark-bg/75 backdrop-blur-xl border-dark-border/60">
-              <CardContent className="p-6 md:p-8">
+              <CardContent className="p-5 sm:p-6 md:p-8">
                 <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
                     <h2 className="text-xl md:text-2xl font-semibold text-text-primary mb-2">
@@ -203,7 +203,7 @@ export default function VerifyPage() {
             </Card>
 
             <Card className="lg:col-span-5 bg-dark-surface/70 border-dark-border/60">
-              <CardContent className="p-6 md:p-8 h-full">
+              <CardContent className="p-5 sm:p-6 md:p-8 h-full">
                 <h3 className="text-lg md:text-xl font-semibold text-text-primary mb-4">
                   {t.stepsTitle}
                 </h3>

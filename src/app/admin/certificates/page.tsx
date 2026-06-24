@@ -560,7 +560,7 @@ function CertificateModal({
                   onChange={(e) => handleChange('description', e.target.value)}
                   placeholder="Additional notes about this certificate..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
+                  className="w-full px-3 py-2.5 text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
                 />
               </div>
 
@@ -573,8 +573,8 @@ function CertificateModal({
                 </div>
               )}
 
-              <div className="flex gap-4 pt-4">
-                <Button type="submit" disabled={loading} className="flex-1">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
+                <Button type="submit" disabled={loading} className="w-full sm:flex-1">
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
@@ -587,7 +587,7 @@ function CertificateModal({
                     </>
                   )}
                 </Button>
-                <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
+                <Button type="button" variant="secondary" onClick={onClose} disabled={loading} className="w-full sm:w-auto">
                   Cancel
                 </Button>
               </div>
@@ -753,7 +753,7 @@ function CertificateManagementPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           {/* Back to Dashboard */}
           <Link href="/admin">
@@ -764,21 +764,22 @@ function CertificateManagementPage() {
           </Link>
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                 Certificate Management
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-sm sm:text-base text-text-secondary">
                 Issue and manage member certificates
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               {!dataLoaded && (
                 <Button
                   onClick={fetchCertificates}
                   variant="primary"
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Load Certificates
@@ -789,12 +790,13 @@ function CertificateManagementPage() {
                   onClick={fetchCertificates}
                   variant="secondary"
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
               )}
-              <Button onClick={() => {
+              <Button className="w-full sm:w-auto" onClick={() => {
                 setShowEditModal(false)
                 setEditingCertificate(null)
                 setShowCreateModal(true)
@@ -855,21 +857,25 @@ function CertificateManagementPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Scroll hint for mobile */}
+                <p className="lg:hidden text-xs text-text-tertiary text-center mb-2">
+                  ← Vuốt ngang để xem đầy đủ bảng →
+                </p>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[720px]">
                     <thead>
                       <tr className="border-b border-dark-border">
-                        <th className="text-left py-3 text-text-primary font-semibold">Certificate ID</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Member</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Title</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Issued</th>
-                        <th className="text-right py-3 text-text-primary font-semibold">Actions</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Certificate ID</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Member</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Title</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Issued</th>
+                        <th className="text-right px-3 py-3 text-text-primary font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredCertificates.map((cert) => (
                         <tr key={cert.id} className="border-b border-dark-border/50 hover:bg-dark-surface/50">
-                          <td className="py-4">
+                          <td className="px-3 py-4">
                             <div className="flex items-center gap-2">
                               <code className="px-2 py-1 bg-primary-blue/10 text-primary-blue rounded font-mono text-sm">
                                 {cert.certificate_id}
@@ -883,7 +889,7 @@ function CertificateManagementPage() {
                               </button>
                             </div>
                           </td>
-                          <td className="py-4">
+                          <td className="px-3 py-4">
                             <div className="flex items-center gap-3">
                               <Avatar
                                 name={cert.member?.full_name}
@@ -900,13 +906,13 @@ function CertificateManagementPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 text-text-secondary">
+                          <td className="px-3 py-4 text-text-secondary">
                             {cert.title}
                           </td>
-                          <td className="py-4 text-text-secondary text-sm">
+                          <td className="px-3 py-4 text-text-secondary text-sm">
                             {new Date(cert.issued_at).toLocaleDateString('vi-VN')}
                           </td>
-                          <td className="py-4">
+                          <td className="px-3 py-4">
                             <div className="flex items-center justify-end gap-2">
                               <Button
                                 variant="ghost"

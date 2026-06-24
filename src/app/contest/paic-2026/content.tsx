@@ -198,9 +198,9 @@ export default function PAIC2026Content() {
           <div className="flex bg-dark-surface/50 p-1 rounded-lg border border-dark-border/50">
             <button
               onClick={() => setLang('en')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                lang === 'en' 
-                  ? 'bg-primary-blue text-white shadow-lg' 
+              className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-medium transition-all ${
+                lang === 'en'
+                  ? 'bg-primary-blue text-white shadow-lg'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
             >
@@ -208,9 +208,9 @@ export default function PAIC2026Content() {
             </button>
             <button
               onClick={() => setLang('vi')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                lang === 'vi' 
-                  ? 'bg-primary-blue text-white shadow-lg' 
+              className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-medium transition-all ${
+                lang === 'vi'
+                  ? 'bg-primary-blue text-white shadow-lg'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
             >
@@ -220,21 +220,21 @@ export default function PAIC2026Content() {
         </div>
 
         {/* Hero Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="primary" className="mb-6">
+              <Badge variant="primary" className="mb-5 sm:mb-6">
                 {t.status.ended}
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-5 sm:mb-6">
                 <span className="gradient-text">{t.title}</span>
                 <br />
                 <span className="text-text-primary">{t.subtitle}</span>
               </h1>
-              <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-xl text-text-secondary mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
                 {t.description}
               </p>
-              <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-primary-blue" />
                   <span>{t.stats.teams_participants}</span>
@@ -262,7 +262,7 @@ export default function PAIC2026Content() {
         </section>
 
         {/* Overview Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
               {/* Main Content Card */}
@@ -348,10 +348,10 @@ export default function PAIC2026Content() {
         </section>
 
         {/* Timeline Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
                 {t.timeline.title}
               </h2>
               <p className="text-text-secondary text-center mb-8">
@@ -414,10 +414,10 @@ export default function PAIC2026Content() {
         </section>
 
         {/* Leaderboard Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-4 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4 text-center">
                 {t.leaderboard.title}
               </h2>
               <p className="text-text-secondary text-center mb-8">
@@ -432,39 +432,39 @@ export default function PAIC2026Content() {
         </section>
 
         {/* Competition Format */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
                 {t.format.title}
               </h2>
 
               <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 mb-8">
-                <CardContent className="p-8">
+                <CardContent className="p-5 sm:p-8">
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
-                        <Users className="w-6 h-6 text-primary-blue" />
+                      <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
+                        <Users className="w-6 h-6 text-primary-blue flex-shrink-0" />
                         <span>{t.format.type_title}</span>
                       </h3>
-                      <p className="text-text-secondary leading-relaxed ml-9">
+                      <p className="text-text-secondary leading-relaxed ml-0 sm:ml-9">
                         {t.format.type_desc}
                       </p>
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
-                        <Target className="w-6 h-6 text-primary-blue" />
+                      <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
+                        <Target className="w-6 h-6 text-primary-blue flex-shrink-0" />
                         <span>{t.format.structure_title}</span>
                       </h3>
-                      <p className="text-text-secondary leading-relaxed ml-9 mb-4">
+                      <p className="text-text-secondary leading-relaxed ml-0 sm:ml-9 mb-4">
                         {t.format.structure_desc}
                       </p>
 
-                      <div className="ml-9 space-y-4">
-                        <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
-                          <h4 className="text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
-                            <BarChart3 className="w-5 h-5 text-success" />
+                      <div className="ml-0 sm:ml-9 space-y-4">
+                        <div className="bg-dark-surface/50 rounded-lg p-4 sm:p-6 border border-dark-border/30">
+                          <h4 className="text-base sm:text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
+                            <BarChart3 className="w-5 h-5 text-success flex-shrink-0" />
                             <span>{t.format.rounds[0].title}</span>
                           </h4>
                           <p className="text-sm text-text-secondary mb-2">
@@ -475,9 +475,9 @@ export default function PAIC2026Content() {
                           </p>
                         </div>
 
-                        <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
-                          <h4 className="text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
-                            <Zap className="w-5 h-5 text-warning" />
+                        <div className="bg-dark-surface/50 rounded-lg p-4 sm:p-6 border border-dark-border/30">
+                          <h4 className="text-base sm:text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
+                            <Zap className="w-5 h-5 text-warning flex-shrink-0" />
                             <span>{t.format.rounds[1].title}</span>
                           </h4>
                           <p className="text-sm text-text-secondary mb-2">
@@ -489,7 +489,7 @@ export default function PAIC2026Content() {
                         </div>
                       </div>
 
-                      <div className="ml-9 mt-4 p-4 bg-primary-blue/10 border border-primary-blue/30 rounded-lg">
+                      <div className="ml-0 sm:ml-9 mt-4 p-4 bg-primary-blue/10 border border-primary-blue/30 rounded-lg">
                         <p className="text-text-secondary text-sm">
                           <Trophy className="w-4 h-4 inline mr-2 text-primary-blue" />
                           <strong className="text-text-primary">{t.leaderboard.title}</strong> {t.format.ranking_note}
@@ -504,10 +504,10 @@ export default function PAIC2026Content() {
         </section>
 
         {/* Prizes Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-text-primary mb-4">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
                 {t.prizes.title}
               </h2>
               <p className="text-text-secondary">
@@ -573,9 +573,9 @@ export default function PAIC2026Content() {
 
             {/* Total Prize Pool */}
             <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/30">
-              <CardContent className="py-6 px-8 flex items-center justify-between">
+              <CardContent className="py-5 sm:py-6 px-5 sm:px-8 flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 sm:gap-4">
                 <p className="text-text-secondary font-medium">{t.prizes.total}</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent">
+                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent">
                   {t.prizes.pool}
                 </p>
               </CardContent>

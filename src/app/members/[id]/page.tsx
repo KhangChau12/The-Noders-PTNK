@@ -191,9 +191,9 @@ function ProjectHistory({ projects }: { projects: any[] }) {
                   href={`/products/${project.id}`}
                   className="group block p-4 rounded-lg bg-dark-surface border border-dark-border hover:bg-dark-border/50 transition-all duration-200"
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-3 sm:gap-4">
                     {project.thumbnail_url && (
-                      <div className="w-32 h-24 relative rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border/30">
+                      <div className="w-24 h-20 sm:w-32 sm:h-24 relative rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border/30">
                         <Image
                           src={project.thumbnail_url}
                           alt={project.title}
@@ -203,13 +203,13 @@ function ProjectHistory({ projects }: { projects: any[] }) {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h5 className="font-medium text-text-primary mb-2 group-hover:text-primary-blue transition-colors text-lg truncate">
+                      <h5 className="font-medium text-text-primary mb-2 group-hover:text-primary-blue transition-colors text-base sm:text-lg truncate">
                         {project.title}
                       </h5>
                       <p className="text-sm text-text-secondary mb-3 line-clamp-2">
                         {project.description}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-text-tertiary">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-tertiary">
                         <div className="flex items-center gap-2">
                           <div className="w-16 bg-dark-border rounded-full h-1.5">
                             <div
@@ -249,9 +249,9 @@ function ProjectHistory({ projects }: { projects: any[] }) {
                   href={`/products/${project.id}`}
                   className="group block p-4 rounded-lg bg-dark-surface border border-dark-border hover:bg-dark-border/50 transition-all duration-200"
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-3 sm:gap-4">
                     {project.thumbnail_url && (
-                      <div className="w-32 h-24 relative rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border/30">
+                      <div className="w-24 h-20 sm:w-32 sm:h-24 relative rounded-lg overflow-hidden flex-shrink-0 bg-dark-bg border border-dark-border/30">
                         <Image
                           src={project.thumbnail_url}
                           alt={project.title}
@@ -261,13 +261,13 @@ function ProjectHistory({ projects }: { projects: any[] }) {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h5 className="font-medium text-text-primary mb-2 group-hover:text-primary-blue transition-colors text-lg truncate">
+                      <h5 className="font-medium text-text-primary mb-2 group-hover:text-primary-blue transition-colors text-base sm:text-lg truncate">
                         {project.title}
                       </h5>
                       <p className="text-sm text-text-secondary mb-3 line-clamp-2">
                         {project.description}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-text-tertiary">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-tertiary">
                         <span>Project Lead</span>
                         <Badge variant="secondary" size="sm">
                           {project.status}
@@ -326,9 +326,9 @@ function MemberPosts({ posts }: { posts: any[] }) {
 
         return (
           <Link key={post.id} href={`/posts/${post.slug}`} className="group block">
-            <article className="flex gap-4 p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
+            <article className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
               {thumbnailSrc && (
-                <div className="flex-shrink-0 w-32 h-24 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+                <div className="flex-shrink-0 w-24 h-20 sm:w-32 sm:h-24 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
                   <img
                     src={thumbnailSrc}
                     alt={post.thumbnail_image?.alt_text || post.title}
@@ -344,17 +344,17 @@ function MemberPosts({ posts }: { posts: any[] }) {
                   </Badge>
                 )}
 
-                <h3 className="font-semibold text-text-primary text-lg mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
+                <h3 className="font-semibold text-text-primary text-base sm:text-lg mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
                   {post.title}
                 </h3>
 
                 {post.summary && (
-                  <p className="text-sm text-text-secondary mb-3 line-clamp-2">
+                  <p className="hidden sm:block text-sm text-text-secondary mb-3 line-clamp-2">
                     {post.summary}
                   </p>
                 )}
 
-                <div className="flex items-center gap-4 text-xs text-text-tertiary">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-tertiary">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>{formatDate(post.published_at || post.created_at)}</span>
@@ -467,33 +467,33 @@ export default function MemberProfilePage() {
   const taskStats = member.task_stats || []
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
-        <div className="mb-8">
-          <Link href="/members" className="inline-flex items-center text-text-secondary hover:text-primary-blue transition-colors">
+        <div className="mb-6 sm:mb-8">
+          <Link href="/members" className="inline-flex items-center text-text-secondary hover:text-primary-blue transition-colors py-2">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Members
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:sticky lg:top-24 lg:self-start">
             <Card className="overflow-hidden">
               {/* decorative glow orbs */}
               <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-primary-blue/35 blur-3xl pointer-events-none" />
               <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent-purple/35 blur-3xl pointer-events-none" />
 
-              <CardContent className="relative text-center p-8">
-                <div className="relative mx-auto mb-6 flex justify-center">
+              <CardContent className="relative text-center p-6 sm:p-8">
+                <div className="relative mx-auto mb-5 sm:mb-6 flex justify-center">
                   <Avatar
                     name={member.full_name}
                     src={member.avatar_url}
                     size="xl"
-                    className="w-32 h-32"
+                    className="w-24 h-24 sm:w-32 sm:h-32"
                   />
                 </div>
 
-                <h1 className="text-2xl font-bold text-text-primary mb-2">{member.full_name || member.username}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-text-primary mb-2 break-words">{member.full_name || member.username}</h1>
                 <p className="text-text-secondary mb-1">@{member.username}</p>
                 <Badge variant={member.role === 'admin' ? 'primary' : 'secondary'} className="mb-4">
                   {member.role === 'admin' ? 'Core Team' : 'Member'}
@@ -523,32 +523,32 @@ export default function MemberProfilePage() {
                   Joined {new Date(member.created_at).toLocaleDateString()}
                 </div>
 
-                <div className="flex justify-center space-x-4">
-                  <a href="mailto:phuckhangtdn@gmail.com" className="text-text-tertiary hover:text-primary-blue transition-colors" title="Email">
+                <div className="flex flex-wrap justify-center gap-1">
+                  <a href="mailto:phuckhangtdn@gmail.com" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-tertiary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors" title="Email">
                     <Mail className="w-5 h-5" />
                   </a>
                   {socialLinks.github && (
-                    <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-primary-blue transition-colors" title="GitHub">
+                    <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-tertiary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors" title="GitHub">
                       <Github className="w-5 h-5" />
                     </a>
                   )}
                   {socialLinks.linkedin && (
-                    <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-primary-blue transition-colors" title="LinkedIn">
+                    <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-tertiary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors" title="LinkedIn">
                       <Linkedin className="w-5 h-5" />
                     </a>
                   )}
                   {socialLinks.twitter && (
-                    <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-primary-blue transition-colors" title="Twitter">
+                    <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-tertiary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors" title="Twitter">
                       <Twitter className="w-5 h-5" />
                     </a>
                   )}
                   {socialLinks.facebook && (
-                    <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-primary-blue transition-colors" title="Facebook">
+                    <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-tertiary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors" title="Facebook">
                       <Facebook className="w-5 h-5" />
                     </a>
                   )}
                   {socialLinks.website && (
-                    <a href={socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-text-tertiary hover:text-primary-blue transition-colors" title="Website">
+                    <a href={socialLinks.website} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-tertiary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors" title="Website">
                       <Globe className="w-5 h-5" />
                     </a>
                   )}

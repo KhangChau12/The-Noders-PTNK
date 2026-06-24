@@ -106,13 +106,13 @@ function AdminDashboardContent() {
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary flex items-center">
-              <Shield className="w-8 h-8 mr-3 text-primary-blue" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary flex items-center">
+              <Shield className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-primary-blue flex-shrink-0" />
               Admin Dashboard
             </h1>
-            <p className="text-text-secondary mt-2">
+            <p className="text-sm sm:text-base text-text-secondary mt-2">
               Overview of system performance and quick management actions.
             </p>
           </div>
@@ -122,6 +122,7 @@ function AdminDashboardContent() {
             variant="primary"
             size="sm"
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -129,7 +130,7 @@ function AdminDashboardContent() {
         </div>
 
         {/* Key Statistics - Simplified Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10">
           <Card className="border-l-4 border-l-accent-purple bg-dark-surface/50 hover:bg-dark-surface transition-colors">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -218,9 +219,9 @@ function AdminDashboardContent() {
             <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-primary-blue/50 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-blue/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-primary-blue/20 transition-colors"></div>
               
-              <div className="p-8 relative z-10 flex items-start space-x-6">
-                <div className="p-4 bg-primary-blue/10 rounded-2xl group-hover:bg-primary-blue/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-primary-blue/5">
-                  <Users className="w-10 h-10 text-primary-blue" />
+              <div className="p-5 sm:p-8 relative z-10 flex items-start gap-4 sm:gap-6">
+                <div className="p-3 sm:p-4 shrink-0 bg-primary-blue/10 rounded-2xl group-hover:bg-primary-blue/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-primary-blue/5">
+                  <Users className="w-8 h-8 sm:w-10 sm:h-10 text-primary-blue" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-primary-blue transition-colors">
@@ -242,9 +243,9 @@ function AdminDashboardContent() {
             <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-orange/50 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-accent-orange/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-orange/20 transition-colors"></div>
 
-              <div className="p-8 relative z-10 flex items-start space-x-6">
-                <div className="p-4 bg-accent-orange/10 rounded-2xl group-hover:bg-accent-orange/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-orange/5">
-                  <ClipboardList className="w-10 h-10 text-accent-orange" />
+              <div className="p-5 sm:p-8 relative z-10 flex items-start gap-4 sm:gap-6">
+                <div className="p-3 sm:p-4 shrink-0 bg-accent-orange/10 rounded-2xl group-hover:bg-accent-orange/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-orange/5">
+                  <ClipboardList className="w-8 h-8 sm:w-10 sm:h-10 text-accent-orange" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-orange transition-colors">
@@ -266,9 +267,9 @@ function AdminDashboardContent() {
             <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-pink/50 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-pink/20 transition-colors"></div>
               
-              <div className="p-8 relative z-10 flex items-start space-x-6">
-                <div className="p-4 bg-accent-pink/10 rounded-2xl group-hover:bg-accent-pink/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-pink/5">
-                  <FileText className="w-10 h-10 text-accent-pink" />
+              <div className="p-5 sm:p-8 relative z-10 flex items-start gap-4 sm:gap-6">
+                <div className="p-3 sm:p-4 shrink-0 bg-accent-pink/10 rounded-2xl group-hover:bg-accent-pink/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-pink/5">
+                  <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-accent-pink" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-pink transition-colors">
@@ -290,9 +291,9 @@ function AdminDashboardContent() {
             <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-cyan/50 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-accent-cyan/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-cyan/20 transition-colors"></div>
               
-              <div className="p-8 relative z-10 flex items-start space-x-6">
-                <div className="p-4 bg-accent-cyan/10 rounded-2xl group-hover:bg-accent-cyan/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-cyan/5">
-                  <FileEdit className="w-10 h-10 text-accent-cyan" />
+              <div className="p-5 sm:p-8 relative z-10 flex items-start gap-4 sm:gap-6">
+                <div className="p-3 sm:p-4 shrink-0 bg-accent-cyan/10 rounded-2xl group-hover:bg-accent-cyan/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-cyan/5">
+                  <FileEdit className="w-8 h-8 sm:w-10 sm:h-10 text-accent-cyan" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-cyan transition-colors">
@@ -314,9 +315,9 @@ function AdminDashboardContent() {
             <div className="h-full relative overflow-hidden rounded-xl border border-dark-border bg-dark-surface hover:border-accent-green/50 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-accent-green/10 rounded-full blur-3xl -translate-y-16 translate-x-16 group-hover:bg-accent-green/20 transition-colors"></div>
               
-              <div className="p-8 relative z-10 flex items-start space-x-6">
-                <div className="p-4 bg-accent-green/10 rounded-2xl group-hover:bg-accent-green/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-green/5">
-                  <Award className="w-10 h-10 text-accent-green" />
+              <div className="p-5 sm:p-8 relative z-10 flex items-start gap-4 sm:gap-6">
+                <div className="p-3 sm:p-4 shrink-0 bg-accent-green/10 rounded-2xl group-hover:bg-accent-green/20 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-accent-green/5">
+                  <Award className="w-8 h-8 sm:w-10 sm:h-10 text-accent-green" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-text-primary mb-2 group-hover:text-accent-green transition-colors">

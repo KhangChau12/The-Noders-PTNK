@@ -118,7 +118,7 @@ export default function VerifyResultPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-error/20 mb-6">
             <ShieldX className="w-10 h-10 text-error" />
           </div>
-          <h1 className="text-3xl font-bold text-text-primary mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
             {t.invalid}
           </h1>
           <p className="text-text-secondary mb-8">
@@ -140,7 +140,7 @@ export default function VerifyResultPage() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-error/20 mb-6">
             <XCircle className="w-10 h-10 text-error" />
           </div>
-          <h1 className="text-3xl font-bold text-text-primary mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
             {t.invalid}
           </h1>
           <p className="text-text-secondary mb-4">
@@ -178,13 +178,13 @@ export default function VerifyResultPage() {
             {t.backToVerify}
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 px-4 py-2 bg-success/10 border border-success/30 rounded-full">
-              <ShieldCheck className="w-5 h-5 text-success" />
+              <ShieldCheck className="w-5 h-5 text-success flex-shrink-0" />
               <span className="text-success font-medium">{t.valid}</span>
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={handleShare}>
+              <Button variant="ghost" size="sm" onClick={handleShare} aria-label={t.shareCert} className="min-h-[44px] min-w-[44px]">
                 <Share2 className="w-4 h-4" />
               </Button>
               {certificate?.file_url && (
@@ -192,6 +192,8 @@ export default function VerifyResultPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => window.open(certificate.file_url!, '_blank')}
+                  aria-label={t.downloadCert}
+                  className="min-h-[44px] min-w-[44px]"
                 >
                   <Download className="w-4 h-4" />
                 </Button>
@@ -316,7 +318,7 @@ export default function VerifyResultPage() {
                       href={socialLinks.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
+                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
                     >
                       <Github className="w-4 h-4 text-text-secondary" />
                     </a>
@@ -326,7 +328,7 @@ export default function VerifyResultPage() {
                       href={socialLinks.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
+                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
                     >
                       <Facebook className="w-4 h-4 text-text-secondary" />
                     </a>
@@ -336,7 +338,7 @@ export default function VerifyResultPage() {
                       href={socialLinks.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
+                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
                     >
                       <Linkedin className="w-4 h-4 text-text-secondary" />
                     </a>
@@ -346,7 +348,7 @@ export default function VerifyResultPage() {
                       href={socialLinks.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
+                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
                     >
                       <Globe className="w-4 h-4 text-text-secondary" />
                     </a>

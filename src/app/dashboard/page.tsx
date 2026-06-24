@@ -144,16 +144,16 @@ function DashboardContent() {
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2 break-words">
             Welcome back, {profile.full_name || profile.username}!
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-sm sm:text-base text-text-secondary">
             Here's what's happening with your projects and contributions.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* LEFT SIDEBAR: Profile & Stats */}
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
@@ -214,12 +214,12 @@ function DashboardContent() {
                 {/* Contact Links */}
                 <div className="mb-6">
                   <h4 className="text-sm font-medium text-text-primary mb-3">Contact</h4>
-                  <div className="flex space-x-3 justify-center">
-                    <a href="mailto:phuckhangtdn@gmail.com" className="text-text-secondary hover:text-primary-blue">
+                  <div className="flex gap-1 justify-center">
+                    <a href="mailto:phuckhangtdn@gmail.com" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-secondary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors">
                       <Mail className="w-5 h-5" />
                     </a>
                     {socialLinks.facebook && (
-                      <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-primary-blue">
+                      <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 rounded-lg text-text-secondary hover:text-primary-blue hover:bg-dark-bg/50 transition-colors">
                         <Facebook className="w-5 h-5" />
                       </a>
                     )}
@@ -310,7 +310,7 @@ function DashboardContent() {
           </div>
 
           {/* RIGHT CONTENT: Dashboard Actions & Activity */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
              {/* My Content & Achievements - MOVED TO TOP */}
              <Card className="border-none bg-transparent shadow-none p-0">
                <CardContent className="p-0">

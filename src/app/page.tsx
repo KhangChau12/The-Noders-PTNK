@@ -387,7 +387,7 @@ export default async function HomePage() {
       <NeuralNetworkBackground />
       <div className="min-h-screen relative z-10">
       {/* Hero & Stats Section */}
-      <section className="relative py-12 px-4 sm:px-6 sm:py-16 lg:px-8 overflow-hidden">
+      <section className="relative py-10 px-4 sm:px-6 sm:py-16 lg:px-8 overflow-hidden">
         {/* Single subtle gradient — lets the global neural-net background show through */}
         <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface/10 to-dark-bg" />
 
@@ -455,7 +455,7 @@ export default async function HomePage() {
       </section>
 
       {/* Latest News Section */}
-      <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
+      <section className="py-10 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
         <div className="container mx-auto">
           <SectionHeading
             title="Latest Community Activities"
@@ -468,7 +468,7 @@ export default async function HomePage() {
       </section>
 
       {/* Recent Products Section */}
-      <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8">
+      <section className="py-10 px-4 sm:px-6 sm:py-16 lg:px-8">
         <div className="container mx-auto">
           <SectionHeading
             title="Recent Products"
@@ -560,7 +560,7 @@ export default async function HomePage() {
       </section>
 
       {/* Our Programs Section - Contests & Education Combined */}
-      <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
+      <section className="py-10 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
         <div className="container mx-auto">
           <SectionHeading
             title="Our Programs"

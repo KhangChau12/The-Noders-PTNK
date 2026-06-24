@@ -326,7 +326,7 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
                     onChange={(e) => handleChange('bio', e.target.value)}
                     placeholder="Tell us about this user..."
                     rows={3}
-                    className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
+                    className="w-full px-3 py-2.5 text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
                   />
                 </div>
 
@@ -338,7 +338,7 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
                     <select
                       value={formData.role}
                       onChange={(e) => handleChange('role', e.target.value as 'admin' | 'member')}
-                      className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
+                      className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
                     >
                       <option value="member">Member</option>
                       <option value="admin">Admin</option>
@@ -381,11 +381,11 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
                 </div>
               )}
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   {loading ? (
                     <>
@@ -404,6 +404,7 @@ function CreateUserModal({ isOpen, onClose, onUserCreated }: {
                   variant="secondary"
                   onClick={onClose}
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
@@ -554,7 +555,7 @@ function UserManagementPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           {/* Back to Dashboard */}
           <Link href="/admin">
@@ -565,21 +566,22 @@ function UserManagementPage() {
           </Link>
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                 User Management
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-sm sm:text-base text-text-secondary">
                 Create and manage user accounts
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               {!dataLoaded && (
                 <Button
                   onClick={fetchUsers}
                   variant="primary"
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Load Users
@@ -590,12 +592,13 @@ function UserManagementPage() {
                   onClick={fetchUsers}
                   variant="secondary"
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
               )}
-              <Button onClick={() => setShowCreateModal(true)}>
+              <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Create User
               </Button>
@@ -652,17 +655,21 @@ function UserManagementPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Scroll hint for mobile */}
+                <p className="lg:hidden text-xs text-text-tertiary text-center mb-2">
+                  ← Vuốt ngang để xem đầy đủ bảng →
+                </p>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[820px]">
                     <thead>
                       <tr className="border-b border-dark-border">
-                        <th className="text-left py-3 text-text-primary font-semibold">User</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Email</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Role</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Status</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Contests</th>
-                        <th className="text-left py-3 text-text-primary font-semibold">Created</th>
-                        <th className="text-right py-3 text-text-primary font-semibold">Actions</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">User</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Email</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Role</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Status</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Contests</th>
+                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Created</th>
+                        <th className="text-right px-3 py-3 text-text-primary font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -672,7 +679,7 @@ function UserManagementPage() {
 
                         return (
                           <tr key={user.id} className="border-b border-dark-border/50 hover:bg-dark-surface/50">
-                            <td className="py-4">
+                            <td className="px-3 py-4">
                               <div className="flex items-center gap-3">
                                 <Avatar
                                   name={profile?.full_name}
@@ -689,10 +696,10 @@ function UserManagementPage() {
                                 </div>
                               </div>
                             </td>
-                            <td className="py-4 text-text-secondary">
+                            <td className="px-3 py-4 text-text-secondary">
                               {user.email}
                             </td>
-                            <td className="py-4">
+                            <td className="px-3 py-4">
                               <Badge variant={profile?.role === 'admin' ? 'primary' : 'secondary'}>
                                 {profile?.role === 'admin' ? (
                                   <>
@@ -707,12 +714,12 @@ function UserManagementPage() {
                                 )}
                               </Badge>
                             </td>
-                            <td className="py-4">
+                            <td className="px-3 py-4">
                               <Badge variant={user.email_confirmed_at ? 'success' : 'warning'} size="sm">
                                 {user.email_confirmed_at ? 'Verified' : 'Pending'}
                               </Badge>
                             </td>
-                            <td className="py-4">
+                            <td className="px-3 py-4">
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => handleContestCountChange(user.id, (profile?.contest_count || 0) - 1)}
@@ -732,10 +739,10 @@ function UserManagementPage() {
                                 </button>
                               </div>
                             </td>
-                            <td className="py-4 text-text-secondary text-sm">
+                            <td className="px-3 py-4 text-text-secondary text-sm">
                               {new Date(user.created_at).toLocaleDateString()}
                             </td>
-                            <td className="py-4">
+                            <td className="px-3 py-4">
                               <div className="flex items-center justify-end gap-2">
                                 <Button
                                   variant="ghost"

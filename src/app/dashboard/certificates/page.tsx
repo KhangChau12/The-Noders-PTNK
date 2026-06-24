@@ -101,21 +101,21 @@ export default function MyCertificatesPage() {
       <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-[1500px] space-y-6 px-1 sm:px-2">
           {/* Header */}
-          <div className="rounded-2xl border border-dark-border bg-dark-surface/40 backdrop-blur-sm p-6 md:p-8">
+          <div className="rounded-2xl border border-dark-border bg-dark-surface/40 backdrop-blur-sm p-5 sm:p-6 md:p-8">
             <Link href="/dashboard">
               <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
               </Button>
             </Link>
-            
+
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-text-primary mb-2 flex items-center">
-                  <Award className="w-8 h-8 mr-3 text-primary-blue" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2 flex items-center">
+                  <Award className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-primary-blue flex-shrink-0" />
                   My Certificates
                 </h1>
-                <p className="text-text-secondary max-w-2xl">
+                <p className="text-sm sm:text-base text-text-secondary max-w-2xl">
                   View and manage your verified achievements from The Noders Community.
                 </p>
               </div>
@@ -140,7 +140,7 @@ export default function MyCertificatesPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
               {certificates.map((cert) => (
                 <Card key={cert.id} className="group h-full min-h-[315px] overflow-hidden bg-dark-surface/95 border-dark-border/80 hover:border-primary-blue/50 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300">
                   <div className="flex flex-col sm:flex-row h-full">

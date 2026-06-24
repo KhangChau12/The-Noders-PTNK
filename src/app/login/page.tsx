@@ -64,7 +64,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
       {/* LEFT PANEL — Branding & Community Showcase */}
-      <div className="relative lg:w-[60%] flex items-center justify-center px-6 py-12 lg:py-0 overflow-hidden bg-gradient-to-b from-dark-bg via-dark-surface/20 to-dark-bg">
+      <div className="relative lg:w-[60%] flex items-center justify-center px-6 py-8 sm:py-12 lg:py-0 overflow-hidden bg-gradient-to-b from-dark-bg via-dark-surface/20 to-dark-bg">
         {/* Background decorations */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Center Glow Orb */}
@@ -84,12 +84,12 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-lg text-center lg:text-left">
           {/* Text Logo */}
-          <div className="mb-8">
-            <h1 className="text-4xl lg:text-5xl font-[family-name:var(--font-shrikhand)]">
+          <div className="mb-0 lg:mb-8">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-[family-name:var(--font-shrikhand)]">
               <span className="text-text-primary">The Noders </span>
               <span className="text-primary-blue">PTNK</span>
             </h1>
-            <p className="text-lg text-text-secondary mt-3">
+            <p className="text-base sm:text-lg text-text-secondary mt-3">
               {SITE_CONFIG.tagline}
             </p>
             <p className="text-sm text-text-tertiary mt-1">
@@ -149,7 +149,7 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT PANEL — Login Form */}
-      <div className="lg:w-[40%] relative flex items-center justify-center px-6 py-12 lg:py-0
+      <div className="lg:w-[40%] relative flex items-center justify-center px-6 pb-10 pt-2 sm:py-12 lg:py-0
                       bg-gradient-to-b from-dark-surface/50 to-dark-bg
                       lg:border-l lg:border-dark-border/30">
         {/* Subtle top glow */}

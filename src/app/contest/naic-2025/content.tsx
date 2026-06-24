@@ -128,9 +128,9 @@ export function NAIC2025Content() {
           <div className="flex bg-dark-surface/50 p-1 rounded-lg border border-dark-border/50">
             <button
               onClick={() => setLang('en')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                lang === 'en' 
-                  ? 'bg-primary-blue text-white shadow-lg' 
+              className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-medium transition-all ${
+                lang === 'en'
+                  ? 'bg-primary-blue text-white shadow-lg'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
             >
@@ -138,9 +138,9 @@ export function NAIC2025Content() {
             </button>
             <button
               onClick={() => setLang('vi')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                lang === 'vi' 
-                  ? 'bg-primary-blue text-white shadow-lg' 
+              className={`px-4 py-2 min-h-[40px] rounded-md text-sm font-medium transition-all ${
+                lang === 'vi'
+                  ? 'bg-primary-blue text-white shadow-lg'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
             >
@@ -150,21 +150,21 @@ export function NAIC2025Content() {
         </div>
 
         {/* Hero Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="primary" className="mb-6">
+              <Badge variant="primary" className="mb-5 sm:mb-6">
                  {loc(t.hero.badge)}
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-5 sm:mb-6">
                 <span className="gradient-text">{loc(t.hero.titlePrefix)}</span>
                 <br />
                 <span className="text-text-primary">2025</span>
               </h1>
-              <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-xl text-text-secondary mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
                 {loc(t.hero.description)}
               </p>
-              <div className="flex flex-wrap justify-center gap-4 text-text-secondary">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-text-secondary">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-primary-blue" />
                   <span>{loc(t.hero.stats.members)}</span>
@@ -188,26 +188,26 @@ export function NAIC2025Content() {
         </section>
 
         {/* Overview & Video Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-12 text-center">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-8 sm:mb-12 text-center">
                  {loc(t.overview.heading)}
               </h2>
 
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8">
                 {/* Left Column - Overview (2/5 width) */}
                 <div className="lg:col-span-2">
                   <Card className="bg-gradient-to-br from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 h-full">
-                    <CardContent className="p-8">
-                      <h3 className="text-2xl font-bold text-text-primary mb-6">
+                    <CardContent className="p-6 sm:p-8">
+                      <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-5 sm:mb-6">
                         {loc(t.overview.aboutTitle)}
                       </h3>
-                      <p className="text-text-secondary leading-relaxed mb-6">
+                      <p className="text-text-secondary leading-relaxed mb-5 sm:mb-6">
                         {loc(t.overview.aboutText)}
                       </p>
 
-                      <div className="bg-dark-surface/50 rounded-lg p-6 border border-dark-border/30">
+                      <div className="bg-dark-surface/50 rounded-lg p-5 sm:p-6 border border-dark-border/30">
                         <h4 className="text-text-primary font-semibold mb-4 flex items-center">
                           <Users className="w-5 h-5 mr-2 text-primary-blue" />
                           {loc(t.overview.targetTitle)}
@@ -233,7 +233,7 @@ export function NAIC2025Content() {
                         <PlayCircle className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold text-text-primary">
+                        <h3 className="text-xl sm:text-2xl font-bold text-text-primary">
                           {loc(t.overview.videoTitle)}
                         </h3>
                         <p className="text-text-secondary text-sm">
@@ -271,10 +271,10 @@ export function NAIC2025Content() {
         </section>
 
         {/* Timeline Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-12 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-8 sm:mb-12 text-center">
                  {loc(t.timeline.heading)}
               </h2>
 
@@ -399,31 +399,36 @@ export function NAIC2025Content() {
         </section>
 
         {/* Leaderboard Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
                  {loc(t.leaderboard.heading)}
               </h2>
-              <p className="text-text-secondary text-center mb-8">
+              <p className="text-text-secondary text-center mb-6 sm:mb-8">
                  {loc(t.leaderboard.subheading)}
+              </p>
+
+              {/* Scroll hint for mobile */}
+              <p className="md:hidden text-xs text-text-tertiary text-center mb-2">
+                {lang === 'vi' ? '← Vuốt ngang để xem đầy đủ →' : '← Swipe to see full table →'}
               </p>
 
               <Card className="overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[480px]">
                     <thead className="bg-dark-border/30">
                       <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                        <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
                            {loc(t.leaderboard.columns.rank)}
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                        <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">
                            {loc(t.leaderboard.columns.participant)}
                         </th>
-                        <th className="px-6 py-4 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                        <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">
                            {loc(t.leaderboard.columns.submissions)}
                         </th>
-                        <th className="px-6 py-4 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                        <th className="px-4 sm:px-6 py-3 sm:py-4 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">
                            {loc(t.leaderboard.columns.mae)}
                         </th>
                       </tr>
@@ -438,10 +443,10 @@ export function NAIC2025Content() {
                             hover:bg-dark-border/20 transition-colors
                           `}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               {entry.rank <= 3 ? (
-                                <div className={`flex items-center justify-center w-8 h-8 rounded-full mr-2 ${
+                                <div className={`flex items-center justify-center w-8 h-8 rounded-full mr-2 flex-shrink-0 ${
                                   entry.rank === 1 ? 'bg-yellow-500/20 text-yellow-500' :
                                   entry.rank === 2 ? 'bg-gray-400/20 text-gray-400' :
                                   'bg-amber-600/20 text-amber-600'
@@ -458,7 +463,7 @@ export function NAIC2025Content() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 sm:px-6 py-3 sm:py-4">
                             <span className={`text-sm ${
                               entry.isBaseline ? 'font-semibold text-warning italic' :
                               entry.rank <= 5 ? 'font-semibold text-text-primary' :
@@ -467,12 +472,12 @@ export function NAIC2025Content() {
                               {entry.name}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
                             <span className="text-sm text-text-secondary font-mono">
                               {entry.submissions}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                             <span className={`text-sm font-mono ${
                               entry.rank <= 5 ? 'font-bold text-primary-blue' : 'text-text-secondary'
                             }`}>
@@ -490,10 +495,10 @@ export function NAIC2025Content() {
         </section>
 
         {/* Format Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-5xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
                  {loc(t.format.heading)}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -522,29 +527,29 @@ export function NAIC2025Content() {
         </section>
 
         {/* Content Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
                  {loc(t.content.heading)}
               </h2>
 
               <div className="space-y-6">
                 <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-                  <CardContent className="p-8">
+                  <CardContent className="p-6 sm:p-8">
                     <div className="flex items-start space-x-4 mb-6">
                       <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl flex items-center justify-center text-primary-blue">
                         <Target className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-text-primary mb-2">{loc(t.content.theme.title)}</h3>
+                        <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-2">{loc(t.content.theme.title)}</h3>
                         <p className="text-text-secondary">
                           {loc(t.content.theme.desc)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         {t.content.details.map((item, i) => {
                              const Icon = contentDetailsIcons[i];
                              return (
@@ -568,11 +573,11 @@ export function NAIC2025Content() {
         </section>
 
         {/* Prizes Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-text-primary mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
                   {loc(t.prizes.heading)}
                 </h2>
                 <p className="text-text-secondary">
@@ -610,14 +615,14 @@ export function NAIC2025Content() {
 
               {/* Participation Reward */}
               <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/30">
-                <CardContent className="py-6 px-8 flex items-center justify-between">
+                <CardContent className="py-5 sm:py-6 px-5 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                   <div className="flex items-center gap-3">
-                    <Star className="w-5 h-5 text-success" />
+                    <Star className="w-5 h-5 text-success flex-shrink-0" />
                     <p className="text-text-secondary font-medium">
                       {lang === 'vi' ? 'Tất cả thí sinh khác' : 'All other participants'}
                     </p>
                   </div>
-                  <p className="font-bold text-text-primary">
+                  <p className="font-bold text-text-primary sm:text-right">
                     {lang === 'vi' ? 'Kinh nghiệm + 10 Club Points' : 'Experience + 10 Club Points'}
                   </p>
                 </CardContent>
@@ -627,18 +632,18 @@ export function NAIC2025Content() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/50">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/50">
           <div className="container mx-auto">
             <Card className="text-center bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="p-12">
-                <h2 className="text-3xl font-bold text-text-primary mb-4">
+              <CardContent className="p-6 sm:p-10 lg:p-12">
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
                    {loc(t.cta.title)}
                 </h2>
-                <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
+                <p className="text-text-secondary text-base sm:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto">
                    {loc(t.cta.desc)}
                 </p>
                 <Link href="https://the-noders-competition-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="group">
+                  <Button size="lg" className="group w-full sm:w-auto">
                      {loc(t.cta.button)}
                     <ExternalLink className="ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
                   </Button>

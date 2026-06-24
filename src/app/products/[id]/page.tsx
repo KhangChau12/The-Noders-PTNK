@@ -92,7 +92,7 @@ export default function ProjectDetailPage() {
       <NeuralNetworkBackground />
       
       {/* Cinematic Hero Section */}
-      <div className="relative w-full min-h-[400px] flex items-end py-12">
+      <div className="relative w-full min-h-[360px] sm:min-h-[400px] flex items-end py-10 sm:py-12">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           {project.thumbnail_url ? (
@@ -113,7 +113,7 @@ export default function ProjectDetailPage() {
 
         {/* Hero Content */}
         <div className="container mx-auto px-4 sm:px-6 z-10 w-full">
-            <Link href="/products" className="inline-block mb-8">
+            <Link href="/products" className="inline-block mb-6 sm:mb-8">
               <Button variant="ghost" className="hover:bg-white/10 text-white/80 hover:text-white backdrop-blur-sm transition-all border border-transparent hover:border-white/20">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Projects
@@ -121,9 +121,9 @@ export default function ProjectDetailPage() {
             </Link>
 
             <div className="max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700"> {/* Removed max-w-5xl, using max-w-7xl */}
-              
+
               {/* Header Badges & Date */}
-              <div className="flex flex-wrap items-center gap-4 mb-6">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
                 <Badge 
                   variant={project.status === 'active' ? 'success' : 'secondary'}
                   className="uppercase tracking-wider text-xs font-bold px-3 py-1"
@@ -142,33 +142,33 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 font-heading leading-tight drop-shadow-xl tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-5 sm:mb-6 font-heading leading-tight drop-shadow-xl tracking-tight">
                 {project.title}
               </h1>
 
               {/* Description without strict max-width to allow longer lines */}
-              <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed drop-shadow-md pr-4 max-w-none">
+              <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 leading-relaxed drop-shadow-md max-w-none">
                 {project.description}
               </p>
 
               {/* Contributors In Hero */}
-               <div className="mb-8">
+               <div className="mb-6 sm:mb-8">
                   {renderContributors()}
                </div>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                 {project.demo_url && (
-                  <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                    <Button size="lg" className="bg-primary-blue hover:bg-primary-blue/90 border-0 shadow-lg shadow-primary-blue/25 px-8">
+                  <a href={project.demo_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto bg-primary-blue hover:bg-primary-blue/90 border-0 shadow-lg shadow-primary-blue/25 px-8">
                       <Globe className="w-5 h-5 mr-2" />
                       Live Demo
                     </Button>
                   </a>
                 )}
-                
+
                 {project.repo_url && (
-                  <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
-                    <Button size="lg" variant="ghost" className="bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/10 text-white px-8">
+                  <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                    <Button size="lg" variant="ghost" className="w-full sm:w-auto bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/10 text-white px-8">
                       <Github className="w-5 h-5 mr-2" />
                       Source Code
                     </Button>
@@ -179,16 +179,16 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 py-12 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12 relative z-10">
         {/* Layout Split: Video Left (60%) / Desc Right (40%) */}
         {/* Removed items-start to allow columns to stretch, enabling sticky behavior */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 xl:gap-12">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 xl:gap-12">
+
           {/* Left Column: Demo Video (60%) - Sticky */}
           <div className="lg:col-span-3">
-             <div className="sticky top-24 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                 <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                  <Video className="w-6 h-6 mr-3 text-accent-purple" />
+             <div className="lg:sticky lg:top-24 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                  <Video className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-accent-purple" />
                   Project Demo
                 </h2>
                 
@@ -227,19 +227,19 @@ export default function ProjectDetailPage() {
           {/* Right Column: Description (40%) - Scrolling */}
           <div className="lg:col-span-2 space-y-8">
             <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <Layout className="w-6 h-6 mr-3 text-primary-blue" />
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
+                <Layout className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-blue" />
                 Project Details
               </h2>
               <Card padding="none" className="bg-dark-surface/40 backdrop-blur-sm border-white/5 overflow-hidden">
-                <CardContent className="p-6 md:p-8">
-                  <div className="prose prose-invert prose-lg max-w-none text-text-secondary">
+                <CardContent className="p-5 sm:p-6 md:p-8">
+                  <div className="prose prose-invert prose-base sm:prose-lg max-w-none text-text-secondary break-words">
                     {project.details ? (
-                      <div 
-                        dangerouslySetInnerHTML={{ __html: project.details }} 
-                        className="[&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mb-6 [&>h1]:mt-8
-                                   [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mb-4 [&>h2]:mt-8
-                                   [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white [&>h3]:mb-3 [&>h3]:mt-6
+                      <div
+                        dangerouslySetInnerHTML={{ __html: project.details }}
+                        className="[&>h1]:text-2xl sm:[&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mb-5 sm:[&>h1]:mb-6 [&>h1]:mt-6 sm:[&>h1]:mt-8
+                                   [&>h2]:text-xl sm:[&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mb-3 sm:[&>h2]:mb-4 [&>h2]:mt-6 sm:[&>h2]:mt-8
+                                   [&>h3]:text-lg sm:[&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-white [&>h3]:mb-3 [&>h3]:mt-5 sm:[&>h3]:mt-6
                                    [&>p]:leading-relaxed [&>p]:mb-4
                                    [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
                                    [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4

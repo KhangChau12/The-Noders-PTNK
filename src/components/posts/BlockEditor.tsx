@@ -427,7 +427,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle>Content Blocks</CardTitle>
           <div className="flex items-center gap-2 text-xs text-text-tertiary">
             <span>{blocks.length}/15 blocks</span>
@@ -450,7 +450,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className="h-11 w-11 sm:h-8 sm:w-8 p-0"
                   onClick={() => handleMoveBlock(block.id, 'up')}
                   disabled={isFirst || isReordering || !!reorderingBlockId}
                   aria-label="Move block up"
@@ -462,7 +462,7 @@ export function BlockEditor({ blocks, postId, onBlocksChange, session }: BlockEd
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className="h-11 w-11 sm:h-8 sm:w-8 p-0"
                   onClick={() => handleMoveBlock(block.id, 'down')}
                   disabled={isLast || isReordering || !!reorderingBlockId}
                   aria-label="Move block down"

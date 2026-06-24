@@ -186,18 +186,18 @@ function AdminActivityContent() {
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto max-w-7xl space-y-8">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="container mx-auto max-w-7xl space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
-              <ClipboardList className="w-8 h-8 text-accent-orange" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary flex items-center gap-2 sm:gap-3">
+              <ClipboardList className="w-6 h-6 sm:w-8 sm:h-8 text-accent-orange flex-shrink-0" />
               Activity Points Manager
             </h1>
-            <p className="text-text-secondary mt-2 max-w-2xl">
+            <p className="text-sm sm:text-base text-text-secondary mt-2 max-w-2xl">
               Create scored tasks, reuse old templates, and assign points to multiple members in one entry.
             </p>
           </div>
-          <Button onClick={fetchData} variant="secondary">
+          <Button onClick={fetchData} variant="secondary" className="w-full sm:w-auto">
             Refresh
           </Button>
         </div>
@@ -214,12 +214,12 @@ function AdminActivityContent() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             <Card className="border-dark-border bg-dark-surface/70">
               <CardHeader>
-                <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-accent-orange" />
+                <h2 className="text-lg sm:text-xl font-semibold text-text-primary flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-accent-orange flex-shrink-0" />
                   Create Task Entry
                 </h2>
               </CardHeader>
@@ -231,7 +231,7 @@ function AdminActivityContent() {
                       <select
                         value={selectedTemplateId}
                         onChange={(event) => handleTemplateSelect(event.target.value)}
-                        className="w-full rounded-lg border border-dark-border bg-dark-bg px-3 py-2 text-text-primary"
+                        className="w-full rounded-lg border border-dark-border bg-dark-bg px-3 py-2.5 min-h-[44px] text-base sm:text-sm text-text-primary"
                       >
                         <option value="">Create new task</option>
                         {templates.map((template) => (
@@ -271,7 +271,7 @@ function AdminActivityContent() {
                       onChange={(event) => setTaskDescription(event.target.value)}
                       placeholder="Describe the task"
                       rows={4}
-                      className="w-full rounded-lg border border-dark-border bg-dark-bg px-3 py-2 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50"
+                      className="w-full rounded-lg border border-dark-border bg-dark-bg px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50"
                     />
                   </div>
 
@@ -311,8 +311,8 @@ function AdminActivityContent() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 pt-2">
-                    <Button type="submit" disabled={saving || !taskName || !points || selectedMemberIds.length === 0}>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+                    <Button type="submit" disabled={saving || !taskName || !points || selectedMemberIds.length === 0} className="w-full sm:w-auto">
                       <Plus className="w-4 h-4 mr-2" />
                       {saving ? 'Saving...' : 'Save Task Points'}
                     </Button>
@@ -326,8 +326,8 @@ function AdminActivityContent() {
 
             <Card className="border-dark-border bg-dark-surface/70">
               <CardHeader>
-                <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary-blue" />
+                <h2 className="text-lg sm:text-xl font-semibold text-text-primary flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary-blue flex-shrink-0" />
                   Recorded Task Entries
                 </h2>
               </CardHeader>
@@ -366,10 +366,10 @@ function AdminActivityContent() {
             </Card>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <Card className="border-dark-border bg-dark-surface/70">
               <CardHeader>
-                <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-semibold text-text-primary flex items-center gap-2">
                   <ClipboardList className="w-5 h-5 text-accent-orange" />
                   Saved Templates
                 </h2>

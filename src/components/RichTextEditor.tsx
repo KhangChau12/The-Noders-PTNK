@@ -172,8 +172,8 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
       />
 
       <div className={`border mb-3 border-dark-border rounded-xl bg-dark-surface shadow-lg ${className}`}>
-      {/* Toolbar */}
-      <div className="border-b border-dark-border p-4 flex flex-wrap gap-3 bg-gradient-to-r from-dark-surface to-dark-surface/80 rounded-t-xl">
+      {/* Toolbar — wraps to multiple rows on narrow screens */}
+      <div className="border-b border-dark-border p-2 sm:p-4 flex flex-wrap gap-2 sm:gap-3 bg-gradient-to-r from-dark-surface to-dark-surface/80 rounded-t-xl">
         {/* Format buttons */}
         <div className="flex gap-1.5 mr-3">
           {formatButtons.map((btn) => (
@@ -292,7 +292,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
           onPaste={handlePaste}
           onFocus={() => setIsEditorFocused(true)}
           onBlur={() => setIsEditorFocused(false)}
-          className={`min-h-[100px] p-6 text-text-primary focus:outline-none rounded-b-xl prose prose-invert max-w-none ${
+          className={`min-h-[100px] p-4 sm:p-6 text-base text-text-primary focus:outline-none rounded-b-xl prose prose-invert max-w-none ${
             isEditorFocused ? 'bg-dark-surface/50' : 'bg-transparent'
           } transition-all duration-200`}
           style={{ wordBreak: 'break-word' }}
@@ -301,7 +301,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Enter project d
 
         {/* Placeholder */}
         {(!value || value === '') && !isEditorFocused && (
-          <div className="absolute top-6 left-6 text-text-tertiary pointer-events-none flex items-start gap-2 max-w-[calc(100%-3rem)]">
+          <div className="absolute top-4 sm:top-6 left-4 sm:left-6 text-text-tertiary pointer-events-none flex items-start gap-2 max-w-[calc(100%-2rem)] sm:max-w-[calc(100%-3rem)]">
             <Type className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span className="text-sm leading-relaxed">
               {placeholder}

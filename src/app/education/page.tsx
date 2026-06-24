@@ -50,7 +50,7 @@ export default function EducationPage() {
         />
 
         {/* Our Programs Section */}
-        <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
+        <section className="py-10 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
           <div className="container mx-auto">
             <div className="mb-8 sm:mb-10">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-2">
@@ -95,7 +95,7 @@ export default function EducationPage() {
                       <Badge variant={program.badgeVariant} className="mb-4 self-start">
                         {program.badge}
                       </Badge>
-                      <h3 className="text-xl lg:text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300">
+                      <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300 break-words">
                         {program.title}
                       </h3>
                       <p className="text-text-secondary leading-relaxed text-sm lg:text-base mb-5">

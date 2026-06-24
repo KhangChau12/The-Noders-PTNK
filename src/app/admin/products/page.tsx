@@ -203,7 +203,7 @@ function ProjectManagementPage() {
 
   return (
     <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           {/* Back to Dashboard */}
           <Link href="/admin">
@@ -214,12 +214,12 @@ function ProjectManagementPage() {
           </Link>
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
                 Project Management
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-sm sm:text-base text-text-secondary">
                 Monitor and manage club projects
               </p>
             </div>
@@ -229,6 +229,7 @@ function ProjectManagementPage() {
                   onClick={fetchProjects}
                   variant="primary"
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Load Projects
@@ -239,6 +240,7 @@ function ProjectManagementPage() {
                   onClick={fetchProjects}
                   variant="secondary"
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
@@ -274,7 +276,7 @@ function ProjectManagementPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
+                className="px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -324,7 +326,7 @@ function ProjectManagementPage() {
                     </div>
                   </div>
 
-                  <CardContent className="p-6">
+                  <CardContent className="p-5 sm:p-6">
                     <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-1">
                       {project.title}
                     </h3>
@@ -352,11 +354,15 @@ function ProjectManagementPage() {
                     )}
 
                     {/* Contributors */}
-                    <div className="flex items-center text-sm text-text-tertiary mb-4">
-                      <Users className="w-4 h-4 mr-1" />
-                      {project.contributors?.length || 0} contributors
-                      <Calendar className="w-4 h-4 ml-4 mr-1" />
-                      {new Date(project.created_at).toLocaleDateString()}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-tertiary mb-4">
+                      <span className="inline-flex items-center">
+                        <Users className="w-4 h-4 mr-1" />
+                        {project.contributors?.length || 0} contributors
+                      </span>
+                      <span className="inline-flex items-center">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {new Date(project.created_at).toLocaleDateString()}
+                      </span>
                     </div>
 
                     {/* Featured on Homepage */}

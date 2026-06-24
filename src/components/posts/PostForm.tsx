@@ -210,7 +210,7 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
                 placeholder="Write a brief summary in English (2-3 sentences)..."
                 maxLength={500}
                 rows={4}
-                className="w-full px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+                className="w-full px-4 py-2.5 text-base sm:text-sm bg-dark-bg border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
               />
               <p className={`text-xs mt-2 ${summaryLength > 500 ? 'text-error' : 'text-text-tertiary'}`}>
                 {summaryLength}/500 characters
@@ -224,7 +224,7 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
                 placeholder="Viết tóm tắt ngắn gọn bằng tiếng Việt (2-3 câu)..."
                 maxLength={500}
                 rows={4}
-                className="w-full px-4 py-2 bg-dark-bg border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
+                className="w-full px-4 py-2.5 text-base sm:text-sm bg-dark-bg border border-dark-border rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent resize-none"
               />
               <p className={`text-xs mt-2 ${summaryViLength > 500 ? 'text-error' : 'text-text-tertiary'}`}>
                 {summaryViLength}/500 ký tự
@@ -244,7 +244,7 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`px-4 py-2 rounded-lg border transition-colors ${
+                  className={`px-4 py-2.5 min-h-[44px] text-sm rounded-lg border transition-colors ${
                     category === cat
                       ? 'border-primary-blue bg-primary-blue/10 text-primary-blue'
                       : 'border-dark-border text-text-secondary hover:border-dark-border/60'
@@ -351,10 +351,11 @@ export function PostForm({ post, onSave, saving, session }: PostFormProps) {
           </div>
 
           {/* Submit */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-dark-border">
+          <div className="flex justify-stretch sm:justify-end gap-3 pt-4 border-t border-dark-border">
             <Button
               type="submit"
               disabled={!titleValid || !summaryValid || saving}
+              className="w-full sm:w-auto"
             >
               {saving ? 'Saving...' : 'Save Information'}
             </Button>

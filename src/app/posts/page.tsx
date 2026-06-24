@@ -578,7 +578,7 @@ export default function PostsPage() {
           description="Stay updated with the latest news, educational content, member spotlights, and community activities from The Noders Community."
         />
 
-        <section className="pb-12 px-4 sm:px-6 lg:px-8">
+        <section className="pb-10 sm:pb-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
           {/* Search and Filters */}
           <div className="mb-8">
@@ -716,12 +716,12 @@ export default function PostsPage() {
 
           {/* Featured Posts */}
           {featuredPosts.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center gap-2">
-                <Award className="w-6 h-6 text-primary-blue" />
+            <div className="mb-10 sm:mb-12">
+              <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-5 sm:mb-6 flex items-center gap-2">
+                <Award className="w-5 h-5 sm:w-6 sm:h-6 text-primary-blue" />
                 Featured Posts
               </h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                 {featuredPosts.map((post) => (
                   <PostCard key={post.id} post={post} featured />
                 ))}
@@ -731,13 +731,13 @@ export default function PostsPage() {
 
           {/* Regular Posts */}
           {regularPosts.length > 0 ? (
-            <div className="mb-12">
+            <div className="mb-10 sm:mb-12">
               {featuredPosts.length > 0 && (
-                <h2 className="text-2xl font-bold text-text-primary mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-5 sm:mb-6">
                   Latest Posts
                 </h2>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                 {regularPosts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))}
