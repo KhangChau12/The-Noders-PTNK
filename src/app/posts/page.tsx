@@ -22,7 +22,6 @@ import {
   Award,
   BookOpen,
   Clock,
-  Filter,
   ThumbsUp,
   Eye,
   UserCircle,
@@ -31,6 +30,8 @@ import {
   Check,
   Code,
 } from "lucide-react";
+// `Filter` icon dropped — the mobile "Filters" toggle was removed in favour of
+// always-visible, horizontally-scrollable category chips.
 
 const categories = [
   { id: "all", name: "All Posts", icon: BookOpen, color: "text-text-primary" },
@@ -95,7 +96,11 @@ function CategoryBadge({ category }: { category: Post["category"] }) {
 
   const { label, variant } = config[category];
   return (
-    <Badge variant={variant} size="sm">
+    <Badge
+      variant={variant}
+      size="sm"
+      className="bg-dark-bg/70 backdrop-blur-md border border-white/10"
+    >
       {label}
     </Badge>
   );
@@ -109,27 +114,28 @@ function PostCard({
   featured?: boolean;
 }) {
   const { localize } = useLanguage();
-  const cardClass = featured
-    ? "bg-gradient-to-br from-primary-blue/5 to-accent-cyan/5 border-primary-blue/20"
-    : "";
 
   const thumbnailSrc = post.thumbnail_image?.public_url || post.thumbnail_url;
 
   return (
-    <Card variant="interactive" className={`h-full hover-lift ${cardClass}`}>
-      <Link href={`/posts/${post.slug}`}>
-        <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
+    <Card
+      variant="interactive"
+      padding="none"
+      className="group/card relative h-full overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:hover:-translate-y-1"
+    >
+      <Link href={`/posts/${post.slug}`} className="flex h-full flex-col">
+        <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5">
           {thumbnailSrc ? (
             <Image
               src={thumbnailSrc}
               alt={post.thumbnail_image?.alt_text || post.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-700 group-hover/card:scale-[1.03]"
               loading="lazy"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
+            <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary">
               <svg
                 className="w-12 h-12 mb-2 opacity-60"
                 fill="none"
@@ -146,55 +152,53 @@ function PostCard({
               <span className="text-sm font-medium">No Image</span>
             </div>
           )}
+
+          {/* Bottom gradient so badges stay legible over any thumbnail */}
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/70 via-transparent to-transparent opacity-60" />
+
           {featured && (
-            <div className="absolute top-4 left-4">
-              <Badge variant="primary" size="sm">
+            <div className="absolute top-4 left-4 z-10">
+              <Badge
+                variant="primary"
+                size="sm"
+                className="bg-dark-bg/70 backdrop-blur-md border border-white/10"
+              >
                 Featured
               </Badge>
             </div>
           )}
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-10">
             <CategoryBadge category={post.category} />
           </div>
         </div>
 
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4 text-xs text-text-tertiary mb-3">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {new Date(post.created_at).toLocaleDateString()}
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {post.reading_time} min
-            </div>
-            {post.author && (
-              <div className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {post.author.full_name}
-              </div>
-            )}
-          </div>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2 group-hover:text-primary-blue transition-colors">
+        <CardContent className="flex flex-1 flex-col p-5 sm:p-6">
+          <h3 className="mb-2 line-clamp-2 text-lg sm:text-xl font-bold leading-tight text-text-primary group-hover/card:text-primary-blue transition-colors">
             {localize(post.title, post.title_vi)}
           </h3>
 
-          <p className="text-text-secondary text-sm mb-4 line-clamp-3">
+          <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-text-secondary">
             {localize(post.summary, post.summary_vi)}
           </p>
 
-          <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
-            <div className="flex items-center gap-1">
-              <Eye className="w-3 h-3" />
-              {post.view_count} views
+          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-text-tertiary">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              {new Date(post.created_at).toLocaleDateString()}
             </div>
-            <div className="flex items-center gap-1">
-              <ThumbsUp className="w-3 h-3" />
-              {post.upvote_count} upvotes
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
+              {post.reading_time} min
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Eye className="h-3.5 w-3.5" />
+              {post.view_count}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ThumbsUp className="h-3.5 w-3.5" />
+              {post.upvote_count}
             </div>
           </div>
-
         </CardContent>
       </Link>
     </Card>
@@ -401,7 +405,6 @@ export default function PostsPage() {
   const [selectedAuthor, setSelectedAuthor] = useState<string>(
     searchParams.get("author") || ""
   );
-  const [showFilters, setShowFilters] = useState(false);
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
@@ -582,8 +585,9 @@ export default function PostsPage() {
 
           {/* Search and Filters */}
           <div className="mb-8">
-            <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-6">
-              <div className="w-full lg:w-96">
+            {/* Tier 1: search (flexes to fill) + author / language cluster on the right */}
+            <div className="flex flex-col lg:flex-row gap-3 lg:items-center mb-4">
+              <div className="flex-1 min-w-0">
                 <Input
                   placeholder="Search posts..."
                   value={searchTerm}
@@ -592,8 +596,7 @@ export default function PostsPage() {
                 />
               </div>
 
-              <div className="flex gap-2 w-full lg:w-auto">
-                {/* Author Filter Dropdown */}
+              <div className="flex items-center gap-2 shrink-0">
                 <AuthorDropdown
                   authors={authors}
                   selectedAuthor={selectedAuthor}
@@ -602,51 +605,33 @@ export default function PostsPage() {
                   onOpen={fetchAuthors}
                   totalPosts={totalCount}
                 />
-
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden"
-                  icon={<Filter className="w-4 h-4" />}
-                >
-                  Filters
-                </Button>
+                <LanguageDropdown />
               </div>
             </div>
 
-            {/* Categories */}
-            <div
-              className={`flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 ${
-                showFilters ? "flex" : "hidden lg:flex"
-              }`}
-            >
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap gap-2">
-                {categories.map((category) => {
-                  const Icon = category.icon;
-                  const isActive = selectedCategory === category.id;
+            {/* Tier 2: category chips on a single horizontally-scrollable row */}
+            <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const isActive = selectedCategory === category.id;
 
-                  return (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                        isActive
-                          ? "border-primary-blue bg-primary-blue/10 text-primary-blue"
-                          : "border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary"
-                      }`}
-                    >
-                      <Icon
-                        className={`w-4 h-4 ${isActive ? "text-primary-blue" : category.color}`}
-                      />
-                      <span className="text-sm font-medium">{category.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="flex justify-end">
-                <LanguageDropdown />
-              </div>
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "border-primary-blue bg-primary-blue/10 text-primary-blue"
+                        : "border-dark-border/60 text-text-secondary hover:border-dark-border hover:text-text-primary"
+                    }`}
+                  >
+                    <Icon
+                      className={`w-3.5 h-3.5 ${isActive ? "text-primary-blue" : category.color}`}
+                    />
+                    <span className="whitespace-nowrap">{category.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
