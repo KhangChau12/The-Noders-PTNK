@@ -9,6 +9,7 @@ import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
+import { PageHero } from "@/components/PageHero";
 import { useLanguage } from "@/components/LanguageProvider";
 import { LanguageDropdown } from "@/components/LanguageDropdown";
 import { Post } from "@/types/database";
@@ -570,19 +571,15 @@ export default function PostsPage() {
   return (
     <>
       <NeuralNetworkBackground />
-      <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 z-10">
-        <div className="container mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
-              Posts & Updates
-            </h1>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Stay updated with the latest news, educational content, member
-              spotlights, and community activities from The Noders Community.
-            </p>
-          </div>
+      <div className="relative min-h-screen z-10">
+        <PageHero
+          title="Posts & Updates"
+          subtitle="News, Insights & Community Stories"
+          description="Stay updated with the latest news, educational content, member spotlights, and community activities from The Noders Community."
+        />
 
+        <section className="pb-12 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto">
           {/* Search and Filters */}
           <div className="mb-8">
             {/* Tier 1: search (flexes to fill) + author / language cluster on the right */}
@@ -784,7 +781,8 @@ export default function PostsPage() {
               </CardContent>
             </Card>
           ) : null}
-        </div>
+          </div>
+        </section>
       </div>
     </>
   );

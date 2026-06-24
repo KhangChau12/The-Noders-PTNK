@@ -1,17 +1,16 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { Button } from '@/components/Button'
-import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 import {
   ArrowRight,
   Users,
   Calendar,
-  Target,
   Trophy
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
+import { PageHero } from '@/components/PageHero'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'Competitions - The Noders Community',
@@ -33,8 +32,6 @@ export default function ContestPage() {
         { icon: <Users className="w-4 h-4" />, text: '24 Teams • 54 Participants' },
         { icon: <Calendar className="w-4 h-4" />, text: '05 - 18 Jan 2026' }
       ],
-      gradient: 'from-accent-cyan/10 to-primary-blue/10',
-      border: 'border-accent-cyan/30',
       videoUrl: 'https://www.youtube.com/embed/cFs5njLot7k',
       videoTitle: 'PAIC 2026 Workshop'
     },
@@ -49,8 +46,6 @@ export default function ContestPage() {
         { icon: <Users className="w-4 h-4" />, text: '16 Members Joined' },
         { icon: <Calendar className="w-4 h-4" />, text: '28 Nov - 28 Dec 2025' }
       ],
-      gradient: 'from-primary-blue/10 to-accent-cyan/10',
-      border: 'border-primary-blue/30',
       videoUrl: 'https://www.youtube.com/embed/zN5i0p9qJqI',
       videoTitle: 'NAIC 2025 Rules & Q&A'
     }
@@ -60,117 +55,112 @@ export default function ContestPage() {
     <>
       <NeuralNetworkBackground />
       <div className="relative min-h-screen z-10">
-        {/* Hero Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-dark-surface/50 to-primary-blue/5">
-          <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-6xl font-bold font-heading mb-4">
-                <span className="gradient-text">Contests</span>
-              </h1>
+        <PageHero
+          title="Contests"
+          subtitle="Learn by Doing • Practice through Competition"
+          description="The best way to master AI is hands-on. Our competitions give you real-world challenges to apply what you know, learn from experience, and grow with peers."
+        >
+          {/* Platform banner — title + blurb left, action right */}
+          <div className="relative mt-10 sm:mt-12 max-w-5xl mx-auto overflow-hidden rounded-2xl border border-primary-blue/30 bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 backdrop-blur-sm p-6 sm:p-8">
+            {/* Quiet watermark — background mark, not a focal point */}
+            <Trophy
+              className="pointer-events-none absolute -top-4 -right-2 h-28 w-28 sm:h-36 sm:w-36 -rotate-12 text-primary-blue opacity-[0.07]"
+              strokeWidth={1.5}
+            />
 
-              <p className="text-2xl md:text-3xl font-semibold text-text-primary mb-8">
-                Learn by Doing - Practice through Competition
-              </p>
-
-              <p className="text-xl text-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-                At The Noders Community, we believe the best way to master AI is through hands-on practice.
-                Our competitions provide real-world challenges where you can apply your knowledge,
-                learn from experience, and grow alongside passionate peers.
-              </p>
-
-              <div className="flex justify-center">
-                <Link href="https://the-noders-competition-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="group">
-                    Visit Competition Platform
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-20 left-10 w-20 h-20 bg-primary-blue/10 rounded-full blur-xl"></div>
-            <div className="absolute bottom-20 right-10 w-32 h-32 bg-accent-cyan/10 rounded-full blur-xl"></div>
-          </div>
-        </section>
-
-        {/* Our Competitions Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
-                  Our Competitions
+            <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-left">
+                <h2 className="text-lg sm:text-xl font-bold text-text-primary mb-1">
+                  Compete on our platform
                 </h2>
-                <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-                  From internal practice sessions to public challenges, we offer competitions
-                  that match your skill level and ambitions.
+                <p className="text-sm sm:text-base text-text-secondary leading-relaxed max-w-xl">
+                  Register, submit your models, and climb the live leaderboard — all in one place.
                 </p>
               </div>
 
-              <div className="space-y-8">
-                {competitions.map((competition) => (
-                  <Card
-                    key={competition.id}
-                    variant="hover"
-                    className={`hover-lift bg-gradient-to-br ${competition.gradient} border ${competition.border} overflow-hidden`}
-                  >
-                    <div className="flex flex-col lg:flex-row">
-                       {/* Video Section - Left Side */}
-                       {competition.videoUrl && (
-                        <div className="lg:w-1/2 xl:w-3/5 relative bg-dark-bg border-b lg:border-b-0 lg:border-r border-dark-border/30">
-                          <div className="aspect-video relative w-full h-full">
-                            <iframe
-                              className="absolute top-0 left-0 w-full h-full"
-                              src={competition.videoUrl}
-                              title={competition.videoTitle}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
+              <Link
+                href="https://the-noders-competition-platform.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sm:flex-shrink-0"
+              >
+                <Button size="lg" className="w-full sm:w-auto group">
+                  Visit Platform
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </PageHero>
+
+        {/* Our Competitions Section */}
+        <section className="py-12 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
+          <div className="container mx-auto">
+            <div className="mb-8 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-2">
+                Our Competitions
+              </h2>
+              <p className="text-text-secondary text-base sm:text-lg leading-relaxed max-w-2xl">
+                From internal practice sessions to public challenges, we run competitions
+                that match your skill level and ambitions.
+              </p>
+            </div>
+
+            <div className="space-y-6 sm:space-y-8">
+              {competitions.map((competition) => (
+                <div
+                  key={competition.id}
+                  className="group relative overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10"
+                >
+                  <div className="flex flex-col lg:flex-row">
+                    {/* Video — left */}
+                    {competition.videoUrl && (
+                      <div className="lg:w-1/2 xl:w-3/5 relative bg-dark-bg border-b lg:border-b-0 lg:border-r border-dark-border/40">
+                        <div className="aspect-video relative w-full h-full">
+                          <iframe
+                            className="absolute top-0 left-0 w-full h-full"
+                            src={competition.videoUrl}
+                            title={competition.videoTitle}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Content — right */}
+                    <div className={`p-6 lg:p-8 flex flex-col ${competition.videoUrl ? 'lg:w-1/2 xl:w-2/5' : 'w-full'}`}>
+                      <Badge variant={competition.badgeVariant} className="mb-4 self-start">
+                        {competition.badge}
+                      </Badge>
+                      <h3 className="text-xl lg:text-2xl font-bold text-text-primary mb-3 group-hover:text-primary-blue transition-colors duration-300">
+                        {competition.title}
+                      </h3>
+                      <p className="text-text-secondary leading-relaxed text-sm lg:text-base mb-5">
+                        {competition.shortDescription}
+                      </p>
+
+                      <div className="space-y-2 mb-6">
+                        {competition.stats.map((stat, index) => (
+                          <div key={index} className="flex items-center gap-2 text-text-secondary">
+                            <span className="text-primary-blue">{stat.icon}</span>
+                            <span className="text-sm">{stat.text}</span>
                           </div>
-                        </div>
-                      )}
+                        ))}
+                      </div>
 
-                      {/* Content Section - Right Side */}
-                      <CardContent className={`p-6 lg:p-8 flex flex-col justify-between ${competition.videoUrl ? 'lg:w-1/2 xl:w-2/5' : 'w-full'}`}>
-                        <div>
-                          <Badge variant={competition.badgeVariant} className="mb-4">
-                            {competition.badge}
-                          </Badge>
-                          <h3 className="text-xl lg:text-2xl font-bold text-text-primary mb-3">
-                            {competition.title}
-                          </h3>
-                          <p className="text-text-secondary leading-relaxed text-sm lg:text-base mb-6">
-                            {competition.shortDescription}
-                          </p>
-
-                          <div className="space-y-2 mb-6">
-                            {competition.stats.map((stat, index) => (
-                              <div key={index} className="flex items-center space-x-2 text-text-secondary">
-                                <div className="text-primary-blue">
-                                  {stat.icon}
-                                </div>
-                                <span className="text-sm">{stat.text}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <Link href={`/contest/${competition.slug}`}>
-                            <Button variant="secondary" className="w-full group">
-                              Learn More
-                              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
+                      <div className="mt-auto">
+                        <Link href={`/contest/${competition.slug}`}>
+                          <Button variant="secondary" className="w-full group/btn">
+                            Learn More
+                            <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
-                  </Card>
-                ))}
-              </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>

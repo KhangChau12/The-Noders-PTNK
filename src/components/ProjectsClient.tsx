@@ -171,7 +171,7 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
       {/* Projects Grid/List */}
       <div className="mb-12">
         {loading && hasFiltered ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {[...Array(6)].map((_, i) => (
               <SkeletonProject key={i} />
             ))}
@@ -184,15 +184,16 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
             </CardContent>
           </Card>
         ) : projects && projects.length > 0 ? (
-          <div className={`grid gap-8 ${viewMode === 'grid'
+          <div className={`grid gap-5 sm:gap-6 ${viewMode === 'grid'
             ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-            : 'grid-cols-1 max-w-4xl mx-auto'
+            : 'grid-cols-1'
           }`}>
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
                 showStats={true}
+                layout={viewMode}
               />
             ))}
           </div>

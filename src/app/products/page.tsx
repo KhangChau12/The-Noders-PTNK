@@ -1,4 +1,5 @@
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
+import { PageHero } from '@/components/PageHero'
 import ProjectsClient from '@/components/ProjectsClient'
 
 async function getInitialProjects() {
@@ -21,21 +22,18 @@ export default async function ProjectsPage() {
   return (
     <>
       <NeuralNetworkBackground />
-      <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 z-10">
-        <div className="container mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold font-heading text-text-primary mb-4">
-              Our Products
-            </h1>
-            <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-              Explore the innovative products created by our The Noders Community members.
-              From machine learning models to web applications, discover our collaborative work.
-            </p>
-          </div>
+      <div className="relative min-h-screen z-10">
+        <PageHero
+          title="Our Products"
+          subtitle="Built by Our Community"
+          description="Explore the innovative products created by The Noders Community members — from machine learning models to web applications."
+        />
 
-          <ProjectsClient initialProjects={initialProjects} />
-        </div>
+        <section className="pb-12 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto">
+            <ProjectsClient initialProjects={initialProjects} />
+          </div>
+        </section>
       </div>
     </>
   )

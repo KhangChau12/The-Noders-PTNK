@@ -318,13 +318,11 @@ function DashboardContent() {
                    {/* My Projects */}
                    <Link href="/dashboard/products" className="group block h-full">
                      <div className="h-full p-6 rounded-xl border-2 border-dark-border bg-dark-surface hover:border-primary-blue hover:bg-dark-surface/80 transition-all duration-300 relative overflow-hidden">
-                       <div className="absolute top-0 right-0 w-24 h-24 bg-primary-blue/5 rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:bg-primary-blue/10 transition-colors"></div>
-                       
+                       {/* Quiet watermark — background mark, not a focal point */}
+                       <FileText className="pointer-events-none absolute -top-3 -right-3 w-24 h-24 -rotate-12 text-primary-blue opacity-[0.07] group-hover:opacity-[0.12] transition-opacity" strokeWidth={1.5} />
+
                        <div className="relative z-10">
-                         <div className="flex items-center justify-between mb-4">
-                           <div className="w-12 h-12 rounded-xl bg-primary-blue/10 flex items-center justify-center group-hover:bg-primary-blue/20 group-hover:scale-110 transition-all duration-300">
-                             <FileText className="w-6 h-6 text-primary-blue" />
-                           </div>
+                         <div className="flex items-center justify-end mb-4">
                            <ArrowRight className="w-5 h-5 text-dark-border group-hover:text-primary-blue group-hover:translate-x-1 transition-all" />
                          </div>
                          <h3 className="text-lg font-bold text-text-primary mb-1 group-hover:text-primary-blue transition-colors">My Projects</h3>
@@ -336,13 +334,11 @@ function DashboardContent() {
                    {/* My Posts */}
                    <Link href="/dashboard/posts" className="group block h-full">
                      <div className="h-full p-6 rounded-xl border-2 border-dark-border bg-dark-surface hover:border-accent-cyan hover:bg-dark-surface/80 transition-all duration-300 relative overflow-hidden">
-                       <div className="absolute top-0 right-0 w-24 h-24 bg-accent-cyan/5 rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:bg-accent-cyan/10 transition-colors"></div>
-                       
+                       {/* Quiet watermark — background mark, not a focal point */}
+                       <PenSquare className="pointer-events-none absolute -top-3 -right-3 w-24 h-24 -rotate-12 text-accent-cyan opacity-[0.07] group-hover:opacity-[0.12] transition-opacity" strokeWidth={1.5} />
+
                        <div className="relative z-10">
-                         <div className="flex items-center justify-between mb-4">
-                           <div className="w-12 h-12 rounded-xl bg-accent-cyan/10 flex items-center justify-center group-hover:bg-accent-cyan/20 group-hover:scale-110 transition-all duration-300">
-                             <PenSquare className="w-6 h-6 text-accent-cyan" />
-                           </div>
+                         <div className="flex items-center justify-end mb-4">
                            <ArrowRight className="w-5 h-5 text-dark-border group-hover:text-accent-cyan group-hover:translate-x-1 transition-all" />
                          </div>
                          <h3 className="text-lg font-bold text-text-primary mb-1 group-hover:text-accent-cyan transition-colors">My Posts</h3>
@@ -354,13 +350,11 @@ function DashboardContent() {
                    {/* My Certificates */}
                    <Link href="/dashboard/certificates" className="group block h-full">
                      <div className="h-full p-6 rounded-xl border-2 border-dark-border bg-dark-surface hover:border-accent-purple hover:bg-dark-surface/80 transition-all duration-300 relative overflow-hidden">
-                       <div className="absolute top-0 right-0 w-24 h-24 bg-accent-purple/5 rounded-full blur-2xl -translate-y-8 translate-x-8 group-hover:bg-accent-purple/10 transition-colors"></div>
-                       
+                       {/* Quiet watermark — background mark, not a focal point */}
+                       <Award className="pointer-events-none absolute -top-3 -right-3 w-24 h-24 -rotate-12 text-accent-purple opacity-[0.07] group-hover:opacity-[0.12] transition-opacity" strokeWidth={1.5} />
+
                        <div className="relative z-10">
-                         <div className="flex items-center justify-between mb-4">
-                           <div className="w-12 h-12 rounded-xl bg-accent-purple/10 flex items-center justify-center group-hover:bg-accent-purple/20 group-hover:scale-110 transition-all duration-300">
-                             <Award className="w-6 h-6 text-accent-purple" />
-                           </div>
+                         <div className="flex items-center justify-end mb-4">
                            <ArrowRight className="w-5 h-5 text-dark-border group-hover:text-accent-purple group-hover:translate-x-1 transition-all" />
                          </div>
                          <h3 className="text-lg font-bold text-text-primary mb-1 group-hover:text-accent-purple transition-colors">My Certs</h3>
