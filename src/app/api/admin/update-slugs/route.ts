@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/admin/update-slugs - Regenerate slugs for all posts from their English title
 export async function POST(request: NextRequest) {
   try {

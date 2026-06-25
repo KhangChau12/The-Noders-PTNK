@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       .from('projects')
       .select(`
         *,
-        created_by_profile:profiles!projects_created_by_fkey(
+        created_by_profile:profiles(
           username,
           full_name,
           avatar_url

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 export async function PATCH(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')

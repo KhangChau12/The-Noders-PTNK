@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/admin/stats - Get admin dashboard statistics
 export async function GET(request: NextRequest) {
   try {
