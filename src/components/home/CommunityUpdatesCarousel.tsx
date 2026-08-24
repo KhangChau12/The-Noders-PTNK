@@ -200,7 +200,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                 key={`${post.id}-${index}`}
                 variant="interactive"
                 padding="none"
-                className="group/card relative flex-shrink-0 overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:hover:-translate-y-1 w-[85%] xs:w-[78%] sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)]"
+                className="group/card relative flex-shrink-0 overflow-hidden rounded-[20px] border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm transition-all duration-300 hover:border-primary-blue/40 hover:shadow-lg hover:shadow-primary-blue/10 sm:hover:-translate-y-1 w-[88%] xs:w-[80%] sm:w-[420px]"
                 data-carousel-card="true"
                 aria-hidden={!isOriginal}
               >
@@ -220,7 +220,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                         quality={95}
                         className="object-cover transition-transform duration-700 group-hover/card:scale-[1.03]"
                         loading={index < posts.length ? 'eager' : 'lazy'}
-                        sizes="(max-width: 768px) 100vw, 50vw"
+                        sizes="(max-width: 768px) 100vw, 420px"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
@@ -235,16 +235,16 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                     </div>
                   </div>
 
-                  <CardContent className="flex flex-1 flex-col p-4 sm:p-5 md:p-6">
-                    <h3 className="mb-2 line-clamp-2 text-lg sm:text-xl font-bold leading-tight text-text-primary group-hover/card:text-primary-blue transition-colors">
+                  <CardContent className="flex flex-1 flex-col p-5 sm:p-6">
+                    <h3 className="mb-2.5 line-clamp-2 text-lg sm:text-xl font-bold leading-snug text-text-primary group-hover/card:text-primary-blue transition-colors">
                       {post.title || 'Untitled Post'}
                     </h3>
 
-                    <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-text-secondary">
+                    <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-text-secondary">
                       {post.summary || 'No summary available'}
                     </p>
 
-                    <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-text-tertiary">
+                    <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-tertiary pt-4 border-t border-dark-border/60">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-3.5 w-3.5" />
                         <span>{formatDate(post.published_at)}</span>
@@ -268,7 +268,7 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
       </div>
 
       <p className="mt-4 text-center text-xs text-text-tertiary sm:text-left">
-        Drag, swipe, or use the arrows to browse posts.
+        Drag, swipe, or use the arrows to browse — loops endlessly in both directions.
       </p>
     </div>
   )

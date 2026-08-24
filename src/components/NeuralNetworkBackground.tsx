@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * Neural Network Background Component
@@ -9,8 +9,20 @@ import { useState, useEffect } from 'react'
  * glowing connections, and traveling data particles.
  * Uses fixed positioning so it stays in place while content scrolls.
  *
- * Automatically simplifies on low-end devices (≤4 CPU cores) or when
- * the user has enabled prefers-reduced-motion.
+ * Performance notes (this is a full-viewport `position: fixed` layer, so
+ * every animated pixel here is a recurring cost on every page):
+ * - No SVG `<filter>` (feGaussianBlur) anywhere — those rasterize on the
+ *   CPU in most browsers and are the single most expensive thing an SVG
+ *   background can do. Glow comes entirely from radial-gradient fills,
+ *   which are compositor-friendly.
+ * - Only a handful of lines/particles per network actually animate
+ *   (`animatedLineIdx`/`particleLines`); the rest render as static dashed
+ *   strokes. Visually reads the same density, a fraction of the animation cost.
+ * - `stroke-dashoffset`/`offset-distance` animations pause via a CSS class
+ *   (`.nn-paused`) when the tab is hidden or the layer scrolls out of the
+ *   viewport, instead of continuing to run unseen.
+ * - Automatically simplifies further on low-end devices (≤4 CPU cores) or
+ *   when the user has enabled prefers-reduced-motion.
  *
  * Usage:
  * <NeuralNetworkBackground />
@@ -93,14 +105,21 @@ const rightConnections = [
   { from: 16, to: 10 }, { from: 16, to: 9 },
 ]
 
-// Select some connections to have traveling particles (reduced from 8 to 5 per side)
-const leftParticleLines = [0, 6, 8, 14, 22]
-const rightParticleLines = [1, 7, 9, 15, 25]
+// Only these lines actually animate (dash-flow) — the rest render as static
+// dashed strokes. Visually the network still reads as fully connected; only
+// a fraction of it is doing per-frame work.
+const leftAnimatedLineIdx = new Set([0, 3, 6, 8, 14, 17, 22])
+const rightAnimatedLineIdx = new Set([1, 4, 7, 9, 15, 18, 25])
+
+// Select some connections to have traveling particles
+const leftParticleLines = [0, 6, 8]
+const rightParticleLines = [1, 7, 9]
 
 function NetworkSVG({
   side,
   nodes,
   connections,
+  animatedLineIdx,
   particleLines,
   className,
   mobile = false,
@@ -109,14 +128,13 @@ function NetworkSVG({
   side: 'left' | 'right' | 'center'
   nodes: typeof leftNodes
   connections: typeof leftConnections
+  animatedLineIdx: Set<number>
   particleLines: number[]
   className?: string
   mobile?: boolean
   simplified?: boolean
 }) {
   const prefix = `nn-${side}`
-  // In simplified mode: no filters, no particles, animate only every other line
-  const useFilters = !mobile && !simplified
   const showParticles = !mobile && !simplified
 
   return (
@@ -125,31 +143,6 @@ function NetworkSVG({
       viewBox="0 0 600 500"
     >
       <defs>
-        {useFilters && (
-          <>
-            <filter id={`${prefix}-glow`} x="-100%" y="-100%" width="400%" height="400%">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <filter id={`${prefix}-node-glow`}>
-              <feGaussianBlur stdDeviation="20" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <filter id={`${prefix}-soft-glow`}>
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </>
-        )}
         <radialGradient id={`${prefix}-node-grad`}>
           <stop offset="0%" stopColor="rgba(96, 165, 250, 0.5)" />
           <stop offset="40%" stopColor="rgba(96, 165, 250, 0.2)" />
@@ -164,15 +157,15 @@ function NetworkSVG({
         </radialGradient>
       </defs>
 
-      {/* Connection lines with dash animation */}
+      {/* Connection lines — only a subset animates; the rest are static
+          dashed strokes so the network still reads as fully wired. */}
       {connections.map((conn, i) => {
-        // In simplified mode, animate only every other line to halve animation count
-        if (simplified && i % 2 !== 0) return null
         const from = nodes[conn.from]
         const to = nodes[conn.to]
         const dist = Math.sqrt((to.cx - from.cx) ** 2 + (to.cy - from.cy) ** 2)
         const opacity = dist > 200 ? 0.15 : dist > 120 ? 0.25 : 0.35
         const width = dist > 200 ? 0.8 : dist > 120 ? 1.2 : 1.5
+        const animated = !mobile && !simplified && animatedLineIdx.has(i)
 
         return (
           <line
@@ -183,12 +176,15 @@ function NetworkSVG({
             strokeWidth={width}
             opacity={opacity}
             strokeDasharray="4 4"
-            {...(useFilters && { filter: `url(#${prefix}-soft-glow)` })}
-            style={{
-              animation: `nn-line-flow ${3 + (i % 4)}s linear infinite`,
-              animationDelay: `${(i * 0.7) % 5}s`,
-              willChange: 'stroke-dashoffset',
-            }}
+            className={animated ? 'nn-line-animated' : undefined}
+            style={
+              animated
+                ? {
+                    animation: `nn-line-flow ${3 + (i % 4)}s linear infinite`,
+                    animationDelay: `${(i * 0.7) % 5}s`,
+                  }
+                : undefined
+            }
           />
         )
       })}
@@ -207,18 +203,18 @@ function NetworkSVG({
             key={`${prefix}-particle-${lineIdx}`}
             r="2.5"
             fill="rgba(130, 210, 255, 0.9)"
-            filter={`url(#${prefix}-soft-glow)`}
+            className="nn-particle"
             style={{
               offsetPath: `path("M${from.cx},${from.cy} L${to.cx},${to.cy}")`,
               animation: `nn-particle-travel ${duration}s ease-in-out infinite`,
               animationDelay: `${(lineIdx * 1.3) % 8}s`,
-              willChange: 'offset-distance, opacity',
             }}
           />
         )
       })}
 
-      {/* Node glow backgrounds */}
+      {/* Node glow backgrounds — glow comes from the radial gradient fill
+          itself, not a blur filter, so it stays compositor-only. */}
       {nodes.map((node, i) => (
         <circle
           key={`${prefix}-glow-${i}`}
@@ -226,7 +222,6 @@ function NetworkSVG({
           r={node.glowR}
           fill={node.r >= 7 ? `url(#${prefix}-node-grad-bright)` : `url(#${prefix}-node-grad)`}
           opacity={node.r >= 7 ? 0.6 : 0.4}
-          {...(useFilters && { filter: `url(#${prefix}-node-glow)` })}
         />
       ))}
 
@@ -237,7 +232,6 @@ function NetworkSVG({
           cx={node.cx} cy={node.cy}
           r={node.r}
           fill={node.r >= 7 ? 'rgba(130, 200, 255, 1)' : node.r >= 6 ? 'rgba(96, 165, 250, 1)' : 'rgba(80, 150, 240, 0.9)'}
-          {...(useFilters && { filter: `url(#${prefix}-glow)` })}
         />
       ))}
     </svg>
@@ -246,6 +240,8 @@ function NetworkSVG({
 
 export function NeuralNetworkBackground() {
   const [simplified, setSimplified] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const rootRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -253,13 +249,40 @@ export function NeuralNetworkBackground() {
     setSimplified(prefersReduced || lowEnd)
   }, [])
 
+  // Pause every animation (via a single CSS class instead of touching each
+  // element) when the tab isn't visible or this fixed layer has scrolled
+  // out of view — no point paying per-frame paint cost for pixels no one sees.
+  useEffect(() => {
+    const onVisibility = () => setPaused(document.hidden)
+    document.addEventListener('visibilitychange', onVisibility)
+    onVisibility()
+
+    let observer: IntersectionObserver | undefined
+    if (rootRef.current && 'IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        ([entry]) => setPaused(document.hidden || !entry.isIntersecting),
+        { threshold: 0 }
+      )
+      observer.observe(rootRef.current)
+    }
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      observer?.disconnect()
+    }
+  }, [])
+
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div
+      ref={rootRef}
+      className={`fixed inset-0 pointer-events-none overflow-hidden z-0 [contain:strict] ${paused ? 'nn-paused' : ''}`}
+    >
       {/* Desktop: left + right networks */}
       <NetworkSVG
         side="left"
         nodes={leftNodes}
         connections={leftConnections}
+        animatedLineIdx={leftAnimatedLineIdx}
         particleLines={leftParticleLines}
         className="hidden md:block left-0 -translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
         simplified={simplified}
@@ -268,16 +291,18 @@ export function NeuralNetworkBackground() {
         side="right"
         nodes={rightNodes}
         connections={rightConnections}
+        animatedLineIdx={rightAnimatedLineIdx}
         particleLines={rightParticleLines}
         className="hidden md:block right-0 translate-x-[15%] top-1/2 -translate-y-1/2 w-[750px] h-[550px] lg:w-[850px] lg:h-[600px]"
         simplified={simplified}
       />
 
-      {/* Mobile: single centered network, no filters or particles */}
+      {/* Mobile: single centered network, no particles */}
       <NetworkSVG
         side="center"
         nodes={leftNodes}
         connections={leftConnections}
+        animatedLineIdx={leftAnimatedLineIdx}
         particleLines={leftParticleLines}
         className="block md:hidden left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[380px] h-[420px]"
         mobile

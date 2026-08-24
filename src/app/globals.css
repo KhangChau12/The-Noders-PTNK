@@ -280,6 +280,28 @@ pre code {
   100% { offset-distance: 100%; opacity: 0; }
 }
 
+/* will-change only on the elements actually animating — scoped narrowly so
+   the browser isn't asked to keep extra composited layers for static nodes. */
+.nn-line-animated {
+  will-change: stroke-dashoffset;
+}
+
+.nn-particle {
+  will-change: offset-distance, opacity;
+}
+
+/* Toggled when the tab is hidden or the background has scrolled out of the
+   viewport — freezes every neural-network animation in place instead of
+   paying per-frame paint cost for pixels no one can see. !important is
+   required here: each element also sets `animation` inline (for its
+   per-line duration/delay), and an inline `animation` shorthand implies
+   `animation-play-state: running` at inline specificity, which a plain
+   class selector cannot otherwise override. */
+.nn-paused .nn-line-animated,
+.nn-paused .nn-particle {
+  animation-play-state: paused !important;
+}
+
 @keyframes community-carousel {
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-50%, 0, 0); }
