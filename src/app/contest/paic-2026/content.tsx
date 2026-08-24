@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/Button'
-import { Card, CardContent } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import {
   ArrowLeft,
@@ -18,9 +17,10 @@ import {
   CheckCircle,
   Lightbulb,
   Medal,
+  ExternalLink,
+  Clock,
   BarChart3,
-  Globe,
-  ExternalLink
+  Unlock
 } from 'lucide-react'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import { LeaderboardTabs } from './LeaderboardTabs'
@@ -123,63 +123,45 @@ export default function PAIC2026Content() {
   ]
 
   const features = [
-    {
-      icon: <Brain className="w-6 h-6" />,
-      ...t.features[0]
-    },
-    {
-      icon: <Target className="w-6 h-6" />,
-      ...t.features[1]
-    },
-    {
-      icon: <Lightbulb className="w-6 h-6" />,
-      ...t.features[2]
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      ...t.features[3]
-    }
+    { icon: <Brain className="w-5 h-5" />, ...t.features[0] },
+    { icon: <Target className="w-5 h-5" />, ...t.features[1] },
+    { icon: <Lightbulb className="w-5 h-5" />, ...t.features[2] },
+    { icon: <Users className="w-5 h-5" />, ...t.features[3] },
   ]
 
   // Giải thưởng đội
   const teamPrizes = t.prizes.team.map((prize, index) => {
-    let icon, bg, border, textColor;
+    let icon, bg, textColor
     if (index === 0) {
-      icon = <Trophy className="w-6 h-6 text-yellow-500" />;
-      bg = 'bg-yellow-500/10';
-      border = 'border-yellow-500/30';
-      textColor = 'text-yellow-500';
+      icon = <Trophy className="w-[18px] h-[18px]" />
+      bg = 'rgba(234,179,8,.12)'
+      textColor = '#facc15'
     } else if (index === 1) {
-      icon = <Medal className="w-6 h-6 text-gray-400" />;
-      bg = 'bg-gray-400/10';
-      border = 'border-gray-400/30';
-      textColor = 'text-gray-400';
+      icon = <Medal className="w-[18px] h-[18px]" />
+      bg = 'rgba(148,163,184,.14)'
+      textColor = '#cbd5e1'
     } else {
-      icon = <Award className="w-6 h-6 text-amber-600" />;
-      bg = 'bg-amber-600/10';
-      border = 'border-amber-600/30';
-      textColor = 'text-amber-600';
+      icon = <Award className="w-[18px] h-[18px]" />
+      bg = 'rgba(217,119,6,.12)'
+      textColor = '#fb923c'
     }
-    return { ...prize, icon, bg, border, textColor };
-  });
+    return { ...prize, icon, bg, textColor }
+  })
 
   // Giải thưởng cá nhân
   const individualPrizes = t.prizes.individual.map((prize, index) => {
-    let icon, bg, border, textColor;
+    let icon, bg, textColor
     if (index === 0) {
-      icon = <User className="w-6 h-6 text-primary-blue" />;
-      bg = 'bg-primary-blue/10';
-      border = 'border-primary-blue/30';
-      textColor = 'text-primary-blue';
+      icon = <User className="w-[18px] h-[18px]" />
+      bg = 'rgba(37,99,235,.12)'
+      textColor = '#2563EB'
     } else {
-      icon = <Zap className="w-6 h-6 text-accent-cyan" />;
-      bg = 'bg-accent-cyan/10';
-      border = 'border-accent-cyan/30';
-      textColor = 'text-accent-cyan';
+      icon = <Zap className="w-[18px] h-[18px]" />
+      bg = 'rgba(6,182,212,.12)'
+      textColor = '#06B6D4'
     }
-    return { ...prize, icon, bg, border, textColor };
-  });
-
+    return { ...prize, icon, bg, textColor }
+  })
 
   const timeline = t.timeline.steps
 
@@ -188,7 +170,7 @@ export default function PAIC2026Content() {
       <NeuralNetworkBackground />
       <div className="relative min-h-screen z-10">
         {/* Back Button & Language Switcher */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex justify-between items-center">
+        <div className="container mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8 pt-8 flex justify-between items-center">
           <Link href="/contest">
             <Button variant="ghost" className="group">
               <ArrowLeft className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -220,192 +202,105 @@ export default function PAIC2026Content() {
         </div>
 
         {/* Hero Section */}
-        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="primary" className="mb-5 sm:mb-6">
-                {t.status.ended}
-              </Badge>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-5 sm:mb-6">
-                <span className="gradient-text">{t.title}</span>
-                <br />
-                <span className="text-text-primary">{t.subtitle}</span>
-              </h1>
-              <p className="text-base sm:text-xl text-text-secondary mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
-                {t.description}
-              </p>
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-text-secondary">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-primary-blue" />
-                  <span>{t.stats.teams_participants}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5 text-primary-blue" />
-                  <span>{t.stats.date}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Trophy className="w-5 h-5 text-primary-blue" />
-                  <span>{t.stats.prizepool}</span>
-                </div>
+        <section className="py-9 px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-3xl mx-auto">
+            <Badge variant="gray" className="mb-5">{t.status.ended}</Badge>
+            <h1 className="text-3xl sm:text-4xl md:text-[2.5rem] font-[family-name:var(--font-shrikhand)] mb-3 leading-[1.15]">
+              <span className="gradient-text">{t.title}</span>
+              <br />
+              <span className="text-text-primary">{t.subtitle}</span>
+            </h1>
+            <p className="text-sm sm:text-base text-text-secondary mb-6 max-w-2xl mx-auto leading-relaxed">
+              {t.description}
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-text-secondary mb-6">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary-blue" />
+                <span>{t.stats.teams_participants}</span>
               </div>
-              
-              <div className="mt-8">
-                <Link href="https://the-noders-competition-platform.vercel.app/competitions/e51e4314-854d-4a80-8520-044bf8b069e0" target="_blank" rel="noopener noreferrer">
-                  <Button variant="secondary" className="group">
-                    {t.buttons.competitionDetail}
-                    <ExternalLink className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  </Button>
-                </Link>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary-blue" />
+                <span>{t.stats.date}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-primary-blue" />
+                <span>{t.stats.prizepool}</span>
               </div>
             </div>
+            <Link href="https://the-noders-competition-platform.vercel.app/competitions/e51e4314-854d-4a80-8520-044bf8b069e0" target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary" className="group">
+                {t.buttons.competitionDetail}
+                <ExternalLink className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </Button>
+            </Link>
           </div>
         </section>
 
-        {/* Overview Section */}
-        <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-7xl mx-auto">
-              {/* Main Content Card */}
-              <Card className="bg-gradient-to-br from-primary-blue/5 to-accent-cyan/5 border-primary-blue/20 mb-6">
-                <CardContent className="p-6 md:p-8">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left: Video */}
-                    <div className="lg:col-span-2">
-                      <div className="mb-3">
-                        <h3 className="text-lg font-bold text-text-primary mb-1 flex items-center gap-2">
-                          <span className="text-primary-blue">▶</span>
-                          {t.workshop.title}
-                        </h3>
-                        <p className="text-text-secondary text-sm">
-                          {t.workshop.description}
-                        </p>
-                      </div>
-                      <div className="relative w-full rounded-lg overflow-hidden border border-primary-blue/20" style={{ paddingBottom: '56.25%' }}>
-                        <iframe
-                          className="absolute top-0 left-0 w-full h-full"
-                          src="https://www.youtube.com/embed/cFs5njLot7k"
-                          title="PAIC 2026 Workshop"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                      </div>
-                    </div>
+        {/* Overview console — one consistent panel replacing the old
+            gradient-card + 4 separate hover-lift feature cards. */}
+        <section className="py-9 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-[1180px]">
+            <div className="rounded-[20px] border border-dark-border/60 bg-gradient-to-br from-dark-surface to-[#16223a] overflow-hidden">
+              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-dark-border/60">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-green" />
+                <span className="text-[10.5px] font-extrabold uppercase tracking-[0.1em] text-text-tertiary">{t.workshop.title}</span>
+              </div>
 
-                    {/* Right: Overview */}
-                    <div className="lg:col-span-1 flex flex-col gap-4">
-                      <div>
-                        <h3 className="text-lg font-bold text-text-primary mb-3">
-                          {t.overview.title}
-                        </h3>
-                        <p className="text-text-secondary text-sm leading-relaxed mb-3">
-                         {t.overview.intro}
-                        </p>
-                      </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr]">
+                <div className="p-5 lg:border-r border-dark-border/60">
+                  <h3 className="text-sm font-extrabold mb-1 flex items-center gap-2">▶ {t.workshop.title}</h3>
+                  <p className="text-xs text-text-tertiary mb-3">{t.workshop.description}</p>
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src="https://www.youtube.com/embed/cFs5njLot7k"
+                      title="PAIC 2026 Workshop"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
 
-                      <div className="bg-dark-surface/50 rounded-lg p-4 border border-dark-border/30">
-                        <p className="text-primary-blue text-xs font-semibold mb-2">
-                          {t.overview.goals_title}
-                        </p>
-                        <div className="space-y-2">
-                          {t.overview.goals.map((goal, index) => (
-                            <div key={index} className="flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                              <p className="text-text-secondary text-xs">{goal}</p>
-                            </div>
-                          ))}
+                <div className="p-5 flex flex-col gap-3.5">
+                  <div>
+                    <h3 className="text-sm font-extrabold mb-1.5">{t.overview.title}</h3>
+                    <p className="text-xs text-text-secondary leading-relaxed">{t.overview.intro}</p>
+                  </div>
+                  <div className="bg-dark-bg/40 border border-dark-border/60 rounded-xl p-3.5">
+                    <div className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-primary-blue mb-2">{t.overview.goals_title}</div>
+                    <div className="flex flex-col gap-1.5">
+                      {t.overview.goals.map((goal, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-3.5 h-3.5 text-accent-green flex-shrink-0 mt-0.5" />
+                          <p className="text-xs text-text-secondary">{goal}</p>
                         </div>
-                      </div>
-
-                      <div className="bg-dark-surface/50 rounded-lg p-4 border border-dark-border/30">
-                        <p className="text-text-secondary text-xs">
-                          <span className="text-text-primary font-semibold">Đối tượng:</span> {t.overview.target}
-                        </p>
-                      </div>
+                      ))}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-dark-bg/40 border border-dark-border/60 rounded-xl p-3.5">
+                    <p className="text-xs text-text-secondary">
+                      <span className="text-text-primary font-semibold">Target:</span> {t.overview.target}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-dark-border/60">
                 {features.map((feature, index) => (
-                  <Card key={index} variant="hover" className="text-center group hover-lift">
-                    <CardContent className="p-6">
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/10 border border-primary-blue/30 rounded-xl mb-4 text-primary-blue group-hover:shadow-lg group-hover:shadow-primary-blue/25 transition-all duration-300">
-                        {feature.icon}
-                      </div>
-                      <h3 className="text-lg font-semibold text-text-primary mb-3 font-mono">
-                        {feature.title}
-                      </h3>
-                      <p className="text-text-secondary text-sm leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Timeline Section */}
-        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
-          <div className="container mx-auto">
-            <div className="max-w-7xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
-                {t.timeline.title}
-              </h2>
-              <p className="text-text-secondary text-center mb-8">
-                {t.timeline.subtitle}
-              </p>
-
-              {/* Desktop Timeline */}
-              <div className="hidden md:block relative">
-                {/* Progress Bar Background */}
-                <div className="absolute top-6 left-0 right-0 h-1 bg-dark-border/30 rounded-full">
                   <div
-                    className="absolute top-0 left-0 h-full bg-success rounded-full transition-all duration-1000"
-                    style={{ width: '100%' }}
-                  ></div>
-                </div>
-
-                {/* Timeline Items */}
-                <div className="relative flex justify-between items-start">
-                  {timeline.map((item, index) => (
-                    <div key={index} className="flex flex-col items-center flex-1 relative">
-                      {/* Milestone Node */}
-                      <div className="w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 bg-success border-success/30 shadow-lg shadow-success/50 z-10">
-                        <div className="w-5 h-5 rounded-full bg-white"></div>
-                      </div>
-
-                      {/* Label */}
-                      <div className="mt-4 text-center">
-                        <Badge variant="success" className="mb-2">
-                          {item.date}
-                        </Badge>
-                        <h3 className="text-base font-bold text-text-primary font-mono">
-                          {item.title}
-                        </h3>
-                      </div>
+                    key={index}
+                    className={[
+                      'p-4 flex flex-col gap-2 border-dark-border/60',
+                      index % 2 === 0 ? 'border-r' : '',
+                      index >= 2 ? 'border-t lg:border-t-0' : '',
+                      'lg:border-r lg:last:border-r-0',
+                    ].join(' ')}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-primary-blue/12 flex items-center justify-center text-primary-blue">
+                      {feature.icon}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mobile Timeline */}
-              <div className="md:hidden flex flex-col gap-4">
-                {timeline.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full border-4 flex items-center justify-center bg-success border-success/30">
-                      <div className="w-4 h-4 rounded-full bg-white"></div>
-                    </div>
-                    <div className="flex-1 flex items-center gap-3">
-                      <Badge variant="success">
-                        {item.date}
-                      </Badge>
-                      <span className="text-base font-bold text-text-primary font-mono">
-                        {item.title}
-                      </span>
-                    </div>
+                    <h4 className="text-xs font-extrabold">{feature.title}</h4>
+                    <p className="text-[11px] text-text-tertiary leading-relaxed">{feature.description}</p>
                   </div>
                 ))}
               </div>
@@ -413,173 +308,163 @@ export default function PAIC2026Content() {
           </div>
         </section>
 
-        {/* Leaderboard Section */}
-        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-7xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4 text-center">
-                {t.leaderboard.title}
-              </h2>
-              <p className="text-text-secondary text-center mb-8">
-                {t.leaderboard.subtitle}
-              </p>
-              <LeaderboardTabs
-                teamLeaderboard={teamLeaderboard}
-                individualLeaderboard={individualLeaderboard}
-              />
+        {/* Timeline — compact horizontal rail instead of a large illustrated progress bar */}
+        <section className="py-9 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+          <div className="container mx-auto max-w-[1180px]">
+            <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-blue mb-3.5">
+              <span className="w-[18px] h-0.5 rounded-sm bg-current" />
+              Timeline
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-1.5">{t.timeline.title}</h2>
+            <p className="text-text-secondary text-sm mb-6">{t.timeline.subtitle}</p>
+
+            <div className="flex flex-col md:flex-row rounded-2xl border border-dark-border/60 bg-dark-surface/70 overflow-hidden">
+              {timeline.map((item, index) => (
+                <div
+                  key={index}
+                  className={`flex-1 p-4 ${index < timeline.length - 1 ? 'border-b md:border-b-0 md:border-r' : ''} border-dark-border/60`}
+                >
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="w-2 h-2 rounded-full bg-accent-green" />
+                    <span className="text-[10px] font-extrabold text-text-tertiary tracking-[0.06em]">STEP {String(index + 1).padStart(2, '0')}</span>
+                  </div>
+                  <div className="text-[11px] font-bold text-accent-green mb-1">{item.date}</div>
+                  <h4 className="text-sm font-extrabold text-text-primary font-mono">{item.title}</h4>
+                </div>
+              ))}
             </div>
+          </div>
+        </section>
+
+        {/* Leaderboard — real data table with rank badges, same data as before */}
+        <section className="py-9 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-[1180px]">
+            <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-blue mb-3.5">
+              <span className="w-[18px] h-0.5 rounded-sm bg-current" />
+              Results
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-1.5">{t.leaderboard.title}</h2>
+            <p className="text-text-secondary text-sm mb-6">{t.leaderboard.subtitle}</p>
+
+            <LeaderboardTabs
+              teamLeaderboard={teamLeaderboard}
+              individualLeaderboard={individualLeaderboard}
+            />
           </div>
         </section>
 
         {/* Competition Format */}
-        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 text-center">
-                {t.format.title}
-              </h2>
+        <section className="py-9 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
+          <div className="container mx-auto max-w-[1180px]">
+            <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-blue mb-3.5">
+              <span className="w-[18px] h-0.5 rounded-sm bg-current" />
+              Format
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6">{t.format.title}</h2>
 
-              <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20 mb-8">
-                <CardContent className="p-5 sm:p-8">
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
-                        <Users className="w-6 h-6 text-primary-blue flex-shrink-0" />
-                        <span>{t.format.type_title}</span>
-                      </h3>
-                      <p className="text-text-secondary leading-relaxed ml-0 sm:ml-9">
-                        {t.format.type_desc}
-                      </p>
-                    </div>
+            <div className="rounded-[18px] border border-dark-border/60 bg-dark-surface/70 p-5 sm:p-7">
+              <div className="mb-6">
+                <h3 className="text-base font-extrabold text-text-primary mb-2 flex items-center gap-2.5">
+                  <Users className="w-[18px] h-[18px] text-primary-blue flex-shrink-0" />
+                  {t.format.type_title}
+                </h3>
+                <p className="text-sm text-text-secondary leading-relaxed">{t.format.type_desc}</p>
+              </div>
 
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-bold text-text-primary mb-3 flex items-center space-x-3">
-                        <Target className="w-6 h-6 text-primary-blue flex-shrink-0" />
-                        <span>{t.format.structure_title}</span>
-                      </h3>
-                      <p className="text-text-secondary leading-relaxed ml-0 sm:ml-9 mb-4">
-                        {t.format.structure_desc}
-                      </p>
+              <div>
+                <h3 className="text-base font-extrabold text-text-primary mb-2 flex items-center gap-2.5">
+                  <Clock className="w-[18px] h-[18px] text-primary-blue flex-shrink-0" />
+                  {t.format.structure_title}
+                </h3>
+                <p className="text-sm text-text-secondary leading-relaxed mb-3">{t.format.structure_desc}</p>
 
-                      <div className="ml-0 sm:ml-9 space-y-4">
-                        <div className="bg-dark-surface/50 rounded-lg p-4 sm:p-6 border border-dark-border/30">
-                          <h4 className="text-base sm:text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
-                            <BarChart3 className="w-5 h-5 text-success flex-shrink-0" />
-                            <span>{t.format.rounds[0].title}</span>
-                          </h4>
-                          <p className="text-sm text-text-secondary mb-2">
-                            <strong>{t.format.rounds[0].time}</strong>
-                          </p>
-                          <p className="text-text-secondary text-sm leading-relaxed">
-                            {t.format.rounds[0].desc}
-                          </p>
-                        </div>
-
-                        <div className="bg-dark-surface/50 rounded-lg p-4 sm:p-6 border border-dark-border/30">
-                          <h4 className="text-base sm:text-lg font-semibold text-text-primary mb-2 flex items-center space-x-2">
-                            <Zap className="w-5 h-5 text-warning flex-shrink-0" />
-                            <span>{t.format.rounds[1].title}</span>
-                          </h4>
-                          <p className="text-sm text-text-secondary mb-2">
-                            <strong>{t.format.rounds[1].time}</strong>
-                          </p>
-                          <p className="text-text-secondary text-sm leading-relaxed">
-                            {t.format.rounds[1].desc}
-                          </p>
-                        </div>
+                <div className="flex flex-col gap-3">
+                  {t.format.rounds.map((round, i) => {
+                    const RoundIcon = i === 0 ? BarChart3 : Unlock
+                    return (
+                      <div key={i} className="bg-dark-bg/40 border border-dark-border/60 rounded-[11px] p-4">
+                        <h4 className="text-sm font-bold text-text-primary mb-1.5 flex items-center gap-2">
+                          <RoundIcon className="w-3.5 h-3.5 text-primary-blue flex-shrink-0" />
+                          {round.title}
+                        </h4>
+                        <p className="text-xs text-text-tertiary mb-1.5"><strong>{round.time}</strong></p>
+                        <p className="text-xs text-text-secondary leading-relaxed">{round.desc}</p>
                       </div>
+                    )
+                  })}
+                </div>
 
-                      <div className="ml-0 sm:ml-9 mt-4 p-4 bg-primary-blue/10 border border-primary-blue/30 rounded-lg">
-                        <p className="text-text-secondary text-sm">
-                          <Trophy className="w-4 h-4 inline mr-2 text-primary-blue" />
-                          <strong className="text-text-primary">{t.leaderboard.title}</strong> {t.format.ranking_note}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="mt-4 p-3.5 bg-primary-blue/8 border border-primary-blue/25 rounded-xl">
+                  <p className="text-sm text-text-secondary">
+                    <Trophy className="w-4 h-4 inline mr-2 text-primary-blue" />
+                    <strong className="text-text-primary">{t.leaderboard.title}</strong> {t.format.ranking_note}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Prizes Section */}
-        <section className="py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto max-w-5xl">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-                {t.prizes.title}
-              </h2>
-              <p className="text-text-secondary">
-                {t.prizes.total} <span className="text-primary-blue font-bold">{t.prizes.pool}</span>
+        {/* Prizes */}
+        <section className="py-9 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-2xl">
+            <div className="text-center mb-8">
+              <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-blue mb-3.5 justify-center">
+                <span className="w-[18px] h-0.5 rounded-sm bg-current" />
+                Prizes
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">{t.prizes.title}</h2>
+              <p className="text-sm text-text-secondary">{t.prizes.total}</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent mt-1">
+                {t.prizes.pool}
               </p>
             </div>
 
-            {/* Giải đội */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary-blue" />
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary-blue" />
                 {t.prizes.team_prizes_title}
               </h3>
-              <Card className="overflow-hidden border-primary-blue/20">
-                <div className="divide-y divide-dark-border/30">
-                  {teamPrizes.map((prize, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 hover:bg-dark-surface/30 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg ${prize.bg} border ${prize.border} flex items-center justify-center`}>
-                          {prize.icon}
-                        </div>
-                        <div>
-                          <p className={`font-semibold ${prize.textColor}`}>{prize.rank}</p>
-                          <p className="text-text-tertiary text-sm">{prize.count}</p>
-                        </div>
+              <div className="rounded-[14px] border border-dark-border/60 overflow-hidden">
+                {teamPrizes.map((prize, index) => (
+                  <div key={index} className="flex items-center justify-between p-3.5 border-b border-dark-border/60 last:border-b-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: prize.bg, color: prize.textColor }}>
+                        {prize.icon}
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-text-primary">{prize.prize}</p>
+                      <div>
+                        <p className="font-semibold text-sm" style={{ color: prize.textColor }}>{prize.rank}</p>
+                        <p className="text-text-tertiary text-xs">{prize.count}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </Card>
+                    <p className="font-bold text-text-primary text-sm">{prize.prize}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Giải cá nhân */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-primary-blue" />
+            <div className="mb-6">
+              <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+                <User className="w-4 h-4 text-primary-blue" />
                 {t.prizes.individual_prizes_title}
               </h3>
-              <Card className="overflow-hidden border-primary-blue/20">
-                <div className="divide-y divide-dark-border/30">
-                  {individualPrizes.map((prize, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 hover:bg-dark-surface/30 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg ${prize.bg} border ${prize.border} flex items-center justify-center`}>
-                          {prize.icon}
-                        </div>
-                        <div>
-                          <p className={`font-semibold ${prize.textColor}`}>{prize.rank}</p>
-                          <p className="text-text-tertiary text-sm">{prize.count}</p>
-                        </div>
+              <div className="rounded-[14px] border border-dark-border/60 overflow-hidden">
+                {individualPrizes.map((prize, index) => (
+                  <div key={index} className="flex items-center justify-between p-3.5 border-b border-dark-border/60 last:border-b-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: prize.bg, color: prize.textColor }}>
+                        {prize.icon}
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-text-primary">{prize.prize}</p>
+                      <div>
+                        <p className="font-semibold text-sm" style={{ color: prize.textColor }}>{prize.rank}</p>
+                        <p className="text-text-tertiary text-xs">{prize.count}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </Card>
+                    <p className="font-bold text-text-primary text-sm">{prize.prize}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-
-            {/* Total Prize Pool */}
-            <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/30">
-              <CardContent className="py-5 sm:py-6 px-5 sm:px-8 flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 sm:gap-4">
-                <p className="text-text-secondary font-medium">{t.prizes.total}</p>
-                <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-blue to-accent-cyan bg-clip-text text-transparent">
-                  {t.prizes.pool}
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </section>
 

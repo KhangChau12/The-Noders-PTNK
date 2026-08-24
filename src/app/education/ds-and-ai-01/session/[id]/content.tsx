@@ -1,12 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/Button'
 import { Badge } from '@/components/Badge'
 import { useLanguage } from '@/components/LanguageProvider'
 import { translations } from '../../locale'
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
-import { ArrowLeft, Calendar, Target, Clock, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Calendar, Target, Clock, ExternalLink, Presentation, PlayCircle, FileText } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface SessionData {
   canvaUrl: string | null
@@ -28,17 +30,18 @@ const sessionData: Record<number, SessionData> = {
     docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSKQSyxomwwYJQ4XooC-cBqGKJsaFwOzTtVRwBQPDIt6osNxrzj_LJDd9Sj8mnbD_3RqPxE6oG8Gdau/pub?embedded=true',
     colabUrl: 'https://colab.research.google.com/drive/1An4g-yczGnwz75e0B7Akpezzz8G1XrGX?usp=sharing',
   },
-  3: { 
-    canvaUrl: 'https://www.canva.com/design/DAG6gEMB0TM/jGfQyCUd3g1brWst6WF_9w/view?embed', 
-    youtubeUrl: 'https://www.youtube.com/embed/jSQLXLTBEhE', 
-    docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSA4oO7kdPIkTDd5OUd0bMxwBMkqLhU27y5eR9iz2ymTjPUQRCvDpQ6DTGO4Xl_fK1IcyV6ZVlkfgAW/pub?embedded=true', 
-    colabUrl: 'https://colab.research.google.com/drive/1lD1AMTLALgHB4AQ8DjQ94N3iBSpeACoO?usp=sharing' 
+  3: {
+    canvaUrl: 'https://www.canva.com/design/DAG6gEMB0TM/jGfQyCUd3g1brWst6WF_9w/view?embed',
+    youtubeUrl: 'https://www.youtube.com/embed/jSQLXLTBEhE',
+    docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vSA4oO7kdPIkTDd5OUd0bMxwBMkqLhU27y5eR9iz2ymTjPUQRCvDpQ6DTGO4Xl_fK1IcyV6ZVlkfgAW/pub?embedded=true',
+    colabUrl: 'https://colab.research.google.com/drive/1lD1AMTLALgHB4AQ8DjQ94N3iBSpeACoO?usp=sharing',
   },
-  4: { 
-    canvaUrl: 'https://www.canva.com/design/DAG8VnHsx_8/99IxQ-xH48xY4hfG9USddg/view?embed', 
-    youtubeUrl: 'https://www.youtube.com/embed/TvU_e2Kvp_Y', 
-    docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vScKMjc_YQMo-s-3-8wdkhTGyg8-0yN4ti52thiyH3EQ1B6sb6FP4pGI8kMI4iY2Q5jmsB6qjFxK56U/pub?embedded=true', 
-    colabUrl: 'https://colab.research.google.com/drive/1zKTsGbxZC97R6mrROg6V4F5hZKPDGmW6?usp=sharing' },
+  4: {
+    canvaUrl: 'https://www.canva.com/design/DAG8VnHsx_8/99IxQ-xH48xY4hfG9USddg/view?embed',
+    youtubeUrl: 'https://www.youtube.com/embed/TvU_e2Kvp_Y',
+    docsUrl: 'https://docs.google.com/document/d/e/2PACX-1vScKMjc_YQMo-s-3-8wdkhTGyg8-0yN4ti52thiyH3EQ1B6sb6FP4pGI8kMI4iY2Q5jmsB6qjFxK56U/pub?embedded=true',
+    colabUrl: 'https://colab.research.google.com/drive/1zKTsGbxZC97R6mrROg6V4F5hZKPDGmW6?usp=sharing',
+  },
 }
 
 const sessionDates: Record<number, string> = {
@@ -48,13 +51,16 @@ const sessionDates: Record<number, string> = {
   4: '15/04/2026',
 }
 
+type MaterialTab = 'slides' | 'video' | 'notes'
 
 function ComingSoonPlaceholder({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[240px] bg-dark-surface/40 border border-dark-border/40 rounded-xl backdrop-blur-md">
-      <Clock className="w-10 h-10 text-text-secondary/40 mb-4" />
+    <div className="flex flex-col items-center justify-center min-h-[240px] bg-dark-bg/40 rounded-b-2xl">
+      <Clock className="w-9 h-9 text-text-secondary/40 mb-3" />
       <p className="text-text-secondary text-sm font-medium">{label}</p>
-      <p className="text-text-secondary/50 text-xs mt-1">Tài liệu sẽ được cập nhật sau buổi học</p>
+      <p className="text-text-secondary/50 text-xs mt-1">
+        {'Available after the session'}
+      </p>
     </div>
   )
 }
@@ -66,6 +72,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
 
   const id = parseInt(sessionId, 10)
   const sessionIndex = id - 1
+  const [activeTab, setActiveTab] = useState<MaterialTab>('slides')
 
   if (isNaN(id) || id < 1 || id > 4) {
     return (
@@ -86,148 +93,166 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
   const objective = loc(sessionInfo.objective)
   const date = sessionDates[id]
 
+  const tabs: { key: MaterialTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'slides', label: lang === 'vi' ? 'Slide' : 'Slides', icon: <Presentation className="w-4 h-4" /> },
+    { key: 'video', label: lang === 'vi' ? 'Bài giảng' : 'Recording', icon: <PlayCircle className="w-4 h-4" /> },
+    { key: 'notes', label: lang === 'vi' ? 'Tài liệu' : 'Notes', icon: <FileText className="w-4 h-4" /> },
+  ]
+
   return (
     <div className="min-h-screen bg-dark-bg relative overflow-hidden">
       <NeuralNetworkBackground />
 
-      {/* Header + Canva — narrower container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8 sm:pb-10">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <Link href="/education/ds-and-ai-01">
-            <Button variant="secondary" className="mb-6 group">
-              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              {lang === 'vi' ? 'Quay lại Module 1' : 'Back to Module 1'}
-            </Button>
-          </Link>
+      <div className="relative z-10 container mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-14 sm:pb-16">
+        <Link href="/education/ds-and-ai-01">
+          <Button variant="secondary" className="mb-6 group">
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            {lang === 'vi' ? 'Quay lại Module 1' : 'Back to Module 1'}
+          </Button>
+        </Link>
 
-          <div className="flex flex-wrap items-center gap-3 mb-3">
-            <Badge variant="default" className="text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
-              DS &amp; AI
-            </Badge>
-            <Badge variant="default" className={`border bg-transparent ${id === 1 ? 'text-accent-cyan border-accent-cyan/30' : id === 2 ? 'text-accent-cyan border-accent-cyan/30' : id === 3 ? 'text-success border-success/30' : 'text-warning border-warning/30'}`}>
-              Session {id}
-            </Badge>
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <Badge variant="default" className="!rounded-[7px] text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
+            DS &amp; AI
+          </Badge>
+          <Badge variant="default" className="!rounded-[7px] border bg-transparent text-accent-cyan border-accent-cyan/30">
+            Session {id}
+          </Badge>
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4 leading-tight break-words">{title}</h1>
+
+        <div className="flex flex-wrap gap-2.5 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-surface border border-dark-border/60 text-text-secondary text-xs">
+            <Target className="w-3.5 h-3.5 text-accent-cyan flex-shrink-0" />
+            <span className="break-words">{objective}</span>
           </div>
-
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-4 leading-tight break-words">{title}</h1>
-
-          <div className="flex flex-wrap gap-3 sm:gap-4">
-            <div className="inline-flex items-start px-3 py-1.5 rounded-lg bg-dark-surface/60 text-text-secondary text-sm border border-dark-border/40">
-              <Target className="w-4 h-4 mr-2 mt-0.5 text-accent-cyan flex-shrink-0" />
-              <span className="break-words">{objective}</span>
-            </div>
-            <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-dark-surface/60 text-text-secondary text-sm border border-dark-border/40">
-              <Calendar className="w-4 h-4 mr-2 text-yellow-300 flex-shrink-0" />
-              {date}
-            </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-surface border border-dark-border/60 text-text-secondary text-xs">
+            <Calendar className="w-3.5 h-3.5 text-yellow-300 flex-shrink-0" />
+            {date}
           </div>
         </div>
 
-        {/* Canva Slide Section */}
-        <section>
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-text-primary">
-              {lang === 'vi' ? 'Slide bài giảng' : 'Lecture Slides'}
-            </h2>
-            {session.canvaUrl && (
-              <a
-                href={session.canvaUrl.replace('?embed', '')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-sm text-primary-blue hover:text-accent-cyan transition-colors"
-              >
-                <ExternalLink className="w-4 h-4 mr-1" />
-                {lang === 'vi' ? 'Mở trong Canva' : 'Open in Canva'}
-              </a>
-            )}
-          </div>
-
-          {session.canvaUrl ? (
-            <div className="relative w-full rounded-2xl overflow-hidden border border-dark-border/40 shadow-2xl bg-dark-surface/20">
-              <div className="aspect-video">
-                <iframe
-                  src={session.canvaUrl}
-                  allowFullScreen
-                  allow="fullscreen"
-                  className="w-full h-full"
-                  style={{ border: 'none' }}
-                  title={`Session ${id} Slides`}
-                />
-              </div>
-            </div>
-          ) : (
-            <ComingSoonPlaceholder label={lang === 'vi' ? 'Slide bài giảng' : 'Lecture Slides'} />
-          )}
-        </section>
-      </div>
-
-      {/* Video + Docs — wider container, less padding */}
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-4 lg:px-6 pb-12 sm:pb-16">
-        <section>
-          <h2 className="text-lg sm:text-xl font-semibold text-text-primary mb-4">
-            {lang === 'vi' ? 'Video & Tài liệu' : 'Video & Materials'}
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-6 items-stretch">
-            {/* YouTube — 60% */}
-            <div className="lg:col-span-3 flex flex-col">
-              <p className="text-sm text-text-secondary mb-2 font-medium">
-                {lang === 'vi' ? 'Video bài giảng' : 'Lecture Recording'}
-              </p>
-              {session.youtubeUrl ? (
-                <div className="rounded-xl overflow-hidden border border-dark-border/40 bg-dark-surface/20">
-                  <div className="aspect-video">
-                    <iframe
-                      src={session.youtubeUrl}
-                      allowFullScreen
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      className="w-full h-full"
-                      style={{ border: 'none' }}
-                      title={`Session ${id} Video`}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <ComingSoonPlaceholder label={lang === 'vi' ? 'Video bài giảng' : 'Lecture Recording'} />
+        {/* Material viewer — one tabbed panel instead of three stacked
+            full-width iframes (Canva, YouTube, Google Docs) in sequence. */}
+        <div className="flex gap-1 border-b border-dark-border/60">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 -mb-px transition-colors',
+                activeTab === tab.key ? 'text-text-primary border-primary-blue' : 'text-text-tertiary border-transparent hover:text-text-secondary'
               )}
-            </div>
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-            {/* Google Docs — 40% */}
-            <div className="lg:col-span-2 flex flex-col">
-              <p className="text-sm text-text-secondary mb-2 font-medium">
-                {lang === 'vi' ? 'Tài liệu bài giảng' : 'Lecture Notes'}
-              </p>
-              {session.docsUrl ? (
-                <div className="rounded-xl overflow-hidden border border-dark-border/40 bg-dark-surface/20 flex-1 h-[420px] sm:h-[520px] lg:h-auto">
+        <div className="rounded-b-2xl border border-t-0 border-dark-border/60 bg-dark-surface overflow-hidden">
+          {activeTab === 'slides' && (
+            session.canvaUrl ? (
+              <>
+                <div className="relative aspect-video bg-black">
+                  <iframe
+                    src={session.canvaUrl}
+                    allowFullScreen
+                    allow="fullscreen"
+                    className="absolute inset-0 w-full h-full border-0"
+                    title={`Session ${id} Slides`}
+                  />
+                </div>
+                <div className="flex items-center justify-between px-4 py-3 border-t border-dark-border/60">
+                  <span className="text-xs text-text-tertiary">{lang === 'vi' ? 'Slide bài giảng' : 'Lecture Slides'}</span>
+                  <a
+                    href={session.canvaUrl.replace('?embed', '')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-accent-cyan"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    {lang === 'vi' ? 'Mở trong Canva' : 'Open in Canva'}
+                  </a>
+                </div>
+              </>
+            ) : (
+              <ComingSoonPlaceholder label={lang === 'vi' ? 'Slide bài giảng' : 'Lecture Slides'} />
+            )
+          )}
+
+          {activeTab === 'video' && (
+            session.youtubeUrl ? (
+              <>
+                <div className="relative aspect-video bg-black">
+                  <iframe
+                    src={session.youtubeUrl}
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    className="absolute inset-0 w-full h-full border-0"
+                    title={`Session ${id} Video`}
+                  />
+                </div>
+                <div className="flex items-center px-4 py-3 border-t border-dark-border/60">
+                  <span className="text-xs text-text-tertiary">{lang === 'vi' ? 'Video bài giảng' : 'Lecture Recording'}</span>
+                </div>
+              </>
+            ) : (
+              <ComingSoonPlaceholder label={lang === 'vi' ? 'Video bài giảng' : 'Lecture Recording'} />
+            )
+          )}
+
+          {activeTab === 'notes' && (
+            session.docsUrl ? (
+              <>
+                <div className="relative h-[480px] sm:h-[560px] bg-white">
                   <iframe
                     src={session.docsUrl}
-                    className="w-full h-full"
-                    style={{ border: 'none', display: 'block', minHeight: '200px' }}
+                    className="absolute inset-0 w-full h-full border-0"
                     title={`Session ${id} Notes`}
                   />
                 </div>
-              ) : (
-                <ComingSoonPlaceholder label={lang === 'vi' ? 'Tài liệu bài giảng' : 'Lecture Notes'} />
-              )}
-            </div>
-          </div>
-        </section>
+                <div className="flex items-center px-4 py-3 border-t border-dark-border/60">
+                  <span className="text-xs text-text-tertiary">{lang === 'vi' ? 'Tài liệu bài giảng' : 'Lecture Notes'}</span>
+                </div>
+              </>
+            ) : (
+              <ComingSoonPlaceholder label={lang === 'vi' ? 'Tài liệu bài giảng' : 'Lecture Notes'} />
+            )
+          )}
+        </div>
 
-        {/* Colab Button */}
         {session.colabUrl && (
           <a
             href={session.colabUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#F9AB00]/10 hover:bg-[#F9AB00]/20 border border-[#F9AB00]/30 hover:border-[#F9AB00]/60 text-[#F9AB00] font-semibold text-base transition-all duration-200 group"
+            className="mt-5 flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-[#F9AB00]/10 hover:bg-[#F9AB00]/20 border border-[#F9AB00]/30 hover:border-[#F9AB00]/60 text-[#F9AB00] font-semibold text-sm transition-all duration-200 group"
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 1.97a4.079 4.079 0 0 0-5.476 5.476l-1.97 1.97a6.5 6.5 0 0 1 9.416-9.416zm-11.124 7.504 1.97-1.97a4.079 4.079 0 0 0 5.476-5.476l1.97-1.97a6.5 6.5 0 0 1-9.416 9.416z"/>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 1.97a4.079 4.079 0 0 0-5.476 5.476l-1.97 1.97a6.5 6.5 0 0 1 9.416-9.416zm-11.124 7.504 1.97-1.97a4.079 4.079 0 0 0 5.476-5.476l1.97-1.97a6.5 6.5 0 0 1-9.416 9.416z" />
             </svg>
             {lang === 'vi' ? 'Mở bài Lab trên Google Colab' : 'Open Lab on Google Colab'}
             <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </a>
         )}
+
+        {/* Prev/next session navigation — this is one of a numbered 4-session sequence */}
+        <div className="flex items-center justify-between gap-3 mt-8 pt-6 border-t border-dark-border/60">
+          {id > 1 ? (
+            <Link href={`/education/ds-and-ai-01/session/${id - 1}`} className="inline-flex items-center gap-2 text-sm font-bold text-text-secondary hover:text-primary-blue transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+              {lang === 'vi' ? `Buổi ${id - 1}` : `Session ${id - 1}`}
+            </Link>
+          ) : <span />}
+          {id < 4 ? (
+            <Link href={`/education/ds-and-ai-01/session/${id + 1}`} className="inline-flex items-center gap-2 text-sm font-bold text-text-secondary hover:text-primary-blue transition-colors">
+              {lang === 'vi' ? `Buổi ${id + 1}` : `Session ${id + 1}`}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : <span />}
+        </div>
       </div>
     </div>
   )

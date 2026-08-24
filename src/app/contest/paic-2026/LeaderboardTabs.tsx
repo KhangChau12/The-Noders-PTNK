@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card } from '@/components/Card'
-import { Trophy, Medal, Award, Users, User } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useLanguage } from '@/components/LanguageProvider'
 import { content } from './locale'
 
@@ -30,167 +29,119 @@ interface LeaderboardTabsProps {
   individualLeaderboard: IndividualEntry[]
 }
 
+function RankBadge({ rank }: { rank: number | null }) {
+  if (rank === null) {
+    return <span className="inline-flex items-center justify-center w-6 h-6 rounded-md text-[11px] font-bold bg-dark-bg/60 text-text-tertiary">—</span>
+  }
+  const rankStyle =
+    rank === 1 ? 'bg-yellow-500/20 text-yellow-400' :
+    rank === 2 ? 'bg-slate-400/20 text-slate-300' :
+    rank === 3 ? 'bg-amber-600/20 text-amber-500' :
+    'bg-dark-bg/60 text-text-tertiary'
+  return <span className={cn('inline-flex items-center justify-center w-6 h-6 rounded-md text-[11px] font-bold', rankStyle)}>{rank}</span>
+}
+
 export function LeaderboardTabs({ teamLeaderboard, individualLeaderboard }: LeaderboardTabsProps) {
   const [activeTab, setActiveTab] = useState<'team' | 'individual'>('team')
   const { lang } = useLanguage()
   const t = content[lang as keyof typeof content] || content.vi
 
+  const rowHighlight = (rank: number | null) => {
+    if (rank === 1) return 'bg-yellow-500/[0.04]'
+    if (rank === 2) return 'bg-slate-400/[0.04]'
+    if (rank === 3) return 'bg-amber-600/[0.03]'
+    return ''
+  }
+
   return (
     <div>
-      {/* Tab Buttons */}
-      <div className="flex justify-center gap-2 mb-6 sm:mb-8">
+      {/* Tab Buttons — small pills, consistent with the rest of the site's tab pattern */}
+      <div className="flex gap-1.5 mb-4">
         <button
           onClick={() => setActiveTab('team')}
-          className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 min-h-[44px] rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 ${
+          className={cn(
+            'text-xs font-bold px-3.5 py-2 rounded-lg border transition-colors',
             activeTab === 'team'
-              ? 'bg-gradient-to-r from-primary-blue to-accent-cyan text-white shadow-lg shadow-primary-blue/30'
-              : 'bg-dark-surface/50 text-text-secondary hover:text-text-primary hover:bg-dark-surface border border-dark-border/50'
-          }`}
+              ? 'bg-primary-blue border-primary-blue text-white'
+              : 'bg-dark-surface border-dark-border/60 text-text-secondary hover:text-text-primary'
+          )}
         >
-          <Users className="w-4 h-4 flex-shrink-0" />
-          <span className="truncate">{t.leaderboard_tabs.team_tab} ({teamLeaderboard.length})</span>
+          {t.leaderboard_tabs.team_tab} ({teamLeaderboard.length})
         </button>
         <button
           onClick={() => setActiveTab('individual')}
-          className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-3 min-h-[44px] rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 ${
+          className={cn(
+            'text-xs font-bold px-3.5 py-2 rounded-lg border transition-colors',
             activeTab === 'individual'
-              ? 'bg-gradient-to-r from-primary-blue to-accent-cyan text-white shadow-lg shadow-primary-blue/30'
-              : 'bg-dark-surface/50 text-text-secondary hover:text-text-primary hover:bg-dark-surface border border-dark-border/50'
-          }`}
+              ? 'bg-primary-blue border-primary-blue text-white'
+              : 'bg-dark-surface border-dark-border/60 text-text-secondary hover:text-text-primary'
+          )}
         >
-          <User className="w-4 h-4 flex-shrink-0" />
-          <span className="truncate">{t.leaderboard_tabs.individual_tab} ({individualLeaderboard.length})</span>
+          {t.leaderboard_tabs.individual_tab} ({individualLeaderboard.length})
         </button>
       </div>
 
-      {/* Scroll hint for mobile */}
-      <p className="lg:hidden text-xs text-text-tertiary text-center mb-2">
-        {lang === 'vi' ? '← Vuốt ngang để xem đầy đủ bảng →' : '← Swipe to see full table →'}
-      </p>
-
-      {/* Team Leaderboard */}
-      {activeTab === 'team' && (
-        <Card className="overflow-hidden border-primary-blue/20">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px]">
+      <div className="rounded-2xl border border-dark-border/60 overflow-hidden">
+        <div className="overflow-x-auto">
+          {activeTab === 'team' ? (
+            <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
-                  <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.rank}</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.team}</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.public}</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.private}</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.average}</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.submissions}</th>
+                <tr className="bg-dark-surface">
+                  <th className="px-4 py-3 text-left text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.rank}</th>
+                  <th className="px-4 py-3 text-left text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.team}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.public}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.private}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.average}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.submissions}</th>
                 </tr>
               </thead>
               <tbody>
                 {teamLeaderboard.map((entry, index) => (
-                  <tr
-                    key={entry.rank ?? `unranked-${index}`}
-                    className={`border-b border-dark-border/50 hover:bg-dark-surface/50 transition-colors ${
-                      entry.rank !== null && entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
-                    }`}
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {entry.rank === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
-                        {entry.rank === 2 && <Medal className="w-5 h-5 text-gray-400" />}
-                        {entry.rank === 3 && <Award className="w-5 h-5 text-amber-600" />}
-                        <span className={`font-bold ${entry.rank !== null && entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
-                          {entry.rank !== null ? `#${entry.rank}` : '—'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`font-medium ${entry.rank !== null && entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
-                        {entry.team}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center font-mono text-sm text-text-secondary">
-                      {entry.public?.toFixed(4) ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-center font-mono text-sm text-text-secondary">
-                      {entry.private?.toFixed(4) ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`font-mono text-sm font-semibold ${entry.average ? 'text-primary-blue' : 'text-text-tertiary'}`}>
-                        {entry.average?.toFixed(4) ?? '—'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-sm text-text-tertiary">
-                      {entry.submissions}
-                    </td>
+                  <tr key={entry.rank ?? `unranked-${index}`} className={cn('border-t border-dark-border/60', rowHighlight(entry.rank))}>
+                    <td className="px-4 py-2.5"><RankBadge rank={entry.rank} /></td>
+                    <td className="px-4 py-2.5 font-bold text-text-primary whitespace-nowrap">{entry.team}</td>
+                    <td className="px-4 py-2.5 text-right text-text-secondary [font-variant-numeric:tabular-nums]">{entry.public?.toFixed(4) ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-right text-text-secondary [font-variant-numeric:tabular-nums]">{entry.private?.toFixed(4) ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-right font-semibold text-text-primary [font-variant-numeric:tabular-nums]">{entry.average?.toFixed(4) ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-right text-text-tertiary [font-variant-numeric:tabular-nums]">{entry.submissions}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </Card>
-      )}
-
-      {/* Individual Leaderboard */}
-      {activeTab === 'individual' && (
-        <Card className="overflow-hidden border-primary-blue/20">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px]">
+          ) : (
+            <table className="w-full min-w-[680px] text-sm">
               <thead>
-                <tr className="bg-gradient-to-r from-primary-blue/20 to-accent-cyan/20 border-b border-dark-border">
-                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.rank}</th>
-                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.name}</th>
-                  <th className="px-3 py-4 text-left text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.team}</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.public}</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.private}</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.average}</th>
-                  <th className="px-3 py-4 text-center text-sm font-semibold text-text-primary">{t.leaderboard_tabs.columns.submissions}</th>
+                <tr className="bg-dark-surface">
+                  <th className="px-4 py-3 text-left text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.rank}</th>
+                  <th className="px-4 py-3 text-left text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.name}</th>
+                  <th className="px-4 py-3 text-left text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.team}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.public}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.private}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.average}</th>
+                  <th className="px-4 py-3 text-right text-[10.5px] font-extrabold uppercase tracking-wider text-text-tertiary">{t.leaderboard_tabs.columns.submissions}</th>
                 </tr>
               </thead>
               <tbody>
                 {individualLeaderboard.map((entry, index) => (
-                  <tr
-                    key={entry.rank ?? `unranked-${index}`}
-                    className={`border-b border-dark-border/50 hover:bg-dark-surface/50 transition-colors ${
-                      entry.rank !== null && entry.rank <= 5 ? 'bg-gradient-to-r from-primary-blue/5 to-accent-cyan/5' : ''
-                    }`}
-                  >
-                    <td className="px-3 py-3">
-                      <div className="flex items-center gap-1">
-                        {entry.rank === 1 && <Trophy className="w-4 h-4 text-yellow-500" />}
-                        {entry.rank === 2 && <Medal className="w-4 h-4 text-gray-400" />}
-                        {entry.rank === 3 && <Award className="w-4 h-4 text-amber-600" />}
-                        <span className={`font-bold text-sm ${entry.rank !== null && entry.rank <= 3 ? 'text-primary-blue' : 'text-text-secondary'}`}>
-                          {entry.rank !== null ? `#${entry.rank}` : '—'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <span className={`font-medium text-sm ${entry.rank !== null && entry.rank <= 5 ? 'text-text-primary' : 'text-text-secondary'}`}>
-                        {entry.name}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-sm text-text-tertiary">
-                      {entry.team}
-                    </td>
-                    <td className="px-3 py-3 text-center font-mono text-xs text-text-secondary">
-                      {entry.public?.toFixed(4) ?? '—'}
-                    </td>
-                    <td className="px-3 py-3 text-center font-mono text-xs text-text-secondary">
-                      {entry.private?.toFixed(4) ?? '—'}
-                    </td>
-                    <td className="px-3 py-3 text-center">
-                      <span className={`font-mono text-xs font-semibold ${entry.average ? 'text-primary-blue' : 'text-text-tertiary'}`}>
-                        {entry.average?.toFixed(4) ?? '—'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-center text-xs text-text-tertiary">
-                      {entry.submissions}
-                    </td>
+                  <tr key={entry.rank ?? `unranked-${index}`} className={cn('border-t border-dark-border/60', rowHighlight(entry.rank))}>
+                    <td className="px-4 py-2.5"><RankBadge rank={entry.rank} /></td>
+                    <td className="px-4 py-2.5 font-bold text-text-primary whitespace-nowrap">{entry.name}</td>
+                    <td className="px-4 py-2.5 text-text-tertiary whitespace-nowrap">{entry.team}</td>
+                    <td className="px-4 py-2.5 text-right text-text-secondary [font-variant-numeric:tabular-nums]">{entry.public?.toFixed(4) ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-right text-text-secondary [font-variant-numeric:tabular-nums]">{entry.private?.toFixed(4) ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-right font-semibold text-text-primary [font-variant-numeric:tabular-nums]">{entry.average?.toFixed(4) ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-right text-text-tertiary [font-variant-numeric:tabular-nums]">{entry.submissions}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </Card>
-      )}
+          )}
+        </div>
+      </div>
+
+      <p className="lg:hidden text-xs text-text-tertiary text-center mt-3">
+        {lang === 'vi' ? '← Vuốt ngang để xem đầy đủ bảng →' : '← Swipe to see full table →'}
+      </p>
     </div>
   )
 }

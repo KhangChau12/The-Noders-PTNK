@@ -246,7 +246,7 @@ export function DataScienceModule1Content() {
         <section className="py-6 md:py-8 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
-              <Badge variant="warning" className="mb-4">
+              <Badge variant="gray" className="mb-4">
                 {loc(t.hero.badge)}
               </Badge>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-4">
@@ -275,7 +275,9 @@ export function DataScienceModule1Content() {
           </div>
         </section>
 
-        {/* Lecture Video Carousel */}
+        {/* Lecture Video Carousel — no outer panel/border around this block
+            anymore; the cards sit directly on the page like every other
+            section instead of inside a second boxed container. */}
         <section id="lectures" className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 relative">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
@@ -284,94 +286,76 @@ export function DataScienceModule1Content() {
           </div>
         </section>
 
-        {/* Detailed Curriculum */}
+        {/* Detailed Curriculum — a colored left panel per session (still
+            color-coded, still legible) without the old 800%-scaled giant
+            background icon treatment. */}
         <section className="py-8 md:py-12 px-4 sm:px-6 lg:px-8 bg-dark-surface/30">
           <div className="container mx-auto">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary mb-6 md:mb-8 text-center">
+              <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-accent-purple mb-3.5">
+                <span className="w-[18px] h-0.5 rounded-sm bg-current" />
+                Curriculum
+              </span>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary mb-2">
                 {loc(t.curriculum.heading)}
               </h2>
+              <p className="text-text-secondary text-sm mb-6 md:mb-8">{loc(t.curriculum.subheading)}</p>
 
-              <div className="space-y-8">
+              <div className="flex flex-col gap-4">
                 {sessions.map((session, index) => (
-                  <Link key={index} href={`/education/ds-and-ai-01/session/${session.number}`} className="relative group block">
-                    {/* Glow Effect */}
-                    <div className={`absolute inset-0 bg-gradient-to-r ${session.gradient} rounded-2xl opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-500`}></div>
-
-                    <Card className="relative overflow-hidden border-dark-border/40 bg-dark-surface/40 backdrop-blur-md hover:border-primary-blue/30 transition-all duration-300 cursor-pointer">
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row h-full">
-                          {/* Left Column: Header */}
-                          <div className={`md:w-1/3 xl:w-1/4 p-4 sm:p-6 md:p-8 bg-gradient-to-br ${session.gradient} relative overflow-hidden flex flex-col justify-between`}>
-                            {/* Giant Background Icon */}
-                            <div className="absolute -bottom-6 -right-6 text-white text-opacity-10 rotate-12 z-0 pointer-events-none origin-bottom-right">
-                              <div className="transform scale-[8] opacity-10">
-                                {session.icon}
-                              </div>
-                            </div>
-
-                            {/* Decorative Background Pattern */}
-                            <div className="absolute inset-0 opacity-10 z-0">
-                              <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <path d="M0 100 L100 0 L100 100 Z" fill="currentColor" />
-                              </svg>
-                            </div>
-                            
-                            <div className="relative z-10">
-                              <div className="flex items-center space-x-3 mb-4">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white font-bold text-sm">
-                                  {session.number}
-                                </span>
-                                <span className="text-sm font-medium text-white/80 uppercase tracking-widest">{loc(t.curriculum.sessionLabel)}</span>
-                              </div>
-                              
-                              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 leading-tight">
-                                {session.title}
-                              </h3>
-
-                              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md text-white/90 text-sm border border-white/10">
-                                <Calendar className="w-4 h-4 mr-2 text-yellow-300" />
-                                <span>{session.date}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Right Column: Content */}
-                          <div className="md:w-2/3 xl:w-3/4 p-4 sm:p-6 md:p-8 bg-dark-bg/20">
-                             <div className="flex items-center mb-4 md:mb-6">
-                                <Badge variant="default" className="text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
-                                  {loc(t.curriculum.topicsLabel)}
-                                </Badge>
-                                <div className="h-px bg-dark-border/40 flex-1 ml-4"></div>
-                                <span className="ml-4 inline-flex items-center gap-1 text-xs text-text-secondary/60 group-hover:text-primary-blue transition-colors">
-                                  {lang === 'vi' ? 'Xem chi tiết' : 'View details'}
-                                  <ArrowLeft className="w-3 h-3 rotate-180 group-hover:translate-x-0.5 transition-transform" />
-                                </span>
-                             </div>
-
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-4 sm:gap-y-6">
-                              {session.topics.map((topic, topicIndex) => (
-                                <div key={topicIndex} className="group/topic">
-                                  <h4 className="text-base sm:text-lg font-semibold text-text-primary mb-3 flex items-start group-hover/topic:text-primary-blue transition-colors">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-primary-blue mr-2 mt-2 flex-shrink-0"></div>
-                                    {topic.title}
-                                  </h4>
-                                  <ul className="space-y-2 pl-3.5 border-l border-dark-border/30">
-                                    {topic.items.map((item, itemIndex) => (
-                                      <li key={itemIndex} className="text-sm text-text-secondary pl-3 relative">
-                                        {/* Custom bullet using pseudo like effect but inline for ease */}
-                                        <span className="absolute left-0 top-2 w-1 h-1 rounded-full bg-text-secondary/50"></span>
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
-                             </div>
-                          </div>
+                  <Link key={index} href={`/education/ds-and-ai-01/session/${session.number}`} className="group block">
+                    <div className="rounded-[18px] border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm overflow-hidden transition-colors duration-300 group-hover:border-primary-blue/40 grid grid-cols-1 md:grid-cols-[220px_1fr]">
+                      {/* Left: colored session identity panel */}
+                      <div className={`relative overflow-hidden p-5 md:p-6 flex flex-col justify-between bg-gradient-to-br ${session.gradient}`}>
+                        <div className="absolute -bottom-3.5 -right-3.5 text-white opacity-[0.12] rotate-[8deg] pointer-events-none [&>svg]:w-24 [&>svg]:h-24">
+                          {session.icon}
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div className="relative z-10">
+                          <span className="inline-flex items-center justify-center w-[26px] h-[26px] rounded-full bg-white/18 text-white font-bold text-xs mb-2">
+                            {session.number}
+                          </span>
+                          <span className="block text-[10px] font-bold text-white/75 uppercase tracking-widest mb-2">{loc(t.curriculum.sessionLabel)}</span>
+                          <h3 className="text-base font-bold text-white leading-snug">{session.title}</h3>
+                        </div>
+                        <div className="relative z-10 inline-flex items-center self-start px-2.5 py-1.5 rounded-lg bg-white/12 text-white/90 text-xs border border-white/10 mt-4">
+                          <Calendar className="w-3.5 h-3.5 mr-1.5 text-yellow-300 flex-shrink-0" />
+                          {session.date}
+                        </div>
+                      </div>
+
+                      {/* Right: topics */}
+                      <div className="p-5 md:p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Badge variant="default" className="!rounded-[7px] text-primary-blue border border-primary-blue/30 bg-primary-blue/5">
+                            {loc(t.curriculum.topicsLabel)}
+                          </Badge>
+                          <div className="h-px bg-dark-border/40 flex-1"></div>
+                          <span className="hidden sm:inline-flex items-center gap-1 text-xs text-text-tertiary group-hover:text-primary-blue transition-colors whitespace-nowrap">
+                            {lang === 'vi' ? 'Xem chi tiết' : 'View details'}
+                            <ArrowLeft className="w-3 h-3 rotate-180 group-hover:translate-x-0.5 transition-transform" />
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-5">
+                          {session.topics.map((topic, topicIndex) => (
+                            <div key={topicIndex}>
+                              <h4 className="text-sm font-bold text-text-primary mb-2 flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent-purple mt-1.5 flex-shrink-0"></span>
+                                {topic.title}
+                              </h4>
+                              <ul className="flex flex-col gap-1.5 pl-3.5 border-l border-dark-border/40">
+                                {topic.items.map((item, itemIndex) => (
+                                  <li key={itemIndex} className="text-xs text-text-secondary pl-3 relative">
+                                    <span className="absolute left-0 top-1.5 w-1 h-1 rounded-full bg-text-tertiary"></span>
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>

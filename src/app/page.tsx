@@ -458,7 +458,7 @@ export default async function HomePage() {
                 VNUHCM High School for the Gifted
               </span>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[2.75rem] leading-[1.05] font-[family-name:var(--font-shrikhand)] mb-5 break-words">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[1.85rem] xl:text-[2.2rem] 2xl:text-[2.5rem] leading-[1.05] font-[family-name:var(--font-shrikhand)] mb-5 lg:whitespace-nowrap break-words">
                 <span className="gradient-text">THE NODERS COMMUNITY</span>
               </h1>
 
