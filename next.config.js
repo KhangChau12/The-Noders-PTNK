@@ -25,6 +25,18 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    // Serve modern formats where the browser supports them.
+    formats: ['image/avif', 'image/webp'],
+    // Optimized images are immutable for a given URL — cache them for 31 days
+    // instead of the 60s default so repeat visits skip re-optimization.
+    minimumCacheTTL: 60 * 60 * 24 * 31,
+  },
+  // Strip console.* (except warn/error) from the production client bundle.
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? { exclude: ['error', 'warn'] }
+        : false,
   },
   typescript: {
     // Temporarily ignore build errors

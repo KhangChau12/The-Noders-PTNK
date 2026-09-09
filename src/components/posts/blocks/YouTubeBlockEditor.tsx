@@ -111,6 +111,7 @@ export function YouTubeBlockEditor({ content, onSave, onDelete, onCancel, isNew 
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}`}
                 title="YouTube preview"
+                loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="absolute inset-0 w-full h-full"

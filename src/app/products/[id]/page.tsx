@@ -198,6 +198,7 @@ export default function ProjectDetailPage() {
                       src={project.video_url.replace('watch?v=', 'embed/')}
                       title={`${project.title} Demo`}
                       className="w-full h-full"
+                      loading="lazy"
                       allowFullScreen
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />

@@ -68,6 +68,7 @@ export default function EducationPage() {
                 <div className="relative bg-black aspect-[4/3]">
                   <iframe
                     src={program.canvaEmbed}
+                    loading="lazy"
                     allowFullScreen
                     allow="fullscreen"
                     className="absolute inset-0 w-full h-full border-0"

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ProjectWithContributors } from '@/types/database'
 import { Badge } from './Badge'
 import { getInitials } from '@/lib/utils'
@@ -28,19 +29,24 @@ function getStatusVariant(status: string) {
 function Thumbnail({
   project,
   className,
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
 }: {
   project: ProjectWithContributors
   className: string
+  sizes?: string
 }) {
   const thumbnailSrc = project.thumbnail_image?.public_url || project.thumbnail_url
 
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-primary-blue/10 to-accent-cyan/5 ${className}`}>
       {thumbnailSrc ? (
-        <img
+        <Image
           src={thumbnailSrc}
           alt={project.thumbnail_image?.alt_text || project.title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          fill
+          loading="lazy"
+          sizes={sizes}
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
@@ -185,6 +191,7 @@ export function ProjectCard({ project, showStats = true, layout = 'grid' }: Proj
           <Thumbnail
             project={project}
             className="aspect-video sm:aspect-auto sm:w-64 lg:w-72 sm:shrink-0"
+            sizes="(max-width: 640px) 100vw, 288px"
           />
 
           <div className="p-5 sm:p-6 flex-1 flex flex-col min-w-0">

@@ -135,6 +135,7 @@ export default function ContestPage() {
                       className="absolute inset-0 w-full h-full"
                       src={competition.videoUrl}
                       title={competition.videoTitle}
+                      loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />

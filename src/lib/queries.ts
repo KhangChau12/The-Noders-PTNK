@@ -94,34 +94,38 @@ export const projectQueries = {
     const supabase = createClient()
 
     try {
-      // Fetch project basic info first (fast)
-      const { data: project, error: projectError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('id', id)
-        .single()
+      // The two reads are independent — issue them concurrently instead of
+      // waiting for the project row before starting the contributors query.
+      const [
+        { data: project, error: projectError },
+        { data: contributors },
+      ] = await Promise.all([
+        supabase
+          .from('projects')
+          .select('*')
+          .eq('id', id)
+          .single(),
+        supabase
+          .from('project_contributors')
+          .select(`
+            id,
+            contribution_percentage,
+            role_in_project,
+            profiles(
+              id,
+              username,
+              full_name,
+              avatar_url,
+              role
+            )
+          `)
+          .eq('project_id', id)
+          .order('contribution_percentage', { ascending: false }),
+      ])
 
       if (projectError || !project) {
         return { project: null, error: projectError }
       }
-
-      // Fetch contributors with profiles in parallel (only if needed for display)
-      const { data: contributors } = await supabase
-        .from('project_contributors')
-        .select(`
-          id,
-          contribution_percentage,
-          role_in_project,
-          profiles(
-            id,
-            username,
-            full_name,
-            avatar_url,
-            role
-          )
-        `)
-        .eq('project_id', id)
-        .order('contribution_percentage', { ascending: false })
 
       // Combine data
       const projectWithContributors = {

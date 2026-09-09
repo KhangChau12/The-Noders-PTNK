@@ -149,28 +149,30 @@ async function getStats(): Promise<Stats> {
   try {
     const supabase = createClient()
 
-    // Get projects count
-    const { count: projectsCount } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
-
-    // Get members count
-    const { count: membersCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-
-    // Get published posts count
-    const { count: postsCount } = await supabase
-      .from('posts')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'published')
-
-    // Get total views from all published posts
-    const { data: postsData } = await supabase
-      .from('posts')
-      .select('view_count')
-      .eq('status', 'published')
+    // All four reads are independent — run them concurrently instead of
+    // four sequential round-trips.
+    const [
+      { count: projectsCount },
+      { count: membersCount },
+      { count: postsCount },
+      { data: postsData },
+    ] = await Promise.all([
+      supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active'),
+      supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true }),
+      supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'published'),
+      supabase
+        .from('posts')
+        .select('view_count')
+        .eq('status', 'published'),
+    ])
 
     const totalViews = postsData?.reduce((sum, post: any) => sum + (post.view_count || 0), 0) || 0
 
@@ -293,19 +295,16 @@ async function getRecentPosts(): Promise<NewsPost[]> {
     const { data: posts, error } = await supabase
       .from('posts')
       .select(`
-        *,
-        author:profiles!posts_author_id_fkey(
-          id,
-          username,
-          full_name,
-          avatar_url
-        ),
+        id,
+        title,
+        summary,
+        slug,
+        category,
+        reading_time,
+        view_count,
+        published_at,
         thumbnail_image:images!posts_thumbnail_image_id_fkey(
-          id,
-          filename,
           public_url,
-          width,
-          height,
           alt_text
         )
       `)

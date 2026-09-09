@@ -38,23 +38,39 @@ export async function GET(request: NextRequest) {
 
     const memberIds = profiles.map(p => p.id)
 
-    // Fetch project contributions count
-    const { data: contributions } = await supabase
-      .from('project_contributors')
-      .select('user_id')
-      .in('user_id', memberIds)
+    // These five reads only depend on `memberIds`, not on each other — run them
+    // concurrently instead of five sequential round-trips.
+    const [
+      { data: contributions },
+      { data: posts },
+      { data: certs },
+      { data: taskPointRows },
+      { data: usersData },
+    ] = await Promise.all([
+      supabase
+        .from('project_contributors')
+        .select('user_id')
+        .in('user_id', memberIds),
+      supabase
+        .from('posts')
+        .select('author_id, view_count')
+        .eq('status', 'published')
+        .in('author_id', memberIds),
+      supabase
+        .from('certificates')
+        .select('user_id')
+        .in('user_id', memberIds),
+      supabase
+        .from('task_log_members')
+        .select('member_id, points')
+        .in('member_id', memberIds),
+      supabase.auth.admin.listUsers(),
+    ])
 
     const contributionCounts: Record<string, number> = {}
     contributions?.forEach(contrib => {
       contributionCounts[contrib.user_id] = (contributionCounts[contrib.user_id] || 0) + 1
     })
-
-    // Fetch posts count and view counts
-    const { data: posts } = await supabase
-      .from('posts')
-      .select('author_id, view_count')
-      .eq('status', 'published')
-      .in('author_id', memberIds)
 
     const postCounts: Record<string, number> = {}
     const postViewCounts: Record<string, number> = {}
@@ -63,22 +79,10 @@ export async function GET(request: NextRequest) {
       postViewCounts[post.author_id] = (postViewCounts[post.author_id] || 0) + (post.view_count || 0)
     })
 
-    // Fetch certificate counts
-    const { data: certs } = await supabase
-      .from('certificates')
-      .select('user_id')
-      .in('user_id', memberIds)
-
     const certCounts: Record<string, number> = {}
     certs?.forEach(cert => {
       certCounts[cert.user_id] = (certCounts[cert.user_id] || 0) + 1
     })
-
-    // Fetch task points for members
-    const { data: taskPointRows } = await supabase
-      .from('task_log_members')
-      .select('member_id, points')
-      .in('member_id', memberIds)
 
     const totalPointsMap: Record<string, number> = {}
     const taskCountMap: Record<string, number> = {}
@@ -87,8 +91,6 @@ export async function GET(request: NextRequest) {
       taskCountMap[row.member_id] = (taskCountMap[row.member_id] || 0) + 1
     })
 
-    // Fetch emails from auth.users using admin client
-    const { data: usersData } = await supabase.auth.admin.listUsers()
     const emailMap: Record<string, string> = {}
     usersData?.users?.forEach(user => {
       if (user.email) {

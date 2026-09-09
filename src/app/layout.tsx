@@ -11,12 +11,16 @@ import { SITE_CONFIG } from '@/lib/constants'
 
 const nunito = Nunito({
   subsets: ['latin'],
-  weight: ['300', '400', '600', '700', '800']
+  weight: ['400', '600', '700', '800'],
+  display: 'swap',
+  fallback: ['system-ui', 'arial'],
 })
 export const shrikhand = Shrikhand({
   weight: '400',
   subsets: ['latin'],
-  variable: '--font-shrikhand'
+  variable: '--font-shrikhand',
+  display: 'swap',
+  fallback: ['system-ui', 'cursive'],
 })
 
 export const metadata: Metadata = {

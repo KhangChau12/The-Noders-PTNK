@@ -151,6 +151,7 @@ export function NAIC2025Content() {
                       className="absolute inset-0 w-full h-full"
                       src="https://www.youtube.com/embed/zN5i0p9qJqI"
                       title="NAIC 2025 Rules & Q&A"
+                      loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />

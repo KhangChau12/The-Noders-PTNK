@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase'
 import { generateMetadata as generateSEOMetadata, generateProjectSchema, generateBreadcrumbSchema } from '@/lib/seo'
@@ -7,11 +8,11 @@ interface Props {
   children: React.ReactNode
 }
 
-// Generate dynamic metadata for each project
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// De-duplicated across generateMetadata + the structured-data component:
+// React cache() collapses identical calls within a single request render.
+const getProjectById = cache(async (id: string) => {
   const supabase = createClient()
 
-  // Fetch project by ID
   const { data: project } = await supabase
     .from('projects')
     .select(`
@@ -21,8 +22,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         alt_text
       )
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
+
+  return project
+})
+
+// Generate dynamic metadata for each project
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const project = await getProjectById(params.id)
 
   if (!project) {
     return generateSEOMetadata({
@@ -52,18 +60,7 @@ export default function ProjectLayout({ params, children }: Props) {
 
 // Server component to add structured data
 async function ProjectStructuredData({ id }: { id: string }) {
-  const supabase = createClient()
-
-  const { data: project } = await supabase
-    .from('projects')
-    .select(`
-      *,
-      thumbnail_image:images!projects_thumbnail_image_id_fkey(
-        public_url
-      )
-    `)
-    .eq('id', id)
-    .single()
+  const project = await getProjectById(id)
 
   if (!project) return null
 

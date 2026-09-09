@@ -217,9 +217,11 @@ export function CommunityUpdatesCarousel({ posts }: CommunityUpdatesCarouselProp
                         src={post.thumbnail_image.public_url}
                         alt={post.thumbnail_image.alt_text || post.title}
                         fill
-                        quality={95}
                         className="object-cover transition-transform duration-700 group-hover/card:scale-[1.03]"
-                        loading={index < posts.length ? 'eager' : 'lazy'}
+                        // Only the first couple of cards sit in the viewport at
+                        // rest; everything else (including the loop clones) is
+                        // lazy so the homepage doesn't fetch ~30 thumbnails up front.
+                        loading={index >= posts.length && index < posts.length + 2 ? 'eager' : 'lazy'}
                         sizes="(max-width: 768px) 100vw, 420px"
                       />
                     ) : (

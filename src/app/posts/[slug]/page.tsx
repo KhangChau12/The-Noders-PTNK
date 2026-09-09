@@ -168,6 +168,7 @@ function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
             <iframe
               src={`https://www.youtube.com/embed/${youtubeContent.video_id}`}
               title={youtubeContent.title || 'YouTube video'}
+              loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="absolute inset-0 w-full h-full"
@@ -562,10 +563,13 @@ export default function PostDetailPage() {
                       {/* Thumbnail */}
                       <div className="flex-shrink-0 w-28 h-24 sm:w-48 sm:h-36 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
                         {thumbnailSrc ? (
-                          <img
+                          <Image
                             src={thumbnailSrc}
                             alt={(related as any).thumbnail_image?.alt_text || localize(related.title, related.title_vi)}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            fill
+                            loading="lazy"
+                            sizes="(max-width: 640px) 112px, 192px"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-text-tertiary">

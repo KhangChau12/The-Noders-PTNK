@@ -158,6 +158,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
                 <div className="relative aspect-video bg-black">
                   <iframe
                     src={session.canvaUrl}
+                    loading="lazy"
                     allowFullScreen
                     allow="fullscreen"
                     className="absolute inset-0 w-full h-full border-0"
@@ -188,6 +189,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
                 <div className="relative aspect-video bg-black">
                   <iframe
                     src={session.youtubeUrl}
+                    loading="lazy"
                     allowFullScreen
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     className="absolute inset-0 w-full h-full border-0"
@@ -209,6 +211,7 @@ export function SessionDetailContent({ sessionId }: { sessionId: string }) {
                 <div className="relative h-[480px] sm:h-[560px] bg-white">
                   <iframe
                     src={session.docsUrl}
+                    loading="lazy"
                     className="absolute inset-0 w-full h-full border-0"
                     title={`Session ${id} Notes`}
                   />

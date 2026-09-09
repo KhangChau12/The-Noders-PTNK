@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase'
 import { generateMetadata as generateSEOMetadata, generateArticleSchema, generateBreadcrumbSchema } from '@/lib/seo'
@@ -7,11 +8,11 @@ interface Props {
   children: React.ReactNode
 }
 
-// Generate dynamic metadata for each post
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// De-duplicated across generateMetadata + the structured-data component:
+// React cache() collapses identical calls within a single request render.
+const getPostForSlug = cache(async (slug: string) => {
   const supabase = createClient()
 
-  // Fetch post by slug
   const { data: posts } = await supabase
     .from('posts')
     .select(`
@@ -25,11 +26,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         alt_text
       )
     `)
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('status', 'published')
     .limit(1)
 
-  const post = posts?.[0]
+  return posts?.[0] ?? null
+})
+
+// Generate dynamic metadata for each post
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await getPostForSlug(params.slug)
 
   if (!post) {
     return generateSEOMetadata({
@@ -63,24 +69,7 @@ export default function PostLayout({ params, children }: Props) {
 
 // Server component to add structured data
 async function PostStructuredData({ slug }: { slug: string }) {
-  const supabase = createClient()
-
-  const { data: posts } = await supabase
-    .from('posts')
-    .select(`
-      *,
-      author:profiles!posts_author_id_fkey(
-        full_name
-      ),
-      thumbnail_image:images!posts_thumbnail_image_id_fkey(
-        public_url
-      )
-    `)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .limit(1)
-
-  const post = posts?.[0]
+  const post = await getPostForSlug(slug)
 
   if (!post) return null
 

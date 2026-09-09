@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { useMember } from '@/lib/hooks'
+import { postQueries } from '@/lib/queries'
 import { Card, CardContent, CardHeader } from '@/components/Card'
 import { Badge } from '@/components/Badge'
 import { Button } from '@/components/Button'
@@ -329,10 +330,13 @@ function MemberPosts({ posts }: { posts: any[] }) {
             <article className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
               {thumbnailSrc && (
                 <div className="flex-shrink-0 w-24 h-20 sm:w-32 sm:h-24 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-                  <img
+                  <Image
                     src={thumbnailSrc}
                     alt={post.thumbnail_image?.alt_text || post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 640px) 96px, 128px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               )}
@@ -404,18 +408,23 @@ export default function MemberProfilePage() {
 
       try {
         const supabase = createClient()
-        const { postQueries } = await import('@/lib/queries')
-        const { posts: fetchedPosts, error: postsError } = await postQueries.getUserPosts(member.id)
+
+        // Posts and certificates are independent — fetch them concurrently.
+        const [
+          { posts: fetchedPosts, error: postsError },
+          { data: certs },
+        ] = await Promise.all([
+          postQueries.getUserPosts(member.id),
+          supabase
+            .from('certificates')
+            .select('id, certificate_id, title, gen_number, issued_at')
+            .eq('user_id', member.id)
+            .order('issued_at', { ascending: false }),
+        ])
 
         if (!postsError && fetchedPosts) {
           setPosts(fetchedPosts.filter((post) => post.status === 'published'))
         }
-
-        const { data: certs } = await supabase
-          .from('certificates')
-          .select('id, certificate_id, title, gen_number, issued_at')
-          .eq('user_id', member.id)
-          .order('issued_at', { ascending: false })
 
         if (certs) {
           setCertificates(certs)

@@ -255,6 +255,7 @@ export default function PAIC2026Content() {
                       className="absolute inset-0 w-full h-full"
                       src="https://www.youtube.com/embed/cFs5njLot7k"
                       title="PAIC 2026 Workshop"
+                      loading="lazy"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
