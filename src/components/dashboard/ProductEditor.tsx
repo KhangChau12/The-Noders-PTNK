@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { useToast } from '@/components/Toast'
 import { useConfirm } from '@/components/ConfirmDialog'
-import { RichTextEditor } from '@/components/RichTextEditor'
+import { RichText, cleanHtml, plainText } from '@/components/RichText'
 import { CONTAINER_CLASS, youtubeId } from '@/components/editorial'
 import { createClient } from '@/lib/supabase'
 import { projectQueries } from '@/lib/queries'
@@ -58,10 +58,7 @@ const EMPTY: Form = {
 
 const DESC_MAX = 160
 
-const plainText = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
 
-/** Strip attributes browser extensions inject into contenteditable (e.g. bis_skin_checked). */
-const cleanHtml = (html: string) => html.replace(/\s+bis_skin_checked="[^"]*"/g, '')
 
 function urlProblem(v: string) {
   if (!v) return null
@@ -423,7 +420,9 @@ export function ProductEditor({ productId }: { productId?: string }) {
           <section id="writeup" className="scroll-mt-40">
             <h2 className="mb-1.5 text-[22px] font-bold">Write-up</h2>
             <p className="mb-3.5 text-sm text-text-tertiary">The body of the product page. What problem it solves, how it works, who it’s for, what you’d do next.</p>
-            <RichTextEditor value={form.details} onChange={(v) => set('details', v)} placeholder="Start writing — headings you add become sections on the page." />
+            <div className="rounded-lg border border-control bg-paper px-5 py-4 focus-within:border-link">
+              <RichText value={form.details} onChange={(v) => set('details', v)} label="Write-up" placeholder="Start writing — headings you add become sections on the page." />
+            </div>
           </section>
 
           <section id="team" className="scroll-mt-40">

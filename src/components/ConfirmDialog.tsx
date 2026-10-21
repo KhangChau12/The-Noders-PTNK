@@ -1,8 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { AlertTriangle, X } from 'lucide-react'
-import { Button } from './Button'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 interface ConfirmOptions {
@@ -21,159 +19,86 @@ const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined)
 
 export function useConfirm() {
   const context = useContext(ConfirmContext)
-  if (!context) {
-    throw new Error('useConfirm must be used within ConfirmProvider')
-  }
+  if (!context) throw new Error('useConfirm must be used within ConfirmProvider')
   return context
 }
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false)
   const [options, setOptions] = useState<ConfirmOptions | null>(null)
-  const [resolvePromise, setResolvePromise] = useState<((value: boolean) => void) | null>(null)
+  const resolver = useRef<((v: boolean) => void) | null>(null)
 
-  const confirm = useCallback((opts: ConfirmOptions): Promise<boolean> => {
+  const confirm = useCallback((opts: ConfirmOptions) => {
     setOptions(opts)
-    setIsOpen(true)
-
-    return new Promise((resolve) => {
-      setResolvePromise(() => resolve)
+    return new Promise<boolean>((resolve) => {
+      resolver.current = resolve
     })
   }, [])
 
-  const handleConfirm = useCallback(() => {
-    if (resolvePromise) {
-      resolvePromise(true)
-    }
-    setIsOpen(false)
+  const close = useCallback((result: boolean) => {
+    resolver.current?.(result)
+    resolver.current = null
     setOptions(null)
-    setResolvePromise(null)
-  }, [resolvePromise])
-
-  const handleCancel = useCallback(() => {
-    if (resolvePromise) {
-      resolvePromise(false)
-    }
-    setIsOpen(false)
-    setOptions(null)
-    setResolvePromise(null)
-  }, [resolvePromise])
+  }, [])
 
   return (
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
-      {isOpen && options && (
-        <ConfirmDialog
-          options={options}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
-      )}
+      {options && <ConfirmDialog options={options} onClose={close} />}
     </ConfirmContext.Provider>
   )
 }
 
-function ConfirmDialog({
-  options,
-  onConfirm,
-  onCancel
-}: {
-  options: ConfirmOptions
-  onConfirm: () => void
-  onCancel: () => void
-}) {
-  const {
-    title = 'Confirm Action',
-    message,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
-    variant = 'warning'
-  } = options
+/**
+ * Only for things that can't be undone. The safe choice has focus, Esc cancels,
+ * and the confirm button repeats the verb.
+ */
+function ConfirmDialog({ options, onClose }: { options: ConfirmOptions; onClose: (result: boolean) => void }) {
+  const { title = 'Are you sure?', message, confirmText = 'Confirm', cancelText = 'Cancel', variant = 'warning' } = options
+  const cancelRef = useRef<HTMLButtonElement>(null)
 
-  const variantConfig = {
-    danger: {
-      icon: AlertTriangle,
-      iconColor: 'text-error',
-      iconBg: 'bg-error/10',
-      buttonVariant: 'danger' as const
-    },
-    warning: {
-      icon: AlertTriangle,
-      iconColor: 'text-warning',
-      iconBg: 'bg-warning/10',
-      buttonVariant: 'primary' as const
-    },
-    info: {
-      icon: AlertTriangle,
-      iconColor: 'text-info',
-      iconBg: 'bg-info/10',
-      buttonVariant: 'primary' as const
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null
+    cancelRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose(false)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      previous?.focus?.()
     }
-  }
-
-  const config = variantConfig[variant]
-  const Icon = config.icon
+  }, [onClose])
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in"
-        onClick={onCancel}
-      />
-
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-[70] bg-[rgba(5,8,14,0.6)]" onClick={() => onClose(false)} />
+      <div className="pointer-events-none fixed inset-0 z-[71] flex items-center justify-center p-4">
         <div
-          className={cn(
-            'pointer-events-auto w-full max-w-md bg-dark-surface rounded-lg shadow-xl border border-dark-border',
-            'animate-slide-up'
-          )}
-          onClick={(e) => e.stopPropagation()}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="confirm-title"
+          aria-describedby="confirm-body"
+          className="pointer-events-auto w-full max-w-[440px] animate-[slideUp_0.18s_ease-out] rounded-[14px] border border-[#2A2E37] bg-paper px-[26px] pb-[22px] pt-[26px] shadow-[0_24px_64px_rgba(0,0,0,0.5)]"
         >
-          {/* Header */}
-          <div className="flex items-start justify-between p-6 pb-4">
-            <div className="flex items-start gap-4">
-              <div className={cn('p-2 rounded-lg', config.iconBg)}>
-                <Icon className={cn('w-6 h-6', config.iconColor)} />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-text-primary">
-                  {title}
-                </h3>
-              </div>
-            </div>
+          <h2 id="confirm-title" className="mb-2 text-xl font-bold">{title}</h2>
+          <p id="confirm-body" className="mb-[22px] text-[15px] text-text-secondary">{message}</p>
+          <div className="flex justify-end gap-2.5">
             <button
-              onClick={onCancel}
-              className="text-text-tertiary hover:text-text-primary transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Body */}
-          <div className="px-6 pb-6">
-            <p className="text-text-secondary text-sm leading-relaxed ml-14">
-              {message}
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-dark-bg/50 rounded-b-lg border-t border-dark-border">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onCancel}
+              ref={cancelRef}
+              type="button"
+              onClick={() => onClose(false)}
+              className="min-h-[42px] rounded-md border border-control px-4 font-semibold text-text-primary hover:border-text-tertiary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
             >
               {cancelText}
-            </Button>
-            <Button
-              variant={config.buttonVariant}
-              size="sm"
-              onClick={onConfirm}
+            </button>
+            <button
+              type="button"
+              onClick={() => onClose(true)}
+              className={cn(
+                'min-h-[42px] rounded-md px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link',
+                variant === 'danger' ? 'bg-[#C2412D] text-white hover:bg-[#D14C37]' : 'bg-text-primary text-ink hover:bg-white'
+              )}
             >
               {confirmText}
-            </Button>
+            </button>
           </div>
         </div>
       </div>

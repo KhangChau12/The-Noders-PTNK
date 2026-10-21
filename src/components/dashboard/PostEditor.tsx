@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { useToast } from '@/components/Toast'
 import { useConfirm } from '@/components/ConfirmDialog'
-import { BlockEditor } from '@/components/posts/BlockEditor'
+import { BlockEditor, missingVi, type Lang } from '@/components/posts/BlockEditor'
 import { POST_CATEGORIES } from '@/lib/constants'
 import { postQueries } from '@/lib/queries'
 import { uploadImage } from '@/lib/upload'
@@ -60,6 +60,7 @@ export function PostEditor({ postId }: { postId?: string }) {
   const [saveState, setSaveState] = useState<'idle' | 'dirty' | 'saving' | 'saved' | 'error'>('idle')
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [busy, setBusy] = useState(false)
+  const [lang, setLang] = useState<Lang>('en')
   const [uploading, setUploading] = useState(false)
   const lastSaved = useRef<string>(postId ? '' : JSON.stringify(blank))
   const creating = useRef(false)
@@ -176,6 +177,7 @@ export function PostEditor({ postId }: { postId?: string }) {
   const set = <K extends keyof Info>(k: K, v: Info[K]) => setInfo((s) => (s ? { ...s, [k]: v } : s))
   const status = post?.status || 'draft'
   const readingTime = calculateReadingTime(blocks)
+  const viMissing = blocks.filter(missingVi).length
 
   const statusText =
     saveState === 'saving'
@@ -260,6 +262,22 @@ export function PostEditor({ postId }: { postId?: string }) {
       back={{ href: '/dashboard/posts', label: 'Posts' }}
       actions={
         <>
+          {postId && (
+            <div role="group" aria-label="Language you’re editing" className="inline-flex gap-0.5 rounded-lg bg-paper p-[3px]">
+              {(['en', 'vi'] as Lang[]).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  aria-pressed={lang === l}
+                  onClick={() => setLang(l)}
+                  className={cn('min-h-[32px] rounded-md px-3 text-[13px] font-semibold', lang === l ? 'bg-navy text-white' : 'text-text-secondary hover:text-text-primary')}
+                >
+                  {l.toUpperCase()}
+                  {l === 'vi' && viMissing > 0 && <span className="ml-1 text-signal">•</span>}
+                </button>
+              ))}
+            </div>
+          )}
           {post && status === 'published' && (
             <Link href={`/posts/${post.slug}`} target="_blank" className="hidden px-2.5 py-2 sm:inline text-sm font-semibold text-text-secondary hover:text-text-primary">
               View live ↗
@@ -308,7 +326,14 @@ export function PostEditor({ postId }: { postId?: string }) {
 
           {postId ? (
             <div className="post-blocks">
-              <BlockEditor blocks={blocks} postId={postId} session={session} onBlocksChange={(b) => b && setBlocks(b)} />
+              <p className="mb-3 text-sm text-text-tertiary">
+                {lang === 'en'
+                  ? viMissing
+                    ? `Editing in English. ${viMissing} block${viMissing > 1 ? 's' : ''} still need${viMissing > 1 ? '' : 's'} Vietnamese.`
+                    : 'Editing in English.'
+                  : 'Editing in Vietnamese. Each block shows the English next to it so you can translate in place.'}
+              </p>
+              <BlockEditor blocks={blocks} postId={postId} session={session} lang={lang} onBlocksChange={(b) => b && setBlocks(b)} />
             </div>
           ) : (
             <div className="rounded-[14px] border border-dashed border-control px-6 py-10 text-center">
@@ -372,7 +397,23 @@ export function PostEditor({ postId }: { postId?: string }) {
             </div>
             <input value={info.title_vi} onChange={(e) => set('title_vi', e.target.value)} placeholder="Tiêu đề tiếng Việt" aria-label="Vietnamese title" className={cn(fieldClass, 'mb-1.5 min-h-[40px] text-sm')} />
             <textarea value={info.summary_vi} onChange={(e) => set('summary_vi', e.target.value)} rows={3} placeholder="Tóm tắt" aria-label="Vietnamese summary" className={cn(fieldClass, 'resize-y py-2.5 text-sm')} />
-            <p className={hintClass}>Shown when a reader switches the site to Vietnamese. Each text block has its own Vietnamese field.</p>
+            <p className={hintClass}>Shown when a reader switches the site to Vietnamese.</p>
+            {blocks.some((b) => b.type === 'text' || b.type === 'quote') && (
+              <ul className="mt-3 flex flex-col gap-1.5 text-sm">
+                {blocks.map((b, i) =>
+                  b.type === 'text' || b.type === 'quote' ? (
+                    <li key={b.id} className="flex justify-between">
+                      <span className="text-text-secondary">Block {i + 1} · {b.type}</span>
+                      {missingVi(b) ? (
+                        <button type="button" onClick={() => setLang('vi')} className="text-signal hover:text-text-primary">missing</button>
+                      ) : (
+                        <span className="text-[#6FD39F]">✓</span>
+                      )}
+                    </li>
+                  ) : null
+                )}
+              </ul>
+            )}
           </section>
 
           {post && (

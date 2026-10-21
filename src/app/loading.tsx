@@ -1,12 +1,10 @@
-import { Loading } from '@/components/Loading'
+import { LoadBar } from '@/components/Loading'
 
 export default function LoadingPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <Loading />
-        <p className="text-text-secondary mt-4">Loading The Noders Community...</p>
-      </div>
+    <div aria-busy="true" className="min-h-[60vh]">
+      <LoadBar />
+      <span className="sr-only" role="status">Loading</span>
     </div>
   )
 }

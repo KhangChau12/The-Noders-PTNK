@@ -1,156 +1,100 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { CheckCircle2, XCircle, AlertCircle, Info, X } from 'lucide-react'
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-// Toast types matching the website's semantic colors
 type ToastType = 'success' | 'error' | 'warning' | 'info'
+
+interface ToastAction {
+  label: string
+  onClick: () => void
+}
 
 interface Toast {
   id: string
   type: ToastType
   message: string
-  duration?: number
+  action?: ToastAction
 }
 
 interface ToastContextType {
   toasts: Toast[]
-  showToast: (type: ToastType, message: string, duration?: number) => void
+  /** Errors stay until dismissed unless a duration is given; others fade after 4 s. */
+  showToast: (type: ToastType, message: string, duration?: number, action?: ToastAction) => void
   removeToast: (id: string) => void
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
-// Hook to use toast
 export function useToast() {
   const context = useContext(ToastContext)
-  if (!context) {
-    throw new Error('useToast must be used within ToastProvider')
-  }
+  if (!context) throw new Error('useToast must be used within ToastProvider')
   return context
 }
 
-// Toast Provider Component
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const showToast = useCallback((type: ToastType, message: string, duration: number = 4000) => {
-    const id = `toast-${Date.now()}-${Math.random()}`
-    const newToast: Toast = { id, type, message, duration }
+  const removeToast = useCallback((id: string) => setToasts((prev) => prev.filter((t) => t.id !== id)), [])
 
-    setToasts(prev => [...prev, newToast])
-
-    // Auto remove after duration
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id)
-      }, duration)
-    }
-  }, [])
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }, [])
+  const showToast = useCallback(
+    (type: ToastType, message: string, duration?: number, action?: ToastAction) => {
+      const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+      setToasts((prev) => [...prev.slice(-3), { id, type, message, action }])
+      const ms = duration ?? (type === 'error' ? 0 : action ? 7000 : 4000)
+      if (ms > 0) setTimeout(() => removeToast(id), ms)
+    },
+    [removeToast]
+  )
 
   return (
     <ToastContext.Provider value={{ toasts, showToast, removeToast }}>
       {children}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <div className="pointer-events-none fixed bottom-4 left-4 right-4 z-[60] flex flex-col items-start gap-2 sm:right-auto">
+        {toasts.map((t) => (
+          <ToastItem key={t.id} toast={t} onRemove={() => removeToast(t.id)} />
+        ))}
+      </div>
     </ToastContext.Provider>
   )
 }
 
-// Toast Container - renders all toasts
-function ToastContainer({ toasts, removeToast }: { toasts: Toast[]; removeToast: (id: string) => void }) {
-  if (toasts.length === 0) return null
-
-  return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
-      {toasts.map(toast => (
-        <ToastItem key={toast.id} toast={toast} onRemove={() => removeToast(toast.id)} />
-      ))}
-    </div>
-  )
+const MARK: Record<ToastType, { mark: string; tone: string }> = {
+  success: { mark: '✓', tone: 'text-[#6FD39F]' },
+  info: { mark: 'i', tone: 'text-link' },
+  warning: { mark: '!', tone: 'text-signal' },
+  error: { mark: '!', tone: 'text-[#FF9C85]' },
 }
 
-// Individual Toast Item
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) {
-  const config = {
-    success: {
-      icon: CheckCircle2,
-      bgColor: 'bg-dark-surface',
-      borderColor: 'border-success',
-      iconColor: 'text-success',
-      textColor: 'text-text-primary'
-    },
-    error: {
-      icon: XCircle,
-      bgColor: 'bg-dark-surface',
-      borderColor: 'border-error',
-      iconColor: 'text-error',
-      textColor: 'text-text-primary'
-    },
-    warning: {
-      icon: AlertCircle,
-      bgColor: 'bg-dark-surface',
-      borderColor: 'border-warning',
-      iconColor: 'text-warning',
-      textColor: 'text-text-primary'
-    },
-    info: {
-      icon: Info,
-      bgColor: 'bg-dark-surface',
-      borderColor: 'border-info',
-      iconColor: 'text-info',
-      textColor: 'text-text-primary'
-    }
-  }
-
-  const { icon: Icon, bgColor, borderColor, iconColor, textColor } = config[toast.type]
-
+  const isError = toast.type === 'error'
+  const { mark, tone } = MARK[toast.type]
   return (
     <div
+      role={isError ? 'alert' : 'status'}
       className={cn(
-        'pointer-events-auto flex items-start gap-3 min-w-[320px] max-w-md p-4 rounded-lg border-l-4 shadow-lg',
-        'backdrop-blur-sm animate-slide-in-right',
-        bgColor,
-        borderColor
+        'pointer-events-auto flex w-full max-w-[460px] items-start gap-3 rounded-[10px] border py-3 pl-4 pr-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.35)] sm:w-auto sm:min-w-[320px]',
+        'animate-[slideUp_0.2s_ease-out]',
+        isError ? 'border-[#6B2A2A] bg-[#2A1714]' : 'border-[#2A2E37] bg-[#1C2027]'
       )}
-      style={{
-        animation: 'slideInRight 0.3s ease-out'
-      }}
     >
-      <Icon className={cn('w-5 h-5 flex-shrink-0 mt-0.5', iconColor)} />
-
-      <p className={cn('flex-1 text-sm font-medium', textColor)}>
-        {toast.message}
-      </p>
-
-      <button
-        onClick={onRemove}
-        className="flex-shrink-0 text-text-tertiary hover:text-text-primary transition-colors"
-        aria-label="Close notification"
-      >
-        <X className="w-4 h-4" />
+      <span aria-hidden="true" className={cn('mt-px w-3 shrink-0 text-center font-bold', tone)}>{mark}</span>
+      <p className={cn('flex-1 text-[15px]', isError ? 'text-[#FFC9B8]' : 'text-text-primary')}>{toast.message}</p>
+      {toast.action && (
+        <button
+          type="button"
+          onClick={() => {
+            toast.action!.onClick()
+            onRemove()
+          }}
+          className="shrink-0 px-2 text-sm font-semibold text-link hover:text-text-primary"
+        >
+          {toast.action.label}
+        </button>
+      )}
+      <button type="button" onClick={onRemove} aria-label="Dismiss" className={cn('shrink-0 px-1.5 text-lg leading-none', isError ? 'text-[#FFC9B8]' : 'text-text-tertiary hover:text-text-primary')}>
+        ×
       </button>
     </div>
   )
-}
-
-// Convenience helper functions
-export const toast = {
-  success: (message: string, duration?: number) => {
-    // This will be replaced by the hook version
-    console.log('[Toast] Success:', message)
-  },
-  error: (message: string, duration?: number) => {
-    console.log('[Toast] Error:', message)
-  },
-  warning: (message: string, duration?: number) => {
-    console.log('[Toast] Warning:', message)
-  },
-  info: (message: string, duration?: number) => {
-    console.log('[Toast] Info:', message)
-  }
 }

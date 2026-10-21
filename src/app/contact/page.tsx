@@ -1,457 +1,170 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/Card";
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
-import { Badge } from "@/components/Badge";
-import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import {
-  Mail,
-  Send,
-  MessageCircle,
-  Users,
-  Code,
-  Bug,
-  CheckCircle,
-  AlertCircle,
-  Facebook,
-  MapPin,
-  Phone,
-  Clock,
-} from "lucide-react";
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { PageHero } from '@/components/PageHero'
+import { Container } from '@/components/editorial'
+import { SITE_CONFIG, SOCIAL_LINKS } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
-interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
+const TOPICS = [
+  { value: 'general', label: 'General', hint: 'Questions, passwords', prompt: 'What would you like to know?' },
+  { value: 'join', label: 'Join the club', hint: 'For PTNK students', prompt: 'Your class, and what you’d like to work on — products, writing, contests or teaching' },
+  { value: 'collaboration', label: 'Work together', hint: 'Schools, clubs, sponsors', prompt: 'Who you are and what you have in mind' },
+  { value: 'bug', label: 'Report a bug', hint: 'Something broken here', prompt: 'Which page, what you clicked, what happened' },
+] as const
+type Topic = (typeof TOPICS)[number]['value']
 
-const subjectOptions = [
-  { value: "general", label: "General Inquiry", icon: MessageCircle },
-  { value: "join", label: "Join Our Club", icon: Users },
-  { value: "collaboration", label: "Collaboration", icon: Code },
-  { value: "bug", label: "Bug Report", icon: Bug },
-];
+const MAX = 2000
+const field = 'w-full rounded-md border border-control bg-paper px-3.5 text-[15px] text-text-primary placeholder:text-text-disabled focus:border-link focus:outline-none'
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    subject: "general",
-    message: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <>
+      <PageHero
+        eyebrow="Contact"
+        title="Write to the core team."
+        description="Questions, joining, working together, or something broken on the site. Pick what it’s about so it reaches the right person."
+        aside={
+          <dl className="flex flex-col gap-3.5 text-[15px] text-white">
+            <div>
+              <dt className="text-[13px] text-on-navy">Email</dt>
+              <dd><a href={`mailto:${SOCIAL_LINKS.email}`} className="font-semibold hover:text-on-navy">{SOCIAL_LINKS.email}</a></dd>
+            </div>
+            <div>
+              <dt className="text-[13px] text-on-navy">Facebook</dt>
+              <dd><a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-on-navy">facebook.com/thenodersptnk ↗</a></dd>
+            </div>
+          </dl>
+        }
+      />
+      <Suspense>
+        <ContactForm />
+      </Suspense>
+    </>
+  )
+}
 
-  const handleChange = (field: keyof ContactFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+function ContactForm() {
+  const params = useSearchParams()
+  const initial = TOPICS.find((t) => t.value === params.get('topic'))?.value || 'general'
+  const [topic, setTopic] = useState<Topic>(initial)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [error, setError] = useState<string | null>(null)
+  const current = TOPICS.find((t) => t.value === topic)!
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Using Web3Forms service for email submission
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          access_key:
-            process.env.NEXT_PUBLIC_WEB3FORMS_KEY ||
-            "YOUR_WEB3FORMS_ACCESS_KEY",
-          name: formData.name,
-          email: formData.email,
-          subject: `🔔 The Noders Community - ${subjectOptions.find((s) => s.value === formData.subject)?.label}`,
-          message: `
-═══════════════════════════════════════
-🌟 NEW MESSAGE FROM THE NODERS COMMUNITY WEBSITE
-═══════════════════════════════════════
-
-📋 INQUIRY TYPE: ${subjectOptions.find((s) => s.value === formData.subject)?.label}
-
-👤 CONTACT INFORMATION:
-   Name: ${formData.name}
-   Email: ${formData.email}
-
-💬 MESSAGE:
-${formData.message}
-
-═══════════════════════════════════════
-📧 Sent via The Noders Community Contact Form
-🌐 Website: ${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}
-⏰ Timestamp: ${new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
-═══════════════════════════════════════
-          `.trim(),
-          to: "phuckhangtdn@gmail.com",
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setSuccess(true);
-        setFormData({ name: "", email: "", subject: "general", message: "" });
-      } else {
-        setError("Failed to send message. Please try again.");
-      }
-    } catch (err) {
-      setError("Network error. Please check your connection and try again.");
-    } finally {
-      setLoading(false);
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !message.trim()) {
+      setError('Fill in your name, a valid email and a message.')
+      return
     }
-  };
-
-  if (success) {
-    return (
-      <div className="min-h-screen py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-3xl">
-          <Card className="text-center">
-            <CardContent className="p-6 sm:p-12">
-              <div className="mx-auto w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mb-6">
-                <CheckCircle className="w-8 h-8 text-success" />
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-                Message Sent Successfully!
-              </h1>
-
-              <p className="text-text-secondary text-base sm:text-lg mb-8">
-                Thank you for reaching out to The Noders Community. We've received
-                your message and will get back to you within 24 hours.
-              </p>
-
-              <div className="space-y-4">
-                <Button onClick={() => setSuccess(false)} size="lg">
-                  Send Another Message
-                </Button>
-
-                <div className="flex justify-center gap-6 text-sm text-text-tertiary">
-                  <a
-                    href="/"
-                    className="hover:text-primary-blue transition-colors"
-                  >
-                    Go Home
-                  </a>
-                  <a
-                    href="/products"
-                    className="hover:text-primary-blue transition-colors"
-                  >
-                    Browse Products
-                  </a>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
+    setError(null)
+    setState('sending')
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY || 'YOUR_WEB3FORMS_ACCESS_KEY',
+          name,
+          email,
+          subject: `The Noders — ${current.label}`,
+          message: `Topic: ${current.label}\nFrom: ${name} <${email}>\n\n${message}\n\n— Sent from ${SITE_CONFIG.url}/contact`,
+        }),
+      })
+      const result = await res.json()
+      if (!result.success) throw new Error()
+      setState('sent')
+      setName('')
+      setEmail('')
+      setMessage('')
+    } catch {
+      setError('Couldn’t send — check your connection and try again, or email us directly.')
+      setState('idle')
+    }
   }
 
   return (
-    <>
-      <NeuralNetworkBackground />
-      <div className="relative min-h-screen py-10 sm:py-12 px-4 sm:px-6 lg:px-8 z-10">
-        <div className="container mx-auto max-w-6xl">
-          {/* Header */}
-          <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading text-text-primary mb-3 sm:mb-4">
-              Contact Us
-            </h1>
-            <p className="text-text-secondary text-base sm:text-lg max-w-3xl mx-auto">
-              Have a question, want to join our club, or interested in
-              collaboration? We'd love to hear from you!
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Contact Information */}
-            <div className="space-y-6">
-              {/* Contact Details */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-text-primary">
-                    Get in Touch
-                  </h3>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-blue/20 rounded-lg flex items-center justify-center">
-                      <Mail className="w-4 h-4 text-primary-blue" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-text-primary">Email</p>
-                      <a
-                        href="mailto:phuckhangtdn@gmail.com"
-                        className="text-text-secondary hover:text-primary-blue transition-colors"
-                      >
-                        phuckhangtdn@gmail.com
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-blue/20 rounded-lg flex items-center justify-center">
-                      <Facebook className="w-4 h-4 text-primary-blue" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-text-primary">Facebook</p>
-                      <a
-                        href="https://facebook.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-text-secondary hover:text-primary-blue transition-colors"
-                      >
-                        The Noders Community
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-blue/20 rounded-lg flex items-center justify-center">
-                      <Clock className="w-4 h-4 text-primary-blue" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-text-primary">
-                        Response Time
-                      </p>
-                      <p className="text-text-secondary">Within 24 hours</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* FAQ */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-text-primary">
-                    Frequently Asked
-                  </h3>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="py-1 bg-dark-surface rounded-lg">
-                    <h4 className="font-medium text-text-primary text-sm mb-1">
-                      How can I join the club?
-                    </h4>
-                    <p className="text-text-secondary text-sm">
-                      Contact us with subject "Join Our Club" and tell us about
-                      your background and interests.
-                    </p>
-                  </div>
-
-                  <div className="py-1 bg-dark-surface rounded-lg">
-                    <h4 className="font-medium text-text-primary text-sm mb-1">
-                      Can I contribute to projects?
-                    </h4>
-                    <p className="text-text-secondary text-sm">
-                      Yes! We welcome contributions from everyone. Reach out to
-                      discuss collaboration opportunities.
-                    </p>
-                  </div>
-
-                  <div className="py-1 bg-dark-surface rounded-lg">
-                    <h4 className="font-medium text-text-primary text-sm mb-1">
-                      Do you offer mentorship?
-                    </h4>
-                    <p className="text-text-secondary text-sm">
-                      We provide guidance and mentorship for AI/ML learning and
-                      project development.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Contact Form */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <h3 className="text-xl font-semibold text-text-primary">
-                    Send us a Message
-                  </h3>
-                  <p className="text-text-secondary">
-                    Fill out the form below and we'll get back to you as soon as
-                    possible.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Name and Email */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-text-primary mb-2">
-                          Full Name *
-                        </label>
-                        <Input
-                          required
-                          placeholder="Your full name"
-                          value={formData.name}
-                          onChange={(e) => handleChange("name", e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-text-primary mb-2">
-                          Email Address *
-                        </label>
-                        <Input
-                          type="email"
-                          required
-                          placeholder="your.email@example.com"
-                          value={formData.email}
-                          onChange={(e) =>
-                            handleChange("email", e.target.value)
-                          }
-                          icon={<Mail className="w-4 h-4" />}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Subject */}
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-3">
-                        Subject *
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                        {subjectOptions.map((option) => {
-                          const Icon = option.icon;
-                          return (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() =>
-                                handleChange("subject", option.value)
-                              }
-                              className={`px-3 py-2.5 min-h-[44px] flex items-center gap-2 rounded-lg border transition-colors text-left ${
-                                formData.subject === option.value
-                                  ? "border-primary-blue bg-primary-blue/10"
-                                  : "border-dark-border hover:border-dark-border/60"
-                              }`}
-                            >
-                              <Icon
-                                className={`w-4 h-4 ${
-                                  formData.subject === option.value
-                                    ? "text-primary-blue"
-                                    : "text-text-tertiary"
-                                }`}
-                              />
-                              <p
-                                className={`text-sm font-medium ${
-                                  formData.subject === option.value
-                                    ? "text-primary-blue"
-                                    : "text-text-primary"
-                                }`}
-                              >
-                                {option.label}
-                              </p>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Message */}
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        Message *
-                      </label>
-                      <textarea
-                        required
-                        placeholder="Tell us more about your inquiry..."
-                        value={formData.message}
-                        onChange={(e) =>
-                          handleChange("message", e.target.value)
-                        }
-                        rows={6}
-                        className="w-full px-3 py-2.5 text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue resize-none"
-                      />
-                      <p className="text-xs text-text-tertiary mt-1">
-                        {formData.message.length}/1000 characters
-                      </p>
-                    </div>
-
-                    {/* Submit */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-4">
-                      <Button
-                        type="submit"
-                        disabled={
-                          loading ||
-                          !formData.name ||
-                          !formData.email ||
-                          !formData.message
-                        }
-                        className="w-full sm:w-auto"
-                      >
-                        {loading ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4 mr-2" />
-                            Send Message
-                          </>
-                        )}
-                      </Button>
-
-                      <p className="text-xs text-text-tertiary sm:self-center">
-                        We'll respond within 24 hours
-                      </p>
-                    </div>
-
-                    {/* Error Message */}
-                    {error && (
-                      <div className="flex items-center gap-2 p-4 bg-error/20 border border-error/30 rounded-lg text-error text-sm">
-                        <AlertCircle className="w-4 h-4" />
-                        {error}
-                      </div>
-                    )}
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-10 sm:mt-16 text-center">
-            <Card className="bg-gradient-to-r from-primary-blue/10 to-accent-cyan/10 border-primary-blue/20">
-              <CardContent className="p-6 sm:p-8">
-                <h3 className="text-lg sm:text-xl font-semibold text-text-primary mb-4">
-                  Join Our Community
-                </h3>
-                <p className="text-text-secondary text-sm sm:text-base mb-6 max-w-3xl mx-auto">
-                  Whether you're a beginner or an expert, we welcome everyone
-                  who's passionate about AI and wants to learn, share, and build
-                  amazing projects together.
-                </p>
-
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Badge variant="tech" size="lg">
-                    AI & Machine Learning
-                  </Badge>
-                  <Badge variant="tech" size="lg">
-                    Collaborative Development
-                  </Badge>
-                  <Badge variant="tech" size="lg">
-                    Knowledge Sharing
-                  </Badge>
-                  <Badge variant="tech" size="lg">
-                    Innovation
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+    <Container className="flex flex-wrap items-start gap-x-16 gap-y-10 pb-24 pt-12">
+      {state === 'sent' ? (
+        <div className="min-w-0 max-w-[720px] flex-[1_1_640px] rounded-xl bg-paper p-8">
+          <p className="mb-1.5 font-semibold text-[#6FD39F]">✓ Sent</p>
+          <h2 className="mb-2 text-2xl font-bold">Thanks — your message is with the core team.</h2>
+          <p className="mb-5 text-text-secondary">The reply goes to the email you gave. If it’s urgent, message us on Facebook too.</p>
+          <button type="button" onClick={() => setState('idle')} className="font-semibold text-link hover:text-text-primary">Send another →</button>
         </div>
-      </div>
-    </>
-  );
+      ) : (
+        <form onSubmit={submit} noValidate className="flex min-w-0 max-w-[720px] flex-[1_1_640px] flex-col gap-[22px]">
+          <fieldset>
+            <legend className="mb-2.5 text-sm font-semibold">What’s it about?</legend>
+            <div role="radiogroup" className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+              {TOPICS.map((t) => {
+                const on = t.value === topic
+                return (
+                  <button
+                    key={t.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setTopic(t.value)}
+                    className={cn('min-h-[64px] rounded-lg border px-3.5 py-2.5 text-left transition-colors', on ? 'border-[#4A6BA8] bg-navy text-white' : 'border-control hover:border-text-tertiary')}
+                  >
+                    <span className="block text-[15px] font-semibold">{t.label}</span>
+                    <span className={cn('block text-[13px]', on ? 'text-on-navy' : 'text-text-tertiary')}>{t.hint}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
+          {topic === 'join' && (
+            <p className="-mt-2 rounded-lg bg-paper px-3.5 py-3 text-sm text-text-secondary">
+              Tell us your class and what you’d like to work on. Accounts are made by the core team once you’re in.
+            </p>
+          )}
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            <div>
+              <label htmlFor="name" className="mb-1.5 block text-sm font-semibold">Your name</label>
+              <input id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} className={cn(field, 'min-h-[46px]')} />
+            </div>
+            <div>
+              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold">Email for the reply</label>
+              <input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={cn(field, 'min-h-[46px]')} />
+            </div>
+          </div>
+          <div>
+            <div className="mb-1.5 flex justify-between">
+              <label htmlFor="msg" className="text-sm font-semibold">Message</label>
+              <span className={cn('font-mono text-[13px]', message.length > MAX ? 'text-[#FF9C85]' : 'text-text-disabled')}>{message.length}/{MAX}</span>
+            </div>
+            <textarea id="msg" rows={7} value={message} onChange={(e) => setMessage(e.target.value)} placeholder={current.prompt} className={cn(field, 'resize-y py-3')} />
+          </div>
+          {error && <p role="alert" className="rounded-lg border border-[#6B2A2A] bg-[#2A1714] px-3.5 py-3 text-sm text-[#FFC9B8]">{error}</p>}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <button
+              type="submit"
+              disabled={state === 'sending' || message.length > MAX}
+              className="min-h-[48px] rounded-md bg-text-primary px-[22px] font-semibold text-ink hover:bg-white disabled:bg-text-secondary"
+            >
+              {state === 'sending' ? 'Sending…' : 'Send message'}
+            </button>
+            <span className="text-sm text-text-tertiary">Goes to the core team’s inbox; the reply comes to your email.</span>
+          </div>
+        </form>
+      )}
+
+      <aside className="min-w-0 flex-[0_1_360px]">
+        <h2 className="mb-2 text-[17px] font-bold">Before you write</h2>
+        <ul className="flex flex-col gap-2.5 text-[15px] text-text-secondary">
+          <li>Checking a certificate? <Link href="/verify" className="font-semibold text-link hover:text-text-primary">Verify it here</Link> — no need to ask.</li>
+          <li>Forgot your password? Pick <b className="text-text-primary">General</b> and include your account email; we’ll reset it.</li>
+          <li>Found a bug? Say which page and what you clicked.</li>
+        </ul>
+      </aside>
+    </Container>
+  )
 }

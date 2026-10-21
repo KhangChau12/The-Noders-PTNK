@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from './AuthProvider'
-import { Loading } from './Loading'
+import { LoadBar } from './Loading'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -18,6 +18,7 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, profile, loading, profileLoading, isAdmin } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
 
   // Member pages render as soon as the session is known. Admin pages also
   // need the profile, because that's where the role lives.
@@ -25,16 +26,17 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login')
+      router.push(`/login?next=${encodeURIComponent(pathname || '/dashboard')}`)
     } else if (!loading && user && requireAdmin && !waitingForRole && !isAdmin) {
       router.push('/dashboard')
     }
-  }, [user, loading, requireAdmin, waitingForRole, isAdmin, router])
+  }, [user, loading, requireAdmin, waitingForRole, isAdmin, router, pathname])
 
   if (loading || waitingForRole) {
     return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loading size="lg" text="Loading..." />
+      <div aria-busy="true" className="min-h-[60vh]">
+        <LoadBar />
+        <span className="sr-only" role="status">Loading</span>
       </div>
     )
   }
