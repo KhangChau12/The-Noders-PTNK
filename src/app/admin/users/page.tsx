@@ -15,6 +15,7 @@ import { currentTerm, isAdvisorOnly, roleLine } from '@/lib/terms'
 import { createClient } from '@/lib/supabase'
 import { formatMonth } from '@/lib/dashboard'
 import { SITE_CONFIG } from '@/lib/constants'
+import { freeUsername, isEmail, makePassword, welcomeMessage } from '@/lib/accounts'
 import { cn } from '@/lib/utils'
 
 type Filter = 'all' | 'core' | 'members' | 'incomplete'
@@ -251,18 +252,6 @@ function MembersAdmin() {
 
 /* ---------- Add member ---------- */
 
-const WORDS = ['river', 'maple', 'orbit', 'pixel', 'cedar', 'delta', 'ember', 'lotus', 'nova', 'quartz', 'sable', 'tango', 'vector', 'willow', 'zephyr', 'mango']
-const makePassword = () => {
-  const a = new Uint32Array(3)
-  crypto.getRandomValues(a)
-  return `${WORDS[a[0] % WORDS.length]}-${WORDS[a[1] % WORDS.length]}-${10 + (a[2] % 90)}`
-}
-const usernameFrom = (name: string) => {
-  const parts = name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/).filter(Boolean)
-  if (!parts.length) return ''
-  return [parts[parts.length - 1], ...parts.slice(0, -1)].join('.').slice(0, 30)
-}
-
 function AddMemberPanel({ onClose }: { onClose: () => void }) {
   const { data, refresh, api } = useAdmin()
   const { showToast } = useToast()
@@ -275,11 +264,9 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
   const [done, setDone] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  let username = usernameFrom(name)
-  if (username && data.members.some((m) => m.username === username)) username = `${username}${term?.number ?? 2}`
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  const first = name.trim().split(/\s+/).pop() || 'there'
-  const message = `Hi ${first}, welcome to The Noders!\nSign in at ${SITE_CONFIG.url.replace(/^https?:\/\//, '')}/login\nEmail: ${email}\nPassword: ${password}\nYour dashboard walks you through setting up your profile.`
+  const username = freeUsername(name, new Set(data.members.map((m) => m.username)))
+  const emailOk = isEmail(email)
+  const message = welcomeMessage(name, email, password)
 
   const create = async () => {
     if (!name.trim() || !emailOk || !username) return
@@ -289,7 +276,7 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
         method: 'POST',
         body: { email: email.trim(), password, profileData: { full_name: name.trim(), username, role: term ? 'member' : role } },
       })
-      // Their term membership is what makes them "Generation N" on the site
+      // Their term membership is what puts them on the Members page
       if (term && res.user?.id) {
         const { error } = await (createClient() as any).from('positions').insert({ term_id: term.id, kind: 'member', profile_id: res.user.id, sort: 9 })
         if (error) showToast('error', `Account made, but couldn’t add them to ${term.name}: ${error.message}`)

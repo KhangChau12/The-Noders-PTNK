@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase'
 import { uploadImage } from '@/lib/upload'
 import { currentTerm, departmentsOf } from '@/lib/terms'
 import { cn } from '@/lib/utils'
+import { isEmail, freeUsername, makePassword, welcomeMessage } from '@/lib/accounts'
 
 interface Dept {
   key: string
@@ -19,8 +20,16 @@ interface Dept {
   was: string | null
 }
 
+/** Someone joining with this term who has no account yet. Picked in Leadership as "new:<key>". */
+interface Newcomer {
+  key: string
+  name: string
+  email: string
+  password: string
+}
+
 export default function NewTermPage() {
-  const { data, ready, refresh } = useAdmin()
+  const { data, ready, refresh, api } = useAdmin()
   const { session } = useAuth()
   const { showToast } = useToast()
   const { confirm } = useConfirm()
@@ -41,6 +50,11 @@ export default function NewTermPage() {
   const [advPhoto, setAdvPhoto] = useState<string | null>(null)
   const [leaving, setLeaving] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState(false)
+  const [newcomers, setNewcomers] = useState<Newcomer[]>([])
+  const [welcome, setWelcome] = useState<Newcomer[] | null>(null)
+  const [copied, setCopied] = useState(false)
+  // Accounts already made by an earlier attempt, so a retry doesn't make them twice
+  const madeRef = useRef<Record<string, string>>({})
   const fileRef = useRef<HTMLInputElement>(null)
 
   // Start from the current term's departments
@@ -52,7 +66,27 @@ export default function NewTermPage() {
   const prevPositions = prev ? terms.positions.filter((p) => p.term_id === prev.id) : []
   const prevAdvisors = prevPositions.filter((p) => p.kind === 'advisor')
   const prevPeople = Array.from(new Set(prevPositions.filter((p) => p.kind !== 'advisor' && p.profile_id).map((p) => p.profile_id!)))
-  const nameOf = (id: string) => data.members.find((m) => m.id === id)?.full_name || 'Unknown'
+  const nameOf = (id: string) =>
+    id.startsWith('new:') ? newcomers.find((n) => `new:${n.key}` === id)?.name.trim() || 'New person' : data.members.find((m) => m.id === id)?.full_name || 'Unknown'
+
+  const filled = newcomers.filter((n) => n.name.trim() || n.email.trim())
+  const emails = filled.map((n) => n.email.trim().toLowerCase())
+  const newcomerIssue = filled.some((n) => !n.name.trim())
+    ? 'Every new person needs a name'
+    : filled.some((n) => !isEmail(n.email))
+      ? 'Check the new people’s emails'
+      : emails.some((e, i) => emails.indexOf(e) !== i)
+        ? 'Two new people share an email'
+        : null
+  const newOptions = filled.filter((n) => n.name.trim())
+  const addNewcomer = () => setNewcomers([...newcomers, { key: String(Date.now()), name: '', email: '', password: makePassword() }])
+  const removeNewcomer = (key: string) => {
+    const v = `new:${key}`
+    setNewcomers(newcomers.filter((n) => n.key !== key))
+    if (president === v) setPresident('')
+    setVps(vps.map((x) => (x === v ? '' : x)))
+    setHeads(Object.fromEntries(Object.entries(heads).map(([k, x]) => [k, x === v ? '' : x])))
+  }
 
   const leaderIds = new Set([president, ...vps, ...Object.values(heads)].filter(Boolean))
   const continuing = prevPeople.filter((id) => !leaving.has(id))
@@ -63,7 +97,7 @@ export default function NewTermPage() {
   const loses = nowAdmin.filter((id) => !willAdmin.has(id))
   const validDepts = depts.filter((d) => d.name.trim())
 
-  const blocked = !name.trim() || !president || busy || !terms.ready
+  const blocked = !name.trim() || !president || !!newcomerIssue || busy || !terms.ready
 
   const start = async () => {
     if (blocked) return
@@ -77,6 +111,24 @@ export default function NewTermPage() {
     setBusy(true)
     const db: any = createClient()
     try {
+      // Accounts for the new people first, so they can hold positions
+      const taken = new Set(data.members.map((m) => m.username))
+      for (const n of filled) {
+        if (madeRef.current[n.key]) continue
+        const username = freeUsername(n.name, taken)
+        taken.add(username)
+        try {
+          const res = await api('/api/admin/create-user', {
+            method: 'POST',
+            body: { email: n.email.trim(), password: n.password, profileData: { full_name: n.name.trim(), username, role: 'member' } },
+          })
+          madeRef.current[n.key] = res.user.id
+        } catch (e: any) {
+          throw new Error(`${n.name.trim()}: ${e.message || e}`)
+        }
+      }
+      const resolve = (v: string) => (v.startsWith('new:') ? madeRef.current[v.slice(4)] : v)
+
       const { data: term, error: e1 } = await db.from('terms').insert({ number: nextNumber, name: name.trim(), starts_on: starts || null, is_current: false }).select().single()
       if (e1) throw e1
       const { data: created, error: e2 } = validDepts.length
@@ -88,10 +140,11 @@ export default function NewTermPage() {
         return i >= 0 ? created[i]?.id : null
       }
       const rows: any[] = []
-      rows.push({ term_id: term.id, kind: 'president', profile_id: president, sort: 2 })
-      vps.filter(Boolean).forEach((id) => rows.push({ term_id: term.id, kind: 'vice_president', profile_id: id, sort: 3 }))
-      Object.entries(heads).forEach(([key, id]) => id && deptId(key) && rows.push({ term_id: term.id, kind: 'head', department_id: deptId(key), profile_id: id, sort: 4 }))
+      rows.push({ term_id: term.id, kind: 'president', profile_id: resolve(president), sort: 2 })
+      vps.filter(Boolean).forEach((id) => rows.push({ term_id: term.id, kind: 'vice_president', profile_id: resolve(id), sort: 3 }))
+      Object.entries(heads).forEach(([key, id]) => id && deptId(key) && rows.push({ term_id: term.id, kind: 'head', department_id: deptId(key), profile_id: resolve(id), sort: 4 }))
       continuing.filter((id) => !leaderIds.has(id)).forEach((id) => rows.push({ term_id: term.id, kind: 'member', profile_id: id, sort: 9 }))
+      filled.filter((n) => !leaderIds.has(`new:${n.key}`)).forEach((n) => rows.push({ term_id: term.id, kind: 'member', profile_id: resolve(`new:${n.key}`), sort: 9 }))
       if (advisorMode === 'keep') {
         prevAdvisors.forEach((a) => rows.push({ term_id: term.id, kind: 'advisor', profile_id: a.profile_id, display_name: a.display_name, display_title: a.display_title, avatar_url: a.avatar_url, sort: 1 }))
       } else if (advName.trim()) {
@@ -103,22 +156,38 @@ export default function NewTermPage() {
       if (e4) throw e4
       await refresh()
       showToast('success', `${name.trim()} has started`)
-      router.push('/admin/terms')
+      if (filled.length) {
+        setWelcome(filled)
+        setBusy(false)
+        try {
+          await navigator.clipboard.writeText(filled.map((n) => welcomeMessage(n.name, n.email.trim(), n.password)).join('\n\n'))
+          setCopied(true)
+        } catch {}
+      } else router.push('/admin/terms')
     } catch (e: any) {
-      showToast('error', `Couldn’t start the term: ${e.message || e}. Nothing was switched over; check the Terms page for a half-made term.`)
+      const made = Object.keys(madeRef.current).length
+      showToast('error', `Couldn’t start the term: ${e.message || e}. Nothing was switched over${made ? ` (${made} new account${made > 1 ? 's were' : ' was'} already made and will be reused when you try again)` : ''}; check the Terms page for a half-made term.`)
       setBusy(false)
     }
   }
 
   if (!ready) return <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
   if (!terms.ready) return <p className="text-text-secondary">Run migration 028 first — see the Terms page.</p>
+  if (welcome) return <WelcomeList people={welcome} term={name.trim()} copied={copied} onCopy={() => setCopied(true)} />
 
   const card = 'rounded-xl bg-paper px-6 py-[22px]'
   const step = (n: number) => <span className="font-mono font-normal text-text-tertiary">{n} </span>
   const pick = (value: string, onChange: (v: string) => void, label: string, optional = false) => (
     <select value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} className={cn(fieldClass, 'min-h-[40px] bg-ink text-sm')}>
-      <option value="">{optional ? 'Nobody' : 'Choose a member…'}</option>
-      {sorted.map((m) => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+      <option value="">{optional ? 'Nobody' : 'Choose a person…'}</option>
+      {newOptions.length > 0 && (
+        <optgroup label="New this term">
+          {newOptions.map((n) => <option key={n.key} value={`new:${n.key}`}>{n.name.trim()}</option>)}
+        </optgroup>
+      )}
+      <optgroup label="Already in the club">
+        {sorted.map((m) => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+      </optgroup>
     </select>
   )
 
@@ -158,7 +227,32 @@ export default function NewTermPage() {
           </section>
 
           <section className={card}>
-            <h3 className="mb-3.5 text-[17px] font-bold">{step(3)}Leadership</h3>
+            <h3 className="mb-1 text-[17px] font-bold">{step(3)}New people this term</h3>
+            <p className="mb-3.5 text-sm text-text-tertiary">
+              Everyone joining now, including a new President or head. Each gets an account with a generated password, and you can pick them in Leadership below.
+            </p>
+            {newcomers.length > 0 && (
+              <ul className="mb-2.5 flex flex-col gap-2">
+                {newcomers.map((n, i) => {
+                  const badEmail = !!n.email.trim() && !isEmail(n.email)
+                  return (
+                    <li key={n.key} className="grid grid-cols-[minmax(0,1fr)_32px] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_32px]">
+                      <input value={n.name} onChange={(e) => setNewcomers(newcomers.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} placeholder="Full name" aria-label="Full name" className={cn(fieldClass, 'min-h-[40px] bg-ink text-sm')} />
+                      <button type="button" onClick={() => removeNewcomer(n.key)} aria-label={`Remove ${n.name || 'this person'}`} className="h-8 w-8 text-lg text-text-tertiary hover:text-[#FF9C85] sm:order-last">×</button>
+                      <input type="email" value={n.email} onChange={(e) => setNewcomers(newcomers.map((x, j) => (j === i ? { ...x, email: e.target.value } : x)))} placeholder="Email" aria-label="Email" aria-invalid={badEmail} className={cn(fieldClass, 'min-h-[40px] bg-ink text-sm', badEmail && 'border-[#FF9C85]')} />
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+            <button type="button" onClick={addNewcomer} className="min-h-[36px] rounded-md border border-dashed border-control px-3 text-sm font-semibold text-text-secondary hover:text-text-primary">
+              + Add a new person
+            </button>
+            {newcomerIssue && <p className="mt-2.5 text-sm text-[#FF9C85]">{newcomerIssue}</p>}
+          </section>
+
+          <section className={card}>
+            <h3 className="mb-3.5 text-[17px] font-bold">{step(4)}Leadership</h3>
             <div className="grid items-center gap-x-4 gap-y-2.5 sm:grid-cols-[200px_minmax(0,1fr)]">
               <span className="font-semibold">President</span>
               {pick(president, setPresident, 'President')}
@@ -215,9 +309,9 @@ export default function NewTermPage() {
           </section>
 
           <section className={card}>
-            <h3 className="mb-1 text-[17px] font-bold">{step(4)}Who continues</h3>
+            <h3 className="mb-1 text-[17px] font-bold">{step(5)}Who continues from {prev?.name || 'last term'}</h3>
             <p className="mb-3 text-sm text-text-tertiary">
-              Untick anyone who has left — they become Alumni and keep their {prev?.name || 'earlier'} role on their profile. Add new members from the Members tab afterwards.
+              Untick anyone who has left — they become Alumni and keep their {prev?.name || 'earlier'} role on their profile. New people are added in step 3.
             </p>
             <div className="flex flex-wrap gap-1.5">
               {prevPeople.map((id) => {
@@ -250,6 +344,7 @@ export default function NewTermPage() {
             {prev && (<><dt className="text-text-tertiary">{prev.name}</dt><dd className="text-right">archived</dd></>)}
             <dt className="text-text-tertiary">Departments</dt><dd className="text-right font-mono">{validDepts.length}</dd>
             <dt className="text-text-tertiary">Continuing</dt><dd className="text-right font-mono">{continuing.length}</dd>
+            <dt className="text-text-tertiary">New accounts</dt><dd className="text-right font-mono">{filled.length}</dd>
             <dt className="text-text-tertiary">Alumni</dt><dd className="text-right font-mono">{prevPeople.length - continuing.length}</dd>
           </dl>
           <div className="border-t border-[#2A2E37] pt-3 text-sm">
@@ -259,10 +354,41 @@ export default function NewTermPage() {
             {loses.length > 0 && <p className="text-[#FF9C85]">Loses: {loses.map(nameOf).join(', ')}</p>}
           </div>
           <button type="button" onClick={start} disabled={blocked} className={cn(btnPrimary, 'min-h-[48px]')}>
-            {busy ? 'Starting…' : !president ? 'Pick a President first' : `Start ${name.trim()}`}
+            {busy ? 'Starting…' : newcomerIssue ? newcomerIssue : !president ? 'Pick a President first' : `Start ${name.trim()}`}
           </button>
           <Link href="/admin/terms" className={cn(btnSecondary, 'min-h-[42px]')}>Cancel</Link>
         </aside>
+      </div>
+    </>
+  )
+}
+
+/** After the term starts: each new person's sign-in details, shown once. */
+function WelcomeList({ people, term, copied, onCopy }: { people: Newcomer[]; term: string; copied: boolean; onCopy: () => void }) {
+  const messages = people.map((n) => welcomeMessage(n.name, n.email.trim(), n.password))
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      onCopy()
+    } catch {}
+  }
+  return (
+    <>
+      <h2 className="mb-1 text-[28px] font-bold tracking-[-0.02em]">{term} has started</h2>
+      <p className="mb-6 max-w-[720px] text-text-tertiary">
+        Send each new person their sign-in details. The passwords are only shown here{copied ? ' (all messages are already copied)' : ''}, so copy them before leaving this page.
+      </p>
+      <ul className="mb-6 grid gap-3 md:grid-cols-2">
+        {people.map((n, i) => (
+          <li key={n.key} className="flex flex-col gap-3 rounded-xl bg-paper px-5 py-[18px]">
+            <pre className="flex-auto whitespace-pre-wrap font-sans text-sm text-text-secondary">{messages[i]}</pre>
+            <button type="button" onClick={() => copy(messages[i])} className={cn(btnSecondary, 'self-start')}>Copy message</button>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap gap-2.5">
+        <button type="button" onClick={() => copy(messages.join('\n\n'))} className={btnPrimary}>{copied ? 'Copied ✓' : 'Copy all messages'}</button>
+        <Link href="/admin/terms" className={btnSecondary}>Go to Terms</Link>
       </div>
     </>
   )
