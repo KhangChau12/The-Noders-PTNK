@@ -200,7 +200,6 @@ export async function POST(request: NextRequest) {
       full_name: profileData.full_name,
       avatar_url: profileData.avatar_url || null,
       bio: profileData.bio || null,
-      skills: profileData.skills || [],
       role: profileData.role || 'member',
       social_links: profileData.social_links || {}
     }

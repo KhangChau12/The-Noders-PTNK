@@ -1,996 +1,177 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
+import Link from 'next/link'
+import { useMemo, useRef, useState } from 'react'
+import { useAdmin } from '@/components/admin/AdminContext'
 import { useAuth } from '@/components/AuthProvider'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { Loading } from '@/components/Loading'
-import { Avatar } from '@/components/Avatar'
-import {
-  Award,
-  Plus,
-  PencilLine,
-  Trash2,
-  Search,
-  AlertCircle,
-  CheckCircle,
-  X,
-  RefreshCw,
-  ExternalLink,
-  Copy,
-  ArrowLeft
-} from 'lucide-react'
 import { useToast } from '@/components/Toast'
 import { useConfirm } from '@/components/ConfirmDialog'
-import { ImageUpload } from '@/components/ImageUpload'
-import { PdfUpload } from '@/components/PdfUpload'
-import type { Profile } from '@/types/database'
-import Link from 'next/link'
+import { btnPrimary } from '@/components/dashboard/ui'
+import { AdminCertificate, awardOf, certificateGroups, nameOf } from '@/lib/admin'
+import { AWARD_RANK, AWARD_SHORT, AWARD_TONE, type Award } from '@/lib/awards'
+import { describeCertificate, formatDay } from '@/lib/dashboard'
+import { uploadImage, uploadPdf } from '@/lib/upload'
+import { cn } from '@/lib/utils'
 
-interface ImageData {
-  id: string
-  filename: string
-  original_name: string
-  public_url: string
-  file_size: number
-  width?: number
-  height?: number
-  alt_text?: string
-}
-
-interface CertificateData {
-  id: string
-  certificate_id: string
-  gen_number: number
-  suffix: string
-  file_url: string | null
-  file_type: 'image' | 'pdf'
-  title: string
-  description: string | null
-  issued_at: string
-  created_at: string
-  member: {
-    id: string
-    username: string
-    full_name: string
-    avatar_url: string | null
-  }
-  issuer: {
-    id: string
-    username: string
-    full_name: string
-  } | null
-  image: {
-    id: string
-    public_url: string
-    original_name: string
-    file_size: number
-    width?: number
-    height?: number
-    alt_text?: string
-    mime_type: string
-  } | null
-}
-
-interface CreateCertificateFormData {
-  user_id: string
-  suffix: string
-  image_id: string
-  file_url: string
-  file_type: 'image' | 'pdf'
-  title: string
-  description: string
-}
-
-function normalizeSearchText(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'd')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function matchesMemberSearch(member: Profile, query: string) {
-  if (!query.trim()) return true
-
-  const normalizedQuery = normalizeSearchText(query)
-  if (!normalizedQuery) return true
-
-  const normalizedName = normalizeSearchText(member.full_name || '')
-  const normalizedUsername = normalizeSearchText(member.username || '')
-  const mergedText = `${normalizedName} ${normalizedUsername}`.trim()
-
-  if (mergedText.includes(normalizedQuery)) {
-    return true
-  }
-
-  const queryTokens = normalizedQuery.split(' ').filter(Boolean)
-  if (queryTokens.length > 0 && queryTokens.every(token => mergedText.includes(token))) {
-    return true
-  }
-
-  const initials = normalizedName
-    .split(' ')
-    .filter(Boolean)
-    .map(part => part[0])
-    .join('')
-
-  return initials.includes(normalizedQuery.replace(/\s+/g, ''))
-}
-
-function getMemberLabel(member: Profile) {
-  return `${member.full_name} (@${member.username})`
-}
-
-function CertificateModal({
-  isOpen,
-  mode,
-  certificate,
-  onClose,
-  onSaved,
-  members
-}: {
-  isOpen: boolean
-  mode: 'create' | 'edit'
-  certificate?: CertificateData | null
-  onClose: () => void
-  onSaved: () => void
-  members: Profile[]
-}) {
-  const { session } = useAuth()
-  const { showToast } = useToast()
-  const isEditMode = mode === 'edit'
-
-  const [formData, setFormData] = useState<CreateCertificateFormData>({
-    user_id: '',
-    suffix: '',
-    image_id: '',
-    file_url: '',
-    file_type: 'image',
-    title: '',
-    description: ''
-  })
-  const [uploadedImage, setUploadedImage] = useState<ImageData | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [autoFillingNumber, setAutoFillingNumber] = useState(false)
-  const [memberSearch, setMemberSearch] = useState('')
-  const [memberDropdownOpen, setMemberDropdownOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [initialAutoFillAttempted, setInitialAutoFillAttempted] = useState(false)
-
-  const resetForm = () => {
-    setFormData({
-      user_id: '',
-      suffix: '',
-      image_id: '',
-      file_url: '',
-      file_type: 'image',
-      title: '',
-      description: ''
-    })
-    setUploadedImage(null)
-    setMemberSearch('')
-    setMemberDropdownOpen(false)
-    setError(null)
-    setSuccess(false)
-    setInitialAutoFillAttempted(false)
-  }
-
-  const handleChange = (field: keyof CreateCertificateFormData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleImageChange = (imageData: ImageData | null) => {
-    setUploadedImage(imageData)
-    if (imageData) {
-      setFormData(prev => ({
-        ...prev,
-        image_id: imageData.id,
-        file_url: imageData.public_url
-      }))
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        image_id: '',
-        file_url: ''
-      }))
-    }
-  }
-
-  const fillNextCertificateNumber = async () => {
-    try {
-      if (!session?.access_token) {
-        showToast('error', 'Authentication required. Please refresh the page.')
-        return
-      }
-
-      setAutoFillingNumber(true)
-      const response = await fetch(`/api/admin/certificates/generate-suffix?t=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        cache: 'no-store'
-      })
-
-      const result = await response.json()
-      if (!response.ok || !result.success) {
-        showToast('error', result.error || 'Failed to get next certificate number')
-        return
-      }
-
-      setFormData(prev => ({ ...prev, suffix: result.suffix }))
-      if (!isEditMode) {
-        showToast('success', `Auto-filled next number: ${result.certificate_id}`)
-      }
-    } catch {
-      showToast('error', 'Network error while getting next certificate number')
-    } finally {
-      setAutoFillingNumber(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!isOpen) {
-      resetForm()
-      return
-    }
-
-    if (certificate) {
-      const memberLabel = getMemberLabel(certificate.member as Profile)
-      setFormData({
-        user_id: certificate.member?.id || '',
-        suffix: certificate.suffix || '',
-        image_id: certificate.image?.id || certificate.image_id || '',
-        file_url: certificate.file_url || certificate.image?.public_url || '',
-        file_type: certificate.file_type,
-        title: certificate.title,
-        description: certificate.description || ''
-      })
-      setMemberSearch(memberLabel)
-      setMemberDropdownOpen(false)
-      setUploadedImage(certificate.image ? {
-        id: certificate.image.id,
-        filename: certificate.image.original_name || certificate.image.id,
-        original_name: certificate.image.original_name || certificate.image.id,
-        public_url: certificate.image.public_url,
-        file_size: certificate.image.file_size || 0,
-        width: certificate.image.width,
-        height: certificate.image.height,
-        alt_text: certificate.image.alt_text
-      } : null)
-      setInitialAutoFillAttempted(true)
-      return
-    }
-
-    resetForm()
-    if (!initialAutoFillAttempted) {
-      setInitialAutoFillAttempted(true)
-      void fillNextCertificateNumber()
-    }
-  }, [isOpen, certificate?.id])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      if (!session?.access_token) {
-        setError('Authentication required. Please refresh the page.')
-        return
-      }
-
-      const endpoint = isEditMode && certificate ? `/api/admin/certificates/${certificate.id}` : '/api/admin/certificates'
-      const method = isEditMode ? 'PUT' : 'POST'
-      const payload: Record<string, unknown> = {
-        user_id: formData.user_id,
-        image_id: formData.image_id || undefined,
-        file_url: formData.file_url || undefined,
-        file_type: formData.file_type,
-        title: formData.title,
-        description: formData.description || undefined
-      }
-
-      if (!isEditMode) {
-        payload.suffix = formData.suffix || undefined
-      }
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(payload)
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setSuccess(true)
-        showToast('success', `Certificate ${result.certificate.certificate_id} ${isEditMode ? 'updated' : 'created'}!`)
-        setTimeout(() => {
-          onSaved()
-          onClose()
-          resetForm()
-        }, 1200)
-      } else {
-        setError(result.error || `Failed to ${isEditMode ? 'update' : 'create'} certificate`)
-      }
-    } catch {
-      setError('Network error. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const normalizedSuffix = formData.suffix.replace(/\D/g, '').slice(0, 4)
-  const previewCertificateId = isEditMode
-    ? (certificate?.certificate_id || 'C0000')
-    : (normalizedSuffix ? `C${normalizedSuffix.padStart(4, '0')}` : 'C0000')
-  const filteredMembers = members.filter(member => matchesMemberSearch(member, memberSearch))
-  const selectedMember = members.find(member => member.id === formData.user_id) || null
-
-  if (!isOpen) return null
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              {isEditMode ? <PencilLine className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-              {isEditMode ? 'Edit Certificate' : 'Create Certificate'}
-            </CardTitle>
-            <button onClick={onClose} className="text-text-tertiary hover:text-text-primary">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="text-center py-8">
-              <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
-                Certificate {isEditMode ? 'Updated!' : 'Created!'}
-              </h3>
-              <p className="text-text-secondary">
-                The certificate has been {isEditMode ? 'updated' : 'issued'} successfully.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="p-4 bg-primary-blue/10 border border-primary-blue/30 rounded-lg text-center">
-                <p className="text-sm text-text-secondary mb-1">
-                  {isEditMode ? 'Certificate ID' : 'Certificate ID Preview'}
-                </p>
-                <p className="text-2xl font-mono font-bold text-primary-blue">
-                  {previewCertificateId}
-                </p>
-                {isEditMode && (
-                  <p className="text-xs text-text-tertiary mt-2">
-                    Certificate ID is fixed. You can update the file, member, title, and description.
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Member *
-                </label>
-                <div className="relative">
-                  <Input
-                    value={memberSearch}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      setMemberSearch(value)
-                      setMemberDropdownOpen(true)
-
-                      const exactMatch = members.find(member => {
-                        const label = getMemberLabel(member)
-                        return normalizeSearchText(label) === normalizeSearchText(value)
-                      })
-
-                      if (exactMatch) {
-                        setFormData(prev => ({ ...prev, user_id: exactMatch.id }))
-                      } else {
-                        setFormData(prev => ({ ...prev, user_id: '' }))
-                      }
-                    }}
-                    onFocus={() => setMemberDropdownOpen(true)}
-                    placeholder="Type a name to search and select..."
-                    className="mb-2"
-                    icon={<Search className="w-4 h-4" />}
-                    autoComplete="off"
-                  />
-
-                  {memberDropdownOpen && (
-                    <div className="absolute z-20 mt-1 w-full rounded-lg border border-dark-border bg-dark-bg shadow-xl shadow-black/30 max-h-64 overflow-y-auto">
-                      {filteredMembers.length > 0 ? (
-                        filteredMembers.slice(0, 8).map(member => {
-                          const isSelected = member.id === formData.user_id
-                          return (
-                            <button
-                              key={member.id}
-                              type="button"
-                              onClick={() => {
-                                setFormData(prev => ({ ...prev, user_id: member.id }))
-                                setMemberSearch(getMemberLabel(member))
-                                setMemberDropdownOpen(false)
-                              }}
-                              className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors border-b border-dark-border/50 last:border-b-0 ${
-                                isSelected ? 'bg-primary-blue/10' : 'hover:bg-dark-surface'
-                              }`}
-                            >
-                              <Avatar name={member.full_name} src={member.avatar_url} size="sm" />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-text-primary truncate">
-                                  {member.full_name}
-                                </p>
-                                <p className="text-xs text-text-tertiary truncate">
-                                  @{member.username}
-                                </p>
-                              </div>
-                            </button>
-                          )
-                        })
-                      ) : (
-                        <div className="px-3 py-4 text-sm text-text-tertiary">
-                          No members found.
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-text-tertiary mt-1">
-                  {selectedMember ? `Selected: ${getMemberLabel(selectedMember)}` : `${filteredMembers.length} member(s) found.`}
-                </p>
-              </div>
-
-              {!isEditMode ? (
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Certificate Number (Optional)
-                  </label>
-                  <Input
-                    value={formData.suffix}
-                    onChange={(e) => handleChange('suffix', e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    placeholder="Auto (0000 -> 9999)"
-                    maxLength={4}
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-text-tertiary mt-1">
-                    Auto-filled by default when the form opens. You can still edit it manually (0000-9999).
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Certificate Number
-                  </label>
-                  <Input
-                    value={formData.suffix}
-                    disabled
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-text-tertiary mt-1">
-                    Certificate number is fixed for old certificates.
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  File Type
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (formData.file_type !== 'image') {
-                        setFormData(prev => ({ ...prev, file_type: 'image', image_id: '', file_url: '' }))
-                        setUploadedImage(null)
-                      }
-                    }}
-                    className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
-                      formData.file_type === 'image'
-                        ? 'bg-primary-blue border-primary-blue text-white'
-                        : 'border-dark-border text-text-secondary hover:border-text-tertiary'
-                    }`}
-                  >
-                    Image
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (formData.file_type !== 'pdf') {
-                        setFormData(prev => ({ ...prev, file_type: 'pdf', image_id: '', file_url: '' }))
-                        setUploadedImage(null)
-                      }
-                    }}
-                    className={`flex-1 py-2 px-4 rounded-lg border text-sm font-medium transition-colors ${
-                      formData.file_type === 'pdf'
-                        ? 'bg-primary-blue border-primary-blue text-white'
-                        : 'border-dark-border text-text-secondary hover:border-text-tertiary'
-                    }`}
-                  >
-                    PDF
-                  </button>
-                </div>
-              </div>
-
-              {formData.file_type === 'image' ? (
-                <ImageUpload
-                  value={uploadedImage}
-                  onChange={handleImageChange}
-                  usage="certificate"
-                  placeholder="Upload Certificate Image"
-                  maxSize={10 * 1024 * 1024}
-                />
-              ) : (
-                <PdfUpload
-                  value={uploadedImage}
-                  onChange={handleImageChange}
-                />
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Certificate Title
-                </label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => handleChange('title', e.target.value)}
-                  placeholder={isEditMode ? 'Course Completion Certificate' : 'Enter certificate title'}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Description (Optional)
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleChange('description', e.target.value)}
-                  placeholder="Additional notes about this certificate..."
-                  rows={3}
-                  className="w-full px-3 py-2.5 text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
-                />
-              </div>
-
-              {error && (
-                <div className="p-4 bg-error/20 border border-error/30 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-error">{error}</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
-                <Button type="submit" disabled={loading} className="w-full sm:flex-1">
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      {isEditMode ? 'Saving...' : 'Creating...'}
-                    </>
-                  ) : (
-                    <>
-                      {isEditMode ? <PencilLine className="w-4 h-4 mr-2" /> : <Award className="w-4 h-4 mr-2" />}
-                      {isEditMode ? 'Save Changes' : 'Issue Certificate'}
-                    </>
-                  )}
-                </Button>
-                <Button type="button" variant="secondary" onClick={onClose} disabled={loading} className="w-full sm:w-auto">
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function CertificateManagementPage() {
+export default function CertificatesAdminPage() {
+  const { data, ready, patch, api } = useAdmin()
   const { session } = useAuth()
   const { showToast } = useToast()
   const { confirm } = useConfirm()
-  const [certificates, setCertificates] = useState<CertificateData[]>([])
-  const [members, setMembers] = useState<Profile[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingCertificate, setEditingCertificate] = useState<CertificateData | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [dataLoaded, setDataLoaded] = useState(false)
-  const autoLoadedRef = useRef(false)
+  const [open, setOpen] = useState<Record<string, boolean>>({})
+  const [q, setQ] = useState('')
+  const [busy, setBusy] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const replacing = useRef<AdminCertificate | null>(null)
 
-  const fetchCertificates = async () => {
-    try {
-      setLoading(true)
-      setError(null)
+  const groups = useMemo(() => certificateGroups(data, (c) => describeCertificate(c)), [data])
+  const nextCode = useMemo(() => {
+    const max = data.certificates.reduce((m, c) => Math.max(m, /^C(\d{4})$/.test(c.certificate_id) ? parseInt(c.certificate_id.slice(1), 10) : -1), -1)
+    return `C${String(max + 1).padStart(4, '0')}`
+  }, [data.certificates])
 
-      if (!session?.access_token) {
-        setError('Authentication required. Please refresh the page.')
-        return
-      }
-
-      const params = new URLSearchParams()
-      if (searchTerm) params.set('search', searchTerm)
-
-      const response = await fetch(`/api/admin/certificates?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
-      })
-      const result = await response.json()
-
-      if (result.success) {
-        setCertificates(result.certificates)
-        setDataLoaded(true)
-        setError(null)
-      } else {
-        setError(result.error)
-      }
-    } catch {
-      setError('Failed to fetch certificates')
-    } finally {
-      setLoading(false)
-    }
+  const match = (c: AdminCertificate) => {
+    if (!q) return true
+    const s = q.toLowerCase()
+    return c.certificate_id.toLowerCase().includes(s) || nameOf(data, c.user_id).toLowerCase().includes(s)
   }
 
-  const fetchMembers = async () => {
-    try {
-      if (!session?.access_token) return
-
-      const response = await fetch('/api/members', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
-      })
-      const result = await response.json()
-
-      if (result.success) {
-        setMembers(result.members)
-      }
-    } catch {
-      console.error('Failed to fetch members')
-    }
-  }
-
-  const deleteCertificate = async (id: string, certificateId: string) => {
-    const confirmed = await confirm({
-      title: 'Delete Certificate',
-      message: `Are you sure you want to delete certificate ${certificateId}? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      variant: 'danger'
+  const revoke = async (c: AdminCertificate) => {
+    const ok = await confirm({
+      title: `Revoke ${c.certificate_id}?`,
+      message: `${nameOf(data, c.user_id)}’s certificate is deleted and its verify page will say “not found”. This can’t be undone.`,
+      confirmText: 'Revoke',
+      cancelText: 'Keep',
+      variant: 'danger',
     })
-
-    if (!confirmed) return
-
+    if (!ok) return
     try {
-      setDeletingId(id)
+      await api(`/api/admin/certificates/${c.id}`, { method: 'DELETE' })
+      patch((d) => ({ ...d, certificates: d.certificates.filter((x) => x.id !== c.id) }))
+      showToast('success', `${c.certificate_id} revoked`)
+    } catch (e: any) {
+      showToast('error', e.message)
+    }
+  }
 
-      if (!session?.access_token) {
-        showToast('error', 'Authentication required')
-        return
-      }
-
-      const response = await fetch(`/api/admin/certificates/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        showToast('success', 'Certificate deleted successfully')
-        await fetchCertificates()
-      } else {
-        showToast('error', result.error || 'Failed to delete certificate')
-      }
-    } catch {
-      showToast('error', 'Network error')
+  const replace = async (file?: File) => {
+    const c = replacing.current
+    if (!file || !c || !session?.access_token) return
+    setBusy(c.id)
+    try {
+      const isPdf = file.type === 'application/pdf'
+      const up = isPdf ? await uploadPdf(file, session.access_token) : await uploadImage(file, 'certificate', session.access_token)
+      await api(`/api/admin/certificates/${c.id}`, { method: 'PUT', body: { file_url: up.public_url, image_id: up.id, file_type: isPdf ? 'pdf' : 'image' } })
+      patch((d) => ({ ...d, certificates: d.certificates.map((x) => (x.id === c.id ? { ...x, file_url: up.public_url, file_type: isPdf ? 'pdf' : 'image' } : x)) }))
+      showToast('success', `File for ${c.certificate_id} replaced`)
+    } catch (e: any) {
+      showToast('error', e.message)
     } finally {
-      setDeletingId(null)
+      setBusy(null)
+      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
-  const openEditModal = (certificate: CertificateData) => {
-    setShowCreateModal(false)
-    setEditingCertificate(certificate)
-    setShowEditModal(true)
-  }
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    showToast('success', 'Copied to clipboard!')
-  }
-
-  useEffect(() => {
-    if (session) {
-      fetchMembers()
-    }
-  }, [session])
-
-  useEffect(() => {
-    if (!session?.access_token || autoLoadedRef.current || dataLoaded) {
-      return
-    }
-
-    autoLoadedRef.current = true
-    void fetchCertificates()
-  }, [session, dataLoaded])
-
-  const filteredCertificates = certificates.filter(cert =>
-    cert.certificate_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cert.member?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cert.member?.username?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  if (loading && !dataLoaded) {
-    return (
-      <ProtectedRoute requireAdmin={true}>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loading size="lg" text="Loading certificates..." />
-        </div>
-      </ProtectedRoute>
-    )
-  }
+  if (!ready) return <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
 
   return (
-    <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          {/* Back to Dashboard */}
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
-
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-                Certificate Management
-              </h1>
-              <p className="text-sm sm:text-base text-text-secondary">
-                Issue and manage member certificates
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              {!dataLoaded && (
-                <Button
-                  onClick={fetchCertificates}
-                  variant="primary"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Load Certificates
-                </Button>
-              )}
-              {dataLoaded && (
-                <Button
-                  onClick={fetchCertificates}
-                  variant="secondary"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-              )}
-              <Button className="w-full sm:w-auto" onClick={() => {
-                setShowEditModal(false)
-                setEditingCertificate(null)
-                setShowCreateModal(true)
-              }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Issue Certificate
-              </Button>
-            </div>
-          </div>
-
-          {/* Data Loading Notice */}
-          {!dataLoaded && !loading && (
-            <Card className="mb-8 border-primary-blue/20 bg-primary-blue/5">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl mb-4">🎓</div>
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  Certificate Management Ready
-                </h3>
-                <p className="text-text-secondary mb-4">
-                  Click "Load Certificates" to view all issued certificates.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Search and Filter */}
-          {dataLoaded && (
-            <Card className="mb-6">
-              <CardContent className="p-4">
-                <Input
-                  placeholder="Search by ID or member name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  icon={<Search className="w-4 h-4" />}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Certificates List */}
-          {dataLoaded && error ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  Error Loading Certificates
-                </h3>
-                <p className="text-text-secondary mb-4">{error}</p>
-                <Button onClick={fetchCertificates}>Retry</Button>
-              </CardContent>
-            </Card>
-          ) : dataLoaded ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  Certificates ({filteredCertificates.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Scroll hint for mobile */}
-                <p className="lg:hidden text-xs text-text-tertiary text-center mb-2">
-                  ← Vuốt ngang để xem đầy đủ bảng →
-                </p>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px]">
-                    <thead>
-                      <tr className="border-b border-dark-border">
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Certificate ID</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Member</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Title</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Issued</th>
-                        <th className="text-right px-3 py-3 text-text-primary font-semibold">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredCertificates.map((cert) => (
-                        <tr key={cert.id} className="border-b border-dark-border/50 hover:bg-dark-surface/50">
-                          <td className="px-3 py-4">
-                            <div className="flex items-center gap-2">
-                              <code className="px-2 py-1 bg-primary-blue/10 text-primary-blue rounded font-mono text-sm">
-                                {cert.certificate_id}
-                              </code>
-                              <button
-                                onClick={() => copyToClipboard(cert.certificate_id)}
-                                className="text-text-tertiary hover:text-text-primary"
-                                title="Copy ID"
-                              >
-                                <Copy className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                          <td className="px-3 py-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar
-                                name={cert.member?.full_name}
-                                src={cert.member?.avatar_url}
-                                size="sm"
-                              />
-                              <div>
-                                <p className="font-medium text-text-primary">
-                                  {cert.member?.full_name || 'Unknown'}
-                                </p>
-                                <p className="text-sm text-text-tertiary">
-                                  @{cert.member?.username || 'unknown'}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-3 py-4 text-text-secondary">
-                            {cert.title}
-                          </td>
-                          <td className="px-3 py-4 text-text-secondary text-sm">
-                            {new Date(cert.issued_at).toLocaleDateString('vi-VN')}
-                          </td>
-                          <td className="px-3 py-4">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openEditModal(cert)}
-                                title="Edit Certificate"
-                              >
-                                <PencilLine className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => window.open(`/verify/${cert.certificate_id}`, '_blank')}
-                                title="View Certificate"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteCertificate(cert.id, cert.certificate_id)}
-                                disabled={deletingId === cert.id}
-                                className="text-error hover:text-error hover:bg-error/10"
-                              >
-                                {deletingId === cert.id ? (
-                                  <div className="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-4 h-4" />
-                                )}
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {filteredCertificates.length === 0 && (
-                  <div className="text-center py-12">
-                    <Award className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-text-primary mb-2">
-                      No Certificates Found
-                    </h3>
-                    <p className="text-text-secondary">
-                      {searchTerm ? 'Try adjusting your search criteria.' : 'Get started by issuing your first certificate.'}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {/* Create Certificate Modal */}
-          <CertificateModal
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            mode="create"
-            onSaved={fetchCertificates}
-            members={members}
+    <>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <div>
+          <h2 className="text-[22px] font-bold tracking-[-0.01em]">Certificates</h2>
+          <p className="mt-0.5 text-sm text-text-tertiary">
+            {data.certificates.length} issued in {groups.length} batch{groups.length === 1 ? '' : 'es'} · next code{' '}
+            <span className="font-mono text-text-primary">{nextCode}</span>
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Code or member"
+            aria-label="Find a certificate"
+            className="min-h-[40px] w-[220px] max-w-full rounded-md border border-control bg-paper px-3 text-sm text-text-primary placeholder:text-text-disabled focus:border-link focus:outline-none"
           />
-
-          {/* Edit Certificate Modal */}
-          <CertificateModal
-            isOpen={showEditModal}
-            onClose={() => {
-              setShowEditModal(false)
-              setEditingCertificate(null)
-            }}
-            mode="edit"
-            certificate={editingCertificate}
-            onSaved={fetchCertificates}
-            members={members}
-          />
+          <Link href="/admin/certificates/new" className={btnPrimary}>Issue a batch</Link>
         </div>
       </div>
-    </ProtectedRoute>
+
+      {data.batches === null && (
+        <p className="mb-5 rounded-lg bg-[#1E1A12] px-4 py-3 text-sm text-signal">
+          Batches are read from titles until migration 027 is run. Issuing new batches needs it.
+        </p>
+      )}
+
+      <input ref={fileRef} type="file" accept="image/*,application/pdf" className="sr-only" tabIndex={-1} onChange={(e) => replace(e.target.files?.[0])} />
+
+      <div className="flex flex-col gap-4">
+        {groups.map((g) => {
+          const certs = g.certs.filter(match).sort((a, b) => AWARD_RANK[awardOf(a)] - AWARD_RANK[awardOf(b)] || a.certificate_id.localeCompare(b.certificate_id))
+          if (!certs.length) return null
+          const isOpen = q ? true : !!open[g.key]
+          const codes = g.certs.map((c) => c.certificate_id).sort()
+          const mix = new Map<Award, number>()
+          g.certs.forEach((c) => mix.set(awardOf(c), (mix.get(awardOf(c)) || 0) + 1))
+          const types = Array.from(new Set(g.certs.map((c) => c.file_type || 'image')))
+          return (
+            <article key={g.key} className="overflow-hidden rounded-xl bg-paper">
+              <button
+                type="button"
+                onClick={() => setOpen({ ...open, [g.key]: !isOpen })}
+                aria-expanded={isOpen}
+                className="grid w-full grid-cols-[20px_minmax(0,1fr)] items-center gap-x-3.5 gap-y-2 px-5 py-[18px] text-left sm:grid-cols-[20px_minmax(0,1fr)_auto]"
+              >
+                <span aria-hidden="true" className="text-text-tertiary">{isOpen ? '▾' : '▸'}</span>
+                <span className="min-w-0">
+                  <span className="block text-[17px] font-bold">{g.name}</span>
+                  <span className="block text-sm text-text-tertiary">
+                    {formatDay(g.issuedAt)} · {g.certs.length} certificate{g.certs.length > 1 ? 's' : ''} · {codes[0]}
+                    {codes.length > 1 && `–${codes[codes.length - 1]}`} · {types.join(', ')}
+                  </span>
+                </span>
+                <span className="col-start-2 flex flex-wrap gap-1.5 sm:col-start-auto sm:justify-end">
+                  {Array.from(mix.entries())
+                    .sort((a, b) => AWARD_RANK[a[0]] - AWARD_RANK[b[0]])
+                    .map(([a, n]) => (
+                      <span key={a} className="rounded-full bg-ink px-2.5 py-[3px] text-[13px]" style={{ color: AWARD_TONE[a] }}>
+                        {n} {AWARD_SHORT[a].toLowerCase()}
+                      </span>
+                    ))}
+                </span>
+              </button>
+              {isOpen && (
+                <div className="px-5 pb-3 sm:pl-[54px]">
+                  <ul>
+                    {certs.map((c) => {
+                      const a = awardOf(c)
+                      return (
+                        <li key={c.id} className="grid grid-cols-[64px_minmax(0,1fr)] items-center gap-x-3.5 gap-y-1 border-t border-rule px-1.5 py-[9px] text-sm hover:bg-[#12151B] md:grid-cols-[72px_110px_minmax(0,1fr)_230px]">
+                          <span className="font-mono">{c.certificate_id}</span>
+                          <span className="hidden md:block" style={{ color: AWARD_TONE[a] }}>{AWARD_SHORT[a]}</span>
+                          <span className="min-w-0 truncate">{nameOf(data, c.user_id)}</span>
+                          <span className="col-span-2 flex justify-start gap-3.5 font-semibold md:col-span-1 md:justify-end">
+                            <Link href={`/verify/${c.certificate_id}`} className="text-link hover:text-text-primary">Public page</Link>
+                            <button type="button" disabled={busy === c.id} onClick={() => { replacing.current = c; fileRef.current?.click() }} className="text-text-secondary hover:text-text-primary">
+                              {busy === c.id ? 'Uploading…' : 'Replace file'}
+                            </button>
+                            <button type="button" onClick={() => revoke(c)} className="text-text-tertiary hover:text-[#FF9C85]">Revoke…</button>
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  {g.batchId && (
+                    <Link href={`/admin/certificates/new?batch=${g.batchId}`} className={cn('mt-3 inline-block text-sm font-semibold text-link hover:text-text-primary')}>
+                      + Add files to this batch
+                    </Link>
+                  )}
+                </div>
+              )}
+            </article>
+          )
+        })}
+      </div>
+    </>
   )
 }
-
-export default CertificateManagementPage

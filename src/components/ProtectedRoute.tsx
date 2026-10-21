@@ -11,24 +11,27 @@ interface ProtectedRouteProps {
   fallback?: React.ReactNode
 }
 
-export function ProtectedRoute({ 
-  children, 
-  requireAdmin = false, 
-  fallback 
+export function ProtectedRoute({
+  children,
+  requireAdmin = false,
+  fallback
 }: ProtectedRouteProps) {
-  const { user, profile, loading, isAdmin } = useAuth()
+  const { user, profile, loading, profileLoading, isAdmin } = useAuth()
   const router = useRouter()
+
+  // Member pages render as soon as the session is known. Admin pages also
+  // need the profile, because that's where the role lives.
+  const waitingForRole = requireAdmin && !!user && !profile && !!profileLoading
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login')
-    } else if (!loading && user && requireAdmin && !isAdmin) {
-      router.push('/dashboard') // Redirect non-admin users to dashboard
+    } else if (!loading && user && requireAdmin && !waitingForRole && !isAdmin) {
+      router.push('/dashboard')
     }
-  }, [user, profile, loading, requireAdmin, isAdmin, router])
+  }, [user, loading, requireAdmin, waitingForRole, isAdmin, router])
 
-
-  if (loading) {
+  if (loading || waitingForRole) {
     return fallback || (
       <div className="flex items-center justify-center min-h-screen">
         <Loading size="lg" text="Loading..." />

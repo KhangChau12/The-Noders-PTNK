@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase'
+import { createClient, createTokenClient } from '@/lib/supabase'
 
 // Helper function to check if user can modify project
 async function canUserModifyProject(supabase: any, projectId: string, userId: string): Promise<{ canModify: boolean, isOwner: boolean, isAdmin: boolean, error?: string }> {
@@ -61,7 +61,7 @@ export async function PUT(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createTokenClient(token)
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
@@ -211,7 +211,7 @@ export async function DELETE(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createTokenClient(token)
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)

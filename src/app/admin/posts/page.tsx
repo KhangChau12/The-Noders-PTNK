@@ -1,507 +1,224 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { Badge } from '@/components/Badge'
-import { Loading } from '@/components/Loading'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { useAuth } from '@/components/AuthProvider'
+import { Suspense, useMemo, useState } from 'react'
+import { useAdmin } from '@/components/admin/AdminContext'
 import { useToast } from '@/components/Toast'
-import { useConfirm } from '@/components/ConfirmDialog'
+import { btnPrimary } from '@/components/dashboard/ui'
+import { AdminPost, median, nameOf } from '@/lib/admin'
 import { POST_CATEGORIES } from '@/lib/constants'
-import { Post } from '@/types/database'
-import {
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  User,
-  Filter,
-  TrendingUp,
-  Lightbulb,
-  Award,
-  Users,
-  Code,
-  BookOpen,
-  ThumbsUp,
-  Clock,
-  ArrowLeft,
-  Wrench
-} from 'lucide-react'
+import { formatDay, topicOf } from '@/lib/dashboard'
+import { cn } from '@/lib/utils'
 
-interface PostWithAuthor extends Post {
-  author?: {
-    id: string
-    username: string
-    full_name: string
-    avatar_url: string | null
-  }
+type Tab = 'published' | 'draft' | 'archived'
+const POST_TASK = 'Write web post'
+
+export default function PostsAdminPage() {
+  return (
+    <Suspense>
+      <PostsAdmin />
+    </Suspense>
+  )
 }
 
-const categories = [
-  { id: 'all', name: 'All Categories', icon: BookOpen },
-  { id: 'News', name: 'News', icon: TrendingUp },
-  { id: 'You may want to know', name: 'Do You Know?', icon: Lightbulb },
-  { id: 'Member Spotlight', name: 'Member Spotlight', icon: Award },
-  { id: 'Community Activities', name: 'Community Activities', icon: Users },
-  { id: 'Tech Sharing', name: 'Tech Sharing', icon: Code },
-]
-
-const statuses = [
-  { id: 'all', name: 'All Status', color: 'text-text-secondary' },
-  { id: 'draft', name: 'Draft', color: 'text-text-tertiary' },
-  { id: 'published', name: 'Published', color: 'text-success' },
-  { id: 'archived', name: 'Archived', color: 'text-warning' }
-]
-
-export default function AdminPostsPage() {
-  const router = useRouter()
-  const { session, profile, isAdmin } = useAuth()
+function PostsAdmin() {
+  const { data, ready, refresh, api } = useAdmin()
   const { showToast } = useToast()
-  const { confirm } = useConfirm()
+  const [tab, setTab] = useState<Tab>('published')
+  const [q, setQ] = useState('')
+  const [topic, setTopic] = useState('')
+  const [awarding, setAwarding] = useState<string | null>(null)
+  const [pts, setPts] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  const [posts, setPosts] = useState<PostWithAuthor[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [showFilters, setShowFilters] = useState(false)
-  const [fixingSlugs, setFixingSlugs] = useState(false)
+  const template = data.templates.find((t) => t.name === POST_TASK)
+  const postLogs = data.logs.filter((l) => l.task_name === POST_TASK)
+  const suggested = median(postLogs.map((l) => l.points)) || 30
+  const loggedFor = useMemo(() => new Map(data.logs.filter((l) => l.post_id).map((l) => [l.post_id!, l.points])), [data.logs])
+  const unlinked = postLogs.filter((l) => !l.post_id).length
 
-  // Check if user is admin
-  useEffect(() => {
-    if (profile && !isAdmin) {
-      showToast('error', 'Admin access required')
-      router.push('/dashboard')
-    }
-  }, [profile, isAdmin, router, showToast])
+  const counts = { published: 0, draft: 0, archived: 0 } as Record<Tab, number>
+  data.posts.forEach((p) => (counts[p.status] += 1))
 
-  // Fetch posts
-  useEffect(() => {
-    if (session?.access_token && isAdmin) {
-      fetchPosts()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, selectedStatus, selectedCategory, session?.access_token, isAdmin])
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true)
-
-      const params = new URLSearchParams()
-      if (searchTerm) params.set('search', searchTerm)
-      if (selectedStatus !== 'all') params.set('status', selectedStatus)
-      if (selectedCategory !== 'all') params.set('category', selectedCategory)
-
-      const response = await fetch(`/api/admin/posts?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        }
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setPosts(data.posts)
-      } else {
-        showToast('error', data.error || 'Failed to fetch posts')
-      }
-    } catch (error) {
-      console.error('Error fetching posts:', error)
-      showToast('error', 'Network error occurred')
-    } finally {
-      setLoading(false)
-    }
+  let rows = data.posts.filter((p) => p.status === tab)
+  if (topic) rows = rows.filter((p) => p.category === topic)
+  if (q) {
+    const s = q.toLowerCase()
+    rows = rows.filter((p) => p.title.toLowerCase().includes(s) || nameOf(data, p.author_id).toLowerCase().includes(s))
   }
 
-  const handleDelete = async (postId: string, postTitle: string) => {
-    const confirmed = await confirm({
-      title: 'Delete Post',
-      message: `Are you sure you want to delete "${postTitle}"? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      variant: 'danger'
-    })
+  const writers = useMemo(() => {
+    const m = new Map<string, number>()
+    data.posts.filter((p) => p.status === 'published').forEach((p) => m.set(p.author_id, (m.get(p.author_id) || 0) + 1))
+    return Array.from(m.entries()).sort((a, b) => b[1] - a[1])
+  }, [data.posts])
+  const silent = data.members.length - writers.length
 
-    if (!confirmed) return
-
+  const award = async (p: AdminPost) => {
+    const n = parseInt(pts, 10)
+    if (!Number.isInteger(n) || n < 0) return
+    setBusy(true)
     try {
-      const response = await fetch(`/api/posts/${postId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        }
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        showToast('success', 'Post deleted successfully')
-        fetchPosts()
-      } else {
-        showToast('error', data.error || 'Failed to delete post')
-      }
-    } catch (error) {
-      console.error('Error deleting post:', error)
-      showToast('error', 'Network error occurred')
-    }
-  }
-
-  const handleUpdateSlugs = async () => {
-    const confirmed = await confirm({
-      title: 'Update All Slugs',
-      message: 'This will regenerate slugs for all posts based on their English title. Duplicate titles will get a numbered suffix.',
-      confirmText: 'Update Slugs',
-      cancelText: 'Cancel',
-      variant: 'danger'
-    })
-
-    if (!confirmed) return
-
-    try {
-      setFixingSlugs(true)
-      const response = await fetch('/api/admin/update-slugs', {
+      await api('/api/admin/activity', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        }
+        body: { ...(template ? { templateId: template.id } : { taskName: POST_TASK }), points: n, memberIds: [p.author_id], postId: p.id },
       })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        showToast('success', `Updated ${data.updated} slug${data.updated !== 1 ? 's' : ''}${data.skipped ? `, ${data.skipped} already correct` : ''}`)
-        if (data.updated > 0) fetchPosts()
-      } else {
-        showToast('error', data.error || 'Failed to update slugs')
-      }
-    } catch (error) {
-      showToast('error', 'Network error occurred')
+      showToast('success', `${n} points logged for ${nameOf(data, p.author_id)}`)
+      setAwarding(null)
+      refresh()
+    } catch (e: any) {
+      showToast('error', e.message)
     } finally {
-      setFixingSlugs(false)
+      setBusy(false)
     }
   }
 
-  if (!profile || !isAdmin) {
-    return (
-      <ProtectedRoute>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loading size="lg" text="Checking permissions..." />
-        </div>
-      </ProtectedRoute>
-    )
-  }
+  if (!ready) return <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
+  const maxW = writers[0]?.[1] || 1
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto max-w-7xl">
-        {/* Back to Dashboard */}
-        <Link href="/admin">
-          <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-        </Link>
-
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-                Manage All Posts
-              </h1>
-              <p className="text-sm sm:text-base text-text-secondary">
-                View and manage all posts from all members
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleUpdateSlugs}
-              loading={fixingSlugs}
-              icon={<Wrench className="w-4 h-4" />}
-              className="w-full sm:w-auto"
+    <div className="flex flex-wrap items-start gap-x-12 gap-y-8">
+      <section aria-label="Posts" className="min-w-0 flex-[1_1_760px]">
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-3 border-b border-rule">
+          <div role="tablist" aria-label="Status" className="flex gap-[22px] text-[15px] font-medium">
+            {(['published', 'draft', 'archived'] as Tab[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => setTab(t)}
+                className={cn('-mb-px border-b-2 pb-3 pt-2.5', tab === t ? 'border-link text-white' : 'border-transparent text-text-secondary hover:text-text-primary')}
+              >
+                {t === 'draft' ? 'Drafts' : t[0].toUpperCase() + t.slice(1)} <span className="font-mono text-[13px] text-text-tertiary">{counts[t]}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 pb-2">
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Title or author"
+              aria-label="Search posts"
+              className="min-h-[36px] w-[200px] rounded-md border border-control bg-paper px-3 text-sm text-text-primary placeholder:text-text-disabled focus:border-link focus:outline-none"
+            />
+            <select
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              aria-label="Topic"
+              className="min-h-[36px] rounded-md border border-control bg-paper px-2.5 text-sm text-text-secondary focus:border-link focus:outline-none"
             >
-              Update Slugs
-            </Button>
+              <option value="">All topics</option>
+              {POST_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{topicOf(c).label}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 lg:items-center justify-between mb-4">
-              <div className="w-full lg:w-96">
-                <Input
-                  placeholder="Search posts..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  icon={<Search className="w-4 h-4" />}
-                />
-              </div>
-
-              <Button
-                variant="secondary"
-                onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden w-full"
-                icon={<Filter className="w-4 h-4" />}
-              >
-                Filters
-              </Button>
-            </div>
-
-            {/* Filter Buttons */}
-            <div className={`space-y-4 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-              {/* Status Filter */}
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Status
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {statuses.map((status) => (
-                    <button
-                      key={status.id}
-                      onClick={() => setSelectedStatus(status.id)}
-                      className={`px-4 py-2.5 min-h-[44px] rounded-lg border transition-colors ${
-                        selectedStatus === status.id
-                          ? 'border-primary-blue bg-primary-blue/10 text-primary-blue'
-                          : 'border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary'
-                      }`}
-                    >
-                      <span className="text-sm font-medium">{status.name}</span>
+        <ul>
+          {rows.map((p) => {
+            const t = topicOf(p.category)
+            const logged = loggedFor.get(p.id)
+            const open = awarding === p.id
+            return (
+              <li key={p.id} className="border-b border-rule">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-1.5 py-[11px] hover:bg-[#12151B] md:grid-cols-[92px_minmax(0,1fr)_48px_160px]">
+                  <span className="col-span-2 font-mono text-[13px] text-text-tertiary md:col-span-1">
+                    {formatDay(p.status === 'draft' ? p.updated_at || p.created_at : p.published_at || p.created_at)}
+                  </span>
+                  <span className="min-w-0">
+                    <Link href={`/dashboard/posts/${p.id}/edit`} className="block truncate font-semibold text-text-primary hover:text-link">{p.title}</Link>
+                    <span className="text-[13px] text-text-tertiary">
+                      <span aria-hidden="true" className="mr-1.5 inline-block h-2 w-2 rounded-sm" style={{ background: t.color }} />
+                      {t.label} · {nameOf(data, p.author_id)}
+                    </span>
+                  </span>
+                  <span className={cn('hidden text-right font-mono text-sm md:block', p.status === 'published' ? 'text-text-primary' : 'text-text-disabled')}>
+                    {p.status === 'published' ? p.view_count : '—'}
+                  </span>
+                  <span className="flex justify-end">
+                    {p.status === 'published' ? (
+                      logged !== undefined ? (
+                        <span className="text-[13px] text-[#6FD39F]">✓ {logged} pts logged</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => { setAwarding(open ? null : p.id); setPts(String(suggested)) }}
+                          aria-expanded={open}
+                          className="min-h-[32px] rounded-md border border-control px-2.5 text-[13px] font-semibold text-text-primary hover:border-text-tertiary"
+                        >
+                          Award points
+                        </button>
+                      )
+                    ) : p.status === 'draft' ? (
+                      <Link href={`/dashboard/posts/${p.id}/edit`} className="text-[13px] font-semibold text-signal">Review draft →</Link>
+                    ) : null}
+                  </span>
+                </div>
+                {open && (
+                  <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2.5 rounded-[10px] bg-paper px-4 py-3.5 md:ml-[108px]">
+                    <span className="text-sm text-text-secondary">
+                      <b className="text-text-primary">{POST_TASK}</b> → {nameOf(data, p.author_id)}
+                    </span>
+                    <label className="flex items-center gap-2 text-sm text-text-tertiary">
+                      Points
+                      <input
+                        autoFocus
+                        value={pts}
+                        onChange={(e) => setPts(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                        onKeyDown={(e) => e.key === 'Enter' && award(p)}
+                        inputMode="numeric"
+                        className="min-h-[34px] w-16 rounded-md border border-control bg-ink px-2 text-right font-mono text-text-primary focus:border-link focus:outline-none"
+                      />
+                    </label>
+                    {postLogs.length > 0 && (
+                      <span className="text-[13px] text-text-disabled">
+                        Past posts got {Math.min(...postLogs.map((l) => l.points))}–{Math.max(...postLogs.map((l) => l.points))}, median {suggested}
+                      </span>
+                    )}
+                    <span className="flex-auto" />
+                    <button type="button" onClick={() => setAwarding(null)} className="px-2.5 text-sm font-semibold text-text-tertiary hover:text-text-primary">Cancel</button>
+                    <button type="button" onClick={() => award(p)} disabled={busy || !pts} className={cn(btnPrimary, 'min-h-[34px]')}>
+                      {busy ? 'Logging…' : `Log ${pts || 0} points`}
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Category
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => {
-                    const Icon = category.icon
-                    return (
-                      <button
-                        key={category.id}
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={`flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg border transition-colors ${
-                          selectedCategory === category.id
-                            ? 'border-primary-blue bg-primary-blue/10 text-primary-blue'
-                            : 'border-dark-border hover:border-dark-border/60 text-text-secondary hover:text-text-primary'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">{category.name}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <Loading size="lg" text="Loading posts..." />
-          </div>
-        )}
-
-        {/* Posts List */}
-        {!loading && (
-          <>
-            {/* Results Count */}
-            <div className="mb-4">
-              <p className="text-text-secondary">
-                {posts.length} post{posts.length !== 1 ? 's' : ''} found
-              </p>
-            </div>
-
-            {/* Posts Table */}
-            {posts.length > 0 ? (
-              <Card>
-                {/* Scroll hint for mobile */}
-                <p className="lg:hidden text-xs text-text-tertiary text-center pt-3 px-4">
-                  ← Vuốt ngang để xem đầy đủ bảng →
-                </p>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[760px]">
-                      <thead className="bg-dark-surface/50 border-b border-dark-border">
-                        <tr>
-                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                            Post
-                          </th>
-                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                            Author
-                          </th>
-                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                            Stats
-                          </th>
-                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-dark-border">
-                        {posts.map((post) => (
-                          <tr
-                            key={post.id}
-                            className="hover:bg-dark-surface/30 transition-colors"
-                          >
-                            {/* Post Info */}
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="max-w-md">
-                                <div className="font-medium text-text-primary line-clamp-1 mb-1">
-                                  {post.title}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    variant={
-                                      post.category === 'News' ? 'primary' :
-                                      post.category === 'You may want to know' ? 'tech' :
-                                      post.category === 'Member Spotlight' ? 'success' :
-                                      'warning'
-                                    }
-                                    size="sm"
-                                  >
-                                    {post.category === 'You may want to know' ? 'Do You Know?' : post.category}
-                                  </Badge>
-                                  {post.featured && (
-                                    <Badge variant="primary" size="sm">
-                                      Featured
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Author */}
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-text-tertiary" />
-                                <span className="text-sm text-text-secondary">
-                                  {post.author?.full_name || 'Unknown'}
-                                </span>
-                              </div>
-                            </td>
-
-                            {/* Status */}
-                            <td className="px-4 sm:px-6 py-4">
-                              <Badge
-                                variant={
-                                  post.status === 'published' ? 'success' :
-                                  post.status === 'draft' ? 'secondary' :
-                                  'default'
-                                }
-                                size="sm"
-                              >
-                                {post.status}
-                              </Badge>
-                            </td>
-
-                            {/* Stats */}
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="flex flex-col gap-1 text-xs text-text-tertiary">
-                                <div className="flex items-center gap-1">
-                                  <Eye className="w-3 h-3" />
-                                  {post.view_count}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <ThumbsUp className="w-3 h-3" />
-                                  {post.upvote_count}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {post.reading_time}m
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Date */}
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="text-sm text-text-tertiary">
-                                {new Date(post.created_at).toLocaleDateString()}
-                              </div>
-                            </td>
-
-                            {/* Actions */}
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="flex items-center justify-end gap-2">
-                                {post.status === 'published' && (
-                                  <Link href={`/posts/${post.slug}`} target="_blank">
-                                    <Button variant="ghost" size="sm">
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </Link>
-                                )}
-                                <Link href={`/dashboard/posts/${post.id}/edit`}>
-                                  <Button variant="secondary" size="sm">
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                </Link>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDelete(post.id, post.title)}
-                                  className="text-error hover:text-error hover:bg-error/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <div className="text-6xl mb-4 opacity-50">📰</div>
-                  <h3 className="text-xl font-semibold text-text-primary mb-2">
-                    No posts found
-                  </h3>
-                  <p className="text-text-secondary mb-6">
-                    {selectedStatus !== 'all' || selectedCategory !== 'all' || searchTerm
-                      ? 'Try adjusting your filters or search criteria.'
-                      : 'No posts have been created yet.'}
-                  </p>
-                  {(selectedStatus !== 'all' || selectedCategory !== 'all' || searchTerm) && (
-                    <Button
-                      onClick={() => {
-                        setSearchTerm('')
-                        setSelectedStatus('all')
-                        setSelectedCategory('all')
-                      }}
-                    >
-                      Clear Filters
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </>
+                )}
+              </li>
+            )
+          })}
+          {rows.length === 0 && <li className="px-1.5 py-8 text-text-tertiary">{q || topic ? 'No posts match.' : tab === 'draft' ? 'No drafts.' : 'Nothing archived.'}</li>}
+        </ul>
+        <p className="mt-3.5 text-[13px] text-text-disabled">
+          Points logged from here remember their post, so a post can’t be rewarded twice.
+          {unlinked > 0 && ` The ${unlinked} older “${POST_TASK}” log${unlinked > 1 ? 's aren’t' : ' isn’t'} linked to a post.`}
+        </p>
+      </section>
+
+      <aside aria-labelledby="writers" className="min-w-0 flex-[0_1_340px] rounded-xl bg-paper px-6 py-[22px]">
+        <h2 id="writers" className="mb-1 text-lg font-bold">Who writes</h2>
+        <p className="mb-4 text-sm text-text-tertiary">
+          Published posts per member · {writers.length} of {data.members.length} have written
+        </p>
+        <ol className="flex flex-col gap-[9px]">
+          {writers.slice(0, 12).map(([id, n]) => (
+            <li key={id} className="grid grid-cols-[minmax(0,1fr)_90px_24px] items-center gap-2.5 text-sm">
+              <Link href={`/members/${id}`} className="truncate text-text-primary hover:text-link">{nameOf(data, id)}</Link>
+              <span aria-hidden="true" className="h-1.5 overflow-hidden rounded-[3px] bg-rule">
+                <span className="block h-full bg-[#5B7FD6]" style={{ width: `${Math.round((n / maxW) * 100)}%` }} />
+              </span>
+              <span className="text-right font-mono">{n}</span>
+            </li>
+          ))}
+        </ol>
+        {silent > 0 && (
+          <p className="mt-4 border-t border-[#2A2E37] pt-3.5 text-sm text-text-tertiary">
+            {silent} member{silent > 1 ? 's haven’t' : ' hasn’t'} written yet.{' '}
+            <Link href="/admin/users" className="font-semibold text-link hover:text-text-primary">See who →</Link>
+          </p>
         )}
-      </div>
+      </aside>
     </div>
-    </ProtectedRoute>
   )
 }

@@ -1,13 +1,13 @@
 export const SITE_CONFIG = {
   name: 'The Noders Community',
   shortName: 'The Noders',
-  description: 'A technology club at VNUHCM High School for the Gifted, building practical AI solutions, organizing workshops, and connecting young developers in PTNK.',
+  description: 'A student-led tech community at High School for the Gifted VNUHCM (PTNK). We build AI products, run AI contests and teach short courses for students.',
   tagline: 'Connecting Minds, Creating Intelligence',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.thenodersptnk.com',
   keywords: [
     'The Noders',
     'PTNK',
-    'VNUHCM High School for the Gifted',
+    'High School for the Gifted VNUHCM',
     'technology club',
     'AI innovation',
     'student developers',
@@ -28,20 +28,21 @@ export const SITE_CONFIG = {
   type: 'website',
 }
 
-export const NAVIGATION_ITEMS = [
-  { name: 'Contest', href: '/contest' },
-  { name: 'Education', href: '/education' },
+// Primary nav — flat, in the order a first-time visitor reads the site:
+// what we've built, what we write, then programs, then people.
+export const NAVIGATION_ITEMS: { name: string; href: string; children?: { name: string; href: string }[] }[] = [
   { name: 'Products', href: '/products' },
   { name: 'Posts', href: '/posts' },
-  {
-    name: 'About',
-    href: '#',
-    children: [
-      { name: 'Members', href: '/members' },
-      { name: 'Verify Certificate', href: '/verify' },
-      { name: 'Contact', href: '/contact' },
-    ]
-  },
+  { name: 'Contests', href: '/contest' },
+  { name: 'Education', href: '/education' },
+  { name: 'Members', href: '/members' },
+]
+
+// Utility links shown at the right of the header (desktop) and in a "More"
+// group on mobile.
+export const SECONDARY_NAV_ITEMS = [
+  { name: 'Verify certificate', href: '/verify' },
+  { name: 'Contact', href: '/contact' },
 ]
 
 export const SOCIAL_LINKS = {
@@ -124,16 +125,6 @@ export const DEFAULT_AVATAR_COLORS = [
   '#EA580C', // Orange-600
   '#BE123C', // Rose
 ]
-
-export const SKILLS_CATEGORIES = {
-  'Frontend': ['React', 'Next.js', 'Vue.js', 'Angular', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS'],
-  'Backend': ['Node.js', 'Python', 'Express', 'FastAPI', 'Django', 'Flask', 'PostgreSQL', 'MongoDB'],
-  'Mobile': ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Ionic'],
-  'DevOps': ['Docker', 'AWS', 'Google Cloud', 'Azure', 'Kubernetes', 'CI/CD'],
-  'AI/ML': ['TensorFlow', 'PyTorch', 'Scikit-learn', 'OpenAI', 'Hugging Face', 'Computer Vision'],
-  'Design': ['Figma', 'Adobe XD', 'Sketch', 'Photoshop', 'Illustrator'],
-  'Others': ['Git', 'REST API', 'GraphQL', 'Testing', 'Agile', 'Scrum']
-}
 
 export const CONTRIBUTION_ROLES = [
   'Project Lead',

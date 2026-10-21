@@ -1,568 +1,307 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-import { Card, CardContent, CardHeader } from '@/components/Card'
-import { Badge } from '@/components/Badge'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { Loading } from '@/components/Loading'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Avatar } from '@/components/Avatar'
-import { ImageUpload } from '@/components/ImageUpload'
-import { UpdateProfileData } from '@/types/member'
-import {
-  ArrowLeft,
-  Save,
-  Upload,
-  X,
-  Github,
-  Linkedin,
-  Facebook,
-  Globe,
-  User,
-  Shield,
-  Lock,
-  Eye,
-  EyeOff
-} from 'lucide-react'
+import { useToast } from '@/components/Toast'
+import { useDashboard } from '@/components/dashboard/DashboardContext'
+import { MemberAvatar, btnPrimary, btnSecondary, fieldClass, hintClass, labelClass } from '@/components/dashboard/ui'
+import { createClient } from '@/lib/supabase'
+import { uploadImage } from '@/lib/upload'
+import { cn } from '@/lib/utils'
+import type { SocialLinks } from '@/types/database'
 
-interface SocialLinksEditorProps {
-  socialLinks: UpdateProfileData['social_links']
-  onChange: (socialLinks: UpdateProfileData['social_links']) => void
+const LINKS: { key: keyof SocialLinks; label: string; placeholder: string }[] = [
+  { key: 'github', label: 'GitHub', placeholder: 'https://github.com/username' },
+  { key: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/username' },
+  { key: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/username' },
+  { key: 'website', label: 'Website', placeholder: 'https://yourwebsite.com' },
+]
+
+const BIO_MAX = 160
+
+function usernameProblem(v: string): string | null {
+  if (!v) return 'Choose a username.'
+  if (v.length < 3) return 'At least 3 characters.'
+  if (v.length > 30) return 'At most 30 characters.'
+  if (!/^[a-z0-9._-]+$/.test(v)) return 'Lowercase letters, numbers, dots, dashes and underscores only.'
+  return null
 }
 
-function SocialLinksEditor({ socialLinks, onChange }: SocialLinksEditorProps) {
-  const handleChange = (platform: string, value: string) => {
-    onChange({
-      ...socialLinks,
-      [platform]: value || undefined
-    })
+function urlProblem(v?: string) {
+  if (!v) return null
+  try {
+    const u = new URL(v)
+    return u.protocol.startsWith('http') ? null : 'Start the link with https://'
+  } catch {
+    return 'Start the link with https://'
   }
+}
 
-  const socialPlatforms = [
-    { key: 'github', label: 'GitHub', icon: Github, placeholder: 'https://github.com/username' },
-    { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, placeholder: 'https://linkedin.com/in/username' },
-    { key: 'facebook', label: 'Facebook', icon: Facebook, placeholder: 'https://facebook.com/username' },
-    { key: 'website', label: 'Website', icon: Globe, placeholder: 'https://yourwebsite.com' }
-  ]
+interface Form {
+  full_name: string
+  username: string
+  bio: string
+  avatar_url: string | null
+  social_links: SocialLinks
+}
 
-  return (
-    <div className="space-y-4">
-      {socialPlatforms.map(({ key, label, icon: Icon, placeholder }) => (
-        <div key={key}>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            <Icon className="w-4 h-4 inline mr-2" />
-            {label}
-          </label>
-          <Input
-            type="url"
-            placeholder={placeholder}
-            value={socialLinks?.[key as keyof typeof socialLinks] || ''}
-            onChange={(e) => handleChange(key, e.target.value)}
-          />
-        </div>
-      ))}
-    </div>
+export default function ProfilePage() {
+  const { profile, session, updateProfile } = useAuth()
+  const { setPreview } = useDashboard()
+  const { showToast } = useToast()
+
+  const initial = useMemo<Form | null>(
+    () =>
+      profile && {
+        full_name: profile.full_name || '',
+        username: profile.username || '',
+        bio: profile.bio || '',
+        avatar_url: profile.avatar_url || null,
+        social_links: profile.social_links || {},
+      },
+    [profile]
   )
-}
+  const [form, setForm] = useState<Form | null>(initial)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [usernameTaken, setUsernameTaken] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
-function ProfileEditPage() {
-  const router = useRouter()
-  const { profile, user, updateProfile, changePassword } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    setForm(initial)
+  }, [initial])
 
-  // Password change state
-  const [passwordLoading, setPasswordLoading] = useState(false)
-  const [passwordSuccess, setPasswordSuccess] = useState(false)
-  const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  })
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  })
+  // Mirror edits into the navy band above, and clear on leave.
+  useEffect(() => {
+    if (form) setPreview({ full_name: form.full_name, bio: form.bio, avatar_url: form.avatar_url })
+  }, [form, setPreview])
+  useEffect(() => () => setPreview(null), [setPreview])
 
-  const [formData, setFormData] = useState<UpdateProfileData>({
-    full_name: profile?.full_name || '',
-    username: profile?.username || '',
-    bio: profile?.bio || '',
-    skills: profile?.skills || [],
-    avatar_url: profile?.avatar_url || '',
-    social_links: profile?.social_links || {}
-  })
-
-  const [avatarImage, setAvatarImage] = useState<any>(null)
-  const [usernameError, setUsernameError] = useState<string | null>(null)
-
-  const validateUsername = (value: string): string | null => {
-    if (!value) return 'Username is required'
-    if (value !== value.toLowerCase()) return 'Username must be lowercase'
-    if (/\s/.test(value)) return 'Username cannot contain spaces'
-    if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(value)) return 'Username cannot contain Vietnamese diacritics'
-    if (!/^[a-z0-9._-]+$/.test(value)) return 'Username can only contain lowercase letters, numbers, dots, hyphens, and underscores'
-    if (value.length < 3) return 'Username must be at least 3 characters'
-    if (value.length > 30) return 'Username must be at most 30 characters'
-    return null
-  }
-
-  const handleUsernameChange = (value: string) => {
-    const sanitized = value.toLowerCase().replace(/\s/g, '')
-    setFormData(prev => ({ ...prev, username: sanitized }))
-    setUsernameError(validateUsername(sanitized))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const uError = validateUsername(formData.username || '')
-    if (uError) {
-      setUsernameError(uError)
+  // Username availability, checked after typing stops
+  useEffect(() => {
+    if (!form || !profile || form.username === profile.username || usernameProblem(form.username)) {
+      setUsernameTaken(false)
       return
     }
+    const t = setTimeout(async () => {
+      const { data } = await (createClient() as any).from('profiles').select('id').eq('username', form.username).neq('id', profile.id).limit(1)
+      setUsernameTaken(!!data?.length)
+    }, 400)
+    return () => clearTimeout(t)
+  }, [form?.username, profile]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    setLoading(true)
-    setError(null)
-    setSuccess(false)
+  const dirty = !!form && !!initial && JSON.stringify(form) !== JSON.stringify(initial)
 
+  // Warn before leaving with unsaved edits
+  useEffect(() => {
+    if (!dirty) return
+    const h = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', h)
+    return () => window.removeEventListener('beforeunload', h)
+  }, [dirty])
+
+  if (!form || !profile) {
+    return <div aria-busy="true" className="h-[520px] animate-pulse rounded-[14px] bg-paper" />
+  }
+
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => (f ? { ...f, [k]: v } : f))
+  const uError = usernameProblem(form.username) || (usernameTaken ? 'Someone already uses this username.' : null)
+  const linkErrors = Object.fromEntries(LINKS.map((l) => [l.key, urlProblem(form.social_links[l.key])]))
+  const invalid = !form.full_name.trim() || !!uError || form.bio.length > BIO_MAX || Object.values(linkErrors).some(Boolean)
+
+  const onPhoto = async (file?: File) => {
+    if (!file || !session?.access_token) return
     try {
-      const result = await updateProfile(formData)
-
-      if (result.error) {
-        setError(result.error)
-      } else {
-        setSuccess(true)
-        setTimeout(() => setSuccess(false), 3000)
-      }
-    } catch (err) {
-      setError('An unexpected error occurred')
+      setUploading(true)
+      const img = await uploadImage(file, 'avatar', session.access_token)
+      set('avatar_url', img.public_url)
+    } catch (e: any) {
+      showToast('error', e.message || 'Upload failed')
     } finally {
-      setLoading(false)
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
-  const handleChange = (field: keyof UpdateProfileData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+  const save = async () => {
+    if (invalid) return
+    setSaving(true)
+    const links = Object.fromEntries(Object.entries(form.social_links).filter(([, v]) => !!v)) as SocialLinks
+    const result = await updateProfile({
+      full_name: form.full_name.trim(),
+      username: form.username,
+      bio: form.bio.trim() || null,
+      avatar_url: form.avatar_url,
+      social_links: links,
+    } as any)
+    setSaving(false)
+    if (result.error) showToast('error', result.error)
+    else showToast('success', 'Profile saved')
   }
 
-  const handlePasswordChange = async () => {
-    setPasswordLoading(true)
-    setPasswordError(null)
-    setPasswordSuccess(false)
-
-    try {
-      // Validation
-      if (passwordData.newPassword.length < 6) {
-        setPasswordError('Password must be at least 6 characters long')
-        setPasswordLoading(false)
-        return
-      }
-
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setPasswordError('New passwords do not match')
-        setPasswordLoading(false)
-        return
-      }
-
-      const result = await changePassword(passwordData.currentPassword, passwordData.newPassword)
-
-      if (result.error) {
-        setPasswordError(result.error)
-        return
-      }
-
-      setPasswordSuccess(true)
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      })
-
-      setTimeout(() => setPasswordSuccess(false), 5000)
-    } catch (err) {
-      setPasswordError('An unexpected error occurred')
-    } finally {
-      setPasswordLoading(false)
-    }
-  }
-
-  if (!profile) {
-    return <Loading />
-  }
-
-  // Use CSS Avatar component instead of external image
+  const card = 'rounded-[14px] bg-paper px-7 py-[26px]'
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-4xl">
-          {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <Button
-              onClick={() => router.back()}
-              variant="ghost"
-              size="sm"
-              className="inline-flex items-center text-text-secondary hover:text-primary-blue transition-colors mb-4 px-0"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
+    <>
+      <div className="mb-7 flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1.5">
+        <h2 className="text-[28px] font-bold tracking-[-0.02em]">Profile</h2>
+        <span className="text-text-tertiary">Changes show in the band above as you type. Everything here is public.</span>
+      </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Edit Profile</h1>
-            <p className="text-sm sm:text-base text-text-secondary mt-2">
-              Update your profile information and preferences.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-              {/* Profile Preview */}
-              <div className="lg:col-span-1">
-                <Card className="lg:sticky lg:top-8">
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-text-primary">Preview</h3>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    {/* Avatar */}
-                    <div className="mx-auto mb-4 flex justify-center">
-                      <Avatar
-                        name={formData.full_name}
-                        src={formData.avatar_url}
-                        size="xl"
-                      />
-                    </div>
-
-                    {/* Basic Info */}
-                    <h4 className="font-semibold text-text-primary mb-1">
-                      {formData.full_name || 'Your Name'}
-                    </h4>
-                    <p className="text-text-secondary text-sm mb-2">
-                      @{formData.username || 'username'}
-                    </p>
-                    <Badge variant={profile.role === 'admin' ? 'primary' : 'secondary'} size="sm">
-                      {profile.role === 'admin' ? 'Admin' : 'Member'}
-                    </Badge>
-
-                    {/* Bio Preview */}
-                    {formData.bio && (
-                      <p className="text-text-secondary text-xs mt-4 leading-relaxed">
-                        {formData.bio}
-                      </p>
-                    )}
-
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Form Fields */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Basic Information */}
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Basic Information
-                    </h3>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        Username
-                      </label>
-                      <Input
-                        required
-                        placeholder="username"
-                        value={formData.username || ''}
-                        onChange={(e) => handleUsernameChange(e.target.value)}
-                      />
-                      {usernameError ? (
-                        <p className="text-xs text-error mt-1">{usernameError}</p>
-                      ) : (
-                        <p className="text-xs text-text-tertiary mt-1">
-                          Lowercase letters, numbers, dots, hyphens, and underscores only
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Avatar Upload with Current Preview */}
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        Avatar
-                      </label>
-                      {!avatarImage && formData.avatar_url && (
-                        <div className="mb-3 relative group">
-                          <div className="relative overflow-hidden rounded-lg border border-dark-border">
-                            <img
-                              src={formData.avatar_url}
-                              alt="Current avatar"
-                              className="w-full h-40 object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <div className="flex gap-2">
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  size="sm"
-                                  onClick={() => {
-                                    handleChange('avatar_url', '')
-                                    setAvatarImage(null)
-                                  }}
-                                >
-                                  <Upload className="w-4 h-4 mr-1" />
-                                  Change
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    handleChange('avatar_url', '')
-                                    setAvatarImage(null)
-                                  }}
-                                  className="text-error hover:text-error"
-                                >
-                                  <X className="w-4 h-4 mr-1" />
-                                  Remove
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-xs text-text-tertiary mt-1">Current avatar</p>
-                        </div>
-                      )}
-                      {(!formData.avatar_url || avatarImage) && (
-                        <ImageUpload
-                          value={avatarImage}
-                          onChange={(imageData) => {
-                            setAvatarImage(imageData)
-                            if (imageData) {
-                              handleChange('avatar_url', imageData.public_url)
-                            } else {
-                              handleChange('avatar_url', '')
-                            }
-                          }}
-                          usage="avatar"
-                          placeholder="Upload your avatar"
-                        />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Social Links */}
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      Social Links
-                    </h3>
-                  </CardHeader>
-                  <CardContent>
-                    <SocialLinksEditor
-                      socialLinks={formData.social_links}
-                      onChange={(socialLinks) => handleChange('social_links', socialLinks)}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Security Settings */}
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
-                      Security Settings
-                    </h3>
-                    <p className="text-text-secondary text-sm mt-1">
-                      Change your account password to keep your account secure.
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        Current Password
-                      </label>
-                      <div className="relative">
-                        <Input
-                          type={showPasswords.current ? "text" : "password"}
-                          placeholder="Enter current password"
-                          value={passwordData.currentPassword}
-                          onChange={(e) => setPasswordData(prev => ({
-                            ...prev,
-                            currentPassword: e.target.value
-                          }))}
-                          icon={<Lock className="w-4 h-4" />}
-                          className="pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPasswords(prev => ({
-                            ...prev,
-                            current: !prev.current
-                          }))}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
-                        >
-                          {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        New Password
-                      </label>
-                      <div className="relative">
-                        <Input
-                          type={showPasswords.new ? "text" : "password"}
-                          placeholder="Enter new password"
-                          value={passwordData.newPassword}
-                          onChange={(e) => setPasswordData(prev => ({
-                            ...prev,
-                            newPassword: e.target.value
-                          }))}
-                          icon={<Lock className="w-4 h-4" />}
-                          className="pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPasswords(prev => ({
-                            ...prev,
-                            new: !prev.new
-                          }))}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
-                        >
-                          {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      <p className="text-xs text-text-tertiary mt-1">
-                        Password must be at least 6 characters long
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-text-primary mb-2">
-                        Confirm New Password
-                      </label>
-                      <div className="relative">
-                        <Input
-                          type={showPasswords.confirm ? "text" : "password"}
-                          placeholder="Confirm new password"
-                          value={passwordData.confirmPassword}
-                          onChange={(e) => setPasswordData(prev => ({
-                            ...prev,
-                            confirmPassword: e.target.value
-                          }))}
-                          icon={<Lock className="w-4 h-4" />}
-                          className="pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPasswords(prev => ({
-                            ...prev,
-                            confirm: !prev.confirm
-                          }))}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
-                        >
-                          {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-dark-border">
-                      <Button
-                        type="button"
-                        onClick={handlePasswordChange}
-                        disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                        variant="secondary"
-                        className="w-full sm:w-auto"
-                      >
-                        {passwordLoading ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                            Changing Password...
-                          </>
-                        ) : (
-                          <>
-                            <Shield className="w-4 h-4 mr-2" />
-                            Change Password
-                          </>
-                        )}
-                      </Button>
-                    </div>
-
-                    {/* Password Success/Error Messages */}
-                    {passwordSuccess && (
-                      <div className="p-4 bg-success/20 border border-success/30 rounded-lg text-success text-sm">
-                        Password changed successfully!
-                      </div>
-                    )}
-
-                    {passwordError && (
-                      <div className="p-4 bg-error/20 border border-error/30 rounded-lg text-error text-sm">
-                        {passwordError}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Submit */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full sm:w-auto sm:flex-none"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => router.push('/dashboard')}
-                    className="w-full sm:w-auto"
-                  >
-                    Cancel
-                  </Button>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          save()
+        }}
+        className="grid items-start gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr))]"
+      >
+        <div className={cn(card, 'flex flex-col gap-9')}>
+          <fieldset>
+            <legend className="mb-3.5 text-lg font-bold">Photo</legend>
+            <div className="flex flex-wrap items-center gap-5">
+              <MemberAvatar name={form.full_name} src={form.avatar_url} className="h-[88px] w-[88px] rounded-2xl text-[28px]" />
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2.5">
+                  <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className={btnSecondary}>
+                    {uploading ? 'Uploading…' : form.avatar_url ? 'Upload new' : 'Upload a photo'}
+                  </button>
+                  {form.avatar_url && (
+                    <button type="button" onClick={() => set('avatar_url', null)} className="px-2.5 text-sm font-semibold text-text-tertiary hover:text-text-primary">
+                      Remove
+                    </button>
+                  )}
                 </div>
-
-                {/* Success/Error Messages */}
-                {success && (
-                  <div className="p-4 bg-success/20 border border-success/30 rounded-lg text-success text-sm">
-                    Profile updated successfully!
-                  </div>
-                )}
-
-                {error && (
-                  <div className="p-4 bg-error/20 border border-error/30 rounded-lg text-error text-sm">
-                    {error}
-                  </div>
-                )}
+                <span className="text-[13px] text-text-tertiary">Square works best. Cropped and resized for you.</span>
+                <input ref={fileRef} type="file" accept="image/*" className="sr-only" tabIndex={-1} onChange={(e) => onPhoto(e.target.files?.[0])} />
               </div>
             </div>
-          </form>
+          </fieldset>
+
+          <fieldset className="flex flex-col gap-[18px]">
+            <legend className="mb-3.5 text-lg font-bold">About you</legend>
+            <div>
+              <label htmlFor="name" className={labelClass}>Full name</label>
+              <input id="name" value={form.full_name} onChange={(e) => set('full_name', e.target.value)} className={cn(fieldClass, 'min-h-[46px]')} />
+            </div>
+            <div>
+              <label htmlFor="user" className={labelClass}>Username</label>
+              <div className={cn('flex items-center overflow-hidden rounded-md border bg-paper focus-within:border-link', uError ? 'border-[#B5473A]' : 'border-control')}>
+                <span className="pl-3.5 pr-1 font-mono text-sm text-text-disabled">@</span>
+                <input
+                  id="user"
+                  value={form.username}
+                  onChange={(e) => set('username', e.target.value.toLowerCase().replace(/\s/g, ''))}
+                  aria-invalid={!!uError}
+                  aria-describedby="user-hint"
+                  className="min-h-[44px] min-w-0 flex-auto bg-transparent pr-3.5 font-mono text-sm text-text-primary focus:outline-none"
+                />
+              </div>
+              <p id="user-hint" className={cn(hintClass, uError && 'text-[#FF9C85]')}>
+                {uError || 'Lowercase letters, numbers, dots, dashes and underscores.'}
+              </p>
+            </div>
+            <div>
+              <div className="mb-1.5 flex justify-between">
+                <label htmlFor="bio" className="text-sm font-semibold">Bio</label>
+                <span className={cn('font-mono text-[13px]', form.bio.length > BIO_MAX ? 'text-[#FF9C85]' : 'text-text-disabled')}>
+                  {form.bio.length}/{BIO_MAX}
+                </span>
+              </div>
+              <textarea id="bio" rows={3} value={form.bio} onChange={(e) => set('bio', e.target.value)} className={cn(fieldClass, 'resize-y py-3')} />
+              <p className={hintClass}>One line about what you do, shown under your name. Your products, posts and results are added automatically.</p>
+            </div>
+          </fieldset>
         </div>
-      </div>
-    </ProtectedRoute>
+
+        <div className="flex flex-col gap-6">
+          <fieldset className={cn(card, 'flex flex-col gap-3.5')}>
+            <legend className="float-left mb-3.5 w-full text-lg font-bold">Links</legend>
+            {LINKS.map((l) => (
+              <div key={l.key}>
+                <div className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-3">
+                  <label htmlFor={`l-${l.key}`} className="text-sm font-semibold">{l.label}</label>
+                  <input
+                    id={`l-${l.key}`}
+                    type="url"
+                    inputMode="url"
+                    placeholder={l.placeholder}
+                    value={form.social_links[l.key] || ''}
+                    onChange={(e) => set('social_links', { ...form.social_links, [l.key]: e.target.value.trim() || undefined })}
+                    aria-invalid={!!linkErrors[l.key]}
+                    className={cn(fieldClass, 'min-h-[44px] text-sm', linkErrors[l.key] && 'border-[#B5473A]')}
+                  />
+                </div>
+                {linkErrors[l.key] && <p className="ml-[108px] mt-1 text-[13px] text-[#FF9C85]">{linkErrors[l.key]}</p>}
+              </div>
+            ))}
+          </fieldset>
+
+          <PasswordCard className={card} email={session?.user?.email} />
+        </div>
+      </form>
+
+      {dirty && (
+        <div role="region" aria-label="Unsaved changes" className="sticky bottom-0 z-30 -mx-[clamp(20px,4vw,48px)] mt-8 border-t border-[#2A2E37] bg-paper/95 backdrop-blur">
+          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-3 px-[clamp(20px,4vw,48px)] py-3.5">
+            <span className="flex-auto text-sm text-text-secondary">{invalid ? 'Fix the highlighted fields to save.' : 'You have unsaved changes.'}</span>
+            <button type="button" onClick={() => setForm(initial)} className={btnSecondary}>
+              Discard
+            </button>
+            <button type="button" onClick={save} disabled={saving || invalid} className={btnPrimary}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
-export default ProfileEditPage
+function PasswordCard({ className, email }: { className: string; email?: string }) {
+  const { changePassword } = useAuth()
+  const { showToast } = useToast()
+  const [open, setOpen] = useState(false)
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const submit = async () => {
+    setError(null)
+    if (next.length < 8) return setError('Use at least 8 characters.')
+    setBusy(true)
+    const r = await changePassword(current, next)
+    setBusy(false)
+    if (r.error) return setError(r.error)
+    setCurrent('')
+    setNext('')
+    setOpen(false)
+    showToast('success', 'Password updated')
+  }
+
+  return (
+    <section aria-labelledby="signin" className={cn(className, 'flex flex-col gap-3.5')}>
+      <h3 id="signin" className="text-lg font-bold">Sign-in</h3>
+      <div className="flex flex-wrap justify-between gap-2 text-[15px]">
+        <span className="min-w-0 break-all">
+          <span className="text-text-tertiary">Email </span>
+          {email}
+        </span>
+        <span className="text-[13px] text-text-disabled">Ask an admin to change it</span>
+      </div>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className={cn(btnSecondary, 'self-start')}>
+        Change password
+      </button>
+      {open && (
+        <div className="flex flex-col gap-2.5 rounded-[10px] bg-ink p-[18px]">
+          <input type="password" autoComplete="current-password" placeholder="Current password" aria-label="Current password" value={current} onChange={(e) => setCurrent(e.target.value)} className={cn(fieldClass, 'min-h-[44px] bg-ink')} />
+          <input type="password" autoComplete="new-password" placeholder="New password · 8+ characters" aria-label="New password" value={next} onChange={(e) => setNext(e.target.value)} className={cn(fieldClass, 'min-h-[44px] bg-ink')} />
+          {error && <p role="alert" className="text-[13px] text-[#FF9C85]">{error}</p>}
+          <button type="button" onClick={submit} disabled={busy || !current || !next} className={cn(btnPrimary, 'self-start')}>
+            {busy ? 'Updating…' : 'Update password'}
+          </button>
+        </div>
+      )}
+    </section>
+  )
+}

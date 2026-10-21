@@ -1,217 +1,122 @@
-"use client";
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase'
+import { Avatar } from '@/components/Avatar'
+import { Container, NavyFacts, SectionTitle } from '@/components/editorial'
+import { MembersDirectory, type DirectoryMember } from '@/components/members/MembersDirectory'
+import { activitySummary, roleTitle } from '@/lib/memberSummary'
 
-import { useState } from "react";
-import Link from "next/link";
-import { useMembers } from "@/lib/hooks";
-import { Card, CardContent } from "@/components/Card";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
-import { SkeletonProfile } from "@/components/Loading";
-import { MemberFilters } from "@/types/member";
-import { Avatar } from "@/components/Avatar";
-import { ClickableBadge } from "@/components/ClickableBadge";
-import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
-import { PageHero } from "@/components/PageHero";
-import { Search, FileText, Calendar } from "lucide-react";
+interface ProfileRow {
+  id: string
+  full_name: string | null
+  username: string | null
+  avatar_url: string | null
+  bio: string | null
+  role: 'admin' | 'member'
+  contest_count: number | null
+}
+
+async function getMembers() {
+  const supabase = createClient()
+  const [profiles, posts, credits, projects] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, username, avatar_url, bio, role, contest_count'),
+    supabase.from('posts').select('author_id').eq('status', 'published'),
+    supabase.from('project_contributors').select('user_id'),
+    supabase.from('projects').select('id', { count: 'exact', head: true }).in('status', ['active', 'completed']),
+  ])
+
+  const count = (rows: any[] | null, key: string) =>
+    (rows || []).reduce<Record<string, number>>((acc, r) => ((acc[r[key]] = (acc[r[key]] || 0) + 1), acc), {})
+  const postsBy = count(posts.data, 'author_id')
+  const productsBy = count(credits.data, 'user_id')
+
+  const members = ((profiles.data as ProfileRow[]) || []).map((p) => {
+    const stats = { products: productsBy[p.id] || 0, posts: postsBy[p.id] || 0, contests: p.contest_count || 0 }
+    return { ...p, name: p.full_name || p.username || 'Member', ...stats }
+  })
+
+  return {
+    members,
+    totalPosts: (posts.data || []).length,
+    totalProducts: projects.count || 0,
+  }
+}
 
 
-export default function MembersPage() {
-  const [filters, setFilters] = useState<MemberFilters>({
-    role: "all",
-    search: "",
-    sort_by: "full_name",
-    sort_order: "asc",
-  });
-  const { members, loading, error } = useMembers(filters);
+export default async function MembersPage() {
+  const { members, totalPosts, totalProducts } = await getMembers()
+  const competed = members.filter((m) => m.contests > 0).length
+  const leads = members
+    .filter((m) => m.role === 'admin')
+    .map((m) => ({ ...m, title: roleTitle(m.bio, m.role) }))
+    // Founder first, then heads, then the rest of the core team.
+    .sort((a, b) => rankTitle(a.title) - rankTitle(b.title) || a.name.localeCompare(b.name))
 
-  const handleSearchChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, search: value }));
-  };
-
-  const handleRoleFilter = (role: string) => {
-    setFilters((prev) => ({ ...prev, role: role as any }));
-  };
+  const directory: DirectoryMember[] = members.map((m) => ({
+    id: m.id,
+    name: m.name,
+    avatar: m.avatar_url || null,
+    products: m.products,
+    posts: m.posts,
+    contests: m.contests,
+    summary: activitySummary(m),
+  }))
 
   return (
-    <>
-      <NeuralNetworkBackground />
-      <div className="relative min-h-screen z-10">
-        <PageHero
-          title="Meet Our Team"
-          subtitle="The People Behind The Noders"
-          description="Get to know the passionate individuals building, writing, and competing across The Noders Community."
-        />
+    <div>
+      <section className="bg-navy text-white">
+        <Container className="pt-14">
+          <p className="mb-4 text-[15px] text-on-navy">Members</p>
+          <h1 className="mb-4 max-w-[760px] text-[32px] sm:text-[40px] lg:text-[50px] font-bold leading-[1.06] tracking-[-0.03em]">
+            {members.length} students. Everything on this site, they made.
+          </h1>
+          <p className="max-w-[620px] text-lg text-on-navy">
+            Each profile shows what that person actually shipped — products, posts and contest results — so you can see who to ask about what.
+          </p>
+          <NavyFacts
+            className="mt-10"
+            facts={[
+              { value: members.length, label: 'members' },
+              { value: totalProducts, label: 'products shipped' },
+              { value: totalPosts, label: 'posts written' },
+              { value: competed, label: 'took part in a contest' },
+            ]}
+          />
+        </Container>
+      </section>
 
-        <section className="pb-10 sm:pb-12 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto">
-          {/* Controls — search + role filter on one baseline row */}
-          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="w-full sm:w-72">
-              <Input
-                placeholder="Search members..."
-                value={filters.search || ""}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-              />
-            </div>
-
-            <div className="flex items-center gap-2">
-              {[
-                { label: "All", value: "all" },
-                { label: "Members", value: "member" },
-                { label: "Core Team", value: "admin" },
-              ].map((option) => (
-                <ClickableBadge
-                  key={option.value}
-                  variant={filters.role === option.value ? "primary" : "secondary"}
-                  size="md"
-                  className="hover:opacity-80 min-h-[40px] px-4"
-                  onClick={() => handleRoleFilter(option.value)}
-                >
-                  {option.label}
-                </ClickableBadge>
+      {leads.length > 0 && (
+        <section className="pt-20">
+          <Container>
+            <SectionTitle className="mb-2">Who leads what</SectionTitle>
+            <p className="mb-7 text-text-secondary">Reach out to the person who owns the area you care about.</p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {leads.map((m) => (
+                <Link key={m.id} href={`/members/${m.id}`} className="group grid grid-cols-[56px_1fr] items-center gap-4 rounded-xl bg-paper px-5 py-[18px] transition-colors hover:bg-[#1A1E26]">
+                  <Avatar src={m.avatar_url} name={m.name} size="lg" className="h-14 w-14" />
+                  <span className="min-w-0">
+                    <span className="block text-[13px] font-semibold text-link">{m.title}</span>
+                    <span className="block truncate text-[17px] font-bold leading-snug text-text-primary group-hover:text-link transition-colors">{m.name}</span>
+                    <span className="block truncate text-sm text-text-tertiary">{activitySummary(m) || 'No public work yet'}</span>
+                  </span>
+                </Link>
               ))}
             </div>
-          </div>
-
-          {/* Results count */}
-          {!loading && members && (
-            <div className="mb-6 text-sm text-text-tertiary">
-              {members.length} member{members.length !== 1 ? "s" : ""} found
-            </div>
-          )}
-
-          {/* Members grid */}
-          <div className="mb-12">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <SkeletonProfile key={i} />
-                ))}
-              </div>
-            ) : error ? (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <p className="text-error mb-4">Failed to load members</p>
-                  <p className="text-text-secondary">{error}</p>
-                </CardContent>
-              </Card>
-            ) : members && members.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-                {members.map((member) => {
-                  const totalPoints = member.total_points || 0;
-                  const postCount = member.posts_count || 0;
-                  const certCount = member.certificate_count || 0;
-                  const totalViews = member.total_post_views || 0;
-                  const taskCount = member.task_count || 0;
-                  const isCore = member.role === "admin";
-                  const joinDate = new Date(member.created_at).toLocaleDateString("en-US", {
-                    day: "2-digit", month: "short", year: "numeric",
-                  });
-
-                  return (
-                    <Link key={member.id} href={`/members/${member.id}`} className="block group h-full">
-                      <div
-                        className={`relative h-full flex flex-col overflow-hidden rounded-2xl border bg-dark-surface/70 backdrop-blur-sm p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary-blue/10 sm:group-hover:-translate-y-1 ${
-                          isCore
-                            ? "border-primary-blue/40 hover:border-primary-blue/60"
-                            : "border-dark-border/60 hover:border-primary-blue/40"
-                        }`}
-                      >
-                        {/* Identity */}
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <Avatar
-                              name={member.full_name}
-                              src={member.avatar_url}
-                              size="lg"
-                              className="border-2 border-dark-surface flex-shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <h3 className="text-base font-bold text-text-primary truncate group-hover:text-primary-blue transition-colors duration-300">
-                                {member.full_name || member.username}
-                              </h3>
-                              <p className="text-xs text-text-secondary truncate">@{member.username}</p>
-                            </div>
-                          </div>
-
-                          {isCore && (
-                            <Badge variant="primary" size="sm" className="flex-shrink-0">
-                              Core Team
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Bio */}
-                        <p className="text-sm text-text-secondary leading-relaxed line-clamp-2 mb-4 min-h-[2.5rem]">
-                          {member.bio || "Member of The Noders Community"}
-                        </p>
-
-                        {/* Stats — light pills, homepage style */}
-                        <div className="grid grid-cols-3 gap-2 mb-4">
-                          {[
-                            { value: totalPoints, label: "Points" },
-                            { value: certCount, label: "Certs" },
-                            { value: taskCount, label: "Tasks" },
-                          ].map((stat) => (
-                            <div
-                              key={stat.label}
-                              className="rounded-lg border border-dark-border/50 bg-dark-bg/40 px-2 py-2 text-center"
-                            >
-                              <div className="text-sm font-bold text-text-primary tabular-nums">{stat.value}</div>
-                              <div className="text-[10px] uppercase tracking-wide text-text-tertiary">{stat.label}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Footer meta */}
-                        <div className="mt-auto pt-4 border-t border-dark-border/60 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-tertiary">
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                            Joined {joinDate}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 flex-shrink-0" />
-                            {postCount} {postCount === 1 ? "post" : "posts"}
-                            {totalViews > 0 && <> • {totalViews.toLocaleString()} views</>}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <div className="text-6xl mb-4 opacity-50">👥</div>
-                  <h3 className="text-xl font-semibold text-text-primary mb-2">
-                    No members found
-                  </h3>
-                  <p className="text-text-secondary">
-                    Try adjusting your search criteria or filters.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* CTA Section */}
-          <div className="relative overflow-hidden rounded-2xl border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm p-6 sm:p-8 text-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3">
-              Interested in Joining?
-            </h2>
-            <p className="text-sm sm:text-base text-text-secondary mb-5 sm:mb-6 max-w-xl mx-auto">
-              Follow our community's fanpage to keep up with the newest recruitment information.
-            </p>
-            <a href="https://www.facebook.com/thenodersptnk" target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="w-full sm:w-auto">Our Fanpage</Button>
-            </a>
-          </div>
-          </div>
+          </Container>
         </section>
-      </div>
-    </>
-  );
+      )}
+
+      <section className="pt-24 pb-20 sm:pb-28">
+        <Container>
+          <MembersDirectory members={directory} />
+        </Container>
+      </section>
+    </div>
+  )
+}
+
+function rankTitle(t: string) {
+  if (t === 'Founder') return 0
+  if (t === 'Co-founder') return 1
+  if (t.startsWith('Head of')) return 2
+  return 3
 }

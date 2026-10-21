@@ -45,45 +45,27 @@ export async function GET(
       })
     }
 
-    // Get member details
-    const { data: member } = await supabase
-      .from('profiles')
-      .select('id, username, full_name, avatar_url, bio, social_links')
-      .eq('id', certificate.user_id)
-      .single()
-
-    // Get issuer details (if exists)
-    let issuer = null
-    if (certificate.issued_by) {
-      const { data: issuerData } = await supabase
+    // Member, issuer and image are independent: fetch them together
+    const [{ data: member }, issuerRes, imageRes] = await Promise.all([
+      supabase
         .from('profiles')
-        .select('id, username, full_name')
-        .eq('id', certificate.issued_by)
-        .single()
-      issuer = issuerData
-    }
-
-    // Get image details (if file_url references images table)
-    let imageUrl = certificate.file_url
-    if (!imageUrl) {
-      // Try to get from images table via a separate query
-      const { data: certWithImage } = await supabase
-        .from('certificates')
-        .select(`
-          image:images!certificates_image_id_fkey(
-            id,
-            public_url,
-            mime_type
-          )
-        `)
-        .eq('id', certificate.id)
-        .single()
-
-      if (certWithImage?.image) {
-        const img = certWithImage.image as { public_url?: string }
-        imageUrl = img.public_url || null
-      }
-    }
+        .select('id, username, full_name, avatar_url, bio, social_links')
+        .eq('id', certificate.user_id)
+        .single(),
+      certificate.issued_by
+        ? supabase.from('profiles').select('id, username, full_name').eq('id', certificate.issued_by).single()
+        : Promise.resolve({ data: null }),
+      certificate.file_url
+        ? Promise.resolve({ data: null })
+        : supabase
+            .from('certificates')
+            .select('image:images!certificates_image_id_fkey(id, public_url, mime_type)')
+            .eq('id', certificate.id)
+            .single(),
+    ])
+    const issuer = (issuerRes as any).data
+    const img = (imageRes as any).data?.image as { public_url?: string } | undefined
+    const imageUrl = certificate.file_url || img?.public_url || null
 
     return NextResponse.json({
       valid: true,

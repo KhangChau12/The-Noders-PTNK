@@ -23,12 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     })
   }
 
-  const skillsKeywords = member.skills || []
-
   return generateSEOMetadata({
     title: member.full_name || member.username,
     description: member.bio || `${member.full_name || member.username} - Member of The Noders Community technology club`,
-    keywords: ['team member', 'developer', 'PTNK student', ...skillsKeywords],
+    keywords: ['team member', 'developer', 'PTNK student'],
     image: member.avatar_url,
     url: `/members/${member.id}`,
     type: 'profile',

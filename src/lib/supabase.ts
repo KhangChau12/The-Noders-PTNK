@@ -10,8 +10,19 @@ function resetSupabaseInstance() {
   console.log('Supabase instance reset')
 }
 
-// Client-side Supabase client
+// Supabase client. In the browser it's a singleton that holds the user's session.
+// On the server every call gets a fresh, session-less client: API routes call
+// setSession() on it, and a shared instance would leak one user's session into
+// another request.
 export const createClient = () => {
+  if (typeof window === 'undefined') {
+    return createSupabaseClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+    )
+  }
+
   if (!supabaseInstance) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -45,6 +56,20 @@ export const createClient = () => {
 
   return supabaseInstance
 }
+
+/**
+ * Server-side client that acts as the user who sent `token`, so row-level
+ * security sees their auth.uid(). Use in API routes after verifying the token.
+ */
+export const createTokenClient = (token: string) =>
+  createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    }
+  )
 
 // Force create new client (useful after signOut)
 export const createNewClient = () => {

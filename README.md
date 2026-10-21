@@ -31,7 +31,7 @@ This project is built as a full-stack system using Next.js App Router + Supabase
 ### 4. Members
 - Member directory with core team visibility.
 - Search and role-based filtering.
-- Profile-centric display of skills, role, and relevant community info.
+- Profile-centric display of role, contributions, and relevant community info.
 
 ### 5. Education
 - DS/AI mini-course presentation pages.

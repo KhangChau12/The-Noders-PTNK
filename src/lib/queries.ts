@@ -600,26 +600,13 @@ export const memberQueries = {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('role, skills, created_at')
+      .select('role, created_at')
 
     if (!profiles) return null
 
     const total_members = profiles.length
     const total_admins = profiles.filter(p => p.role === 'admin').length
     const total_regular_members = total_members - total_admins
-
-    // Count skills
-    const skillCount: Record<string, number> = {}
-    profiles.forEach(profile => {
-      profile.skills?.forEach(skill => {
-        skillCount[skill] = (skillCount[skill] || 0) + 1
-      })
-    })
-
-    const most_common_skills = Object.entries(skillCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10)
 
     // Recent members (last 30 days)
     const thirtyDaysAgo = new Date()
@@ -632,7 +619,6 @@ export const memberQueries = {
       total_members,
       total_admins,
       total_regular_members,
-      most_common_skills,
       recent_members
     }
   }

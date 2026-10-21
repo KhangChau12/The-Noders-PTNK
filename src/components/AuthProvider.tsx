@@ -13,7 +13,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [session, setSession] = useState<AuthSession | null>(null)
   const [loading, setLoading] = useState(true)
-  const [profileLoading, setProfileLoading] = useState(false)
+  // true until the first profile fetch settles (or we know there is no session)
+  const [profileLoading, setProfileLoading] = useState(true)
 
   useEffect(() => {
     const supabase = createClient()
@@ -73,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return result
       } finally {
         activeProfileRequest = null
-        if (isMounted && setLoadingState) setProfileLoading(false)
+        if (isMounted) setProfileLoading(false)
       }
     }
 
@@ -91,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
           setSession(null)
           setProfile(null)
+          setProfileLoading(false)
           setLoading(false)
           return
         }
@@ -99,25 +101,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session.user as AuthUser)
           setSession(session as AuthSession)
 
-          // Fetch profile with longer timeout and retry
-          try {
-            await Promise.race([
-              fetchProfile(session.user.id),
-              new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Profile fetch timeout')), 30000) // 30s timeout
-              )
-            ])
-          } catch (profileError) {
-            console.warn('AuthProvider: Profile fetch timed out, will retry in background')
-            // Continue anyway, retry in background
-            fetchProfile(session.user.id, false).catch(() => {
-              console.error('Background profile fetch also failed')
-            })
-          }
+          // Knowing the session is enough to render protected pages; the
+          // profile arrives in the background (pages show their own skeletons).
+          setLoading(false)
+          fetchProfile(session.user.id).catch(() => {})
         } else {
           setUser(null)
           setSession(null)
           setProfile(null)
+          setProfileLoading(false)
         }
       } catch (error) {
         console.error('AuthProvider: Error in getInitialSession:', error)
@@ -126,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setSession(null)
         setProfile(null)
+        setProfileLoading(false)
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -137,8 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return
-
-        console.log('AuthProvider: Auth state changed:', event)
 
         try {
           if (session?.user) {
@@ -160,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
           setSession(null)
           setProfile(null)
+          setProfileLoading(false)
         }
 
         if (isMounted) setLoading(false)
@@ -179,8 +171,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      console.log('Starting signOut process...')
-
       // Clear local state first
       setUser(null)
       setSession(null)
@@ -196,8 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Clear all auth data
       await auth.clearAllAuthData()
-
-      console.log('SignOut completed, redirecting...')
 
       // Force page reload to clear any remaining cache
       window.location.href = '/login'
@@ -234,6 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     session,
     loading,
+    profileLoading,
     signIn,
     signOut,
     updateProfile,

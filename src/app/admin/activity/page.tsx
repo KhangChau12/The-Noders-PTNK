@@ -1,415 +1,219 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '@/components/AuthProvider'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardHeader } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Badge } from '@/components/Badge'
-import { Input } from '@/components/Input'
-import { Loading } from '@/components/Loading'
-import { Avatar } from '@/components/Avatar'
-import { Plus, Search, Users, Sparkles, BookOpen, ClipboardList, Check } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useAdmin } from '@/components/admin/AdminContext'
+import { useToast } from '@/components/Toast'
+import { btnPrimary } from '@/components/dashboard/ui'
+import { pointsByMember } from '@/lib/admin'
+import { formatDay } from '@/lib/dashboard'
+import { cn } from '@/lib/utils'
 
-interface ActivityTemplate {
-  id: string
-  name: string
-  description: string
-  usage_count?: number
-}
+const NEW = '__new__'
 
-interface ActivityMember {
-  id: string
-  username: string
-  full_name: string
-  avatar_url: string | null
-  role: 'admin' | 'member'
-  contest_count?: number
-}
+export default function PointsAdminPage() {
+  const { data, ready, refresh, api } = useAdmin()
+  const { showToast } = useToast()
+  const [act, setAct] = useState<string>('')
+  const [newName, setNewName] = useState('')
+  const [sel, setSel] = useState<Set<string>>(new Set())
+  const [pts, setPts] = useState('')
+  const [q, setQ] = useState('')
+  const [busy, setBusy] = useState(false)
 
-interface ActivityLogMember {
-  member_id: string
-  username: string
-  full_name: string
-  avatar_url: string | null
-  role: 'admin' | 'member'
-  points: number
-}
+  // Last points given per activity, to prefill
+  const lastPoints = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const l of data.logs) if (l.task_template_id) m.set(l.task_template_id, l.points)
+    return m
+  }, [data.logs])
 
-interface ActivityLog {
-  id: string
-  task_template_id: string | null
-  task_name: string
-  task_description: string
-  points: number
-  member_count?: number
-  total_points?: number
-  members?: ActivityLogMember[]
-}
+  const totals = useMemo(() => pointsByMember(data), [data])
+  const p = parseInt(pts, 10) || 0
+  const activityName = act === NEW ? newName.trim() : data.templates.find((t) => t.id === act)?.name || ''
 
-function AdminActivityContent() {
-  const { session } = useAuth()
-  const [templates, setTemplates] = useState<ActivityTemplate[]>([])
-  const [members, setMembers] = useState<ActivityMember[]>([])
-  const [taskLogs, setTaskLogs] = useState<ActivityLog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [selectedTemplateId, setSelectedTemplateId] = useState('')
-  const [taskName, setTaskName] = useState('')
-  const [taskDescription, setTaskDescription] = useState('')
-  const [points, setPoints] = useState('')
-  const [memberSearch, setMemberSearch] = useState('')
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
-
-  const fetchData = async () => {
-    if (!session?.access_token) return
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch('/api/admin/activity', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      })
-
-      const data = await response.json()
-      if (!response.ok || !data.success) {
-        setError(data.error || 'Failed to load activity data')
-        return
-      }
-
-      setTemplates(data.templates || [])
-      setMembers(data.members || [])
-      setTaskLogs(data.task_logs || [])
-    } catch (fetchError) {
-      console.error('Error loading activity data:', fetchError)
-      setError('Network error occurred')
-    } finally {
-      setLoading(false)
-    }
+  const pick = (id: string) => {
+    setAct(id)
+    if (id !== NEW) setPts(String(lastPoints.get(id) ?? 10))
+  }
+  const toggle = (id: string) => {
+    const next = new Set(sel)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setSel(next)
   }
 
-  useEffect(() => {
-    if (session?.access_token) {
-      fetchData()
-    }
-  }, [session?.access_token])
-
-  const filteredMembers = useMemo(() => {
-    const search = memberSearch.trim().toLowerCase()
-    if (!search) return members
-
-    return members.filter((member) => {
-      return (
-        member.full_name?.toLowerCase().includes(search) ||
-        member.username?.toLowerCase().includes(search)
-      )
+  const standings = data.members
+    .map((m) => {
+      const base = totals.get(m.id) || 0
+      return { m, base, now: base + (sel.has(m.id) ? p : 0) }
     })
-  }, [members, memberSearch])
+    .sort((a, b) => b.now - a.now)
+  const max = Math.max(1, ...standings.map((s) => s.now))
+  const total = Array.from(totals.values()).reduce((a, b) => a + b, 0)
 
-  const handleTemplateSelect = (templateId: string) => {
-    setSelectedTemplateId(templateId)
-    const template = templates.find((item) => item.id === templateId)
-    if (!template) {
-      setTaskName('')
-      setTaskDescription('')
-      return
-    }
-
-    setTaskName(template.name)
-    setTaskDescription(template.description || '')
-  }
-
-  const toggleMember = (memberId: string) => {
-    setSelectedMemberIds((prev) =>
-      prev.includes(memberId) ? prev.filter((id) => id !== memberId) : [...prev, memberId]
-    )
-  }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    if (!session?.access_token) return
-
-    try {
-      setSaving(true)
-      setError(null)
-      setSuccess(null)
-
-      const response = await fetch('/api/admin/activity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          templateId: selectedTemplateId || undefined,
-          taskName,
-          taskDescription,
-          points: Number(points),
-          memberIds: selectedMemberIds,
-        }),
-      })
-
-      const data = await response.json()
-      if (!response.ok || !data.success) {
-        setError(data.error || 'Failed to create task log')
-        return
+  const history = useMemo(() => {
+    const byName = new Map<string, { logs: number; people: Set<string>; total: number; last: string | null }>()
+    for (const l of data.logs) {
+      const h = byName.get(l.task_name) || { logs: 0, people: new Set<string>(), total: 0, last: null }
+      h.logs++
+      for (const r of data.logMembers.filter((x) => x.task_log_id === l.id)) {
+        h.people.add(r.member_id)
+        h.total += r.points || 0
       }
+      if (l.created_at && (!h.last || l.created_at > h.last)) h.last = l.created_at
+      byName.set(l.task_name, h)
+    }
+    return Array.from(byName.entries()).sort((a, b) => b[1].total - a[1].total)
+  }, [data.logs, data.logMembers])
 
-      setSuccess('Task points saved successfully')
-      setSelectedTemplateId('')
-      setTaskName('')
-      setTaskDescription('')
-      setPoints('')
-      setSelectedMemberIds([])
-      await fetchData()
-    } catch (submitError) {
-      console.error('Error saving task log:', submitError)
-      setError('Network error occurred')
+  const shown = data.members.filter((m) => !q || (m.full_name || '').toLowerCase().includes(q.toLowerCase()))
+  const blocked = !activityName || !sel.size || !Number.isInteger(parseInt(pts, 10)) || busy
+
+  const log = async () => {
+    if (blocked) return
+    setBusy(true)
+    try {
+      await api('/api/admin/activity', {
+        method: 'POST',
+        body: { ...(act === NEW ? { taskName: activityName } : { templateId: act }), points: p, memberIds: Array.from(sel) },
+      })
+      showToast('success', `+${p} logged for ${sel.size} member${sel.size > 1 ? 's' : ''}`)
+      setSel(new Set())
+      setNewName('')
+      await refresh()
+    } catch (e: any) {
+      showToast('error', e.message)
     } finally {
-      setSaving(false)
+      setBusy(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loading size="lg" text="Loading activity manager..." />
-      </div>
-    )
-  }
+  if (!ready) return <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
+  const chip = (on: boolean) =>
+    cn('min-h-[34px] rounded-md border px-3 text-sm transition-colors', on ? 'border-[#4A6BA8] bg-navy text-white' : 'border-control text-text-secondary hover:border-text-tertiary hover:text-text-primary')
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto max-w-7xl space-y-6 sm:space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <>
+      <div className="flex flex-wrap items-start gap-x-10 gap-y-7">
+        <section aria-labelledby="log" className="flex min-w-0 flex-[1_1_640px] flex-col gap-[22px] rounded-xl bg-paper px-[26px] py-6">
+          <h2 id="log" className="text-[22px] font-bold tracking-[-0.01em]">Log points</h2>
+
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary flex items-center gap-2 sm:gap-3">
-              <ClipboardList className="w-6 h-6 sm:w-8 sm:h-8 text-accent-orange flex-shrink-0" />
-              Activity Points Manager
-            </h1>
-            <p className="text-sm sm:text-base text-text-secondary mt-2 max-w-2xl">
-              Create scored tasks, reuse old templates, and assign points to multiple members in one entry.
+            <p className="mb-2 text-sm font-semibold">Activity</p>
+            <div role="radiogroup" aria-label="Activity" className="flex flex-wrap gap-1.5">
+              {data.templates.map((t) => (
+                <button key={t.id} type="button" role="radio" aria-checked={act === t.id} onClick={() => pick(t.id)} className={chip(act === t.id)}>
+                  {t.name}
+                  {t.description && <span className="opacity-70"> · {t.description}</span>}
+                  {lastPoints.has(t.id) && <span className="ml-1.5 font-mono text-xs opacity-70">{lastPoints.get(t.id)}</span>}
+                </button>
+              ))}
+              <button type="button" role="radio" aria-checked={act === NEW} onClick={() => pick(NEW)} className={cn(chip(act === NEW), act !== NEW && 'border-dashed')}>
+                + New activity
+              </button>
+            </div>
+            {act === NEW && (
+              <input
+                autoFocus
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="e.g. Mentor at the PAIC 2027 workshop"
+                aria-label="New activity name"
+                className="mt-2.5 min-h-[40px] w-full rounded-md border border-control bg-ink px-3 text-sm text-text-primary placeholder:text-text-disabled focus:border-link focus:outline-none"
+              />
+            )}
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-baseline justify-between">
+              <p className="text-sm font-semibold">
+                Who <span className="font-mono font-normal text-text-tertiary">{sel.size} selected</span>
+              </p>
+              <span className="flex gap-3 text-[13px] font-semibold">
+                <button type="button" onClick={() => setSel(new Set(data.members.filter((m) => m.role === 'admin').map((m) => m.id)))} className="text-link hover:text-text-primary">Core team</button>
+                <button type="button" onClick={() => setSel(new Set(data.members.map((m) => m.id)))} className="text-link hover:text-text-primary">Everyone</button>
+                <button type="button" onClick={() => setSel(new Set())} className="text-text-tertiary hover:text-text-primary">Clear</button>
+              </span>
+            </div>
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Type a name"
+              aria-label="Find members"
+              className="mb-2.5 min-h-[40px] w-full rounded-md border border-control bg-ink px-3 text-sm text-text-primary placeholder:text-text-disabled focus:border-link focus:outline-none"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {shown.map((m) => {
+                const on = sel.has(m.id)
+                return (
+                  <button key={m.id} type="button" aria-pressed={on} onClick={() => toggle(m.id)} className={cn('min-h-[32px] rounded-full border px-2.5 text-[13px]', on ? 'border-[#4A6BA8] bg-navy text-white' : 'border-control text-text-secondary hover:text-text-primary')}>
+                    {on && '✓ '}
+                    {m.full_name}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-3.5 border-t border-[#2A2E37] pt-[18px]">
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Points each
+              <input
+                value={pts}
+                onChange={(e) => setPts(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                inputMode="numeric"
+                className="min-h-[42px] w-[90px] rounded-md border border-control bg-ink px-2.5 text-right font-mono text-base text-text-primary focus:border-link focus:outline-none"
+              />
+            </label>
+            <p className="min-w-0 flex-[1_1_260px] text-sm text-text-tertiary">
+              {activityName && sel.size
+                ? `“${activityName}” · +${p} each to ${sel.size} member${sel.size > 1 ? 's' : ''} (${p * sel.size} total). Standings update on the right.`
+                : !activityName
+                  ? 'Pick an activity.'
+                  : 'Pick at least one member.'}
             </p>
+            <button type="button" onClick={log} disabled={blocked} className={cn(btnPrimary, 'min-h-[44px]')}>
+              {busy ? 'Logging…' : sel.size ? `Log for ${sel.size} member${sel.size > 1 ? 's' : ''}` : 'Log points'}
+            </button>
           </div>
-          <Button onClick={fetchData} variant="secondary" className="w-full sm:w-auto">
-            Refresh
-          </Button>
-        </div>
+        </section>
 
-        {error && (
-          <Card className="border border-red-500/40 bg-red-500/10">
-            <CardContent className="p-4 text-red-200">{error}</CardContent>
-          </Card>
-        )}
-
-        {success && (
-          <Card className="border border-green-500/40 bg-green-500/10">
-            <CardContent className="p-4 text-green-200">{success}</CardContent>
-          </Card>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-            <Card className="border-dark-border bg-dark-surface/70">
-              <CardHeader>
-                <h2 className="text-lg sm:text-xl font-semibold text-text-primary flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-accent-orange flex-shrink-0" />
-                  Create Task Entry
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-text-secondary mb-2">Reuse old task</label>
-                      <select
-                        value={selectedTemplateId}
-                        onChange={(event) => handleTemplateSelect(event.target.value)}
-                        className="w-full rounded-lg border border-dark-border bg-dark-bg px-3 py-2.5 min-h-[44px] text-base sm:text-sm text-text-primary"
-                      >
-                        <option value="">Create new task</option>
-                        {templates.map((template) => (
-                          <option key={template.id} value={template.id}>
-                            {template.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-text-secondary mb-2">Points</label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={points}
-                        onChange={(event) => setPoints(event.target.value)}
-                        placeholder="e.g. 10"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-2">Task name</label>
-                    <Input
-                      value={taskName}
-                      onChange={(event) => setTaskName(event.target.value)}
-                      placeholder="Enter task name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-2">Description (optional)</label>
-                    <textarea
-                      value={taskDescription}
-                      onChange={(event) => setTaskDescription(event.target.value)}
-                      placeholder="Describe the task"
-                      rows={4}
-                      className="w-full rounded-lg border border-dark-border bg-dark-bg px-3 py-2.5 text-base sm:text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-text-secondary">Members</label>
-                      <Badge variant="secondary">{selectedMemberIds.length} selected</Badge>
-                    </div>
-                    <Input
-                      value={memberSearch}
-                      onChange={(event) => setMemberSearch(event.target.value)}
-                      placeholder="Search members..."
-                      icon={<Search className="w-4 h-4" />}
-                    />
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
-                      {filteredMembers.map((member) => {
-                        const selected = selectedMemberIds.includes(member.id)
-                        return (
-                          <button
-                            key={member.id}
-                            type="button"
-                            onClick={() => toggleMember(member.id)}
-                            className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-colors ${selected ? 'border-accent-orange bg-accent-orange/10' : 'border-dark-border bg-dark-bg hover:bg-dark-surface'}`}
-                          >
-                            <Avatar name={member.full_name} src={member.avatar_url} size="sm" />
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-text-primary truncate">{member.full_name || member.username}</p>
-                                {member.role === 'admin' && <Badge size="sm">Core Team</Badge>}
-                              </div>
-                              <p className="text-xs text-text-tertiary truncate">@{member.username}</p>
-                            </div>
-                            {selected && <Check className="w-4 h-4 text-accent-orange flex-shrink-0" />}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
-                    <Button type="submit" disabled={saving || !taskName || !points || selectedMemberIds.length === 0} className="w-full sm:w-auto">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {saving ? 'Saving...' : 'Save Task Points'}
-                    </Button>
-                    <span className="text-sm text-text-tertiary">
-                      Same task name can be reused with a different point value.
-                    </span>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            <Card className="border-dark-border bg-dark-surface/70">
-              <CardHeader>
-                <h2 className="text-lg sm:text-xl font-semibold text-text-primary flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary-blue flex-shrink-0" />
-                  Recorded Task Entries
-                </h2>
-              </CardHeader>
-              <CardContent>
-                {taskLogs.length > 0 ? (
-                  <div className="space-y-4">
-                    {taskLogs.map((log) => (
-                      <div key={log.id} className="rounded-xl border border-dark-border bg-dark-bg p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                          <div>
-                            <h3 className="text-lg font-semibold text-text-primary">{log.task_name}</h3>
-                            {log.task_description && <p className="text-sm text-text-secondary mt-1">{log.task_description}</p>}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="primary">{log.points} pts each</Badge>
-                            <Badge variant="secondary">{log.member_count || 0} members</Badge>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {(log.members || []).map((member) => (
-                            <span key={`${log.id}-${member.member_id}`} className="inline-flex items-center gap-2 rounded-full bg-dark-surface border border-dark-border px-3 py-1 text-xs text-text-secondary">
-                              <span>{member.full_name || member.username}</span>
-                              <span className="text-text-tertiary">+{member.points}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-10 text-text-tertiary">
-                    No task entries yet.
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6 sm:space-y-8">
-            <Card className="border-dark-border bg-dark-surface/70">
-              <CardHeader>
-                <h2 className="text-lg sm:text-xl font-semibold text-text-primary flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5 text-accent-orange" />
-                  Saved Templates
-                </h2>
-              </CardHeader>
-              <CardContent>
-                {templates.length > 0 ? (
-                  <div className="space-y-3">
-                    {templates.map((template) => (
-                      <button
-                        key={template.id}
-                        type="button"
-                        onClick={() => handleTemplateSelect(template.id)}
-                        className={`w-full rounded-xl border p-3 text-left transition-colors ${selectedTemplateId === template.id ? 'border-accent-orange bg-accent-orange/10' : 'border-dark-border bg-dark-bg hover:bg-dark-surface'}`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h3 className="font-medium text-text-primary">{template.name}</h3>
-                            {template.description && <p className="text-sm text-text-secondary mt-1 line-clamp-2">{template.description}</p>}
-                          </div>
-                          <Badge variant="secondary">{template.usage_count || 0}</Badge>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-text-tertiary">No templates saved yet.</div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <aside aria-labelledby="board" className="min-w-0 flex-[0_1_380px]">
+          <h2 id="board" className="mb-1 text-[22px] font-bold tracking-[-0.01em]">Standings</h2>
+          <p className="mb-3.5 text-sm text-text-tertiary">
+            {total.toLocaleString('en-US')} points across {data.logs.length} logged activities
+          </p>
+          <ol className="flex flex-col gap-2">
+            {standings.slice(0, 15).map((s, i) => (
+              <li key={s.m.id} className="grid grid-cols-[20px_minmax(0,1fr)_100px_32px] items-center gap-2.5 text-sm">
+                <span className="font-mono text-xs text-text-disabled">{i + 1}</span>
+                <span className="truncate">{s.m.full_name}</span>
+                <span aria-hidden="true" className="h-1.5 overflow-hidden rounded-[3px] bg-rule">
+                  <span className={cn('block h-full', s.now > s.base ? 'bg-signal' : 'bg-[#5B7FD6]')} style={{ width: `${Math.round((s.now / max) * 100)}%` }} />
+                </span>
+                <span className="text-right font-mono">{s.now}</span>
+              </li>
+            ))}
+          </ol>
+        </aside>
       </div>
-    </div>
-  )
-}
 
-export default function AdminActivityPage() {
-  return (
-    <ProtectedRoute requireAdmin>
-      <AdminActivityContent />
-    </ProtectedRoute>
+      <section aria-labelledby="hist" className="mt-11">
+        <h2 id="hist" className="mb-2 text-[22px] font-bold tracking-[-0.01em]">By activity</h2>
+        <ul className="border-b border-rule">
+          {history.map(([name, h]) => (
+            <li key={name} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 border-t border-rule px-1.5 py-3 text-[15px] md:grid-cols-[minmax(0,1fr)_110px_120px_120px_80px]">
+              <span className="min-w-0 truncate font-semibold">{name}</span>
+              <span className="text-right font-mono md:order-last">{h.total}</span>
+              <span className="text-sm text-text-tertiary">{h.logs} log{h.logs > 1 ? 's' : ''}</span>
+              <span className="text-sm text-text-tertiary">{h.people.size} {h.people.size === 1 ? 'person' : 'people'}</span>
+              <span className="hidden text-sm text-text-tertiary md:block">{h.last ? formatDay(h.last) : '—'}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-[13px] text-text-disabled">Logs from before 2026-10 have no date. New logs record when and by whom.</p>
+      </section>
+    </>
   )
 }

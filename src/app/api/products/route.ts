@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase'
+import { createClient, createTokenClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createTokenClient(token)
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)

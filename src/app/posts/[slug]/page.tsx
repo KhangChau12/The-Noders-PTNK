@@ -1,33 +1,20 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Card, CardContent } from '@/components/Card'
-import { Badge } from '@/components/Badge'
-import { Button } from '@/components/Button'
 import { Loading } from '@/components/Loading'
+import { Avatar } from '@/components/Avatar'
 import { useAuth } from '@/components/AuthProvider'
 import { useLanguage } from '@/components/LanguageProvider'
-import { LanguageDropdown } from '@/components/LanguageDropdown'
 import { useToast } from '@/components/Toast'
+import { Container, PrimaryLink, VideoPlayer } from '@/components/editorial'
 import { Post, PostBlock } from '@/types/database'
 import { postQueries } from '@/lib/queries'
 import { SITE_CONFIG } from '@/lib/constants'
-import {
-  Calendar,
-  Clock,
-  User,
-  ThumbsUp,
-  Eye,
-  ArrowLeft,
-  Share2,
-  AlertCircle,
-  Facebook,
-  Link2,
-  Check
-} from 'lucide-react'
+import { CONTESTS, COURSES } from '@/lib/programs'
+import { cn } from '@/lib/utils'
 
 interface PostWithDetails extends Post {
   author?: {
@@ -42,145 +29,111 @@ interface PostWithDetails extends Post {
     width?: number
     height?: number
   }
+  thumbnail_url?: string | null
 }
 
-function CategoryBadge({ category }: { category: Post['category'] }) {
-  const config = {
-    'News': { label: 'News', variant: 'primary' as const },
-    'You may want to know': { label: 'Do You Know?', variant: 'tech' as const },
-    'Member Spotlight': { label: 'Member Spotlight', variant: 'success' as const },
-    'Community Activities': { label: 'Activities', variant: 'warning' as const }
-  }
+const CATEGORY_LABEL: Record<string, string> = {
+  'Community Activities': 'Community',
+  News: 'News',
+  'You may want to know': 'Do you know?',
+  'Tech Sharing': 'Tech sharing',
+  'Member Spotlight': 'Member spotlight',
+}
 
-  const { label, variant } = config[category]
-  return <Badge variant={variant}>{label}</Badge>
+function formatDate(value?: string | null) {
+  if (!value) return ''
+  return new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+/** Emoji in titles read as noise next to the editorial type. */
+function cleanTitle(title?: string | null) {
+  return (title || '').replace(/(?:[\u2600-\u27BF]|[\uD83C-\uDBFF][\uDC00-\uDFFF])\uFE0F?\s*/g, '').trim()
 }
 
 // Helper to add target="_blank" to all links in HTML
 function processLinksInHTML(html: string): string {
-  return html.replace(
-    /<a\s+([^>]*href=["'][^"']*["'][^>]*)>/gi,
-    (match, attributes) => {
-      // Check if target attribute already exists
-      if (/target=/i.test(attributes)) {
-        return match
-      }
-      // Add target="_blank" and rel="noopener noreferrer"
-      return `<a ${attributes} target="_blank" rel="noopener noreferrer">`
-    }
-  )
+  return html.replace(/<a\s+([^>]*href=["'][^"']*["'][^>]*)>/gi, (match, attributes) => {
+    if (/target=/i.test(attributes)) return match
+    return `<a ${attributes} target="_blank" rel="noopener noreferrer">`
+  })
 }
 
-function RenderBlock({ block, lang }: { block: PostBlock, lang: 'en' | 'vi' }) {
+type Heading = { id: string; text: string }
+
+/** Give every <h2> in the post an id so the "On this page" list can link to it. */
+function withHeadingIds(html: string, blockIndex: number, out: Heading[]) {
+  let n = 0
+  return html.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_m, attrs, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').trim()
+    const id = `s-${blockIndex}-${n++}`
+    if (text) out.push({ id, text })
+    return `<h2${attrs} id="${id}">${inner}</h2>`
+  })
+}
+
+const PROSE =
+  'mb-7 break-words text-[18px] leading-[1.8] text-[#C9CED8] ' +
+  '[&_p]:mb-6 [&_h2]:mb-[18px] [&_h2]:mt-12 [&_h2]:scroll-mt-28 [&_h2]:text-[27px] [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:tracking-[-0.02em] [&_h2]:text-text-primary ' +
+  '[&_h3]:mb-3 [&_h3]:mt-9 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-text-primary ' +
+  '[&_ul]:mb-6 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-2 ' +
+  '[&_strong]:font-semibold [&_strong]:text-text-primary [&_a]:text-link [&_a]:underline [&_a]:underline-offset-[3px] ' +
+  '[&_blockquote]:my-8 [&_blockquote]:border-l-[3px] [&_blockquote]:border-link [&_blockquote]:pl-[22px] [&_blockquote]:text-[21px] [&_blockquote]:leading-relaxed [&_blockquote]:text-text-primary ' +
+  '[&_code]:rounded [&_code]:bg-paper [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[15px]'
+
+function RenderBlock({ block, lang, html }: { block: PostBlock; lang: 'en' | 'vi'; html?: string }) {
   switch (block.type) {
     case 'text':
-      const textContent = block.content as any
-      const htmlField = lang === 'vi' ? (textContent.html_vi) : (textContent.html)
-      const processedHTML = processLinksInHTML(htmlField || '')
-      return (
-        <div
-          className="prose prose-invert max-w-none mb-8 break-words"
-          dangerouslySetInnerHTML={{ __html: processedHTML }}
-        />
-      )
+      return <div className={PROSE} dangerouslySetInnerHTML={{ __html: html || '' }} />
 
-    case 'quote':
-      const quoteContent = block.content as any
-      const quoteText = lang === 'vi' ? (quoteContent.quote_vi || quoteContent.quote) : (quoteContent.quote_en || quoteContent.quote)
+    case 'quote': {
+      const c = block.content as any
+      const text = lang === 'vi' ? c.quote_vi || c.quote : c.quote_en || c.quote
       return (
-        <Card className="bg-primary-blue/5 border-primary-blue/20 mb-8">
-          <CardContent className="p-5 sm:p-6">
-            <blockquote className="text-base sm:text-lg italic text-text-primary mb-4 break-words">
-              "{quoteText}"
-            </blockquote>
-            {(quoteContent.author || quoteContent.source) && (
-              <div className="text-sm text-text-secondary">
-                — {quoteContent.author}
-                {quoteContent.source && <span>, {quoteContent.source}</span>}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )
-
-    case 'image':
-      const imageContent = block.content as { image_id: string; caption?: string; alt_text?: string }
-      const blockImage = (block as any).image as {
-        public_url?: string
-        alt_text?: string
-        width?: number
-        height?: number
-      } | undefined
-      return (
-        <div className="mb-8">
-          <div className="w-full rounded-lg bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20 overflow-hidden">
-            {blockImage?.public_url ? (
-              blockImage.width && blockImage.height ? (
-                <Image
-                  src={blockImage.public_url}
-                  alt={imageContent.alt_text || blockImage.alt_text || 'Post image'}
-                  width={blockImage.width}
-                  height={blockImage.height}
-                  className="w-full h-auto"
-                  loading="lazy"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-                />
-              ) : (
-                <img
-                  src={blockImage.public_url}
-                  alt={imageContent.alt_text || blockImage.alt_text || 'Post image'}
-                  className="w-full h-auto"
-                  loading="lazy"
-                />
-              )
-            ) : (
-              <div className="w-full min-h-[220px] flex flex-col items-center justify-center text-text-tertiary bg-dark-surface/50 backdrop-blur-sm">
-                <svg
-                  className="w-12 h-12 mb-2 opacity-60"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                  />
-                </svg>
-                <span className="text-sm font-medium">Image</span>
-              </div>
-            )}
-          </div>
-          {imageContent.caption && (
-            <p className="text-sm text-text-tertiary text-center mt-2 italic">
-              {imageContent.caption}
-            </p>
+        <figure className="my-10">
+          <blockquote className="border-l-[3px] border-link pl-[22px] text-[21px] leading-relaxed text-text-primary">{text}</blockquote>
+          {(c.author || c.source) && (
+            <figcaption className="mt-3 pl-[25px] text-sm text-text-tertiary">
+              — {c.author}
+              {c.source && <span>, {c.source}</span>}
+            </figcaption>
           )}
-        </div>
+        </figure>
       )
+    }
 
-    case 'youtube':
-      const youtubeContent = block.content as { youtube_url: string; video_id: string; title?: string }
+    case 'image': {
+      const c = block.content as { caption?: string; alt_text?: string }
+      const img = (block as any).image as { public_url?: string; alt_text?: string; width?: number; height?: number } | undefined
+      if (!img?.public_url) return null
       return (
-        <div className="mb-8">
-          <div className="aspect-video relative overflow-hidden rounded-lg">
-            <iframe
-              src={`https://www.youtube.com/embed/${youtubeContent.video_id}`}
-              title={youtubeContent.title || 'YouTube video'}
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
+        <figure className="my-10">
+          {img.width && img.height ? (
+            <Image
+              src={img.public_url}
+              alt={c.alt_text || img.alt_text || c.caption || 'Post image'}
+              width={img.width}
+              height={img.height}
+              className="h-auto w-full rounded-[10px]"
+              sizes="(max-width: 768px) 100vw, 680px"
             />
-          </div>
-          {youtubeContent.title && (
-            <p className="text-sm text-text-tertiary text-center mt-2">
-              {youtubeContent.title}
-            </p>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={img.public_url} alt={c.alt_text || img.alt_text || c.caption || 'Post image'} className="h-auto w-full rounded-[10px]" loading="lazy" />
           )}
-        </div>
+          {c.caption && <figcaption className="mt-2.5 text-sm text-text-tertiary">{c.caption}</figcaption>}
+        </figure>
       )
+    }
+
+    case 'youtube': {
+      const c = block.content as { youtube_url: string; video_id: string; title?: string }
+      return (
+        <figure className="my-10">
+          <VideoPlayer url={c.youtube_url || `https://www.youtube.com/watch?v=${c.video_id}`} title={c.title || 'Video'} />
+          {c.title && <figcaption className="mt-2.5 text-sm text-text-tertiary">{c.title}</figcaption>}
+        </figure>
+      )
+    }
 
     default:
       return null
@@ -191,7 +144,7 @@ export default function PostDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { session } = useAuth()
-  const { lang, localize } = useLanguage()
+  const { lang, setLang, localize } = useLanguage()
   const slug = params.slug as string
 
   const [post, setPost] = useState<PostWithDetails | null>(null)
@@ -350,9 +303,33 @@ export default function PostDetailPage() {
     setShareOpen(prev => !prev)
   }
 
+  // Reading progress for the thin bar under the header.
+  const [progress, setProgress] = useState(0)
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight
+      setProgress(h > 0 ? Math.min(1, window.scrollY / h) : 0)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Text blocks get heading ids; the collected headings feed "On this page".
+  const { renderedHtml, headings } = useMemo(() => {
+    const out: Heading[] = []
+    const htmlByBlock: Record<string, string> = {}
+    blocks.forEach((b, i) => {
+      if (b.type !== 'text') return
+      const c = b.content as any
+      const raw = lang === 'vi' ? c.html_vi || c.html : c.html
+      htmlByBlock[b.id] = withHeadingIds(processLinksInHTML(raw || ''), i, out)
+    })
+    return { renderedHtml: htmlByBlock, headings: out }
+  }, [blocks, lang])
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loading size="lg" text="Loading post..." />
       </div>
     )
@@ -360,249 +337,221 @@ export default function PostDetailPage() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-4xl">
-          <Card className="text-center py-12">
-            <CardContent>
-              <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
-                {error || 'Post Not Found'}
-              </h3>
-              <p className="text-text-secondary mb-6">
-                The post you're looking for doesn't exist or has been removed.
-              </p>
-              <Link href="/posts">
-                <Button>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Posts
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <Container className="py-24">
+        <h1 className="mb-3 text-3xl font-bold text-text-primary">{error || 'Post not found'}</h1>
+        <p className="mb-6 text-text-secondary">The post you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+        <PrimaryLink href="/posts">Back to posts</PrimaryLink>
+      </Container>
     )
   }
 
   const thumbnailSrc = post.thumbnail_image?.public_url || post.thumbnail_url
+  const category = CATEGORY_LABEL[post.category] ?? post.category
+  const title = cleanTitle(localize(post.title, post.title_vi))
+  // Many summaries are just the opening paragraph; don't print the same text twice.
+  const firstText = (() => {
+    const b = blocks.find((x) => x.type === 'text')
+    return b ? (renderedHtml[b.id] || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase() : ''
+  })()
+  const summaryText = localize(post.summary, post.summary_vi) || ''
+  const dek = summaryText && !firstText.startsWith(summaryText.trim().slice(0, 60).toLowerCase()) ? summaryText : ''
+  const hasVi = !!(post.title_vi || post.summary_vi)
+  // A post that is about one of our programs gets a context card beside it.
+  const contest = CONTESTS.find((c) => c.postSlug === post.slug)
+  const course = COURSES.find((c) => c.announcementSlug === post.slug)
+  const [nextPost, ...morePosts] = relatedPosts
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto max-w-4xl">
-        {/* Back Button & Language Selector */}
-        <div className="mb-5 sm:mb-6 flex items-center justify-between gap-2">
-          <Link href="/posts">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Posts
-            </Button>
-          </Link>
-          <LanguageDropdown />
-        </div>
+    <div>
+      {/* Reading progress, pinned just under the sticky header */}
+      <div aria-hidden="true" className="sticky top-[68px] z-30 h-0.5">
+        <div className="h-0.5 bg-link transition-[width] duration-100" style={{ width: `${progress * 100}%` }} />
+      </div>
 
-        {/* Post Header */}
-        <article>
-          {/* Thumbnail */}
-          {thumbnailSrc && (
-            <div className="w-full overflow-hidden rounded-lg mb-8 bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-              {post.thumbnail_image?.width && post.thumbnail_image?.height ? (
-                <Image
-                  src={thumbnailSrc}
-                  alt={post.thumbnail_image?.alt_text || post.title}
-                  width={post.thumbnail_image.width}
-                  height={post.thumbnail_image.height}
-                  priority
-                  className="w-full h-auto"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-                />
-              ) : (
-                <img
-                  src={thumbnailSrc}
-                  alt={post.thumbnail_image?.alt_text || post.title}
-                  className="w-full h-auto"
-                  loading="eager"
-                />
+      {/* Compact navy intro at article width */}
+      <section className="bg-navy text-white">
+        <Container className={cn('pt-10', thumbnailSrc ? 'pb-[184px]' : 'pb-16')}>
+          <div className="mx-auto max-w-[760px]">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+              <Link href={`/posts?category=${encodeURIComponent(post.category)}`} className="font-semibold text-white hover:text-on-navy">
+                {category}
+              </Link>
+              {hasVi && (
+                <span role="group" aria-label="Read in" className="inline-flex items-center gap-1 text-on-navy">
+                  Read in
+                  {(['en', 'vi'] as const).map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      aria-pressed={lang === l}
+                      onClick={() => setLang(l)}
+                      className={cn('ml-1 min-h-[32px] rounded-[5px] border border-white/35 px-2.5 text-[13px] font-semibold', lang === l ? 'bg-white text-navy-dark' : 'text-on-navy hover:text-white')}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </span>
               )}
             </div>
-          )}
-
-          {/* Meta */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <CategoryBadge category={post.category} />
-              {post.featured && <Badge variant="primary">Featured</Badge>}
+            <h1 className="mb-4 text-[32px] sm:text-[40px] lg:text-[50px] font-bold leading-[1.08] tracking-[-0.03em]">{title}</h1>
+            {dek && <p className="mb-6 text-[19px] leading-relaxed text-on-navy">{dek}</p>}
+            <div className="flex flex-wrap items-center gap-x-[18px] gap-y-2.5 text-[15px] text-on-navy">
+              {post.author && (
+                <Link href={`/members/${post.author.id}`} className="inline-flex items-center gap-2.5 font-semibold text-white hover:text-on-navy">
+                  <Avatar src={post.author.avatar_url} name={post.author.full_name} size="sm" className="h-8 w-8" />
+                  {post.author.full_name}
+                </Link>
+              )}
+              <span>{formatDate(post.published_at || post.created_at)}</span>
+              {post.reading_time > 0 && <span>{post.reading_time} min read</span>}
+              <span>{post.view_count} views</span>
             </div>
           </div>
+        </Container>
+      </section>
 
-          {/* Title */}
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-3 sm:mb-4 leading-tight break-words">
-            {localize(post.title, post.title_vi)}
-          </h1>
+      {/* Cover overlaps the navy field */}
+      {thumbnailSrc && (
+        <Container className="-mt-[152px]">
+          <div className="relative mx-auto aspect-video max-w-[1000px] overflow-hidden rounded-xl bg-paper">
+            <Image src={thumbnailSrc} alt={post.thumbnail_image?.alt_text || title} fill priority sizes="(max-width: 1024px) 100vw, 1000px" className="object-cover" />
+          </div>
+        </Container>
+      )}
 
-          {/* Summary */}
-          <p className="text-base sm:text-lg text-text-secondary mb-5 sm:mb-6">
-            {localize(post.summary, post.summary_vi)}
-          </p>
-
-          {/* Author & Stats */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6 text-sm text-text-tertiary mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-dark-border">
-            {post.author && (
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <span>{post.author.full_name}</span>
-              </div>
+      {/* actions · article · context */}
+      <Container className="grid grid-cols-1 items-start gap-x-12 pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,680px)_minmax(0,1fr)]">
+        <aside aria-label="Post actions" className="order-2 mt-10 flex justify-center gap-2.5 lg:order-none lg:sticky lg:top-[110px] lg:mt-0 lg:flex-col lg:items-end">
+          <button
+            type="button"
+            onClick={handleUpvote}
+            disabled={upvoting}
+            aria-pressed={userHasUpvoted}
+            aria-label="Mark as helpful"
+            className={cn(
+              'flex w-14 flex-col items-center gap-0.5 rounded-[10px] border py-2.5 transition-colors',
+              userHasUpvoted ? 'border-link bg-link/[0.12] text-text-primary' : 'border-control text-text-primary hover:border-text-tertiary'
             )}
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              {new Date(post.created_at).toLocaleDateString()}
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              {post.reading_time} min read
-            </div>
-            <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              {post.view_count} views
-            </div>
-          </div>
-
-          {/* Content Blocks */}
-          <div className="mb-12">
-            {blocks.length > 0 ? (
-              blocks.map((block) => (
-                <RenderBlock key={block.id} block={block} lang={lang} />
-              ))
-            ) : (
-              <Card className="text-center py-8">
-                <CardContent>
-                  <p className="text-text-secondary">No content available</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Auth Message */}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px] fill-none stroke-current stroke-2"><path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span className="font-mono text-[13px]">{upvoteCount}</span>
+          </button>
+          <button type="button" onClick={handleCopyLink} aria-label="Copy link" className={cn('h-11 w-14 rounded-[10px] border border-control text-xs font-semibold transition-colors hover:border-text-tertiary', linkCopied ? 'text-link' : 'text-text-secondary')}>
+            {linkCopied ? 'Copied' : 'Link'}
+          </button>
+          <button type="button" onClick={handleShareFacebook} aria-label="Share on Facebook" className="h-11 w-14 rounded-[10px] border border-control text-[13px] font-semibold text-text-secondary transition-colors hover:border-text-tertiary">
+            fb ↗
+          </button>
           {showAuthMessage && (
-            <Card className="mb-6 bg-warning/10 border-warning/30">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
-                  <div>
-                    <p className="text-text-primary font-medium">Authentication Required</p>
-                    <p className="text-text-secondary text-sm">You must be a member of the community to upvote posts.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <p role="status" className="max-w-[160px] text-right text-xs text-text-tertiary lg:mt-1">
+              <Link href="/login" className="text-link">Sign in</Link> as a member to upvote.
+            </p>
           )}
+        </aside>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-between py-6 border-t border-dark-border">
-            <Button
-              variant={userHasUpvoted ? 'primary' : 'secondary'}
-              onClick={handleUpvote}
-              disabled={upvoting}
-              icon={<ThumbsUp className="w-4 h-4" />}
-            >
-              {upvoting ? 'Loading...' : `${upvoteCount} Upvotes`}
-            </Button>
+        <article className="order-1 min-w-0 lg:order-none">
+          {blocks.map((block) => (
+            <RenderBlock key={block.id} block={block} lang={lang} html={renderedHtml[block.id]} />
+          ))}
 
-            <div className="relative" ref={shareRef}>
-              <Button
-                variant="ghost"
-                icon={<Share2 className="w-4 h-4" />}
-                onClick={handleShareClick}
-              >
-                {localize('Share', 'Chia sẻ')}
-              </Button>
-
-              {/* Share Dropdown - Desktop only (mobile uses native share) */}
-              {shareOpen && (
-                <div className="absolute right-0 bottom-full mb-2 w-56 py-1 bg-dark-surface border border-dark-border rounded-lg shadow-lg z-50 animate-fade-in">
-                  <button
-                    onClick={handleShareFacebook}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-bg/50 transition-colors text-sm font-medium text-text-primary"
-                  >
-                    <Facebook className="w-4 h-4 text-[#1877F2]" />
-                    <span>{localize('Share to Facebook', 'Chia sẻ lên Facebook')}</span>
-                  </button>
-
-                  <div className="my-1 border-t border-dark-border" />
-
-                  <button
-                    onClick={handleCopyLink}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-bg/50 transition-colors text-sm font-medium text-text-primary"
-                  >
-                    {linkCopied ? (
-                      <Check className="w-4 h-4 text-success" />
-                    ) : (
-                      <Link2 className="w-4 h-4 text-text-tertiary" />
-                    )}
-                    <span>
-                      {linkCopied
-                        ? localize('Copied!', 'Đã sao chép!')
-                        : localize('Copy link', 'Sao chép liên kết')}
-                    </span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          {post.author && (
+            <Link href={`/members/${post.author.id}`} className="group mt-12 flex items-center gap-4 border-y border-rule py-[22px]">
+              <Avatar src={post.author.avatar_url} name={post.author.full_name} size="lg" className="h-14 w-14" />
+              <span className="flex-1">
+                <span className="block text-[13px] text-text-tertiary">Written by</span>
+                <span className="block text-[17px] font-bold text-text-primary group-hover:text-link transition-colors">{post.author.full_name}</span>
+              </span>
+              <span className="text-sm font-semibold text-link">Profile →</span>
+            </Link>
+          )}
         </article>
 
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && (
-          <div className="mt-10 sm:mt-12">
-            <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-5 sm:mb-6">{localize('Related Posts', 'Bài viết liên quan')}</h2>
-            <div className="space-y-3 sm:space-y-4">
-              {relatedPosts.map((related) => {
-                const thumbnailSrc = (related as any).thumbnail_image?.public_url
-                return (
-                  <Link key={related.id} href={`/posts/${related.slug}`} className="group block">
-                    <article className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-dark-border bg-dark-surface hover:bg-dark-border/50 transition-all duration-200">
-                      {/* Thumbnail */}
-                      <div className="flex-shrink-0 w-28 h-24 sm:w-48 sm:h-36 relative rounded-lg overflow-hidden bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-                        {thumbnailSrc ? (
-                          <Image
-                            src={thumbnailSrc}
-                            alt={(related as any).thumbnail_image?.alt_text || localize(related.title, related.title_vi)}
-                            fill
-                            loading="lazy"
-                            sizes="(max-width: 640px) 112px, 192px"
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-text-tertiary">
-                            <svg className="w-8 h-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <CategoryBadge category={related.category} />
-                        <h3 className="font-semibold text-text-primary text-sm sm:text-base mt-1.5 sm:mt-2 mb-1 line-clamp-2 group-hover:text-primary-blue transition-colors">
-                          {localize(related.title, related.title_vi)}
+        <aside className="order-3 hidden flex-col gap-7 lg:sticky lg:top-[110px] lg:flex lg:max-w-[260px]">
+          {headings.length > 1 && (
+            <nav aria-label="On this page" className="text-sm">
+              <h2 className="mb-2.5 text-[13px] font-semibold text-text-tertiary">On this page</h2>
+              <ol className="flex flex-col gap-2 border-l border-[#2A2E37] pl-3">
+                {headings.map((h) => (
+                  <li key={h.id}>
+                    <a href={`#${h.id}`} className="text-text-secondary transition-colors hover:text-white">{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+          {contest && (
+            <Link href={`/contest/${contest.slug}`} className="group block rounded-xl bg-paper p-[18px]">
+              <span className="mb-1.5 block text-[13px] text-text-tertiary">This post is about</span>
+              <span className="mb-3 block font-bold leading-snug text-text-primary group-hover:text-link transition-colors">{contest.title}</span>
+              <span className="grid grid-cols-2 gap-2.5 text-[13px] text-text-secondary">
+                {contest.facts.slice(0, 1).map((f) => (
+                  <span key={f.label}><span className="block font-mono text-lg text-text-primary">{f.value}</span>{f.label}</span>
+                ))}
+                {contest.winners[0]?.score && (
+                  <span><span className="block font-mono text-lg text-text-primary">{contest.winners[0].score}</span>winning MAE</span>
+                )}
+              </span>
+              <span className="mt-3 block text-sm font-semibold text-link">Results &amp; problem →</span>
+            </Link>
+          )}
+          {course && (
+            <Link href={`/education/${course.slug}`} className="group block rounded-xl bg-paper p-[18px]">
+              <span className="mb-1.5 block text-[13px] text-text-tertiary">This post is about</span>
+              <span className="mb-2 block font-bold leading-snug text-text-primary group-hover:text-link transition-colors">{course.shortTitle}</span>
+              <span className="block text-[13px] text-text-secondary">{course.sessions.length} sessions · all materials open</span>
+              <span className="mt-3 block text-sm font-semibold text-link">Go to the course →</span>
+            </Link>
+          )}
+        </aside>
+      </Container>
+
+      {/* Next read */}
+      {nextPost && (
+        <section className="pt-24 pb-20 sm:pb-28">
+          <Container>
+            <Link href={`/posts/${nextPost.slug}`} className="group mb-16 flex flex-wrap items-center gap-x-10 gap-y-6 rounded-xl bg-paper p-5 sm:p-8">
+              {(nextPost as any).thumbnail_image?.public_url && (
+                <div className="relative aspect-video min-w-0 flex-[0_1_360px] overflow-hidden rounded-lg">
+                  <Image src={(nextPost as any).thumbnail_image.public_url} alt="" fill sizes="360px" className="object-cover" />
+                </div>
+              )}
+              <span className="min-w-0 flex-[1_1_360px]">
+                <span className="mb-1.5 block text-sm font-semibold text-link">Next in {category} →</span>
+                <span className="mb-2 block text-[22px] sm:text-[30px] font-bold leading-tight tracking-[-0.02em] text-text-primary group-hover:text-link transition-colors">
+                  {cleanTitle(localize(nextPost.title, nextPost.title_vi))}
+                </span>
+                <span className="line-clamp-2 block text-text-secondary">{localize(nextPost.summary, nextPost.summary_vi)}</span>
+              </span>
+            </Link>
+
+            {morePosts.length > 0 && (
+              <>
+                <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+                  <h2 className="text-2xl font-bold tracking-[-0.02em] text-text-primary">More from {category}</h2>
+                  <Link href="/posts" className="text-[15px] font-semibold text-link hover:text-text-primary">All posts →</Link>
+                </div>
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {morePosts.slice(0, 3).map((r) => {
+                    const src = (r as any).thumbnail_image?.public_url
+                    return (
+                      <Link key={r.id} href={`/posts/${r.slug}`} className="group flex flex-col gap-2.5">
+                        <div className="relative aspect-video overflow-hidden rounded-[10px] bg-paper">
+                          {src && <Image src={src} alt="" fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />}
+                        </div>
+                        <span className="text-[13px] text-text-tertiary">{formatDate(r.published_at || r.created_at)}</span>
+                        <h3 className="text-lg font-bold leading-snug text-text-primary group-hover:text-link transition-colors">
+                          {cleanTitle(localize(r.title, r.title_vi))}
                         </h3>
-                        <p className="hidden sm:block text-sm text-text-secondary line-clamp-2 mb-2">
-                          {localize(related.summary, related.summary_vi)}
-                        </p>
-                        {related.reading_time > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-text-tertiary">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>{related.reading_time} {localize('min read', 'phút đọc')}</span>
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+          </Container>
+        </section>
+      )}
+      {!nextPost && <div className="pb-20 sm:pb-28" />}
     </div>
   )
 }

@@ -1,245 +1,83 @@
-'use client'
+import type { Metadata } from 'next'
+import { Container } from '@/components/editorial'
+import { VerifyForm } from '@/components/verify/VerifyForm'
+import { SOCIAL_LINKS, SITE_CONFIG } from '@/lib/constants'
+import { formatMonth } from '@/lib/dashboard'
+import { getCertificateStats } from '@/lib/verify'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
-import {
-  ShieldCheck,
-  Search,
-  Info,
-  CheckCircle2,
-  FileCheck,
-  BadgeCheck,
-  ScanLine
-} from 'lucide-react'
-import { useLanguage } from '@/components/LanguageProvider'
+export const revalidate = 300
 
-const locale = {
-  en: {
-    title: 'Certificate Verification',
-    subtitle: 'Validate certificate authenticity issued by The Noders Community in a few seconds.',
-    placeholder: 'Enter certificate ID (e.g., C0007)',
-    verify: 'Verify Certificate',
-    format: 'ID Format',
-    formatExample: 'C0007',
-    formatDesc: 'One letter C + 4 digits, from C0000 to C9999.',
-    invalid: 'Please enter a valid certificate ID (C0000-C9999).',
-    helperTitle: 'Where to find the ID?',
-    helperDesc: 'The certificate ID appears at the lower-left area of each certificate file.',
-    verifiedTitle: 'What will be checked',
-    stepsTitle: 'How verification works',
-    steps: [
-      'Enter the certificate ID and submit verification.',
-      'The system checks against official records in the database.',
-      'You receive certificate details and member identity results.'
-    ],
-    trustTitle: 'Official verification portal',
-    trustDesc: 'Built for transparent validation across education and competition certificates.',
-    features: {
-      title: 'Verification Coverage',
-      items: [
-        'Certificate identity and title',
-        'Issued date and certificate file',
-        'Member profile mapping'
-      ]
-    }
-  },
-  vi: {
-    title: 'Tra cứu chứng chỉ',
-    subtitle: 'Xác thực nhanh tính hợp lệ của chứng chỉ do The Noders Community cấp.',
-    placeholder: 'Nhập mã chứng chỉ (VD: C0007)',
-    verify: 'Kiểm tra ngay',
-    format: 'Định dạng mã',
-    formatExample: 'C0007',
-    formatDesc: '1 chữ C + 4 chữ số, từ C0000 đến C9999.',
-    invalid: 'Vui lòng nhập đúng mã chứng chỉ (C0000-C9999).',
-    helperTitle: 'Tìm mã chứng chỉ ở đâu?',
-    helperDesc: 'Mã chứng chỉ nằm ở khu vực góc dưới bên trái trên file chứng chỉ.',
-    verifiedTitle: 'Thông tin sẽ được đối chiếu',
-    stepsTitle: 'Quy trình xác thực',
-    steps: [
-      'Nhập mã chứng chỉ và gửi yêu cầu xác thực.',
-      'Hệ thống đối chiếu với dữ liệu chứng chỉ chính thức.',
-      'Trả về kết quả xác thực và thông tin thành viên liên quan.'
-    ],
-    trustTitle: 'Cổng xác thực chính thức',
-    trustDesc: 'Được xây dựng để minh bạch việc xác thực chứng chỉ học tập và thi đấu.',
-    features: {
-      title: 'Thông tin xác thực',
-      items: [
-        'Mã chứng chỉ và tên chứng chỉ',
-        'Ngày cấp và tệp chứng chỉ',
-        'Đối chiếu hồ sơ thành viên'
-      ]
-    }
-  }
+export const metadata: Metadata = {
+  title: 'Verify a certificate',
+  description: 'Check that a certificate issued by The Noders is real: enter the code printed on it to see who it was issued to, for what, and the original file.',
+  alternates: { canonical: `${SITE_CONFIG.url}/verify` },
 }
 
-export default function VerifyPage() {
-  const router = useRouter()
-  const { language } = useLanguage()
-  const t = locale[language as keyof typeof locale] || locale.en
+const TELLS = [
+  { title: 'Who it belongs to', body: 'The member’s name, linked to their public profile and the work behind the award.' },
+  { title: 'What it’s for, and when', body: 'The award, the programme it came from and the date it was issued.' },
+  { title: 'The original file', body: 'The exact certificate we issued, so you can compare it with the copy you were given.' },
+]
 
-  const [certificateId, setCertificateId] = useState('')
-  const [error, setError] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    const id = certificateId.trim().toUpperCase()
-
-    // Validate format: C0000 - C9999
-    const pattern = /^C\d{4}$/
-    if (!pattern.test(id)) {
-      setError(t.invalid)
-      return
-    }
-
-    router.push(`/verify/${id}`)
-  }
-
-  const normalizedPreview = certificateId.trim().toUpperCase()
+export default async function VerifyPage() {
+  const stats = await getCertificateStats()
 
   return (
     <>
-      <NeuralNetworkBackground />
-      <div className="relative min-h-screen z-10 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="absolute top-24 left-1/4 w-80 h-80 bg-primary-blue/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-accent-cyan/10 rounded-full blur-[120px] pointer-events-none" />
-
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-8 md:mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/10 border border-primary-blue/20 text-primary-blue text-sm font-medium mb-5">
-              <ShieldCheck className="w-4 h-4" />
-              {t.trustTitle}
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading text-text-primary tracking-tight mb-4">
-              {t.title}
-            </h1>
-            <p className="text-text-secondary text-sm sm:text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
-              {t.subtitle}
+      <section className="bg-navy text-white">
+        <Container className="pb-20 pt-[72px]">
+          <div className="max-w-[720px]">
+            <p className="mb-4 text-[15px] text-on-navy">Certificate verification</p>
+            <h1 className="mb-4 text-[clamp(32px,3.8vw,50px)] font-bold leading-[1.06] tracking-[-0.03em]">Check that a Noders certificate is real.</h1>
+            <p className="mb-9 text-lg text-on-navy">
+              Enter the code printed at the top of the certificate. You’ll see who it was issued to, for what, and the original file.
             </p>
+            <VerifyForm />
           </div>
+        </Container>
+      </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-            <Card className="lg:col-span-7 bg-dark-bg/75 backdrop-blur-xl border-dark-border/60">
-              <CardContent className="p-5 sm:p-6 md:p-8">
-                <div className="flex items-start justify-between gap-4 mb-6">
-                  <div>
-                    <h2 className="text-xl md:text-2xl font-semibold text-text-primary mb-2">
-                      {t.verify}
-                    </h2>
-                    <p className="text-sm md:text-base text-text-secondary">
-                      {t.trustDesc}
-                    </p>
-                  </div>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <Input
-                    value={certificateId}
-                    onChange={(e) => {
-                      setCertificateId(e.target.value.toUpperCase())
-                      setError('')
-                    }}
-                    placeholder={t.placeholder}
-                    className="h-14 text-lg font-mono tracking-wide uppercase"
-                    icon={<ScanLine className="w-5 h-5" />}
-                  />
-
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                    <div className="text-text-tertiary">
-                      {t.format}: <span className="text-primary-blue font-mono font-semibold">{t.formatExample}</span>
-                    </div>
-                    {normalizedPreview && (
-                      <div className="px-3 py-1.5 rounded-md border border-primary-blue/30 bg-primary-blue/10 text-primary-blue font-mono font-semibold">
-                        {normalizedPreview}
-                      </div>
-                    )}
-                  </div>
-
-                  {error && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg border border-error/30 bg-error/10 text-error text-sm">
-                      <Info className="w-4 h-4 mt-0.5" />
-                      <span>{error}</span>
-                    </div>
-                  )}
-
-                  <Button type="submit" size="lg" className="w-full md:w-auto md:min-w-[220px] h-12">
-                    <Search className="w-4 h-4 mr-2" />
-                    {t.verify}
-                  </Button>
-                </form>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                  <div className="rounded-xl border border-dark-border bg-dark-surface/50 p-4">
-                    <div className="flex items-center gap-2 mb-2 text-text-primary font-medium">
-                      <Info className="w-4 h-4 text-primary-blue" />
-                      {t.helperTitle}
-                    </div>
-                    <p className="text-sm text-text-secondary leading-relaxed">{t.helperDesc}</p>
-                  </div>
-
-                  <div className="rounded-xl border border-dark-border bg-dark-surface/50 p-4">
-                    <div className="flex items-center gap-2 mb-2 text-text-primary font-medium">
-                      <BadgeCheck className="w-4 h-4 text-accent-green" />
-                      {t.verifiedTitle}
-                    </div>
-                    <ul className="space-y-2">
-                      {t.features.items.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-text-secondary">
-                          <CheckCircle2 className="w-4 h-4 mt-0.5 text-accent-green flex-shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-5 bg-dark-surface/70 border-dark-border/60">
-              <CardContent className="p-5 sm:p-6 md:p-8 h-full">
-                <h3 className="text-lg md:text-xl font-semibold text-text-primary mb-4">
-                  {t.stepsTitle}
-                </h3>
-
-                <div className="space-y-4 mb-8">
-                  {t.steps.map((step, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 rounded-lg border border-dark-border bg-dark-bg/60">
-                      <div className="w-7 h-7 rounded-full bg-primary-blue/15 text-primary-blue text-sm font-semibold flex items-center justify-center flex-shrink-0">
-                        {idx + 1}
-                      </div>
-                      <p className="text-sm text-text-secondary leading-relaxed">{step}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-xl border border-primary-blue/20 bg-gradient-to-br from-primary-blue/10 to-transparent p-5">
-                  <h4 className="text-sm font-semibold text-text-primary uppercase tracking-wide mb-3">
-                    {t.format}
-                  </h4>
-                  <div className="font-mono text-3xl font-bold text-primary-blue tracking-wider mb-2">
-                    {t.formatExample}
-                  </div>
-                  <p className="text-sm text-text-secondary mb-4">
-                    {t.formatDesc}
-                  </p>
-                  <div className="text-xs text-text-tertiary flex items-center gap-2">
-                    <FileCheck className="w-3.5 h-3.5" />
-                    {t.features.title}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <Container className="flex flex-wrap items-center gap-x-[72px] gap-y-10 pt-[88px]">
+        <div className="min-w-0 flex-[1_1_360px]">
+          <h2 className="mb-3.5 text-[clamp(26px,2.6vw,34px)] font-bold leading-tight tracking-[-0.02em]">Where to find the code</h2>
+          <p className="mb-4 text-[17px] text-text-secondary">
+            Every certificate carries a line in its top-left corner:{' '}
+            <span className="font-mono text-text-primary">Verify at: thenodersptnk.com/verify/C0003</span>. The code is the part after{' '}
+            <span className="font-mono text-text-primary">/verify/</span> — a letter C followed by four digits.
+          </p>
+          <p className="text-[17px] text-text-secondary">Scanning or opening that link takes you straight to the result.</p>
         </div>
-      </div>
+        {stats.sampleImage && (
+          <figure className="relative min-w-0 flex-[1_1_560px] overflow-hidden rounded-[10px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={stats.sampleImage} alt="A Noders certificate with the verification line in its top-left corner" className="block aspect-[2000/1414] w-full object-cover" />
+            <span
+              aria-hidden="true"
+              className="absolute left-[0.8%] top-[1.2%] h-[4.6%] w-[37%] rounded-md border-[3px] border-signal shadow-[0_0_0_9999px_rgba(13,15,20,0.45)]"
+            />
+          </figure>
+        )}
+      </Container>
+
+      <Container className="pb-28 pt-24">
+        <h2 className="mb-7 text-[clamp(26px,2.6vw,34px)] font-bold leading-tight tracking-[-0.02em]">What a verified result tells you</h2>
+        <div className="grid gap-x-10 gap-y-8 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+          {TELLS.map((t) => (
+            <div key={t.title} className="border-t-2 border-link pt-[18px]">
+              <h3 className="mb-1.5 text-[19px] font-bold">{t.title}</h3>
+              <p className="text-[15px] text-text-secondary">{t.body}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-10 text-[15px] text-text-tertiary">
+          {stats.count > 0 && `${stats.count} certificates issued${stats.since ? ` since ${formatMonth(stats.since)}` : ''}. `}
+          Questions about a certificate?{' '}
+          <a href={`mailto:${SOCIAL_LINKS.email}`} className="font-semibold text-link hover:text-text-primary">
+            Contact us
+          </a>
+          .
+        </p>
+      </Container>
     </>
   )
 }
-

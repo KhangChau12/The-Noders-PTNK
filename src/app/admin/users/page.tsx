@@ -1,796 +1,339 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { useAuth } from '@/components/AuthProvider'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { Badge } from '@/components/Badge'
-import { ClickableBadge } from '@/components/ClickableBadge'
-import { Loading } from '@/components/Loading'
-import { Avatar } from '@/components/Avatar'
-import {
-  Users,
-  Plus,
-  Minus,
-  Trash2,
-  Mail,
-  Calendar,
-  Shield,
-  User,
-  Edit,
-  Search,
-  AlertCircle,
-  CheckCircle,
-  X,
-  RefreshCw,
-  ArrowLeft
-} from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useMemo, useRef, useState } from 'react'
+import { useAdmin } from '@/components/admin/AdminContext'
+import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
+import { useAuth } from '@/components/AuthProvider'
+import { FilterButton } from '@/components/editorial'
+import { MemberAvatar, btnPrimary, btnSecondary, fieldClass, labelClass } from '@/components/dashboard/ui'
+import { AdminMember, pointsByMember, profileGaps } from '@/lib/admin'
+import { roleTitle } from '@/lib/memberSummary'
+import { formatMonth } from '@/lib/dashboard'
+import { SITE_CONFIG } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
-interface AuthUser {
-  id: string
-  email: string
-  email_confirmed_at: string | null
-  last_sign_in_at: string | null
-  created_at: string
-  profile: {
-    id: string
-    username: string | null
-    full_name: string | null
-    avatar_url: string | null
-    bio: string | null
-    skills: string[] | null
-    role: 'admin' | 'member'
-    social_links: any
-    created_at: string
-    updated_at: string
-    contest_count: number
-  } | null
+type Filter = 'all' | 'core' | 'members' | 'incomplete'
+
+export default function MembersAdminPage() {
+  return (
+    <Suspense>
+      <MembersAdmin />
+    </Suspense>
+  )
 }
 
-interface CreateUserFormData {
-  email: string
-  password: string
-  full_name: string
-  username: string
-  bio: string
-  role: 'admin' | 'member'
-  avatar_url: string
-}
+function MembersAdmin() {
+  const { data, ready, patch, api } = useAdmin()
+  const { user } = useAuth()
+  const { showToast } = useToast()
+  const { confirm } = useConfirm()
+  const params = useSearchParams()
+  const router = useRouter()
+  const [filter, setFilter] = useState<Filter>(params.get('show') === 'incomplete' ? 'incomplete' : 'all')
+  const [q, setQ] = useState('')
+  const [menu, setMenu] = useState<string | null>(null)
+  const adding = params.get('add') === '1'
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
-function CreateUserModal({ isOpen, onClose, onUserCreated }: {
-  isOpen: boolean
-  onClose: () => void
-  onUserCreated: () => void
-}) {
-  const { session, user, profile, loading: authLoading, isAdmin } = useAuth()
-  const [formData, setFormData] = useState<CreateUserFormData>({
-    email: '',
-    password: '',
-    full_name: '',
-    username: '',
-    bio: '',
-    role: 'member',
-    avatar_url: ''
-  })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const stats = useMemo(() => {
+    const posts = new Map<string, number>()
+    for (const p of data.posts) if (p.status === 'published') posts.set(p.author_id, (posts.get(p.author_id) || 0) + 1)
+    const products = new Map<string, number>()
+    for (const c of data.credits) products.set(c.user_id, (products.get(c.user_id) || 0) + 1)
+    return { posts, products, points: pointsByMember(data) }
+  }, [data])
 
-  const handleChange = (field: keyof CreateUserFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const isIncomplete = (m: AdminMember) => {
+    const g = profileGaps(m)
+    return !g.photo || !g.bio
   }
+  const FILTERS: { id: Filter; label: string; test: (m: AdminMember) => boolean }[] = [
+    { id: 'all', label: 'All', test: () => true },
+    { id: 'core', label: 'Core team', test: (m) => m.role === 'admin' },
+    { id: 'members', label: 'Members', test: (m) => m.role !== 'admin' },
+    { id: 'incomplete', label: 'Incomplete profile', test: isIncomplete },
+  ]
+  let rows = data.members.filter(FILTERS.find((f) => f.id === filter)!.test)
+  if (q) rows = rows.filter((m) => `${m.full_name} ${m.username}`.toLowerCase().includes(q.toLowerCase()))
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
+  const update = async (m: AdminMember, changes: Partial<Pick<AdminMember, 'role' | 'contest_count'>>, undo: Partial<AdminMember>) => {
+    patch((d) => ({ ...d, members: d.members.map((x) => (x.id === m.id ? { ...x, ...changes } : x)) }))
     try {
-      // Enhanced authentication validation with detailed logging
-      console.log('CreateUser: Authentication check starting...')
-      console.log('CreateUser: Session exists:', !!session)
-      console.log('CreateUser: Access token exists:', !!session?.access_token)
-
-      if (!session) {
-        setError('No active session found. Please log in again.')
-        console.error('CreateUser: No session available')
-        return
-      }
-
-      if (!session.access_token) {
-        setError('No authentication token found. Please refresh the page and try again.')
-        console.error('CreateUser: No access token in session')
-        return
-      }
-
-      console.log('CreateUser: Authentication validation passed')
-
-      // Prepare request data
-      const requestData = {
-        email: formData.email,
-        password: formData.password,
-        profileData: {
-          full_name: formData.full_name,
-          username: formData.username,
-          bio: formData.bio || null,
-          role: formData.role,
-          skills: [],
-          avatar_url: formData.avatar_url || null,
-          social_links: {}
-        }
-      }
-
-      console.log('CreateUser: Sending request to API...')
-      console.log('CreateUser: Request data (without password):', {
-        ...requestData,
-        password: '[REDACTED]'
-      })
-
-      const response = await fetch('/api/admin/create-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(requestData)
-      })
-
-      console.log('CreateUser: Response status:', response.status)
-      console.log('CreateUser: Response ok:', response.ok)
-
-      const result = await response.json()
-      console.log('CreateUser: Response data:', result)
-
-      if (result.success) {
-        setSuccess(true)
-        setTimeout(() => {
-          onUserCreated()
-          onClose()
-          setSuccess(false)
-          setFormData({
-            email: '',
-            password: '',
-            full_name: '',
-            username: '',
-            bio: '',
-            role: 'member',
-            avatar_url: ''
-          })
-        }, 2000)
-      } else {
-        const errorMessage = result.error || 'Unknown error occurred'
-        console.error('CreateUser: API returned error:', errorMessage)
-        setError(`Failed to create user: ${errorMessage}`)
-      }
-    } catch (err) {
-      console.error('CreateUser: Network/parsing error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Unknown network error'
-      setError(`Network error: ${errorMessage}. Please check your connection and try again.`)
-    } finally {
-      setLoading(false)
+      await api('/api/admin/users', { method: 'PATCH', body: { id: m.id, ...changes } })
+      if (changes.role) showToast('success', `${m.full_name} is now ${changes.role === 'admin' ? 'core team' : 'a member'}`)
+    } catch (e: any) {
+      patch((d) => ({ ...d, members: d.members.map((x) => (x.id === m.id ? { ...x, ...undo } : x)) }))
+      showToast('error', e.message)
     }
   }
 
-  if (!isOpen) return null
-
-  // Check authentication status before rendering
-  if (authLoading) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <div className="w-8 h-8 border-2 border-primary-blue/30 border-t-primary-blue rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-text-secondary">Verifying authentication...</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  // Contest count: update the number at once, save after clicks settle
+  const bumpContests = (m: AdminMember, delta: number) => {
+    const next = Math.max(0, (m.contest_count || 0) + delta)
+    patch((d) => ({ ...d, members: d.members.map((x) => (x.id === m.id ? { ...x, contest_count: next } : x)) }))
+    clearTimeout(timers.current[m.id])
+    timers.current[m.id] = setTimeout(() => {
+      api('/api/admin/users', { method: 'PATCH', body: { id: m.id, contest_count: next } }).catch((e) => showToast('error', e.message))
+    }, 600)
   }
 
-  if (!user || !session) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="w-12 h-12 text-error mx-auto mb-4" />
-            <h3 className="font-semibold text-text-primary mb-2">Authentication Required</h3>
-            <p className="text-text-secondary mb-4">You need to be logged in to create users.</p>
-            <Button onClick={onClose}>Close</Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  const remove = async (m: AdminMember) => {
+    setMenu(null)
+    const ok = await confirm({
+      title: `Remove ${m.full_name}?`,
+      message: 'Their account and profile are deleted. Posts they wrote and credits on products may be removed with them. This can’t be undone.',
+      confirmText: 'Remove member',
+      cancelText: 'Keep',
+      variant: 'danger',
+    })
+    if (!ok) return
+    try {
+      await api(`/api/admin/users?id=${m.id}`, { method: 'DELETE' })
+      patch((d) => ({ ...d, members: d.members.filter((x) => x.id !== m.id) }))
+      showToast('success', `${m.full_name} removed`)
+    } catch (e: any) {
+      showToast('error', e.message)
+    }
   }
 
-  if (!isAdmin) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <Shield className="w-12 h-12 text-warning mx-auto mb-4" />
-            <h3 className="font-semibold text-text-primary mb-2">Admin Access Required</h3>
-            <p className="text-text-secondary mb-4">
-              You need admin privileges to create new users. Current role: {profile?.role || 'unknown'}
-            </p>
-            <Button onClick={onClose}>Close</Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  const grid = 'md:grid md:grid-cols-[minmax(0,1fr)_132px_92px_56px_70px_108px_64px_110px_36px] md:gap-3.5'
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              Create New User
-            </CardTitle>
-            <button
-              onClick={onClose}
-              className="text-text-tertiary hover:text-text-primary"
-            >
-              <X className="w-5 h-5" />
-            </button>
+    <>
+      <div className="mb-[18px] flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <div role="group" aria-label="Show" className="flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <FilterButton key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)}>
+              {f.label} <span className="font-mono text-xs opacity-75">{data.members.filter(f.test).length}</span>
+            </FilterButton>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search by name"
+            aria-label="Search members"
+            className="min-h-[40px] w-[240px] max-w-full rounded-md border border-control bg-paper px-3 text-sm text-text-primary placeholder:text-text-disabled focus:border-link focus:outline-none"
+          />
+          <button type="button" onClick={() => router.push('/admin/users?add=1')} className={btnPrimary}>
+            Add member
+          </button>
+        </div>
+      </div>
+
+      {!ready ? (
+        <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
+      ) : (
+        <div role="table" aria-label="Members" className="text-[15px]">
+          <div role="row" className={cn('hidden px-2.5 py-2 text-[13px] text-text-disabled', grid)}>
+            <span role="columnheader">Member</span>
+            <span role="columnheader">Role</span>
+            <span role="columnheader">Joined</span>
+            <span role="columnheader" className="text-right">Posts</span>
+            <span role="columnheader" className="text-right">Products</span>
+            <span role="columnheader" className="text-center">Contests</span>
+            <span role="columnheader" className="text-right">Points</span>
+            <span role="columnheader">Profile</span>
+            <span role="columnheader"><span className="sr-only">More</span></span>
           </div>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="text-center py-8">
-              <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
-                User Created Successfully!
-              </h3>
-              <p className="text-text-secondary">
-                The new user account has been created and they can now log in.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Authentication Info */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-text-primary border-b border-dark-border pb-2">
-                  Authentication
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Email Address *
-                    </label>
-                    <Input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      placeholder="user@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Password *
-                    </label>
-                    <Input
-                      type="password"
-                      required
-                      value={formData.password}
-                      onChange={(e) => handleChange('password', e.target.value)}
-                      placeholder="Strong password"
-                      minLength={6}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Profile Info */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-text-primary border-b border-dark-border pb-2">
-                  Profile Information
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      required
-                      value={formData.full_name}
-                      onChange={(e) => handleChange('full_name', e.target.value)}
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Username *
-                    </label>
-                    <Input
-                      required
-                      value={formData.username}
-                      onChange={(e) => handleChange('username', e.target.value)}
-                      placeholder="johndoe"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) => handleChange('bio', e.target.value)}
-                    placeholder="Tell us about this user..."
-                    rows={3}
-                    className="w-full px-3 py-2.5 text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Role
-                    </label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => handleChange('role', e.target.value as 'admin' | 'member')}
-                      className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
-                    >
-                      <option value="member">Member</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-2">
-                      Avatar URL
-                    </label>
-                    <Input
-                      type="url"
-                      value={formData.avatar_url}
-                      onChange={(e) => handleChange('avatar_url', e.target.value)}
-                      placeholder="https://example.com/avatar.jpg"
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              {error && (
-                <div className="p-4 bg-error/20 border border-error/30 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-error mb-1">Error Creating User</h4>
-                      <p className="text-sm text-error">{error}</p>
-                      {error.includes('Authentication') && (
-                        <p className="text-xs text-error/80 mt-1">
-                          💡 Try refreshing the page and logging in again if authentication issues persist.
-                        </p>
-                      )}
-                      {error.includes('Admin') && (
-                        <p className="text-xs text-error/80 mt-1">
-                          💡 Please ensure you have admin privileges to create users.
-                        </p>
+          {rows.map((m) => {
+            const g = profileGaps(m)
+            const missing = [!g.photo && 'photo', !g.bio && 'bio', !g.link && 'link'].filter(Boolean) as string[]
+            const posts = stats.posts.get(m.id) || 0
+            const products = stats.products.get(m.id) || 0
+            const isCore = m.role === 'admin'
+            return (
+              <div key={m.id} role="row" className={cn('relative flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-rule px-2.5 py-2.5 hover:bg-[#12151B]', grid, 'md:items-center')}>
+                <span role="cell" className="flex min-w-0 flex-[1_1_100%] items-center gap-3 md:flex-none">
+                  <MemberAvatar name={m.full_name} src={m.avatar_url} className="h-9 w-9 shrink-0 rounded-full text-xs" />
+                  <span className="min-w-0">
+                    <Link href={`/members/${m.id}`} className="block truncate font-semibold text-text-primary hover:text-link">{m.full_name}</Link>
+                    <span className="block truncate text-[13px] text-text-tertiary">{roleTitle(m.bio, m.role)}{!g.bio && ' · default bio'}</span>
+                  </span>
+                </span>
+                <span role="cell">
+                  <button
+                    type="button"
+                    disabled={m.id === user?.id}
+                    onClick={() => update(m, { role: isCore ? 'member' : 'admin' }, { role: m.role })}
+                    title={m.id === user?.id ? 'You can’t change your own role' : 'Switch role'}
+                    className={cn('flex min-h-[34px] w-full items-center justify-between gap-2 rounded-md border border-control px-2.5 text-sm disabled:opacity-60', isCore ? 'bg-[#1C2A44] text-on-navy' : 'bg-paper text-text-secondary')}
+                  >
+                    {isCore ? 'Core team' : 'Member'} <span aria-hidden="true" className="text-text-disabled">⇄</span>
+                  </button>
+                </span>
+                <span role="cell" className="font-mono text-[13px] text-text-tertiary">{formatMonth(m.created_at)}</span>
+                <span role="cell" className={cn('font-mono text-sm md:text-right', posts ? 'text-text-primary' : 'text-text-disabled')}>
+                  {posts}<span className="text-text-tertiary md:hidden"> posts</span>
+                </span>
+                <span role="cell" className={cn('font-mono text-sm md:text-right', products ? 'text-text-primary' : 'text-text-disabled')}>
+                  {products}<span className="text-text-tertiary md:hidden"> products</span>
+                </span>
+                <span role="cell" className="flex items-center justify-center gap-0.5">
+                  <button type="button" aria-label={`One fewer contest for ${m.full_name}`} onClick={() => bumpContests(m, -1)} className="h-7 w-7 rounded-md border border-control text-text-secondary hover:text-text-primary">−</button>
+                  <span className="min-w-[26px] text-center font-mono text-sm" aria-label={`${m.contest_count || 0} contests`}>{m.contest_count || 0}</span>
+                  <button type="button" aria-label={`One more contest for ${m.full_name}`} onClick={() => bumpContests(m, 1)} className="h-7 w-7 rounded-md border border-control text-text-secondary hover:text-text-primary">+</button>
+                </span>
+                <span role="cell" className="font-mono text-sm md:text-right">{stats.points.get(m.id) || 0}<span className="text-text-tertiary md:hidden"> pts</span></span>
+                <span role="cell" className="flex items-center gap-[5px]" title={missing.length ? `Missing: ${missing.join(', ')}` : 'Photo, bio and a link'}>
+                  {[g.photo, g.bio, g.link].map((ok, i) => (
+                    <span key={i} aria-hidden="true" className={cn('h-2 w-2 rounded-full', ok ? 'bg-[#5B7FD6]' : 'bg-control')} />
+                  ))}
+                  <span className={cn('ml-1 text-xs', missing.length ? 'text-signal' : 'text-text-disabled')}>{missing.length ? `no ${missing[0]}` : 'complete'}</span>
+                </span>
+                <span role="cell" className="ml-auto md:ml-0">
+                  <button type="button" aria-label={`More for ${m.full_name}`} aria-expanded={menu === m.id} onClick={() => setMenu(menu === m.id ? null : m.id)} className="h-8 w-8 rounded-md text-text-tertiary hover:bg-white/[0.05] hover:text-text-primary">
+                    ⋯
+                  </button>
+                  {menu === m.id && (
+                    <div className="absolute right-2 top-[calc(100%-6px)] z-20 flex w-48 flex-col rounded-lg border border-control bg-paper p-1 text-sm shadow-lg">
+                      <Link href={`/members/${m.id}`} className="rounded px-3 py-2 text-text-primary hover:bg-white/[0.05]">View public profile</Link>
+                      {m.id !== user?.id && (
+                        <button type="button" onClick={() => remove(m)} className="rounded px-3 py-2 text-left text-[#FF9C85] hover:bg-white/[0.05]">Remove member…</button>
                       )}
                     </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full sm:flex-1"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create User
-                    </>
                   )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={onClose}
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel
-                </Button>
+                </span>
               </div>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            )
+          })}
+          {rows.length === 0 && <p className="border-t border-rule px-2.5 py-6 text-text-tertiary">No members match.</p>}
+        </div>
+      )}
+      <p className="mt-3.5 text-[13px] text-text-disabled">Profile dots: photo · bio · a link. Role and contest changes save as you make them.</p>
+
+      {adding && <AddMemberPanel onClose={() => router.replace('/admin/users')} />}
+    </>
   )
 }
 
-function UserManagementPage() {
-  const { session } = useAuth()
-  const [users, setUsers] = useState<AuthUser[]>([])
-  const [loading, setLoading] = useState(false) // Changed to false - manual loading
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
-  const [dataLoaded, setDataLoaded] = useState(false) // Track if data has been loaded
+/* ---------- Add member ---------- */
 
-  const fetchUsers = async () => {
+const WORDS = ['river', 'maple', 'orbit', 'pixel', 'cedar', 'delta', 'ember', 'lotus', 'nova', 'quartz', 'sable', 'tango', 'vector', 'willow', 'zephyr', 'mango']
+const makePassword = () => {
+  const a = new Uint32Array(3)
+  crypto.getRandomValues(a)
+  return `${WORDS[a[0] % WORDS.length]}-${WORDS[a[1] % WORDS.length]}-${10 + (a[2] % 90)}`
+}
+const usernameFrom = (name: string) => {
+  const parts = name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return ''
+  return [parts[parts.length - 1], ...parts.slice(0, -1)].join('.').slice(0, 30)
+}
+
+function AddMemberPanel({ onClose }: { onClose: () => void }) {
+  const { data, refresh, api } = useAdmin()
+  const { showToast } = useToast()
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [gen, setGen] = useState(() => {
+    const gens = data.members.map((m) => parseInt(m.bio?.match(/generation\s*(\d+)/i)?.[1] || '0', 10))
+    return String(Math.max(1, ...gens))
+  })
+  const [role, setRole] = useState<'member' | 'admin'>('member')
+  const [password] = useState(makePassword)
+  const [busy, setBusy] = useState(false)
+  const [done, setDone] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  let username = usernameFrom(name)
+  if (username && data.members.some((m) => m.username === username)) username = `${username}${gen}`
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const first = name.trim().split(/\s+/).pop() || 'there'
+  const message = `Hi ${first}, welcome to The Noders!\nSign in at ${SITE_CONFIG.url.replace(/^https?:\/\//, '')}/login\nEmail: ${email}\nPassword: ${password}\nYour dashboard walks you through setting up your profile.`
+
+  const create = async () => {
+    if (!name.trim() || !emailOk || !username) return
+    setBusy(true)
     try {
-      setLoading(true)
-      setError(null)
-
-      if (!session?.access_token) {
-        setError('Authentication required. Please refresh the page.')
-        return
-      }
-
-      const response = await fetch('/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
+      await api('/api/admin/create-user', {
+        method: 'POST',
+        body: { email: email.trim(), password, profileData: { full_name: name.trim(), username, role, bio: `Member of Generation ${gen}` } },
       })
-      const result = await response.json()
-
-      if (result.success) {
-        setUsers(result.users)
-        setDataLoaded(true)
-        setError(null)
-      } else {
-        setError(result.error)
-      }
-    } catch (err) {
-      setError('Failed to fetch users')
+      try {
+        await navigator.clipboard.writeText(message)
+        setCopied(true)
+      } catch {}
+      setDone(true)
+      refresh()
+      showToast('success', `${name.trim()} added`)
+    } catch (e: any) {
+      showToast('error', e.message)
     } finally {
-      setLoading(false)
+      setBusy(false)
     }
-  }
-
-  const deleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      setDeletingUserId(userId)
-
-      if (!session?.access_token) {
-        alert('Authentication required. Please refresh the page.')
-        return
-      }
-
-      const response = await fetch(`/api/admin/users?id=${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        }
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        await fetchUsers() // Refresh list
-      } else {
-        alert('Failed to delete user: ' + result.error)
-      }
-    } catch (err) {
-      alert('Network error occurred')
-    } finally {
-      setDeletingUserId(null)
-    }
-  }
-
-  const handleContestCountChange = async (userId: string, newCount: number) => {
-    if (newCount < 0) return
-
-    try {
-      if (!session?.access_token) {
-        alert('Authentication required. Please refresh the page.')
-        return
-      }
-
-      // Optimistic update
-      setUsers(prev => prev.map(u => {
-        if (u.id === userId && u.profile) {
-          return { ...u, profile: { ...u.profile, contest_count: newCount } }
-        }
-        return u
-      }))
-
-      const response = await fetch('/api/admin/users/contest-count', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ userId, contest_count: newCount })
-      })
-
-      const result = await response.json()
-
-      if (!result.success) {
-        alert('Failed to update contest count: ' + result.error)
-        await fetchUsers()
-      }
-    } catch (err) {
-      alert('Network error occurred while updating contest count')
-      await fetchUsers()
-    }
-  }
-
-  // Auto-load data on first page visit
-  useEffect(() => {
-    if (!dataLoaded && session) {
-      fetchUsers()
-    }
-  }, [session, dataLoaded])
-
-  const filteredUsers = users.filter(user =>
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.profile?.username?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  if (loading) {
-    return (
-      <ProtectedRoute requireAdmin={true}>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loading size="lg" text="Loading users..." />
-        </div>
-      </ProtectedRoute>
-    )
   }
 
   return (
-    <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          {/* Back to Dashboard */}
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
-
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-                User Management
-              </h1>
-              <p className="text-sm sm:text-base text-text-secondary">
-                Create and manage user accounts
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              {!dataLoaded && (
-                <Button
-                  onClick={fetchUsers}
-                  variant="primary"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Load Users
-                </Button>
-              )}
-              {dataLoaded && (
-                <Button
-                  onClick={fetchUsers}
-                  variant="secondary"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-              )}
-              <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
-                <Plus className="w-4 h-4 mr-2" />
-                Create User
-              </Button>
-            </div>
-          </div>
-
-          {/* Data Loading Notice */}
-          {!dataLoaded && !loading && (
-            <Card className="mb-8 border-primary-blue/20 bg-primary-blue/5">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl mb-4">👥</div>
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  User Management Ready
-                </h3>
-                <p className="text-text-secondary mb-4">
-                  To prevent server overload, user data is loaded manually. Click "Load Users" to fetch
-                  the latest user accounts from the database.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Search */}
-          {dataLoaded && (
-            <div className="mb-6">
-              <Input
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-                className="max-w-md"
-              />
-            </div>
-          )}
-
-          {/* Users List */}
-          {dataLoaded && error ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  Error Loading Users
-                </h3>
-                <p className="text-text-secondary mb-4">{error}</p>
-                <Button onClick={fetchUsers}>Retry</Button>
-              </CardContent>
-            </Card>
-          ) : dataLoaded ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Users ({filteredUsers.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Scroll hint for mobile */}
-                <p className="lg:hidden text-xs text-text-tertiary text-center mb-2">
-                  ← Vuốt ngang để xem đầy đủ bảng →
-                </p>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[820px]">
-                    <thead>
-                      <tr className="border-b border-dark-border">
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">User</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Email</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Role</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Status</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Contests</th>
-                        <th className="text-left px-3 py-3 text-text-primary font-semibold">Created</th>
-                        <th className="text-right px-3 py-3 text-text-primary font-semibold">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUsers.map((user) => {
-                        const profile = user.profile
-                        // Use CSS Avatar component instead of external image
-
-                        return (
-                          <tr key={user.id} className="border-b border-dark-border/50 hover:bg-dark-surface/50">
-                            <td className="px-3 py-4">
-                              <div className="flex items-center gap-3">
-                                <Avatar
-                                  name={profile?.full_name}
-                                  src={profile?.avatar_url}
-                                  size="md"
-                                />
-                                <div>
-                                  <p className="font-medium text-text-primary">
-                                    {profile?.full_name || 'No Name'}
-                                  </p>
-                                  <p className="text-sm text-text-tertiary">
-                                    @{profile?.username || 'no-username'}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-3 py-4 text-text-secondary">
-                              {user.email}
-                            </td>
-                            <td className="px-3 py-4">
-                              <Badge variant={profile?.role === 'admin' ? 'primary' : 'secondary'}>
-                                {profile?.role === 'admin' ? (
-                                  <>
-                                    <Shield className="w-3 h-3 mr-1" />
-                                    Admin
-                                  </>
-                                ) : (
-                                  <>
-                                    <User className="w-3 h-3 mr-1" />
-                                    Member
-                                  </>
-                                )}
-                              </Badge>
-                            </td>
-                            <td className="px-3 py-4">
-                              <Badge variant={user.email_confirmed_at ? 'success' : 'warning'} size="sm">
-                                {user.email_confirmed_at ? 'Verified' : 'Pending'}
-                              </Badge>
-                            </td>
-                            <td className="px-3 py-4">
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => handleContestCountChange(user.id, (profile?.contest_count || 0) - 1)}
-                                  disabled={(profile?.contest_count || 0) <= 0}
-                                  className="w-7 h-7 rounded-md border border-dark-border bg-dark-surface hover:bg-dark-border disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-                                >
-                                  <Minus className="w-3.5 h-3.5 text-text-secondary" />
-                                </button>
-                                <span className="text-text-primary font-semibold tabular-nums w-8 text-center">
-                                  {profile?.contest_count || 0}
-                                </span>
-                                <button
-                                  onClick={() => handleContestCountChange(user.id, (profile?.contest_count || 0) + 1)}
-                                  className="w-7 h-7 rounded-md border border-dark-border bg-dark-surface hover:bg-dark-border flex items-center justify-center transition-colors"
-                                >
-                                  <Plus className="w-3.5 h-3.5 text-text-secondary" />
-                                </button>
-                              </div>
-                            </td>
-                            <td className="px-3 py-4 text-text-secondary text-sm">
-                              {new Date(user.created_at).toLocaleDateString()}
-                            </td>
-                            <td className="px-3 py-4">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => deleteUser(user.id)}
-                                  disabled={deletingUserId === user.id}
-                                  className="text-error hover:text-error hover:bg-error/10"
-                                >
-                                  {deletingUserId === user.id ? (
-                                    <div className="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin" />
-                                  ) : (
-                                    <Trash2 className="w-4 h-4" />
-                                  )}
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {filteredUsers.length === 0 && (
-                  <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-text-primary mb-2">
-                      No Users Found
-                    </h3>
-                    <p className="text-text-secondary">
-                      {searchTerm ? 'Try adjusting your search criteria.' : 'Get started by creating your first user.'}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {/* Create User Modal */}
-          <CreateUserModal
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            onUserCreated={fetchUsers}
-          />
+    <>
+      <div className="fixed inset-0 z-40 bg-[rgba(5,8,14,0.55)]" onClick={onClose} />
+      <aside role="dialog" aria-modal="true" aria-labelledby="add-title" className="fixed inset-y-0 right-0 z-50 flex w-[min(480px,100vw)] flex-col gap-[18px] overflow-y-auto border-l border-rule bg-paper p-7">
+        <div className="flex items-center justify-between">
+          <h2 id="add-title" className="text-[22px] font-bold">{done ? 'Member added' : 'Add a member'}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="h-9 w-9 text-[22px] text-text-tertiary hover:text-text-primary">×</button>
         </div>
-      </div>
-    </ProtectedRoute>
+        {!done && (
+          <>
+            <div>
+              <label htmlFor="nm" className={labelClass}>Full name</label>
+              <input id="nm" autoFocus value={name} onChange={(e) => setName(e.target.value)} className={cn(fieldClass, 'min-h-[44px] bg-ink')} />
+            </div>
+            <div>
+              <label htmlFor="em" className={labelClass}>Email</label>
+              <input id="em" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={cn(fieldClass, 'min-h-[44px] bg-ink')} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="gen" className={labelClass}>Generation</label>
+                <input id="gen" inputMode="numeric" value={gen} onChange={(e) => setGen(e.target.value.replace(/\D/g, '').slice(0, 2))} className={cn(fieldClass, 'min-h-[44px] bg-ink font-mono')} />
+              </div>
+              <div>
+                <span className={labelClass}>Role</span>
+                <div role="radiogroup" aria-label="Role" className="flex gap-1 rounded-lg bg-ink p-1">
+                  {(['member', 'admin'] as const).map((r) => (
+                    <button key={r} type="button" role="radio" aria-checked={role === r} onClick={() => setRole(r)} className={cn('min-h-[34px] flex-1 rounded-md text-sm', role === r ? 'bg-navy text-white' : 'text-text-secondary')}>
+                      {r === 'admin' ? 'Core team' : 'Member'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <dl className="grid grid-cols-[96px_1fr] gap-x-3 gap-y-2 rounded-lg bg-ink px-4 py-3.5 text-sm">
+              <dt className="text-text-tertiary">Username</dt>
+              <dd className="font-mono">{username || '—'}</dd>
+              <dt className="text-text-tertiary">Password</dt>
+              <dd className="font-mono">{password} <span className="font-sans text-text-tertiary">· generated</span></dd>
+            </dl>
+            <p className="-mt-2 text-[13px] text-text-tertiary">Both are made for you. The member can change them from their dashboard.</p>
+          </>
+        )}
+        <div>
+          <p className="mb-1.5 text-sm font-semibold">Welcome message</p>
+          <pre className="whitespace-pre-wrap rounded-lg bg-ink px-4 py-3.5 font-sans text-sm text-text-secondary">{message}</pre>
+        </div>
+        <div className="mt-auto flex gap-2.5">
+          {done ? (
+            <>
+              <button type="button" onClick={async () => { try { await navigator.clipboard.writeText(message); setCopied(true) } catch {} }} className={cn(btnPrimary, 'flex-auto')}>
+                {copied ? 'Copied ✓' : 'Copy message'}
+              </button>
+              <button type="button" onClick={onClose} className={btnSecondary}>Done</button>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={create} disabled={busy || !name.trim() || !emailOk || !username} className={cn(btnPrimary, 'min-h-[46px] flex-auto')}>
+                {busy ? 'Creating…' : 'Create and copy message'}
+              </button>
+              <button type="button" onClick={onClose} className={cn(btnSecondary, 'min-h-[46px]')}>Cancel</button>
+            </>
+          )}
+        </div>
+      </aside>
+    </>
   )
 }
-
-export default UserManagementPage

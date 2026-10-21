@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate category (optional but if provided must be valid)
-    const validCategories = ['News', 'You may want to know', 'Member Spotlight', 'Community Activities']
+    const validCategories = ['News', 'You may want to know', 'Member Spotlight', 'Community Activities', 'Tech Sharing']
     if (category && !validCategories.includes(category)) {
       return NextResponse.json(
         { success: false, error: 'Invalid category' },

@@ -105,14 +105,15 @@ export async function POST(
       upvoted = true
     }
 
-    // Update cached upvote count in posts table
-    const { error: updateError } = await supabase
-      .from('posts')
-      .update({ upvote_count: newUpvoteCount })
-      .eq('id', postId)
+    // Recount from post_upvotes in the database (readers can't write to the post row)
+    const { data: synced, error: updateError } = await (supabase as any)
+      .rpc('sync_post_upvote_count', { post_id_param: postId })
 
     if (updateError) {
-      console.error('Failed to update upvote count:', updateError)
+      // Migration 026 not applied yet: fall back to writing the cached count
+      await supabase.from('posts').update({ upvote_count: newUpvoteCount }).eq('id', postId)
+    } else if (typeof synced === 'number') {
+      newUpvoteCount = synced
     }
 
     return NextResponse.json({

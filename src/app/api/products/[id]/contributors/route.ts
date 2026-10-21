@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createClient, createTokenClient } from '@/lib/supabase'
 
 // Helper function to check if user is project owner
 async function isProjectOwner(supabase: any, projectId: string, userId: string): Promise<boolean> {
@@ -75,7 +75,7 @@ export async function POST(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createTokenClient(token)
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
@@ -221,7 +221,7 @@ export async function PUT(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createTokenClient(token)
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
@@ -342,7 +342,7 @@ export async function DELETE(
     }
 
     const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient()
+    const supabase = createTokenClient(token)
 
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)

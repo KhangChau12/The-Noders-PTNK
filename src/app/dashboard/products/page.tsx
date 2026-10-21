@@ -1,458 +1,146 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { useAuth } from '@/components/AuthProvider'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Badge } from '@/components/Badge'
-import { Loading } from '@/components/Loading'
-import { PlaceholderImage } from '@/components/PlaceholderImage'
-import { ProjectForm } from '@/components/ProjectForm'
-import { projectQueries } from '@/lib/queries'
-import {
-  FileText,
-  Plus,
-  Edit,
-  Trash2,
-  ExternalLink,
-  Github,
-  Users,
-  Calendar,
-  Settings,
-  AlertCircle,
-  Eye,
-  Archive,
-  Star
-} from 'lucide-react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useDashboard } from '@/components/dashboard/DashboardContext'
+import { Segments, btnPrimary, btnSecondary } from '@/components/dashboard/ui'
+import { FilterButton } from '@/components/editorial'
+import { DashProduct, doneCount, productChecklist } from '@/lib/dashboard'
+import { cn } from '@/lib/utils'
 
-interface Project {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  video_url: string | null
-  repo_url: string | null
-  demo_url: string | null
-  tech_stack: string[] | null
-  status: 'active' | 'archived'
-  created_by: string
-  created_at: string
-  project_contributors?: any[]
-  user_contribution?: {
-    contribution_percentage: number
-    role_in_project: string
-  }
-}
+type Filter = 'all' | 'todo' | 'helping'
 
-function MemberProjectsPage() {
-  const { user, session } = useAuth()
-  const [createdProjects, setCreatedProjects] = useState<Project[]>([])
-  const [contributedProjects, setContributedProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'created' | 'contributed'>('created')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingProject, setEditingProject] = useState<Project | null>(null)
-  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null)
+const FILTERS: { id: Filter; label: string; test: (p: DashProduct) => boolean }[] = [
+  { id: 'all', label: 'All', test: () => true },
+  { id: 'todo', label: 'Needs work', test: (p) => doneCount(p) < 4 },
+  { id: 'helping', label: 'Contributing', test: (p) => !p.isCreator },
+]
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchUserProjects()
-    }
-  }, [user?.id]) // Only depend on user.id to avoid unnecessary re-renders
-
-  const fetchUserProjects = async () => {
-    if (!user?.id) {
-      setLoading(false)
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const { createdProjects, contributedProjects, error } = await projectQueries.getUserProjects(user.id)
-
-      if (error) {
-        setError(error.message)
-        setCreatedProjects([])
-        setContributedProjects([])
-      } else {
-        setCreatedProjects(createdProjects || [])
-        setContributedProjects(contributedProjects || [])
-      }
-    } catch (err) {
-      setError('Failed to load projects')
-      setCreatedProjects([])
-      setContributedProjects([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleDeleteProject = async (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      setDeletingProjectId(projectId)
-
-      const { error } = await projectQueries.deleteProject(projectId, session)
-
-      if (error) {
-        alert('Failed to delete project: ' + error.message)
-      } else {
-        await fetchUserProjects() // Refresh the list
-      }
-    } catch (err) {
-      alert('Network error occurred')
-    } finally {
-      setDeletingProjectId(null)
-    }
-  }
-
-  const ProjectCard = ({ project, isOwner = false }: { project: Project, isOwner?: boolean }) => {
-    // Get thumbnail from either thumbnail_image.public_url or thumbnail_url
-    const thumbnailSrc = (project as any).thumbnail_image?.public_url || project.thumbnail_url
-
-    // Debug: Log to see what we're getting
-    console.log('Project:', project.title)
-    console.log('thumbnail_image:', (project as any).thumbnail_image)
-    console.log('thumbnail_url:', project.thumbnail_url)
-    console.log('thumbnailSrc:', thumbnailSrc)
-
-    return (
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-        <div className="aspect-video relative bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-          {thumbnailSrc ? (
-            <img
-              src={thumbnailSrc}
-              alt={project.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-text-tertiary">
-              <span className="text-sm">No Image</span>
-            </div>
-          )}
-        <div className="absolute top-3 left-3">
-          <Badge variant={project.status === 'active' ? 'success' : 'secondary'} size="sm">
-            {project.status}
-          </Badge>
-        </div>
-        {!isOwner && project.user_contribution && (
-          <div className="absolute top-3 right-3">
-            <Badge variant="primary" size="sm">
-              {project.user_contribution.contribution_percentage}%
-            </Badge>
-          </div>
-        )}
-      </div>
-
-      <CardContent className="p-5 sm:p-6">
-        <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-1">
-          {project.title}
-        </h3>
-
-        {project.description && (
-          <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-            {project.description}
-          </p>
-        )}
-
-        {/* Contribution percentage for contributed projects */}
-        {!isOwner && project.user_contribution && (
-          <div className="mb-3 flex items-center gap-2">
-            <div className="flex-1 max-w-[120px] bg-dark-border rounded-full h-2">
-              <div
-                className="bg-primary-blue h-2 rounded-full transition-all"
-                style={{ width: `${project.user_contribution.contribution_percentage}%` }}
-              />
-            </div>
-            <span className="text-xs text-text-tertiary">
-              {project.user_contribution.contribution_percentage}% contribution
-            </span>
-          </div>
-        )}
-
-        {/* Tech Stack */}
-        {project.tech_stack && project.tech_stack.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            {project.tech_stack.slice(0, 3).map((tech, index) => (
-              <Badge key={index} variant="tech" size="sm">
-                {tech}
-              </Badge>
-            ))}
-            {project.tech_stack.length > 3 && (
-              <Badge variant="secondary" size="sm">
-                +{project.tech_stack.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
-
-        {/* Contributors info */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-tertiary mb-4">
-          <span className="inline-flex items-center">
-            <Users className="w-4 h-4 mr-1" />
-            {project.contributors?.length || 0} contributors
-          </span>
-          <span className="inline-flex items-center">
-            <Calendar className="w-4 h-4 mr-1" />
-            {new Date(project.created_at).toLocaleDateString()}
-          </span>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-dark-border">
-          <div className="flex items-center gap-2">
-            {project.repo_url && (
-              <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="sm">
-                  <Github className="w-4 h-4" />
-                </Button>
-              </a>
-            )}
-            {project.demo_url && (
-              <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="sm">
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
-              </a>
-            )}
-            <a href={`/products/${project.id}`}>
-              <Button variant="ghost" size="sm">
-                <Eye className="w-4 h-4" />
-              </Button>
-            </a>
-          </div>
-
-          {isOwner && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setEditingProject(project)}
-                title="Edit Project"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteProject(project.id)}
-                disabled={deletingProjectId === project.id}
-                className="text-error hover:text-error hover:bg-error/10"
-                title="Delete Project"
-              >
-                {deletingProjectId === project.id ? (
-                  <div className="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-    )
-  }
-
-  if (loading) {
-    return (
-      <ProtectedRoute>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loading size="lg" text="Loading your projects..." />
-        </div>
-      </ProtectedRoute>
-    )
-  }
-
+export default function ProductsPage() {
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-                My Projects
-              </h1>
-              <p className="text-sm sm:text-base text-text-secondary">
-                Manage your projects and collaborations
-              </p>
-            </div>
-            <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Project
-            </Button>
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
-            <Card>
-              <CardContent className="p-4 sm:p-6 text-center">
-                <div className="text-2xl font-bold text-primary-blue mb-1">
-                  {createdProjects.length}
-                </div>
-                <div className="text-sm text-text-secondary">
-                  Projects Created
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 sm:p-6 text-center">
-                <div className="text-2xl font-bold text-accent-green mb-1">
-                  {contributedProjects.length}
-                </div>
-                <div className="text-sm text-text-secondary">
-                  Contributing To
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 sm:p-6 text-center">
-                <div className="text-2xl font-bold text-accent-cyan mb-1">
-                  {createdProjects.filter(p => p.status === 'active').length}
-                </div>
-                <div className="text-sm text-text-secondary">
-                  Active Projects
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex items-center gap-1 mb-6 bg-dark-surface rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('created')}
-              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                activeTab === 'created'
-                  ? 'bg-primary-blue text-white'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              <FileText className="w-4 h-4 hidden sm:inline mr-2" />
-              Created ({createdProjects.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('contributed')}
-              className={`flex-1 py-2.5 px-2 sm:px-4 min-h-[44px] rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                activeTab === 'contributed'
-                  ? 'bg-primary-blue text-white'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              <Users className="w-4 h-4 hidden sm:inline mr-2" />
-              Contributing ({contributedProjects.length})
-            </button>
-          </div>
-
-          {/* Error State */}
-          {error && (
-            <Card className="text-center py-12 mb-6">
-              <CardContent>
-                <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  Error Loading Projects
-                </h3>
-                <p className="text-text-secondary mb-4">{error}</p>
-                <Button onClick={fetchUserProjects}>Retry</Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Projects Grid */}
-          {activeTab === 'created' && (
-            <div>
-              {createdProjects.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {createdProjects.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      isOwner={true}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <div className="text-6xl mb-4 opacity-50">📁</div>
-                    <h3 className="text-xl font-semibold text-text-primary mb-2">
-                      No Projects Created Yet
-                    </h3>
-                    <p className="text-text-secondary mb-4">
-                      Start your first project and share it with the community.
-                    </p>
-                    <Button onClick={() => setShowCreateModal(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Your First Project
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'contributed' && (
-            <div>
-              {contributedProjects.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {contributedProjects.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      isOwner={false}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <div className="text-6xl mb-4 opacity-50">🤝</div>
-                    <h3 className="text-xl font-semibold text-text-primary mb-2">
-                      No Collaborations Yet
-                    </h3>
-                    <p className="text-text-secondary mb-4">
-                      Join existing projects and collaborate with other members.
-                    </p>
-                    <a href="/products">
-                      <Button>
-                        <FileText className="w-4 h-4 mr-2" />
-                        Browse Products
-                      </Button>
-                    </a>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* Project Forms */}
-          <ProjectForm
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-            onSuccess={fetchUserProjects}
-            mode="create"
-          />
-
-          <ProjectForm
-            isOpen={!!editingProject}
-            onClose={() => setEditingProject(null)}
-            onSuccess={fetchUserProjects}
-            editProject={editingProject}
-            mode="edit"
-          />
-        </div>
-      </div>
-    </ProtectedRoute>
+    <Suspense>
+      <ProductsList />
+    </Suspense>
   )
 }
 
-export default MemberProjectsPage
+function ProductsList() {
+  const { data, ready } = useDashboard()
+  const params = useSearchParams()
+  const [filter, setFilter] = useState<Filter>(params.get('show') === 'todo' ? 'todo' : 'all')
+
+  const products = data.products
+  const complete = products.filter((p) => doneCount(p) === 4).length
+  const rows = products.filter(FILTERS.find((f) => f.id === filter)!.test)
+
+  return (
+    <>
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1.5">
+          <h2 className="text-[28px] font-bold tracking-[-0.02em]">Products</h2>
+          {ready && products.length > 0 && (
+            <span className="text-text-tertiary">
+              {complete} complete{products.length - complete ? ` · ${products.length - complete} need something` : ''}
+            </span>
+          )}
+        </div>
+        {products.length > 0 && (
+          <div role="group" aria-label="Show" className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <FilterButton key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)}>
+                {f.label} <span className="font-mono text-xs opacity-75">{products.filter(f.test).length}</span>
+              </FilterButton>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {!ready ? (
+        <div aria-busy="true" className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr))]">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-[230px] animate-pulse rounded-[14px] bg-paper" />
+          ))}
+        </div>
+      ) : (
+        <ul className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr))]">
+          {rows.map((p) => (
+            <li key={p.id}>
+              <ProductCard product={p} />
+            </li>
+          ))}
+          {filter === 'all' && (
+            <li>
+              <Link
+                href="/dashboard/products/new"
+                className="flex h-full min-h-[200px] flex-col justify-center gap-1 rounded-[14px] border border-dashed border-control p-6 text-text-primary transition-colors hover:border-text-tertiary"
+              >
+                <span className="text-lg font-bold">+ Add a product</span>
+                <span className="text-sm text-text-tertiary">
+                  Built something with others? Add it once and credit everyone — it shows on each of their profiles.
+                </span>
+              </Link>
+            </li>
+          )}
+        </ul>
+      )}
+      {ready && rows.length === 0 && filter !== 'all' && (
+        <p className="mt-2 text-text-tertiary">{filter === 'todo' ? 'Every product page is complete.' : 'You aren’t credited on anyone else’s product yet.'}</p>
+      )}
+    </>
+  )
+}
+
+function ProductCard({ product: p }: { product: DashProduct }) {
+  const checks = productChecklist(p)
+  const done = checks.filter((c) => c.done).length
+  const full = done === 4
+  const canEdit = true // creators, credited contributors and admins can edit (enforced by the API and RLS)
+  return (
+    <article className="flex h-full flex-wrap overflow-hidden rounded-[14px] bg-paper">
+      <Link href={`/products/${p.id}`} className="relative block min-h-[180px] min-w-0 flex-[1_1_220px] bg-ink" aria-label={`View ${p.title}`}>
+        {p.thumbnail ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={p.thumbnail} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center text-[13px] text-text-disabled">No screenshot yet</span>
+        )}
+      </Link>
+      <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-3 px-[22px] py-5">
+        <div>
+          <h3 className="text-lg font-bold leading-snug">{p.title}</h3>
+          <p className="mt-0.5 text-[13px] text-text-tertiary">
+            {[p.isCreator ? 'Created by you' : p.role || 'Contributor', p.share != null ? `${p.share}%` : null, p.status === 'archived' ? 'Archived' : 'Live']
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
+        <div>
+          <span className="flex items-center gap-2.5">
+            <Segments done={done} />
+            <span className={cn('whitespace-nowrap text-[13px]', full ? 'text-text-tertiary' : 'text-signal')}>{full ? 'Complete' : `${done} of 4`}</span>
+          </span>
+          <ul aria-label="Page checklist" className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-1 text-[13px]">
+            {checks.map((c) => (
+              <li key={c.key} className={cn('flex gap-1.5', c.done ? 'text-text-tertiary' : 'text-signal')}>
+                <span aria-hidden="true" className={c.done ? 'text-[#6FD39F]' : ''}>{c.done ? '✓' : '○'}</span>
+                {c.label}
+                <span className="sr-only">{c.done ? ' — done' : ' — missing'}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mt-auto flex items-center gap-2">
+          {canEdit && (
+            <Link href={`/dashboard/products/${p.id}/edit`} className={full ? btnSecondary : btnPrimary}>
+              {full ? 'Edit' : 'Finish page'}
+            </Link>
+          )}
+          <Link href={`/products/${p.id}`} className="px-2.5 py-2 text-sm font-semibold text-text-secondary hover:text-text-primary">
+            View page
+          </Link>
+        </div>
+      </div>
+    </article>
+  )
+}

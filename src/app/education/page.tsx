@@ -1,145 +1,123 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Metadata } from 'next'
-import { Button } from '@/components/Button'
-import { Badge } from '@/components/Badge'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
-import {
-  ArrowRight,
-  Users,
-  Calendar,
-  Building2,
-  Play,
-  ExternalLink,
-  Plus
-} from 'lucide-react'
-import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground'
 import { PageHero } from '@/components/PageHero'
+import { Container, CtaPanel, Mono, NavyLink, PrimaryLink, SectionTitle, StatusCard, TextLink } from '@/components/editorial'
+import { COURSES, NEXT_COURSE } from '@/lib/programs'
+import { SOCIAL_LINKS } from '@/lib/constants'
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'Education - The Noders Community',
-  description: 'Join workshops and mini-courses designed for high school students serious about AI and Data Science. Build practical skills through structured learning paths.',
+  description:
+    'Short courses in data science and AI, taught by students for students at High School for the Gifted VNUHCM. Each session pairs one concept with hands-on practice.',
   keywords: ['AI education', 'data science course', 'student workshop', 'PTNK training', 'machine learning course'],
   url: '/education',
 })
 
 export default function EducationPage() {
-  const program = {
-    slug: 'ds-and-ai-01',
-    badge: 'Mini-Course • Coming Soon',
-    title: 'Introduction to Data Science and Artificial Intelligence',
-    description: 'Build a solid foundation in data science thinking and gain comprehensive knowledge of the 3 pillars of data (Structured, Vision, NLP).',
-    targetText: 'Grade 10-11 students',
-    scheduleText: '4 sessions × 1.5h • Jan 2026',
-    orgText: 'The Noders Community × PRISEE',
-    canvaEmbed: 'https://www.canva.com/design/DAG6aB5X6q0/9rrWO6b8nUd1G_NSfJvOrA/view?embed',
-  }
-
   return (
-    <>
-      <NeuralNetworkBackground />
-      <div className="relative min-h-screen z-10">
-        <PageHero
-          title="Education"
-          subtitle="Workshops & Mini-Courses for Future AI Builders"
-          description="From quick weekend workshops to multi-module courses, our programs help VNU High School students build practical AI and Data Science skills — learn a skill fast, or follow a structured journey from zero to builder."
-        />
+    <div>
+      <PageHero
+        eyebrow="Education"
+        title="Short courses, by students, for students."
+        description="Small-group courses for students starting out in data and AI. Each session pairs one concept with hands-on practice."
+        aside={
+          NEXT_COURSE ? (
+            <StatusCard label={NEXT_COURSE.open ? 'Enrolment open' : 'Coming up'} title={NEXT_COURSE.name} live={NEXT_COURSE.open}>
+              <NavyLink href={NEXT_COURSE.href}>Details</NavyLink>
+            </StatusCard>
+          ) : (
+            <StatusCard label="No course enrolling right now" title="The next one is announced on Facebook first.">
+              <NavyLink href={SOCIAL_LINKS.facebook} external>
+                Get notified when enrolment opens
+              </NavyLink>
+            </StatusCard>
+          )
+        }
+      />
 
-        {/* Our Programs Section */}
-        <section className="py-10 px-4 sm:px-6 sm:py-16 lg:px-8 bg-dark-surface/40">
-          <div className="container mx-auto">
-            <div className="mb-8 sm:mb-10">
-              <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-accent-purple mb-3.5">
-                <span className="w-[18px] h-0.5 rounded-sm bg-current" />
-                Programs
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary mb-2">
-                Our Programs
-              </h2>
-              <p className="text-text-secondary text-base sm:text-lg leading-relaxed max-w-2xl">
-                From weekend workshops to multi-session courses, choose the learning path
-                that fits your goals and schedule.
+      <section className="pt-20 sm:pt-[88px]">
+        <Container>
+          <SectionTitle className="mb-8">Past courses</SectionTitle>
+
+          {COURSES.map((course) => (
+            <div key={course.slug} className="mb-16 last:mb-0">
+              <article className="rounded-xl bg-paper p-6 sm:p-8 lg:p-10">
+                <div className="flex flex-wrap items-center gap-x-14 gap-y-10">
+                  <div className="relative aspect-video min-w-0 flex-[1_1_440px] overflow-hidden rounded-lg">
+                    <Image src={course.coverImage} alt={course.coverAlt} fill sizes="(max-width: 1024px) 100vw, 560px" className="object-cover" />
+                  </div>
+
+                  <div className="flex min-w-0 flex-[1_1_440px] flex-col gap-[18px]">
+                    <p className="text-sm font-semibold text-link">
+                      {[course.kind, course.partner ? `with ${course.partner}` : null, course.status === 'ended' ? 'Ended' : course.status === 'open' ? 'Open' : 'Upcoming']
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                    <h3 className="text-2xl sm:text-[34px] font-bold leading-[1.12] tracking-[-0.025em] text-text-primary">{course.title}</h3>
+                    <p className="text-text-secondary leading-relaxed">{course.description}</p>
+                    <dl className="grid grid-cols-3 gap-6 border-y border-[#2A2E37] py-[18px]">
+                      <div>
+                        <dt className="text-[13px] text-text-tertiary">For</dt>
+                        <dd className="font-semibold text-text-primary">{course.audience}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[13px] text-text-tertiary">Format</dt>
+                        <dd className="font-semibold text-text-primary">{course.format}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[13px] text-text-tertiary">When</dt>
+                        <dd className="font-semibold text-text-primary">{course.when}</dd>
+                      </div>
+                    </dl>
+                    <div className="flex flex-wrap gap-x-7 gap-y-2.5 text-[15px] font-semibold">
+                      <TextLink href={`/education/${course.slug}`}>Course page →</TextLink>
+                      {course.slidesUrl && (
+                        <a href={course.slidesUrl} target="_blank" rel="noopener noreferrer" className="text-text-primary hover:text-link transition-colors">
+                          All slides ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              {/* Syllabus */}
+              <h3 className="mt-[72px] mb-1.5 text-2xl font-bold tracking-[-0.015em] text-text-primary">
+                What the {course.sessions.length} sessions covered
+              </h3>
+              <p className="mb-6 text-[15px] text-text-secondary">
+                Each session: concept first, then a hands-on notebook. Slides and recordings are on each session page.
               </p>
-            </div>
-
-            <div className="lg:px-7">
-              {/* Featured course card — sized like a first entry in a growing
-                  catalog rather than a lone card floating in the page. */}
-              <div className="rounded-[22px] border border-dark-border/60 bg-dark-surface/70 backdrop-blur-sm overflow-hidden grid grid-cols-1 lg:grid-cols-[1.3fr_1fr]">
-                <div className="relative bg-black aspect-[4/3]">
-                  <iframe
-                    src={program.canvaEmbed}
-                    loading="lazy"
-                    allowFullScreen
-                    allow="fullscreen"
-                    className="absolute inset-0 w-full h-full border-0"
-                    title={`${program.title} - Slide Preview`}
-                  />
-                  <div className="absolute bottom-3 left-3">
-                    <Badge variant="secondary" className="bg-dark-bg/80 backdrop-blur-sm text-xs">
-                      <Play className="w-3 h-3 mr-1" />
-                      Session 1 Preview
-                    </Badge>
-                  </div>
-                </div>
-                <div className="p-6 sm:p-8 flex flex-col">
-                  <Badge
-                    variant="warning"
-                    className="mb-3 self-start !bg-accent-orange/10 !text-[#fdba74] !border-accent-orange/30"
-                  >
-                    {program.badge}
-                  </Badge>
-                  <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 leading-tight">
-                    {program.title}
-                  </h3>
-                  <p className="text-text-secondary leading-relaxed text-sm mb-5">
-                    {program.description}
-                  </p>
-                  <div className="flex flex-col gap-2.5 mb-6">
-                    <div className="flex items-center gap-2.5 text-text-secondary text-sm">
-                      <Users className="w-4 h-4 text-accent-purple flex-shrink-0" />
-                      {program.targetText}
-                    </div>
-                    <div className="flex items-center gap-2.5 text-text-secondary text-sm">
-                      <Calendar className="w-4 h-4 text-accent-purple flex-shrink-0" />
-                      {program.scheduleText}
-                    </div>
-                    <div className="flex items-center gap-2.5 text-text-secondary text-sm">
-                      <Building2 className="w-4 h-4 text-accent-purple flex-shrink-0" />
-                      {program.orgText}
-                    </div>
-                  </div>
-                  <div className="mt-auto pt-5 border-t border-dark-border/60 flex gap-3">
-                    <Link href={`/education/${program.slug}`} className="flex-1">
-                      <Button variant="primary" className="w-full group/btn">
-                        Learn More
-                        <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </Button>
+              <ol className="border-b border-rule">
+                {course.sessions.map((s) => (
+                  <li key={s.n} className="border-t border-rule">
+                    <Link href={`/education/${course.slug}/session/${s.n}`} className="group flex flex-wrap gap-x-10 gap-y-3 py-[26px]">
+                      <Mono className="flex-[0_0_110px] pt-1 text-link">Session {String(s.n).padStart(2, '0')}</Mono>
+                      <div className="min-w-0 flex-[1_1_380px]">
+                        <div className="mb-1 text-[19px] font-bold tracking-[-0.01em] text-text-primary group-hover:text-link transition-colors">
+                          {s.title}
+                        </div>
+                        <div className="text-[15px] text-text-secondary">{s.goal}</div>
+                      </div>
+                      <span className="min-w-0 flex-[1_1_300px] pt-[3px] text-sm text-text-tertiary">{s.topics.join(' · ')}</span>
                     </Link>
-                    <a
-                      href={program.canvaEmbed.replace('?embed', '')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button variant="secondary" title="Open slides in new tab">
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Explicit "more coming" slot so a single-program catalog
-                  doesn't read as an unfinished page. */}
-              <div className="mt-5 rounded-[18px] border border-dashed border-dark-border/60 p-5 sm:p-6 flex items-center gap-3.5 text-text-tertiary text-sm">
-                <div className="w-9 h-9 rounded-lg bg-dark-surface flex items-center justify-center flex-shrink-0">
-                  <Plus className="w-4 h-4" />
-                </div>
-                <span>More workshops and courses will appear here as they&apos;re announced.</span>
-              </div>
+                  </li>
+                ))}
+              </ol>
             </div>
-          </div>
-        </section>
-      </div>
-    </>
+          ))}
+        </Container>
+      </section>
+
+      <section className="pt-20 pb-20 sm:pt-[104px] sm:pb-28">
+        <Container>
+          <CtaPanel title="Want to run a course with us?" body="Schools, clubs and organisations can co-host a course, as PRISEE did.">
+            <PrimaryLink href="/contact">Get in touch</PrimaryLink>
+          </CtaPanel>
+        </Container>
+      </section>
+    </div>
   )
 }

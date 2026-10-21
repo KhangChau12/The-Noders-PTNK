@@ -3,20 +3,19 @@
 import { useState, useEffect } from 'react'
 import { useProjects } from '@/lib/hooks'
 import { ProjectCard } from '@/components/ProjectCard'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { Badge } from '@/components/Badge'
-import { SkeletonProject } from '@/components/Loading'
-import { Card, CardContent } from '@/components/Card'
+import { PageHero } from '@/components/PageHero'
+import { Container, CtaPanel, FilterButton, NavySearch, PrimaryLink } from '@/components/editorial'
 import { ProjectFilters } from '@/types/project'
 import { ProjectWithContributors } from '@/types/database'
 import { FILTER_OPTIONS } from '@/lib/constants'
-import { Search, Filter, Grid, List } from 'lucide-react'
 
 interface ProjectsClientProps {
   initialProjects: ProjectWithContributors[]
 }
 
+const STATUS_LABELS: Record<string, string> = { all: 'All', active: 'Active', archived: 'Archived' }
+
+/** Whole /products page body: navy intro with search, filters, grid, CTA. */
 export default function ProjectsClient({ initialProjects }: ProjectsClientProps) {
   const [filters, setFilters] = useState<ProjectFilters>({
     status: 'all',
@@ -25,21 +24,15 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
     sort_order: 'desc'
   })
   const [searchInput, setSearchInput] = useState('')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [showFilters, setShowFilters] = useState(false)
 
-  const isDefaultFilters =
-    filters.status === 'all' &&
-    filters.search === '' &&
-    filters.sort_by === 'created_at' &&
-    filters.sort_order === 'desc'
-
+  // Serve the server-rendered list until the visitor actually filters.
   const [hasFiltered, setHasFiltered] = useState(false)
-  const { projects: fetchedProjects, loading, error } = useProjects(
-    hasFiltered ? filters : {}
-  )
-
+  const { projects: fetchedProjects, loading, error } = useProjects(hasFiltered ? filters : {})
   const projects = hasFiltered ? fetchedProjects : initialProjects
+
+  // Status counts come from the full initial list so they stay stable while filtering.
+  const statusCount = (status: string) =>
+    status === 'all' ? initialProjects.length : initialProjects.filter((p) => p.status === status).length
 
   // Debounce search input to reduce API calls
   useEffect(() => {
@@ -51,170 +44,103 @@ export default function ProjectsClient({ initialProjects }: ProjectsClientProps)
   }, [searchInput])
 
   const handleStatusFilter = (status: string) => {
-    if (status !== 'all') setHasFiltered(true)
-    setFilters(prev => ({ ...prev, status: status as any }))
+    setHasFiltered(true)
+    setFilters(prev => ({ ...prev, status: status as ProjectFilters['status'] }))
   }
 
   const handleSortChange = (sortValue: string) => {
-    const [sort_by, sort_order] = sortValue.split('_')
+    // Values look like "created_at_desc" — split on the LAST underscore so
+    // multi-word columns survive.
+    const cut = sortValue.lastIndexOf('_')
     setHasFiltered(true)
     setFilters(prev => ({
       ...prev,
-      sort_by: sort_by as any,
-      sort_order: sort_order as any
+      sort_by: sortValue.slice(0, cut) as ProjectFilters['sort_by'],
+      sort_order: sortValue.slice(cut + 1) as ProjectFilters['sort_order'],
     }))
   }
 
   return (
-    <>
-      {/* Search and Filters */}
-      <div className="mb-8">
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:items-center justify-between">
-          {/* Search */}
-          <div className="w-full lg:w-96">
-            <Input
-              placeholder="Search projects..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              icon={<Search className="w-4 h-4" />}
-            />
-          </div>
+    <div>
+      <PageHero
+        eyebrow="Products"
+        title="Things we've shipped."
+        description="Projects built by members — most of them solving a problem we had ourselves as students."
+        aside={
+          <NavySearch
+            id="product-search"
+            label="Search products"
+            placeholder="Name, idea or tech"
+            value={searchInput}
+            onChange={setSearchInput}
+          />
+        }
+      />
 
-          {/* Filter and View Controls — min 44px touch targets on mobile */}
-          <div className="flex items-center justify-between sm:justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              icon={<Filter className="w-4 h-4" />}
-              className="min-h-[44px]"
-            >
-              Filters
-            </Button>
-
-            <div className="flex items-center border border-dark-border rounded-lg overflow-hidden">
-              <Button
-                variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                aria-label="Grid view"
-                className="rounded-none min-h-[44px] min-w-[44px]"
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                aria-label="List view"
-                className="rounded-none min-h-[44px] min-w-[44px]"
-              >
-                <List className="w-4 h-4" />
-              </Button>
+      <section className="pt-14">
+        <Container>
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+            <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-2">
+              {FILTER_OPTIONS.PROJECT_STATUS.map((option) => (
+                <FilterButton
+                  key={option.value}
+                  active={filters.status === option.value}
+                  onClick={() => handleStatusFilter(option.value)}
+                >
+                  {STATUS_LABELS[option.value] ?? option.label}
+                  <span className="font-mono text-xs opacity-75">{statusCount(option.value)}</span>
+                </FilterButton>
+              ))}
             </div>
+
+            <label className="flex items-center gap-2.5 text-sm text-text-secondary">
+              Sort
+              <select
+                className="min-h-[40px] rounded-md border border-control bg-paper px-2.5 text-sm text-text-primary focus:border-text-tertiary focus:outline-none"
+                value={`${filters.sort_by}_${filters.sort_order}`}
+                onChange={(e) => handleSortChange(e.target.value)}
+              >
+                {FILTER_OPTIONS.SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
-        </div>
 
-        {/* Expanded Filters */}
-        {showFilters && (
-          <Card className="mt-4">
-            <CardContent className="">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Status Filter */}
-                <div>
-                  <label className="text-sm font-medium text-text-primary mb-2 block">
-                    Status
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {FILTER_OPTIONS.PROJECT_STATUS.map((option) => (
-                      <Badge
-                        key={option.value}
-                        variant={filters.status === option.value ? 'primary' : 'secondary'}
-                        size="md"
-                        className="cursor-pointer hover:opacity-80 py-2"
-                        onClick={() => handleStatusFilter(option.value)}
-                      >
-                        {option.label}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sort Filter */}
-                <div>
-                  <label className="text-sm font-medium text-text-primary mb-2 block">
-                    Sort By
-                  </label>
-                  <select
-                    className="w-full bg-dark-surface border border-dark-border rounded-md px-3 py-2.5 min-h-[44px] text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                    value={`${filters.sort_by}_${filters.sort_order}`}
-                    onChange={(e) => handleSortChange(e.target.value)}
-                  >
-                    {FILTER_OPTIONS.SORT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Results Count */}
-      {!loading && projects && (
-        <div className="mb-6">
-          <p className="text-text-secondary">
-            {projects.length} project{projects.length !== 1 ? 's' : ''} found
-          </p>
-        </div>
-      )}
-
-      {/* Projects Grid/List */}
-      <div className="mb-12">
-        {loading && hasFiltered ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {[...Array(6)].map((_, i) => (
-              <SkeletonProject key={i} />
-            ))}
-          </div>
-        ) : error ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <p className="text-error mb-4">Failed to load projects</p>
+          {loading && hasFiltered ? (
+            <p className="flex items-center gap-2 text-text-secondary">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-control border-t-text-primary" />
+              Loading products…
+            </p>
+          ) : error ? (
+            <div>
+              <p className="mb-1 text-error">Failed to load products</p>
               <p className="text-text-secondary">{error}</p>
-            </CardContent>
-          </Card>
-        ) : projects && projects.length > 0 ? (
-          <div className={`grid gap-5 sm:gap-6 ${viewMode === 'grid'
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-            : 'grid-cols-1'
-          }`}>
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                showStats={true}
-                layout={viewMode}
-              />
-            ))}
-          </div>
-        ) : (
-          <Card className="text-center py-12">
-            <CardContent>
-              <div className="text-6xl mb-4 opacity-50">🔍</div>
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
-                No projects found
-              </h3>
-              <p className="text-text-secondary">
-                Try adjusting your search criteria or filters.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </>
+            </div>
+          ) : projects && projects.length > 0 ? (
+            <div className="grid grid-cols-1 gap-x-12 gap-y-16 md:grid-cols-2">
+              {projects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-2">
+              <h3 className="mb-2 text-xl font-semibold text-text-primary">No products found</h3>
+              <p className="text-text-secondary">Try a different search or status.</p>
+            </div>
+          )}
+        </Container>
+      </section>
+
+      <section className="pt-20 pb-20 sm:pt-[104px] sm:pb-28">
+        <Container>
+          <CtaPanel title="Built something as a member?" body="Add it from your dashboard — screenshots, links and who did what.">
+            <PrimaryLink href="/dashboard/products">Submit a project</PrimaryLink>
+          </CtaPanel>
+        </Container>
+      </section>
+    </div>
   )
 }

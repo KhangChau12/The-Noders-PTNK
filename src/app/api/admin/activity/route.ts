@@ -1,42 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export const dynamic = 'force-dynamic'
 
 function normalizeText(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
-}
-
-async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { error: NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 }) }
-  }
-
-  const token = authHeader.replace('Bearer ', '')
-  const supabase = createClient()
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-  if (authError || !user) {
-    return { error: NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 }) }
-  }
-
-  await supabase.auth.setSession({
-    access_token: token,
-    refresh_token: token,
-  })
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') {
-    return { error: NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 }) }
-  }
-
-  return { supabase, userId: user.id }
 }
 
 export async function GET(request: NextRequest) {
@@ -156,9 +124,11 @@ export async function POST(request: NextRequest) {
       return access.error
     }
 
-    const { supabase } = access
+    const { userId } = access
+    const supabase: any = access.supabase
     const body = await request.json()
 
+    const postId = normalizeText(body.postId || body.post_id) || null
     const templateId = normalizeText(body.templateId || body.task_template_id)
     const taskName = normalizeText(body.taskName || body.name)
     const taskDescription = normalizeText(body.taskDescription || body.description)
@@ -238,16 +208,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { data: createdLog, error: logError } = await supabase
+    const baseLog = {
+      task_template_id: finalTemplateId,
+      task_name: templateName,
+      task_description: templateDescription,
+      points,
+    }
+    // created_by / post_id need migration 027; fall back to the old shape before it runs
+    let { data: createdLog, error: logError } = await supabase
       .from('task_logs')
-      .insert({
-        task_template_id: finalTemplateId,
-        task_name: templateName,
-        task_description: templateDescription,
-        points,
-      })
-      .select('id, task_template_id, task_name, task_description, points')
+      .insert({ ...baseLog, created_by: userId, ...(postId ? { post_id: postId } : {}) })
+      .select('*')
       .single()
+    if (logError && (logError.code === '42703' || logError.code === 'PGRST204')) {
+      ;({ data: createdLog, error: logError } = await supabase.from('task_logs').insert(baseLog).select('*').single())
+    }
+    if (logError?.code === '23505') {
+      return NextResponse.json({ success: false, error: 'Points were already logged for this post' }, { status: 409 })
+    }
 
     if (logError || !createdLog) {
       return NextResponse.json(

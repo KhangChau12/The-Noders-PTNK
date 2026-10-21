@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Nunito, Shrikhand } from 'next/font/google'
+import { Be_Vietnam_Pro, JetBrains_Mono, Shrikhand } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/AuthProvider'
 import { ToastProvider } from '@/components/Toast'
@@ -9,11 +9,22 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { SITE_CONFIG } from '@/lib/constants'
 
-const nunito = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
+// Be Vietnam Pro carries the whole UI (full Vietnamese diacritics support);
+// JetBrains Mono is reserved for dates, numbers and small labels; Shrikhand is
+// used only for the "The Noders" wordmark.
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
   display: 'swap',
   fallback: ['system-ui', 'arial'],
+})
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+  fallback: ['ui-monospace', 'monospace'],
 })
 export const shrikhand = Shrikhand({
   weight: '400',
@@ -77,7 +88,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${nunito.className} ${shrikhand.variable} bg-dark-bg text-text-primary min-h-screen flex flex-col`}>
+      <body className={`${beVietnamPro.variable} ${jetbrainsMono.variable} ${shrikhand.variable} font-sans bg-dark-bg text-text-primary min-h-screen flex flex-col`}>
         <ToastProvider>
           <ConfirmProvider>
             <AuthProvider>

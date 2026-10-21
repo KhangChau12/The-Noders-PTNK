@@ -1,372 +1,205 @@
-'use client'
-
-import { useParams, useRouter } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/Button'
-import { Badge } from '@/components/Badge'
-import { Loading } from '@/components/Loading'
-import { Avatar } from '@/components/Avatar'
-import {
-  ArrowLeft,
-  ShieldCheck,
-  ShieldX,
-  Calendar,
-  ExternalLink,
-  Github,
-  Facebook,
-  Linkedin,
-  Globe,
-  Download,
-  Share2,
-  CheckCircle,
-  XCircle
-} from 'lucide-react'
-import { useLanguage } from '@/components/LanguageProvider'
-import type { CertificateVerifyResult, SocialLinks } from '@/types/database'
+import { Breadcrumb, Container } from '@/components/editorial'
+import { ShareBox } from '@/components/verify/ShareBox'
+import { MemberAvatarServer } from '@/components/verify/MemberAvatarServer'
+import { normalizeCode, verifyUrl } from '@/lib/certificates'
+import { SOCIAL_LINKS } from '@/lib/constants'
+import { describeCertificate, formatDay } from '@/lib/dashboard'
+import { CONTESTS, contestResultsFor, MemberContestResult } from '@/lib/programs'
+import { ordinal } from '@/lib/memberSummary'
+import { getCertificate } from '@/lib/verify'
 
-const locale = {
-  en: {
-    loading: 'Verifying certificate...',
-    valid: 'Certificate Verified',
-    validDesc: 'This is an authentic certificate issued by The Noders Community',
-    invalid: 'Certificate Not Found',
-    invalidDesc: 'We could not find a certificate with this ID. Please check the ID and try again.',
-    backToVerify: 'Back to Verification',
-    issuedOn: 'Issued On',
-    generation: 'Generation',
-    issuedBy: 'Issued By',
-    viewProfile: 'View Profile',
-    downloadCert: 'Download',
-    shareCert: 'Share',
-    verifiedBadge: 'Verified Member'
-  },
-  vi: {
-    loading: 'Đang xác thực chứng chỉ...',
-    valid: 'Chứng chỉ hợp lệ',
-    validDesc: 'Đây là chứng chỉ chính thức được cấp bởi The Noders Community',
-    invalid: 'Không tìm thấy chứng chỉ',
-    invalidDesc: 'Chúng tôi không tìm thấy chứng chỉ với mã này. Vui lòng kiểm tra lại mã và thử lại.',
-    backToVerify: 'Quay lại',
-    issuedOn: 'Ngày cấp',
-    generation: 'Thế hệ',
-    issuedBy: 'Người cấp',
-    viewProfile: 'Xem hồ sơ',
-    downloadCert: 'Tải xuống',
-    shareCert: 'Chia sẻ',
-    verifiedBadge: 'Đã xác thực'
+export const revalidate = 300
+
+type Params = { params: Promise<{ id: string }> }
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { id } = await params
+  const code = normalizeCode(decodeURIComponent(id))
+  const cert = code ? await getCertificate(code) : null
+  if (!cert) {
+    return { title: 'Certificate not found', robots: { index: false } }
+  }
+  const d = describeCertificate(cert)
+  const who = cert.member?.full_name || 'a member'
+  const title = `${d.award === "Participation" ? "Certificate of Participation" : d.award} — ${d.program} · ${cert.certificate_id}`
+  const description = `Verified: issued by The Noders to ${who} on ${formatDay(cert.issued_at)}.`
+  const image = cert.file_type === 'image' && cert.file_url ? [{ url: cert.file_url, width: 2000, height: 1414, alt: `${d.award} certificate awarded to ${who}` }] : undefined
+  return {
+    title,
+    description,
+    alternates: { canonical: verifyUrl(cert.certificate_id) },
+    openGraph: { title, description, url: verifyUrl(cert.certificate_id), type: 'website', images: image },
+    twitter: { card: image ? 'summary_large_image' : 'summary', title, description, images: image?.map((i) => i.url) },
   }
 }
 
-export default function VerifyResultPage() {
-  const params = useParams()
-  const router = useRouter()
-  const { language } = useLanguage()
-  const t = locale[language as keyof typeof locale] || locale.en
+export default async function VerifyResultPage({ params }: Params) {
+  const { id } = await params
+  const raw = decodeURIComponent(id)
+  const code = normalizeCode(raw)
+  const cert = code ? await getCertificate(code) : null
 
-  const certificateId = params.id as string
+  if (!cert) return <NotFound code={code || raw.toUpperCase()} />
 
-  const [loading, setLoading] = useState(true)
-  const [result, setResult] = useState<CertificateVerifyResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const verifyCertificate = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/certificates/verify/${certificateId}`)
-        const data = await response.json()
-        setResult(data)
-      } catch (err) {
-        setError('Failed to verify certificate')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (certificateId) {
-      verifyCertificate()
-    }
-  }, [certificateId])
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `Certificate Verification - ${certificateId}`,
-        text: `Verify The Noders Community certificate: ${certificateId}`,
-        url: window.location.href
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copied to clipboard!')
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading size="lg" text={t.loading} />
-      </div>
-    )
-  }
-
-  if (error || !result) {
-    return (
-      <div className="min-h-screen py-12 px-4">
-        <div className="max-w-lg mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-error/20 mb-6">
-            <ShieldX className="w-10 h-10 text-error" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            {t.invalid}
-          </h1>
-          <p className="text-text-secondary mb-8">
-            {error || t.invalidDesc}
-          </p>
-          <Button onClick={() => router.push('/verify')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t.backToVerify}
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!result.valid) {
-    return (
-      <div className="min-h-screen py-12 px-4">
-        <div className="max-w-lg mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-error/20 mb-6">
-            <XCircle className="w-10 h-10 text-error" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            {t.invalid}
-          </h1>
-          <p className="text-text-secondary mb-4">
-            {t.invalidDesc}
-          </p>
-          <div className="p-4 bg-dark-surface rounded-lg mb-8 inline-block">
-            <code className="text-xl font-mono text-error">
-              {certificateId}
-            </code>
-          </div>
-          <div>
-            <Button onClick={() => router.push('/verify')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t.backToVerify}
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const { certificate, member, issuer } = result
-  const socialLinks = member?.social_links as SocialLinks | null
+  const d = describeCertificate(cert)
+  const name = cert.member?.full_name || cert.member?.username || 'Unknown member'
+  const contest = d.href ? CONTESTS.find((c) => `/contest/${c.slug}` === d.href) : undefined
+  const result: MemberContestResult | undefined = contest ? contestResultsFor(cert.member?.full_name).find((r) => r.contest.slug === contest.slug) : undefined
 
   return (
-    <div className="min-h-screen py-8 px-4 lg:px-8">
-      <div className="max-w-[1600px] mx-auto">
-        {/* Header - Verification Status + Back */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <Link
-            href="/verify"
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t.backToVerify}
-          </Link>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 bg-success/10 border border-success/30 rounded-full">
-              <ShieldCheck className="w-5 h-5 text-success flex-shrink-0" />
-              <span className="text-success font-medium">{t.valid}</span>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={handleShare} aria-label={t.shareCert} className="min-h-[44px] min-w-[44px]">
-                <Share2 className="w-4 h-4" />
-              </Button>
-              {certificate?.file_url && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(certificate.file_url!, '_blank')}
-                  aria-label={t.downloadCert}
-                  className="min-h-[44px] min-w-[44px]"
-                >
-                  <Download className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
+    <>
+      <section className="bg-navy text-white">
+        <Container className="pb-12 pt-10">
+          <div className="mb-7">
+            <Breadcrumb items={[{ label: 'Verify', href: '/verify' }, { label: cert.certificate_id }]} />
           </div>
-        </div>
-
-        {/* Main Layout - Preview + Sidebar */}
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Certificate Preview - Main Area */}
-          <div className="flex-1 min-w-0">
-            {certificate?.file_url ? (
-              <div className="relative bg-dark-surface/30 rounded-2xl overflow-hidden p-4 lg:p-6">
-                {certificate.file_type === 'pdf' ? (
-                  <iframe
-                    src={certificate.file_url}
-                    className="w-full aspect-[2000/1414] rounded-lg"
-                    title="Certificate Preview"
-                  />
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-5">
+            <span aria-hidden="true" className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#3FB57A]">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0D2A1B" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m5 12 5 5L20 7" />
+              </svg>
+            </span>
+            <div className="min-w-0 flex-[1_1_520px]">
+              <p className="mb-1 text-[15px] font-semibold text-[#B9F0D2]">Verified · issued by The Noders</p>
+              <h1 className="text-[clamp(28px,3.2vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">
+                {d.award === 'Participation' ? `Certificate of Participation — ${d.program}` : `${d.award} — ${d.program}`}
+              </h1>
+              <p className="mt-2 text-lg text-on-navy">
+                Awarded to{' '}
+                {cert.member ? (
+                  <Link href={`/members/${cert.member.id}`} className="font-semibold text-white underline underline-offset-[3px] hover:text-on-navy">
+                    {name}
+                  </Link>
                 ) : (
-                  <div className="relative w-full aspect-[2000/1414]">
-                    <Image
-                      src={certificate.file_url}
-                      alt="Certificate"
-                      fill
-                      className="object-contain rounded-lg"
-                      sizes="(max-width: 1024px) 100vw, 70vw"
-                      priority
-                    />
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center aspect-[2000/1414] bg-dark-surface/30 rounded-2xl">
-                <p className="text-text-tertiary">No certificate preview available</p>
-              </div>
+                  <span className="font-semibold text-white">{name}</span>
+                )}{' '}
+                on {formatDay(cert.issued_at)}.
+              </p>
+            </div>
+            <span className="rounded-lg border border-white/35 px-4 py-2.5 font-mono text-[22px] tracking-[0.06em]">{cert.certificate_id}</span>
+          </div>
+        </Container>
+      </section>
+
+      <Container className="flex flex-wrap items-start gap-x-14 gap-y-10 pt-12">
+        <figure className="min-w-0 flex-[1_1_640px]">
+          {cert.file_type === 'image' && cert.file_url ? (
+            <a href={cert.file_url} target="_blank" rel="noopener noreferrer" title="Open full size" className="block overflow-hidden rounded-[10px] bg-paper">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cert.file_url} alt={`${d.award} certificate awarded to ${name}, ${d.program}`} className="block aspect-[2000/1414] w-full object-cover" />
+            </a>
+          ) : cert.file_url ? (
+            <object data={cert.file_url} type="application/pdf" aria-label={`Certificate PDF for ${name}`} className="block aspect-[2000/1414] w-full rounded-[10px] bg-paper">
+              <a href={cert.file_url} className="flex aspect-[2000/1414] w-full items-center justify-center rounded-[10px] bg-paper font-semibold text-link">
+                Open the PDF ↗
+              </a>
+            </object>
+          ) : (
+            <div className="flex aspect-[2000/1414] w-full items-center justify-center rounded-[10px] bg-paper text-text-tertiary">No file on record</div>
+          )}
+          <figcaption className="mt-3 flex flex-wrap justify-between gap-x-5 gap-y-2 text-sm text-text-tertiary">
+            <span>The original file, exactly as issued · {cert.file_type === 'pdf' ? 'PDF' : 'Image'}</span>
+            {cert.file_url && (
+              <span className="flex gap-5 font-semibold">
+                <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-link hover:text-text-primary">Open full size ↗</a>
+                <a href={cert.file_url} download className="text-link hover:text-text-primary">Download</a>
+              </span>
             )}
-          </div>
+          </figcaption>
+        </figure>
 
-          {/* Sidebar - Info */}
-          <div className="lg:w-80 xl:w-96 flex-shrink-0 space-y-6">
-            {/* Certificate Info */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-text-primary">
-                {certificate?.title || 'Certificate'}
-              </h2>
-
-              {/* Certificate ID */}
-              <div className="p-3 bg-primary-blue/10 rounded-xl">
-                <code className="text-lg font-mono font-bold text-primary-blue">
-                  {certificate?.certificate_id}
-                </code>
-              </div>
-
-              {/* Details */}
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div>
-                  <p className="text-text-tertiary mb-1">{t.issuedOn}</p>
-                  <p className="text-text-primary flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-text-tertiary" />
-                    {certificate?.issued_at
-                      ? new Date(certificate.issued_at).toLocaleDateString('vi-VN', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })
-                      : 'N/A'
-                    }
-                  </p>
-                </div>
-                <div>
-                  <p className="text-text-tertiary mb-1">{t.generation}</p>
-                  <Badge variant="primary">Gen {certificate?.gen_number}</Badge>
-                </div>
-              </div>
-
-              {issuer && (
-                <div className="text-sm">
-                  <p className="text-text-tertiary mb-1">{t.issuedBy}</p>
-                  <p className="text-text-primary">{issuer.full_name}</p>
-                </div>
-              )}
-
-              {certificate?.description && (
-                <p className="text-sm text-text-secondary">{certificate.description}</p>
-              )}
+        <aside className="flex min-w-0 flex-[0_1_400px] flex-col gap-5">
+          <dl className="flex flex-col gap-[18px] rounded-xl bg-paper p-6">
+            <div>
+              <dt className="mb-1.5 text-[13px] text-text-tertiary">Issued to</dt>
+              <dd>
+                {cert.member ? (
+                  <Link href={`/members/${cert.member.id}`} className="group flex items-center gap-3 text-text-primary">
+                    <MemberAvatarServer name={name} src={cert.member.avatar_url} />
+                    <span>
+                      <span className="block font-bold">{name}</span>
+                      <span className="block text-sm text-link group-hover:text-text-primary">See their profile and work →</span>
+                    </span>
+                  </Link>
+                ) : (
+                  <span className="font-bold">{name}</span>
+                )}
+              </dd>
             </div>
-
-            {/* Divider */}
-            <div className="border-t border-dark-border" />
-
-            {/* Member Info */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar
-                  name={member?.full_name}
-                  src={member?.avatar_url}
-                  size="lg"
-                />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-text-primary truncate">
-                    {member?.full_name}
-                  </h3>
-                  <p className="text-sm text-text-secondary truncate">@{member?.username}</p>
-                  <Badge variant="success" size="sm" className="mt-1">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    {t.verifiedBadge}
-                  </Badge>
-                </div>
-              </div>
-
-              {member?.bio && (
-                <p className="text-sm text-text-secondary line-clamp-3">{member.bio}</p>
-              )}
-
-              {/* Social Links */}
-              {socialLinks && Object.keys(socialLinks).length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {socialLinks.github && (
-                    <a
-                      href={socialLinks.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
-                    >
-                      <Github className="w-4 h-4 text-text-secondary" />
-                    </a>
-                  )}
-                  {socialLinks.facebook && (
-                    <a
-                      href={socialLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
-                    >
-                      <Facebook className="w-4 h-4 text-text-secondary" />
-                    </a>
-                  )}
-                  {socialLinks.linkedin && (
-                    <a
-                      href={socialLinks.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
-                    >
-                      <Linkedin className="w-4 h-4 text-text-secondary" />
-                    </a>
-                  )}
-                  {socialLinks.website && (
-                    <a
-                      href={socialLinks.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center w-11 h-11 bg-dark-surface hover:bg-dark-border rounded-lg transition-colors"
-                    >
-                      <Globe className="w-4 h-4 text-text-secondary" />
-                    </a>
-                  )}
-                </div>
-              )}
-
-              {/* View Profile Button */}
-              <Link href={`/members/${member?.id}`} className="block">
-                <Button variant="secondary" size="sm" className="w-full">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  {t.viewProfile}
-                </Button>
-              </Link>
+            <div className="border-t border-[#2A2E37] pt-4">
+              <dt className="mb-0.5 text-[13px] text-text-tertiary">For</dt>
+              <dd>
+                {result ? `${ordinal(result.rank)} of ${result.of} in ` : d.award === 'Participation' ? 'Taking part in ' : `${d.award} in `}
+                {d.href ? <Link href={d.href} className="text-link hover:text-text-primary">{d.program}</Link> : d.program}
+                {result && contest ? ` — ${contest.metric.split(",")[0]} ${result.score.toFixed(4)}` : ''}
+                {cert.description && <span className="mt-1 block text-sm text-text-secondary">{cert.description}</span>}
+              </dd>
             </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4 border-t border-[#2A2E37] pt-4">
+              <div>
+                <dt className="mb-0.5 text-[13px] text-text-tertiary">Issued</dt>
+                <dd>{formatDay(cert.issued_at)}</dd>
+              </div>
+              <div>
+                <dt className="mb-0.5 text-[13px] text-text-tertiary">Code</dt>
+                <dd className="font-mono">{cert.certificate_id}</dd>
+              </div>
+            </div>
+            <div className="border-t border-[#2A2E37] pt-4">
+              <dt className="mb-0.5 text-[13px] text-text-tertiary">Title on record</dt>
+              <dd className="text-[15px] text-text-secondary">{cert.title}</dd>
+            </div>
+          </dl>
+          <ShareBox cert={cert} />
+        </aside>
+      </Container>
+
+      <Container className="pb-28 pt-[72px]">
+        <p className="max-w-[760px] text-[15px] text-text-tertiary">
+          This page is the official record. If the copy you were given differs from the file above — a different name, award or date — it was
+          not issued by The Noders.{' '}
+          <a href={`mailto:${SOCIAL_LINKS.email}?subject=Certificate%20${cert.certificate_id}`} className="text-link hover:text-text-primary">
+            Report a problem
+          </a>{' '}
+          ·{' '}
+          <Link href="/verify" className="text-link hover:text-text-primary">
+            Check another code
+          </Link>
+        </p>
+      </Container>
+    </>
+  )
+}
+
+function NotFound({ code }: { code: string }) {
+  return (
+    <Container className="pb-40 pt-[72px]">
+      <div className="max-w-[640px]">
+        <p className="mb-3 flex items-center gap-2.5 text-[15px] font-semibold text-[#FFB4A3]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+            <path d="M12 8v5M12 16.5v.5" />
+            <circle cx="12" cy="12" r="9.5" />
+          </svg>
+          Not found
+        </p>
+        <h1 className="mb-3.5 text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.1] tracking-[-0.03em]">
+          No certificate has the code <span className="font-mono">{code.slice(0, 24)}</span>.
+        </h1>
+        <p className="mb-7 text-[17px] text-text-secondary">
+          Check the code against the top-left corner of the certificate — a letter C and four digits. If it matches and still isn’t found, the
+          certificate was not issued by The Noders.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/verify" className="inline-flex min-h-[48px] items-center rounded-md bg-text-primary px-5 font-semibold text-ink hover:bg-white">
+            Try another code
+          </Link>
+          <a href={`mailto:${SOCIAL_LINKS.email}`} className="inline-flex min-h-[48px] items-center rounded-md border border-control px-5 font-semibold text-text-primary hover:border-text-tertiary">
+            Contact us
+          </a>
         </div>
       </div>
-    </div>
+    </Container>
   )
 }

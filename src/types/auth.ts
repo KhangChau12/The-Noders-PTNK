@@ -17,6 +17,8 @@ export interface AuthContextType {
   profile: Profile | null
   session: AuthSession | null
   loading: boolean
+  /** True while the profile row is being fetched after the session is known. */
+  profileLoading?: boolean
   signIn: (email: string, password: string) => Promise<{ error?: string }>
   signOut: () => Promise<void>
   updateProfile: (data: Partial<Profile>) => Promise<{ error?: string }>

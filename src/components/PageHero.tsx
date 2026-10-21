@@ -1,51 +1,47 @@
 import { ReactNode } from 'react'
+import { Container } from './editorial'
 
 interface PageHeroProps {
-  /** Main heading — rendered with the brand gradient. */
+  /** Small plain label above the title — usually the page name. */
+  eyebrow?: string
+  /** Main heading: one plain sentence about what the page holds. */
   title: string
-  /** Bold one-line tagline beneath the title. */
-  subtitle?: string
-  /** Supporting paragraph beneath the subtitle. */
+  /** Supporting paragraph beneath the title. */
   description?: string
+  /** @deprecated Older call sites passed a tagline here; it renders as the description when none is given. */
+  subtitle?: string
   /**
-   * Optional content rendered below the description, still inside the hero
-   * container (e.g. a CTA banner or a stats strip).
+   * Optional right-hand column aligned to the bottom of the title block —
+   * e.g. a StatusCard or a NavySearch field.
    */
+  aside?: ReactNode
+  /** Optional content rendered under the title block, still in the navy field. */
   children?: ReactNode
 }
 
 /**
- * Shared hero for the main pages (products, posts, members, contest, education).
- * One source of truth so every page opens the same way: gradient title,
- * centered, light padding. The hero stays transparent so the global neural-net
- * background reads continuously with the rest of the page — no separate panel
- * tint that would make the header look pasted-in. Edit here to restyle all
- * pages at once.
+ * Shared page intro for the main pages: a navy colour field directly under
+ * the (separate, glass) nav. Left-aligned, compact. Edit here to restyle
+ * every page intro at once.
  */
-export function PageHero({ title, subtitle, description, children }: PageHeroProps) {
+export function PageHero({ eyebrow, title, description, subtitle, aside, children }: PageHeroProps) {
+  const body = description ?? subtitle
+
   return (
-    <section className="relative py-10 px-4 sm:px-6 sm:py-16 lg:px-8">
-      <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 break-words">
-            <span className="gradient-text">{title}</span>
-          </h1>
-
-          {subtitle && (
-            <p className="text-base sm:text-xl md:text-2xl font-semibold text-text-primary mb-4 sm:mb-5">
-              {subtitle}
-            </p>
-          )}
-
-          {description && (
-            <p className="text-sm sm:text-lg text-text-secondary leading-relaxed">
-              {description}
-            </p>
-          )}
+    <section className="bg-navy text-white">
+      <Container className="pt-14 pb-16 sm:pt-16 sm:pb-[72px]">
+        <div className="flex flex-wrap items-end gap-x-16 gap-y-8">
+          <div className="min-w-0 flex-[1_1_520px]">
+            {eyebrow && <p className="mb-[18px] text-[15px] text-on-navy">{eyebrow}</p>}
+            <h1 className="mb-[18px] text-[32px] sm:text-[40px] lg:text-[46px] font-bold leading-[1.08] tracking-[-0.03em] break-words">
+              {title}
+            </h1>
+            {body && <p className="max-w-[560px] text-base sm:text-lg leading-relaxed text-on-navy">{body}</p>}
+          </div>
+          {aside && <div className="min-w-0 flex-[0_1_380px]">{aside}</div>}
         </div>
-
         {children}
-      </div>
+      </Container>
     </section>
   )
 }

@@ -1,15 +1,20 @@
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
-import { DataScienceModule1Content } from './content' 
+import { getCourse } from '@/lib/programs'
+import { CourseDetail } from '@/components/course/CourseDetail'
+
+const course = getCourse('ds-and-ai-01')
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'Introduction to Data Science and Artificial Intelligence',
-  description: 'Build a solid foundation in data science with comprehensive training on structured data, computer vision, and NLP. 4-session mini-course for high school students.',
+  description: 'A free 4-session course on tabular data, computer vision and NLP for high-school students. Slides, recordings, notes and Colab notebooks for every session.',
   keywords: ['data science course', 'machine learning training', 'student workshop', 'Python data analysis', 'AI education'],
   url: '/education/ds-and-ai-01',
-  image: '/images/education/data-science-module-1/cover.png',
+  image: course?.coverImage,
 })
 
 export default function DataScienceModule1Page() {
-  return <DataScienceModule1Content />
+  if (!course) notFound()
+  return <CourseDetail course={course} />
 }

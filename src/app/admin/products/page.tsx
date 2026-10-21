@@ -1,478 +1,181 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { useAuth } from '@/components/AuthProvider'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card'
-import { Button } from '@/components/Button'
-import { Input } from '@/components/Input'
-import { Badge } from '@/components/Badge'
-import { Loading } from '@/components/Loading'
-import { PlaceholderImage } from '@/components/PlaceholderImage'
-import { projectQueries } from '@/lib/queries'
-import {
-  FileText,
-  Plus,
-  Trash2,
-  Edit,
-  Search,
-  AlertCircle,
-  CheckCircle,
-  RefreshCw,
-  Users,
-  Calendar,
-  Github,
-  ExternalLink,
-  Archive,
-  Play,
-  Pause,
-  ArrowLeft
-} from 'lucide-react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useAdmin } from '@/components/admin/AdminContext'
+import { useAuth } from '@/components/AuthProvider'
+import { useToast } from '@/components/Toast'
+import { FilterButton } from '@/components/editorial'
+import { Segments } from '@/components/dashboard/ui'
+import { AdminProduct, hasWriteup, nameOf, productGaps } from '@/lib/admin'
+import { projectQueries } from '@/lib/queries'
+import { formatMonth } from '@/lib/dashboard'
+import { cn } from '@/lib/utils'
 
-interface Project {
-  id: string
-  title: string
-  description: string | null
-  thumbnail_url: string | null
-  repo_url: string | null
-  demo_url: string | null
-  status: 'active' | 'archived' | 'in_progress'
-  tech_stack: string[] | null
-  created_at: string
-  updated_at: string
-  created_by: string
-  contributors: any[]
-}
+const SLOTS = 3
+type Filter = 'all' | 'incomplete' | 'featured'
 
-function ProjectManagementPage() {
-  const { session } = useAuth()
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [dataLoaded, setDataLoaded] = useState(false)
-  const [updatingProjectId, setUpdatingProjectId] = useState<string | null>(null)
-
-  // Auto-load data on component mount
-  useEffect(() => {
-    if (!dataLoaded) {
-      fetchProjects()
-    }
-  }, [])
-
-  const fetchProjects = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Use real query function (already optimized with limits)
-      const { projects: fetchedProjects, error } = await projectQueries.getProjects({
-        status: statusFilter !== 'all' ? statusFilter as any : undefined,
-        search: searchTerm || undefined
-      })
-
-      if (!error && fetchedProjects) {
-        setProjects(fetchedProjects)
-        setDataLoaded(true)
-        setError(null)
-      } else {
-        setError(error?.message || 'Failed to fetch projects')
-      }
-    } catch (err) {
-      setError('Failed to fetch projects')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateProjectStatus = async (projectId: string, newStatus: string) => {
-    try {
-      setUpdatingProjectId(projectId)
-      const { project, error } = await projectQueries.updateProject(projectId, {
-        status: newStatus,
-        updated_at: new Date().toISOString()
-      }, session)
-
-      if (!error && project) {
-        // Update local state
-        setProjects(prev =>
-          prev.map(p => p.id === projectId ? { ...p, status: newStatus as any } : p)
-        )
-      } else {
-        alert('Failed to update project: ' + (error?.message || 'Unknown error'))
-      }
-    } catch (err) {
-      alert('Network error occurred')
-    } finally {
-      setUpdatingProjectId(null)
-    }
-  }
-
-  const toggleFeatured = async (projectId: string, newFeaturedValue: boolean) => {
-    try {
-      setUpdatingProjectId(projectId)
-
-      // Check if trying to feature a 4th project
-      if (newFeaturedValue) {
-        const currentFeaturedCount = projects.filter(p => (p as any).featured && p.id !== projectId).length
-        if (currentFeaturedCount >= 3) {
-          alert('Maximum 3 projects can be featured on homepage. Please unfeature another project first.')
-          return
-        }
-      }
-
-      const { project, error } = await projectQueries.updateProject(projectId, {
-        featured: newFeaturedValue
-      }, session)
-
-      if (!error && project) {
-        // Update local state
-        setProjects(prev =>
-          prev.map(p => p.id === projectId ? { ...p, featured: newFeaturedValue } as any : p)
-        )
-      } else {
-        alert('Failed to update featured status: ' + (error?.message || 'Unknown error'))
-      }
-    } catch (err: any) {
-      alert(err?.message || 'Network error occurred')
-    } finally {
-      setUpdatingProjectId(null)
-    }
-  }
-
-  const deleteProject = async (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      setUpdatingProjectId(projectId)
-      const { error } = await projectQueries.deleteProject(projectId, session)
-
-      if (!error) {
-        await fetchProjects() // Refresh list
-      } else {
-        alert('Failed to delete project: ' + (error?.message || 'Unknown error'))
-      }
-    } catch (err) {
-      alert('Network error occurred')
-    } finally {
-      setUpdatingProjectId(null)
-    }
-  }
-
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = searchTerm === '' ||
-      project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description?.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter
-
-    return matchesSearch && matchesStatus
-  })
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'success'
-      case 'in_progress': return 'warning'
-      case 'archived': return 'secondary'
-      default: return 'secondary'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active': return <Play className="w-3 h-3" />
-      case 'in_progress': return <Pause className="w-3 h-3" />
-      case 'archived': return <Archive className="w-3 h-3" />
-      default: return <FileText className="w-3 h-3" />
-    }
-  }
-
-  if (loading && !dataLoaded) {
-    return (
-      <ProtectedRoute requireAdmin={true}>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loading size="lg" text="Loading projects..." />
-        </div>
-      </ProtectedRoute>
-    )
-  }
-
+export default function ProductsAdminPage() {
   return (
-    <ProtectedRoute requireAdmin={true}>
-      <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          {/* Back to Dashboard */}
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="mb-4 pl-0 hover:pl-2 transition-all">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
-
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-                Project Management
-              </h1>
-              <p className="text-sm sm:text-base text-text-secondary">
-                Monitor and manage club projects
-              </p>
-            </div>
-            <div className="flex gap-3">
-              {!dataLoaded && (
-                <Button
-                  onClick={fetchProjects}
-                  variant="primary"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Load Projects
-                </Button>
-              )}
-              {dataLoaded && (
-                <Button
-                  onClick={fetchProjects}
-                  variant="secondary"
-                  disabled={loading}
-                  className="w-full sm:w-auto"
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Data Loading Notice */}
-          {!dataLoaded && !loading && (
-            <Card className="mb-8 border-primary-blue/20 bg-primary-blue/5">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl mb-4">📊</div>
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  Project Management Ready
-                </h3>
-                <p className="text-text-secondary mb-4">
-                  Click "Load Projects" to fetch all club projects for monitoring and management.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Filters */}
-          {dataLoaded && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <Input
-                placeholder="Search projects..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-              />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-dark-surface border border-dark-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="in_progress">In Progress</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-          )}
-
-          {/* Projects List */}
-          {dataLoaded && error ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-text-primary mb-2">
-                  Error Loading Projects
-                </h3>
-                <p className="text-text-secondary mb-4">{error}</p>
-                <Button onClick={fetchProjects}>Retry</Button>
-              </CardContent>
-            </Card>
-          ) : dataLoaded ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => {
-                // Get thumbnail from either thumbnail_image.public_url or thumbnail_url
-                const thumbnailSrc = (project as any).thumbnail_image?.public_url || project.thumbnail_url
-
-                return (
-                  <Card key={project.id} className="overflow-hidden">
-                    <div className="aspect-video relative bg-gradient-to-br from-primary-blue/20 to-accent-cyan/20">
-                      {thumbnailSrc ? (
-                        <img
-                          src={thumbnailSrc}
-                          alt={project.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-text-tertiary">
-                          <span className="text-sm">No Image</span>
-                        </div>
-                      )}
-                      <div className="absolute top-3 left-3">
-                      <Badge variant={getStatusColor(project.status)} size="sm">
-                        {getStatusIcon(project.status)}
-                        {project.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-5 sm:p-6">
-                    <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-1">
-                      {project.title}
-                    </h3>
-
-                    {project.description && (
-                      <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                        {project.description}
-                      </p>
-                    )}
-
-                    {/* Tech Stack */}
-                    {project.tech_stack && project.tech_stack.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {project.tech_stack.slice(0, 3).map((tech, index) => (
-                          <Badge key={index} variant="tech" size="sm">
-                            {tech}
-                          </Badge>
-                        ))}
-                        {project.tech_stack.length > 3 && (
-                          <Badge variant="secondary" size="sm">
-                            +{project.tech_stack.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Contributors */}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-tertiary mb-4">
-                      <span className="inline-flex items-center">
-                        <Users className="w-4 h-4 mr-1" />
-                        {project.contributors?.length || 0} contributors
-                      </span>
-                      <span className="inline-flex items-center">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        {new Date(project.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    {/* Featured on Homepage */}
-                    <div className="flex items-center justify-between mb-4 p-3 bg-dark-surface/50 rounded-lg border border-dark-border">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className={`w-4 h-4 ${(project as any).featured ? 'text-accent-green' : 'text-text-tertiary'}`} />
-                        <span className="text-sm text-text-secondary">
-                          Featured on Homepage
-                        </span>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={(project as any).featured || false}
-                          onChange={() => toggleFeatured(project.id, !(project as any).featured)}
-                          disabled={updatingProjectId === project.id}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-dark-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-blue rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-blue"></div>
-                      </label>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-dark-border">
-                      <div className="flex items-center gap-2">
-                        {project.repo_url && (
-                          <a href={project.repo_url} target="_blank" rel="noopener noreferrer">
-                            <Button variant="ghost" size="sm">
-                              <Github className="w-4 h-4" />
-                            </Button>
-                          </a>
-                        )}
-                        {project.demo_url && (
-                          <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                            <Button variant="ghost" size="sm">
-                              <ExternalLink className="w-4 h-4" />
-                            </Button>
-                          </a>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {/* Status Toggle */}
-                        {project.status === 'active' ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => updateProjectStatus(project.id, 'archived')}
-                            disabled={updatingProjectId === project.id}
-                            title="Archive Project"
-                          >
-                            {updatingProjectId === project.id ? (
-                              <div className="w-4 h-4 border-2 border-text-tertiary/30 border-t-text-tertiary rounded-full animate-spin" />
-                            ) : (
-                              <Archive className="w-4 h-4" />
-                            )}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => updateProjectStatus(project.id, 'active')}
-                            disabled={updatingProjectId === project.id}
-                            title="Activate Project"
-                          >
-                            {updatingProjectId === project.id ? (
-                              <div className="w-4 h-4 border-2 border-text-tertiary/30 border-t-text-tertiary rounded-full animate-spin" />
-                            ) : (
-                              <Play className="w-4 h-4" />
-                            )}
-                          </Button>
-                        )}
-
-                        {/* Delete */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteProject(project.id)}
-                          disabled={updatingProjectId === project.id}
-                          className="text-error hover:text-error hover:bg-error/10"
-                          title="Delete Project"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                )
-              })}
-
-              {filteredProjects.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <FileText className="w-16 h-16 text-text-tertiary mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-text-primary mb-2">
-                    No Projects Found
-                  </h3>
-                  <p className="text-text-secondary">
-                    {searchTerm || statusFilter !== 'all'
-                      ? 'Try adjusting your search criteria or filters.'
-                      : 'No projects have been created yet.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </ProtectedRoute>
+    <Suspense>
+      <ProductsAdmin />
+    </Suspense>
   )
 }
 
-export default ProjectManagementPage
+function ProductsAdmin() {
+  const { data, ready, patch } = useAdmin()
+  const { session } = useAuth()
+  const { showToast } = useToast()
+  const params = useSearchParams()
+  const [filter, setFilter] = useState<Filter>(params.get('show') === 'incomplete' ? 'incomplete' : 'all')
+  const [busy, setBusy] = useState<string | null>(null)
+
+  const featured = data.products.filter((p) => p.featured)
+  const full = featured.length >= SLOTS
+  const credits = (id: string) => data.credits.filter((c) => c.project_id === id).length
+
+  const save = async (p: AdminProduct, changes: Partial<Pick<AdminProduct, 'featured' | 'status'>>, okMsg: string) => {
+    setBusy(p.id)
+    patch((d) => ({ ...d, products: d.products.map((x) => (x.id === p.id ? { ...x, ...changes } : x)) }))
+    const { error } = await projectQueries.updateProject(p.id, changes, session)
+    setBusy(null)
+    if (error) {
+      patch((d) => ({ ...d, products: d.products.map((x) => (x.id === p.id ? p : x)) }))
+      showToast('error', /featured/i.test(error.message) ? `Only ${SLOTS} products can be on the homepage.` : error.message)
+    } else showToast('success', okMsg)
+  }
+
+  const FILTERS: { id: Filter; label: string; test: (p: AdminProduct) => boolean }[] = [
+    { id: 'all', label: 'All', test: () => true },
+    { id: 'incomplete', label: 'Incomplete', test: (p) => productGaps(p).some((g) => !g.ok) },
+    { id: 'featured', label: 'Featured', test: (p) => p.featured },
+  ]
+  const rows = data.products.filter(FILTERS.find((f) => f.id === filter)!.test)
+
+  if (!ready) return <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
+
+  return (
+    <>
+      <section aria-labelledby="slots" className="mb-10">
+        <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5">
+          <h2 id="slots" className="text-[22px] font-bold tracking-[-0.01em]">On the homepage</h2>
+          <span className="text-sm text-text-tertiary">
+            {full ? `${SLOTS} of ${SLOTS} slots used · remove one to feature another` : `${SLOTS - featured.length} slot${SLOTS - featured.length > 1 ? 's' : ''} free`}
+          </span>
+        </div>
+        <ol className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))]">
+          {Array.from({ length: SLOTS }, (_, i) => {
+            const p = featured[i]
+            if (!p) {
+              return (
+                <li key={i} className="flex min-h-[220px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-control p-5 text-center">
+                  <span className="font-mono text-xs text-text-disabled">Slot {i + 1}</span>
+                  <span className="font-semibold">Empty</span>
+                  <span className="text-[13px] text-text-tertiary">Use “Feature” on a product with a write-up below.</span>
+                </li>
+              )
+            }
+            const empty = !hasWriteup(p)
+            return (
+              <li key={p.id} className={cn('overflow-hidden rounded-xl border bg-paper', empty ? 'border-[#6B2A2A]' : 'border-rule')}>
+                <div className="relative">
+                  {p.thumbnail ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.thumbnail} alt="" className="block aspect-video w-full object-cover" />
+                  ) : (
+                    <span className="flex aspect-video w-full items-center justify-center bg-ink text-[13px] text-text-disabled">No screenshot</span>
+                  )}
+                  <span className="absolute left-2.5 top-2.5 rounded bg-ink/80 px-1.5 py-0.5 font-mono text-xs">{i + 1}</span>
+                </div>
+                <div className="flex flex-col gap-1.5 px-4 py-3.5">
+                  <Link href={`/products/${p.id}`} className="font-bold hover:text-link">{p.title}</Link>
+                  <span className={cn('text-[13px]', empty ? 'text-[#FF9C85]' : 'text-text-tertiary')}>
+                    {empty ? 'No write-up — the page behind this card is empty' : p.video_url ? 'Complete' : 'Complete enough to feature · no video'}
+                  </span>
+                  <button type="button" disabled={busy === p.id} onClick={() => save(p, { featured: false }, `${p.title} removed from the homepage`)} className="mt-1 self-start text-sm font-semibold text-text-tertiary hover:text-text-primary">
+                    Remove from homepage
+                  </button>
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+      </section>
+
+      <section aria-labelledby="all">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <h2 id="all" className="text-[22px] font-bold tracking-[-0.01em]">
+            All products <span className="font-mono text-[15px] font-normal text-text-tertiary">{data.products.length}</span>
+          </h2>
+          <div role="group" aria-label="Show" className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <FilterButton key={f.id} active={filter === f.id} onClick={() => setFilter(f.id)}>
+                {f.label} <span className="font-mono text-xs opacity-75">{data.products.filter(f.test).length}</span>
+              </FilterButton>
+            ))}
+          </div>
+        </div>
+        <ul>
+          {rows.map((p) => {
+            const gaps = productGaps(p)
+            const done = gaps.filter((g) => g.ok).length
+            const missing = gaps.filter((g) => !g.ok).map((g) => g.key)
+            const live = p.status === 'active'
+            const canFeature = hasWriteup(p) && !!p.thumbnail && live
+            const featureTip = p.featured ? 'Remove from homepage' : !canFeature ? (live ? 'Needs a write-up and a screenshot first' : 'Archived products can’t be featured') : full ? `All ${SLOTS} slots are taken — remove one above` : 'Show on the homepage'
+            return (
+              <li key={p.id} className="flex flex-wrap items-center gap-x-[18px] gap-y-3 border-t border-rule px-2 py-3 hover:bg-[#12151B] lg:grid lg:grid-cols-[112px_minmax(0,1fr)_210px_110px_190px]">
+                {p.thumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.thumbnail} alt="" className="aspect-[16/10] w-[112px] rounded-md object-cover" />
+                ) : (
+                  <span className="flex aspect-[16/10] w-[112px] items-center justify-center rounded-md bg-paper text-[11px] text-text-disabled">No screenshot</span>
+                )}
+                <span className="min-w-0 flex-[1_1_220px]">
+                  <Link href={`/dashboard/products/${p.id}/edit`} className="block font-bold text-text-primary hover:text-link">{p.title}</Link>
+                  <span className="text-[13px] text-text-tertiary">
+                    {nameOf(data, p.created_by)} · {credits(p.id)} credit{credits(p.id) === 1 ? '' : 's'} · added {formatMonth(p.created_at)}
+                  </span>
+                </span>
+                <span className="min-w-[180px]">
+                  <span className="flex items-center gap-2">
+                    <Segments done={done} />
+                    <span className={cn('whitespace-nowrap text-[13px]', done === 4 ? 'text-text-tertiary' : 'text-signal')}>{done === 4 ? 'Complete' : `${done} of 4`}</span>
+                  </span>
+                  {missing.length > 0 && <span className="mt-0.5 block text-xs text-signal">No {missing.join(', no ')}</span>}
+                </span>
+                <button
+                  type="button"
+                  disabled={busy === p.id}
+                  onClick={() => save(p, live ? { status: 'archived', featured: false } : { status: 'active' }, live ? `${p.title} archived` : `${p.title} is live again`)}
+                  className={cn('justify-self-start rounded-full border px-2.5 py-1 text-[13px]', live ? 'border-[#2E5C45] text-[#6FD39F]' : 'border-control text-text-tertiary')}
+                  title={live ? 'Archive (hide from the Products page)' : 'Make live again'}
+                >
+                  {live ? '● Live' : 'Archived'}
+                </button>
+                <span className="ml-auto flex items-center justify-end gap-1.5 lg:ml-0">
+                  <button
+                    type="button"
+                    disabled={busy === p.id || (!p.featured && (!canFeature || full))}
+                    onClick={() => save(p, { featured: !p.featured }, p.featured ? `${p.title} removed from the homepage` : `${p.title} is on the homepage`)}
+                    title={featureTip}
+                    className={cn(
+                      'min-h-[34px] rounded-md border px-3 text-sm font-semibold disabled:cursor-not-allowed',
+                      p.featured ? 'border-[#4A6BA8] bg-navy text-white' : 'border-control text-text-primary disabled:text-text-disabled'
+                    )}
+                  >
+                    {p.featured ? '★ Featured' : 'Feature'}
+                  </button>
+                  <Link href={`/dashboard/products/${p.id}/edit`} className="px-2 py-1.5 text-sm font-semibold text-text-secondary hover:text-text-primary">Edit</Link>
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+        <p className="mt-3.5 text-[13px] text-text-disabled">Only live products with a write-up and a screenshot can be featured. Delete a product from its editor.</p>
+      </section>
+    </>
+  )
+}

@@ -1,27 +1,31 @@
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
-import { SessionDetailContent } from './content'
+import { getCourse } from '@/lib/programs'
+import { SessionPlayer } from '@/components/course/SessionPlayer'
 
-const sessionTitles: Record<string, string> = {
-  '1': 'Data Science Thinking & Standard Workflows',
-  '2': 'Data Processing & Visualization',
-  '3': 'Computer Vision & Basic Machine Learning',
-  '4': 'Natural Language Processing & Model Evaluation',
+const course = getCourse('ds-and-ai-01')
+
+export function generateStaticParams() {
+  return (course?.sessions ?? []).map((s) => ({ id: String(s.n) }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const title = sessionTitles[id] ?? `Session ${id}`
+  const session = course?.sessions.find((s) => String(s.n) === id)
+  const title = session?.title ?? `Session ${id}`
   return generateSEOMetadata({
     title: `Session ${id}: ${title} — DS & AI`,
-    description: `Session ${id} of DS & AI: ${title}. Slides, video recording, and lecture notes.`,
+    description: `Session ${id} of Intro to Data Science & AI: ${session?.goal ?? title} Slides, recording, notes and practice notebook.`,
     keywords: ['data science', 'session', title],
     url: `/education/ds-and-ai-01/session/${id}`,
-    image: '/images/education/data-science-module-1/cover.png',
+    image: course?.coverImage,
   })
 }
 
 export default async function SessionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  return <SessionDetailContent sessionId={id} />
+  const session = course?.sessions.find((s) => String(s.n) === id)
+  if (!course || !session) notFound()
+  return <SessionPlayer course={course} session={session} />
 }

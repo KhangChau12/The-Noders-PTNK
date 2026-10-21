@@ -41,7 +41,6 @@ export interface Profile {
   full_name: string
   avatar_url: string | null
   bio: string | null
-  skills: string[] | null
   role: 'admin' | 'member'
   social_links: SocialLinks | null
   contest_count: number

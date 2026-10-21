@@ -29,21 +29,34 @@ module.exports = {
 
         // Dark Theme — unified with Competition Platform (slate foundation)
         // Legacy token names kept so existing markup needs no rename; only values changed.
-        'dark-bg': '#0F172A',
-        'dark-surface': '#1E293B',
-        'dark-border': '#334155',
+        'dark-bg': '#0D0F14',
+        'dark-surface': '#15181F',
+        'dark-border': '#262A33',
         // New aliases matching Competition's token names (use these in new code)
-        'bg-primary': '#0F172A',
-        'bg-surface': '#1E293B',
-        'bg-elevated': '#334155',
-        'border-default': '#334155',
-        'border-subtle': '#475569',
+        'bg-primary': '#0D0F14',
+        'bg-surface': '#15181F',
+        'bg-elevated': '#1C2027',
+        'border-default': '#262A33',
+        'border-subtle': '#343946',
         'border-focus': '#2563EB',
 
-        'text-primary': '#F8FAFC',
-        'text-secondary': '#CBD5E1',
-        'text-tertiary': '#94A3B8',
-        'text-disabled': '#64748B',
+        'text-primary': '#EEF0F4',
+        'text-secondary': '#AAB0BC',
+        'text-tertiary': '#878D99',
+        'text-disabled': '#5F6570',
+
+        // Editorial system (2026-10 redesign): one link colour, one signal
+        // colour for status / #1 highlights, a neutral rule for dividers.
+        'ink': '#0D0F14',
+        'paper': '#15181F',
+        'rule': '#23272F',
+        'control': '#343946',
+        'link': '#8DB1FF',
+        'signal': '#F5B841',
+        // Navy colour field used for page intros and the footer.
+        'navy': '#1F3A6B',
+        'navy-dark': '#172C52',
+        'on-navy': '#DCE5FF',
 
         // Semantic Colors
         success: '#059669',
@@ -58,11 +71,11 @@ module.exports = {
         'phase-ended': '#64748B',
       },
       fontFamily: {
-        primary: ['Nunito', 'system-ui', 'sans-serif'],
-        sans: ['Nunito', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
-        display: ['Nunito', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-shrikhand)', 'system-ui', 'sans-serif'],
+        primary: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'Consolas', 'monospace'],
+        display: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         brand: ['var(--font-shrikhand)', 'cursive'],
       },
       backgroundImage: {

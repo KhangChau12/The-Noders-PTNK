@@ -31,13 +31,13 @@ interface MobileMenuProps {
 
 // Icons keyed by top-level nav label (mirrors the Competition Platform's drawer).
 const NAV_ICON_MAP: Record<string, React.ReactNode> = {
-  Contest: <Trophy className="w-5 h-5" />,
+  Contests: <Trophy className="w-5 h-5" />,
   Education: <GraduationCap className="w-5 h-5" />,
   Products: <Boxes className="w-5 h-5" />,
   Posts: <Newspaper className="w-5 h-5" />,
   About: <Users className="w-5 h-5" />,
   Members: <Users className="w-5 h-5" />,
-  'Verify Certificate': <ShieldCheck className="w-5 h-5" />,
+  'Verify certificate': <ShieldCheck className="w-5 h-5" />,
   Contact: <Mail className="w-5 h-5" />,
 }
 
@@ -90,8 +90,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-dark-border/60 shrink-0">
-          <span className="font-[family-name:var(--font-shrikhand)] text-base text-text-primary">
-            The Noders <span className="text-primary-blue">Community</span>
+          <span className="font-brand text-lg leading-none text-text-primary">
+            The Noders
           </span>
           <button
             onClick={onClose}
@@ -108,7 +108,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           {user ? (
             <div className="px-4 pt-5 pb-4">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-dark-surface border border-dark-border/40">
-                <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-control flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={profile.avatar_url} alt={displayName || ''} className="w-full h-full object-cover" />
@@ -154,12 +154,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           onClick={onClose}
                           className={`flex items-center gap-3 pl-10 pr-3 py-2.5 mb-0.5 rounded-xl text-sm font-medium transition-colors ${
                             active
-                              ? 'text-primary-blue bg-primary-blue/10'
+                              ? 'text-text-primary bg-paper'
                               : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface'
                           }`}
                         >
                           {child.name}
-                          {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-blue" />}
+                          {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-text-primary" />}
                         </Link>
                       )
                     })}
@@ -175,15 +175,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   onClick={onClose}
                   className={`flex items-center gap-3 px-3 py-3 mb-0.5 rounded-xl text-sm font-medium transition-colors ${
                     active
-                      ? 'text-primary-blue bg-primary-blue/10'
+                      ? 'text-text-primary bg-paper'
                       : 'text-text-secondary hover:text-text-primary hover:bg-dark-surface'
                   }`}
                 >
-                  <span className={active ? 'text-primary-blue' : 'text-text-tertiary'}>
+                  <span className={active ? 'text-text-primary' : 'text-text-tertiary'}>
                     {NAV_ICON_MAP[item.name] ?? <ChevronRight className="w-5 h-5" />}
                   </span>
                   {item.name}
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-blue" />}
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-text-primary" />}
                 </Link>
               )
             })}
@@ -234,7 +234,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <Link
               href="/login"
               onClick={onClose}
-              className="block w-full px-4 py-3 text-center text-sm rounded-xl font-semibold text-white bg-gradient-brand shadow-lg shadow-primary-blue/20"
+              className="block w-full px-4 py-3 text-center text-sm rounded-md font-semibold text-ink bg-text-primary hover:bg-white transition-colors"
             >
               Sign In
             </Link>

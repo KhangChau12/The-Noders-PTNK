@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/adminAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -191,4 +192,43 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+// PATCH /api/admin/users — change a member's role and/or contest count (admin only)
+export async function PATCH(request: NextRequest) {
+  const access = await requireAdmin(request)
+  if ('error' in access) return access.error
+
+  const body = await request.json().catch(() => ({}))
+  const id = typeof body.id === 'string' ? body.id : ''
+  if (!id) return NextResponse.json({ success: false, error: 'Member id is required' }, { status: 400 })
+
+  const updates: Record<string, unknown> = {}
+  if (body.role !== undefined) {
+    if (!['admin', 'member'].includes(body.role)) {
+      return NextResponse.json({ success: false, error: 'Role must be admin or member' }, { status: 400 })
+    }
+    if (id === access.userId && body.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'You can’t remove your own admin role' }, { status: 400 })
+    }
+    updates.role = body.role
+  }
+  if (body.contest_count !== undefined) {
+    const n = Number(body.contest_count)
+    if (!Number.isInteger(n) || n < 0 || n > 999) {
+      return NextResponse.json({ success: false, error: 'Contest count must be a whole number' }, { status: 400 })
+    }
+    updates.contest_count = n
+  }
+  if (!Object.keys(updates).length) {
+    return NextResponse.json({ success: false, error: 'Nothing to update' }, { status: 400 })
+  }
+
+  const { data, error } = await (createAdminClient() as any)
+    .from('profiles')
+    .update(updates)
+    .eq('id', id)
+    .select('id, role, contest_count')
+    .single()
+  if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true, profile: data })
 }

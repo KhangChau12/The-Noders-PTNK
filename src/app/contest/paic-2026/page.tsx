@@ -1,14 +1,19 @@
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
-import PAIC2026Content from './content'
+import { getContest } from '@/lib/programs'
+import { ContestDetail } from '@/components/contest/ContestDetail'
+
+const contest = getContest('paic-2026')
 
 export const metadata: Metadata = generateSEOMetadata({
   title: 'PAIC 2026 - PTNK AI Challenge 2026',
-  description: 'Kỳ thi học thuật về Trí tuệ Nhân tạo do CLB The Noders tổ chức. Giải thưởng đến 1,800,000 VNĐ. Dành cho học sinh PTNK yêu thích AI.',
-  keywords: ['AI challenge', 'cuộc thi AI', 'học sinh PTNK', 'kỳ thi AI', 'machine learning', 'PAIC 2026'],
+  description: contest?.pitch ?? '',
+  keywords: ['AI challenge', 'AI competition', 'PTNK', 'machine learning', 'IELTS essay scoring', 'PAIC 2026'],
   url: '/contest/paic-2026',
 })
 
 export default function PAIC2026Page() {
-  return <PAIC2026Content />
+  if (!contest) notFound()
+  return <ContestDetail contest={contest} />
 }
