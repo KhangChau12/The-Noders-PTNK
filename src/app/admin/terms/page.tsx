@@ -10,7 +10,7 @@ import { useConfirm } from '@/components/ConfirmDialog'
 import { MemberAvatar, btnPrimary, btnSecondary, fieldClass } from '@/components/dashboard/ui'
 import { createClient } from '@/lib/supabase'
 import { uploadImage } from '@/lib/upload'
-import { formatMonth } from '@/lib/dashboard'
+import { formatDay, formatMonth } from '@/lib/dashboard'
 import { KIND_RANK, departmentsOf, positionLabel, type Position, type PositionKind, type Term } from '@/lib/terms'
 import { cn } from '@/lib/utils'
 
@@ -56,6 +56,12 @@ function TermsAdmin() {
   }
 
   const founders = terms.positions.filter((p) => p.kind === 'founder')
+  const cur = terms.terms.find((t) => t.is_current)
+  // Newer than the current term but never made current = a start that failed partway
+  const notStarted = (t: Term) => !t.is_current && !!cur && t.number > cur.number
+  const nextNumber = Math.max(0, ...terms.terms.filter((t) => !notStarted(t)).map((t) => t.number)) + 1
+  const today = new Date().toISOString().slice(0, 10)
+  const overdue = cur?.ends_on && cur.ends_on < today ? cur : null
 
   return (
     <>
@@ -71,18 +77,25 @@ function TermsAdmin() {
             >
               {t.name}
               {t.is_current && <span className="ml-1.5 font-normal text-[#6FD39F]">● current</span>}
+              {notStarted(t) && <span className="ml-1.5 font-normal text-signal">not started</span>}
             </button>
           ))}
         </nav>
         <Link href="/admin/terms/new" className={btnPrimary}>
-          Start Term {Math.max(0, ...terms.terms.map((t) => t.number)) + 1}…
+          Start Term {nextNumber}…
         </Link>
       </div>
+
+      {overdue && (
+        <div role="status" className="mb-6 rounded-xl border border-[#4A3F22] bg-[#221D12] px-5 py-4 text-sm text-text-secondary">
+          <b className="text-text-primary">{overdue.name} ended on {formatDay(overdue.ends_on!)} but is still the current term.</b> A term only stops being current when the next one is started, so its core team keeps admin access until you start Term {nextNumber}.
+        </div>
+      )}
 
       {term && (
         <div className="flex flex-wrap items-start gap-x-10 gap-y-8">
           <div className="flex min-w-0 flex-[1_1_720px] flex-col gap-8">
-            <TermDetails key={term.id} term={term} run={run} />
+            <TermDetails key={term.id} term={term} run={run} notStarted={notStarted(term)} />
             <Departments term={term} run={run} />
             <Positions term={term} run={run} />
           </div>
@@ -111,18 +124,39 @@ function TermsAdmin() {
 
 type Run = (fn: () => Promise<{ error?: any } | void>, ok?: string, affectsAccess?: boolean) => Promise<boolean>
 
-function TermDetails({ term, run }: { term: Term; run: Run }) {
+function TermDetails({ term, run, notStarted }: { term: Term; run: Run; notStarted: boolean }) {
   const [name, setName] = useState(term.name)
   const [starts, setStarts] = useState(term.starts_on || '')
   const [ends, setEnds] = useState(term.ends_on || '')
   const dirty = name !== term.name || starts !== (term.starts_on || '') || ends !== (term.ends_on || '')
   const bad = !name.trim() || (!!starts && !!ends && ends < starts)
+  const { data } = useAdmin()
+  const { confirm } = useConfirm()
+  const people = data.terms.positions.filter((p) => p.term_id === term.id && p.profile_id && p.kind !== 'advisor').length
+  const leaders = data.terms.positions.filter((p) => p.term_id === term.id && ['president', 'vice_president', 'head'].includes(p.kind)).length
+
+  const makeCurrent = async () => {
+    const ok = await confirm({
+      title: `Make ${term.name} current?`,
+      message: `The current term ends and admin access moves to ${term.name}’s President, Vice Presidents and Heads (${leaders} now). Only the ${people} ${people === 1 ? 'person' : 'people'} listed in ${term.name} count as current members; everyone else becomes Alumni. Add people first if needed.`,
+      confirmText: `Make ${term.name} current`,
+      variant: 'warning',
+    })
+    if (ok) run(() => db().rpc('make_term_current', { term_id_param: term.id }), `${term.name} is now the current term`, false)
+  }
 
   return (
     <section className="rounded-xl bg-paper px-6 py-[22px]">
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-[22px] font-bold">{term.name}</h2>
-        <span className={cn('text-sm', term.is_current ? 'text-[#6FD39F]' : 'text-text-tertiary')}>{term.is_current ? 'Current term' : 'Past term — still editable'}</span>
+        {notStarted ? (
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+            <span className="text-signal">Not started yet</span>
+            <button type="button" onClick={makeCurrent} className={cn(btnSecondary, 'min-h-[36px] text-sm')}>Make {term.name} current…</button>
+          </span>
+        ) : (
+          <span className={cn('text-sm', term.is_current ? 'text-[#6FD39F]' : 'text-text-tertiary')}>{term.is_current ? 'Current term' : 'Past term — still editable'}</span>
+        )}
       </div>
       <div className="grid gap-3.5 sm:grid-cols-[minmax(0,1fr)_170px_170px]">
         <label className="text-sm font-semibold">

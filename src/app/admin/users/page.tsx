@@ -15,6 +15,7 @@ import { currentTerm, isAdvisorOnly, roleLine } from '@/lib/terms'
 import { createClient } from '@/lib/supabase'
 import { formatMonth } from '@/lib/dashboard'
 import { SITE_CONFIG } from '@/lib/constants'
+import { MemberTermsDialog } from '@/components/admin/MemberTermsDialog'
 import { freeUsername, isEmail, makePassword, welcomeMessage } from '@/lib/accounts'
 import { cn } from '@/lib/utils'
 
@@ -38,6 +39,7 @@ function MembersAdmin() {
   const [filter, setFilter] = useState<Filter>(params.get('show') === 'incomplete' ? 'incomplete' : 'all')
   const [q, setQ] = useState('')
   const [menu, setMenu] = useState<string | null>(null)
+  const [termsFor, setTermsFor] = useState<AdminMember | null>(null)
   const [resetDone, setResetDone] = useState<{ name: string; email: string | null; password: string } | null>(null)
   const isFounder = !!user && data.terms.positions.some((p) => p.kind === 'founder' && p.profile_id === user.id)
   const canReset = (m: AdminMember) => m.id !== user?.id && (m.role !== 'admin' || isFounder)
@@ -226,6 +228,9 @@ function MembersAdmin() {
                   </button>
                   {menu === m.id && (
                     <div className="absolute right-2 top-[calc(100%-6px)] z-20 flex w-48 flex-col rounded-lg border border-control bg-paper p-1 text-sm shadow-lg">
+                      {data.terms.ready && (
+                        <button type="button" onClick={() => { setMenu(null); setTermsFor(m) }} className="rounded px-3 py-2 text-left text-text-primary hover:bg-white/[0.05]">Terms and roles…</button>
+                      )}
                       {!isAdvisorOnly(data.terms, m.id) && <Link href={`/members/${m.id}`} className="rounded px-3 py-2 text-text-primary hover:bg-white/[0.05]">View public profile</Link>}
                       {canReset(m) && (
                         <button type="button" onClick={() => resetPassword(m)} className="rounded px-3 py-2 text-left text-text-primary hover:bg-white/[0.05]">Reset password…</button>
@@ -242,9 +247,10 @@ function MembersAdmin() {
           {rows.length === 0 && <p className="border-t border-rule px-2.5 py-6 text-text-tertiary">No members match.</p>}
         </div>
       )}
-      <p className="mt-3.5 text-[13px] text-text-disabled">Profile dots: photo · bio · a link. Contest counts save as you change them; admin access follows positions on the Terms page.</p>
+      <p className="mt-3.5 text-[13px] text-text-disabled">Profile dots: photo · bio · a link. Contest counts save as you change them; admin access follows each person’s role in the current term (⋯ → Terms and roles).</p>
 
       {adding && <AddMemberPanel onClose={() => router.replace('/admin/users')} />}
+      {termsFor && <MemberTermsDialog member={termsFor} onClose={() => setTermsFor(null)} />}
       {resetDone && <ResetDoneDialog {...resetDone} onClose={() => setResetDone(null)} />}
     </>
   )

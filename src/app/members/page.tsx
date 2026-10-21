@@ -56,7 +56,10 @@ const termRange = (t: Term) =>
 
 export default async function MembersPage({ searchParams }: { searchParams: Promise<{ term?: string }> }) {
   const { term: termParam } = await searchParams
-  const { members, totalPosts, totalProducts, terms } = await getData()
+  const { members, totalPosts, totalProducts, terms: all } = await getData()
+  // A term that hasn't started yet (being set up, or a start that failed) stays off the public page
+  const started = currentTerm(all)
+  const terms = { ...all, terms: all.terms.filter((t) => !started || t.is_current || t.number < started.number) }
   const byId = new Map(members.map((m) => [m.id, m]))
   const competed = members.filter((m) => m.contests > 0).length
 

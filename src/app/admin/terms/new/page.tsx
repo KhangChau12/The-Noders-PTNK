@@ -36,7 +36,9 @@ export default function NewTermPage() {
   const router = useRouter()
   const { terms } = data
   const prev = currentTerm(terms)
-  const nextNumber = Math.max(0, ...terms.terms.map((t) => t.number)) + 1
+  // A newer term that never became current = left over from a failed start
+  const stale = terms.terms.filter((t) => !t.is_current && t.number > (prev?.number ?? 0))
+  const nextNumber = Math.max(0, ...terms.terms.filter((t) => !stale.includes(t)).map((t) => t.number)) + 1
 
   const [name, setName] = useState(`Term ${nextNumber}`)
   const [starts, setStarts] = useState(new Date().toISOString().slice(0, 10))
@@ -97,7 +99,7 @@ export default function NewTermPage() {
   const loses = nowAdmin.filter((id) => !willAdmin.has(id))
   const validDepts = depts.filter((d) => d.name.trim())
 
-  const blocked = !name.trim() || !president || !!newcomerIssue || busy || !terms.ready
+  const blocked = stale.length > 0 || !name.trim() || !president || !!newcomerIssue || busy || !terms.ready
 
   const start = async () => {
     if (blocked) return
@@ -110,6 +112,7 @@ export default function NewTermPage() {
     if (!ok) return
     setBusy(true)
     const db: any = createClient()
+    let termId: string | null = null
     try {
       // Accounts for the new people first, so they can hold positions
       const taken = new Set(data.members.map((m) => m.username))
@@ -131,6 +134,7 @@ export default function NewTermPage() {
 
       const { data: term, error: e1 } = await db.from('terms').insert({ number: nextNumber, name: name.trim(), starts_on: starts || null, is_current: false }).select().single()
       if (e1) throw e1
+      termId = term.id
       const { data: created, error: e2 } = validDepts.length
         ? await db.from('term_departments').insert(validDepts.map((d, i) => ({ term_id: term.id, name: d.name.trim(), sort: i + 1 }))).select()
         : { data: [], error: null }
@@ -165,10 +169,29 @@ export default function NewTermPage() {
         } catch {}
       } else router.push('/admin/terms')
     } catch (e: any) {
+      // Undo the half-made term (departments and positions go with it)
+      const undone = termId ? !(await db.from('terms').delete().eq('id', termId)).error : true
       const made = Object.keys(madeRef.current).length
-      showToast('error', `Couldn’t start the term: ${e.message || e}. Nothing was switched over${made ? ` (${made} new account${made > 1 ? 's were' : ' was'} already made and will be reused when you try again)` : ''}; check the Terms page for a half-made term.`)
+      showToast(
+        'error',
+        `Couldn’t start the term: ${e.message || e}. Nothing was switched over${made ? ` — ${made} new account${made > 1 ? 's were' : ' was'} already made and will be reused when you try again` : ''}.${undone ? '' : ' A half-made term was left behind; refresh this page to remove it.'}`
+      )
+      if (!undone) refresh()
       setBusy(false)
     }
+  }
+
+  const removeStale = async () => {
+    const ok = await confirm({
+      title: `Remove the unfinished ${stale.map((t) => t.name).join(', ')}?`,
+      message: 'It was left by a start that failed and never became current. Its departments and positions go with it; member accounts are kept.',
+      confirmText: 'Remove',
+      variant: 'danger',
+    })
+    if (!ok) return
+    const { error } = await (createClient() as any).from('terms').delete().in('id', stale.map((t) => t.id))
+    if (error) showToast('error', error.message)
+    else await refresh()
   }
 
   if (!ready) return <div aria-busy="true" className="h-[480px] animate-pulse rounded-xl bg-paper" />
@@ -198,6 +221,14 @@ export default function NewTermPage() {
       <p className="mb-7 max-w-[720px] text-text-tertiary">
         Done once a year. {prev ? `${prev.name} is archived with everyone’s role kept; ` : ''}admin access moves to the new core when you confirm. Everything here stays editable afterwards.
       </p>
+      {stale.length > 0 && (
+        <div role="alert" className="mb-7 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-xl border border-[#5A3A2E] bg-[#2A1C17] px-5 py-4">
+          <p className="min-w-0 flex-[1_1_420px] text-sm text-text-secondary">
+            <b className="text-text-primary">{stale.map((t) => t.name).join(', ')} was never finished</b> — an earlier start failed partway. Remove it before starting again; accounts made for new people are kept.
+          </p>
+          <button type="button" onClick={removeStale} className={btnSecondary}>Remove unfinished term</button>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-start gap-x-10 gap-y-7">
         <div className="flex min-w-0 flex-[1_1_760px] flex-col gap-6">
