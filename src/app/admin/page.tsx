@@ -60,7 +60,7 @@ export default function AdminOverview() {
     const noPhoto = gaps.filter((g) => !g.photo).length
     const noBio = gaps.filter((g) => !g.bio).length
     if (noPhoto || noBio) {
-      out.push({ id: `profiles-${noPhoto}-${noBio}`, tone: 'grey', title: [noPhoto && `${noPhoto} member${noPhoto > 1 ? 's have' : ' has'} no photo`, noBio && `${noBio} still show the default bio`].filter(Boolean).join(', '), why: 'They appear as initials and “Member of Generation …” on the Members page.', href: '/admin/users?show=incomplete', action: 'See who' })
+      out.push({ id: `profiles-${noPhoto}-${noBio}`, tone: 'grey', title: [noPhoto && `${noPhoto} member${noPhoto > 1 ? 's have' : ' has'} no photo`, noBio && `${noBio} have no bio`].filter(Boolean).join(', '), why: 'They appear as a name and initials only on the Members page.', href: '/admin/users?show=incomplete', action: 'See who' })
     }
     return out
   }, [data, published])

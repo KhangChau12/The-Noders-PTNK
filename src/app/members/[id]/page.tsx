@@ -14,6 +14,7 @@ import { Breadcrumb, Container, FilterButton, NavyFacts, PrimaryLink } from '@/c
 import { SITE_CONFIG } from '@/lib/constants'
 import { contestResultsFor } from '@/lib/programs'
 import { activityLine, isDefaultBio, ordinal, roleTitle } from '@/lib/memberSummary'
+import { EMPTY_TERMS, fetchTermsData, generationOf, isAdvisorOnly, roleHistory, roleLine, type TermsData } from '@/lib/terms'
 import { cn } from '@/lib/utils'
 
 interface Certificate {
@@ -69,22 +70,25 @@ export default function MemberProfilePage() {
   const [posts, setPosts] = useState<any[]>([])
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [filter, setFilter] = useState<'all' | Kind>('all')
+  const [terms, setTerms] = useState<TermsData>(EMPTY_TERMS)
 
   useEffect(() => {
     const fetchData = async () => {
       if (!member?.id) return
       try {
         const supabase = createClient()
-        const [{ posts: fetchedPosts, error: postsError }, { data: certs }] = await Promise.all([
+        const [{ posts: fetchedPosts, error: postsError }, { data: certs }, termsData] = await Promise.all([
           postQueries.getUserPosts(member.id),
           supabase
             .from('certificates')
             .select('id, certificate_id, title, issued_at')
             .eq('user_id', member.id)
             .order('issued_at', { ascending: false }),
+          fetchTermsData(supabase),
         ])
         if (!postsError && fetchedPosts) setPosts(fetchedPosts.filter((p: any) => p.status === 'published'))
         if (certs) setCertificates(certs)
+        setTerms(termsData)
       } catch (fetchError) {
         console.error('Error fetching member detail data:', fetchError)
       }
@@ -141,7 +145,7 @@ export default function MemberProfilePage() {
     )
   }
 
-  if (error || !member) {
+  if (error || !member || (terms.ready && isAdvisorOnly(terms, member.id))) {
     return (
       <Container className="py-24">
         <h1 className="mb-3 text-3xl font-bold text-text-primary">Member not found</h1>
@@ -152,7 +156,9 @@ export default function MemberProfilePage() {
   }
 
   const name = member.full_name || member.username || 'Member'
-  const title = roleTitle(member.bio, member.role)
+  const title = terms.ready ? roleLine(terms, member.id) : roleTitle(member.bio, member.role)
+  const generation = terms.ready ? generationOf(terms, member.id) : null
+  const history = terms.ready ? roleHistory(terms, member.id) : []
   const best = results.slice().sort((a, b) => a.rank - b.rank)[0]
   const stats = { products: contributions.length, posts: posts.length, contests: member.contest_count || 0 }
   const autoLine = activityLine(stats, best ? { rank: best.rank, contest: best.contest.shortName } : null)
@@ -198,7 +204,9 @@ export default function MemberProfilePage() {
             )}
             <div className="min-w-0 flex-[1_1_440px]">
               <p className="mb-2 text-[15px] text-on-navy">
-                {title} · Member since {new Date(member.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                {[title, !generation ? `Member since ${new Date(member.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}` : null]
+                  .filter(Boolean)
+                  .join(' · ')}
               </p>
               <h1 className="mb-3 text-[34px] sm:text-[44px] lg:text-[54px] font-bold leading-[1.04] tracking-[-0.035em]">{name}</h1>
               {!isDefaultBio(member.bio) && <p className="mb-2 max-w-[560px] text-lg text-white">{member.bio}</p>}
@@ -215,7 +223,20 @@ export default function MemberProfilePage() {
               ))}
             </div>
           </div>
-          <NavyFacts facts={facts} className="mt-10" />
+          {history.length > 0 && (
+            <div className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-white/20 pt-5">
+              <span className="text-sm text-on-navy">Roles in the club</span>
+              <ol className="flex flex-wrap gap-x-6 gap-y-1.5 text-[15px]">
+                {history.map((r, i) => (
+                  <li key={i}>
+                    <span className="font-semibold">{r.label}</span>
+                    {r.term && <span className="text-on-navy"> · {r.term}{r.current ? ' (now)' : ''}</span>}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+          <NavyFacts facts={facts} className="mt-8" />
         </Container>
       </section>
 

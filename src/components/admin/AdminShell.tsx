@@ -10,6 +10,7 @@ import { AdminProvider, useAdmin } from './AdminContext'
 
 const TABS = [
   { href: '/admin', label: 'Overview', count: null },
+  { href: '/admin/terms', label: 'Terms', count: 'terms' },
   { href: '/admin/users', label: 'Members', count: 'members' },
   { href: '/admin/products', label: 'Products', count: 'products' },
   { href: '/admin/posts', label: 'Posts', count: 'posts' },
@@ -44,6 +45,7 @@ function AdminBand() {
     posts: data.posts.length,
     certificates: data.certificates.length,
     logs: data.logs.length,
+    terms: data.terms.terms.length,
   }
 
   const action = 'inline-flex min-h-[42px] items-center rounded-md px-4 text-[15px] font-semibold transition-colors'

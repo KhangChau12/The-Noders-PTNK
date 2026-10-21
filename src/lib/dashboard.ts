@@ -5,6 +5,7 @@
  */
 import { createClient } from '@/lib/supabase'
 import { AWARD_LABEL, AWARD_TONE, isAward } from '@/lib/awards'
+import { EMPTY_TERMS, fetchTermsData, type TermsData } from '@/lib/terms'
 
 export interface DashProduct {
   id: string
@@ -57,9 +58,10 @@ export interface DashboardData {
   certificates: DashCertificate[]
   points: number
   memberCount: number
+  terms: TermsData
 }
 
-export const EMPTY_DASHBOARD: DashboardData = { products: [], posts: [], certificates: [], points: 0, memberCount: 0 }
+export const EMPTY_DASHBOARD: DashboardData = { products: [], posts: [], certificates: [], points: 0, memberCount: 0, terms: EMPTY_TERMS }
 
 const PROJECT_FIELDS = `id, title, description, details, thumbnail_url, video_url, demo_url, repo_url, status, created_by, created_at,
   thumbnail_image:images!projects_thumbnail_image_id_fkey(public_url)`
@@ -86,7 +88,7 @@ function toProduct(p: any, userId: string, credit?: { contribution_percentage: n
 export async function fetchDashboardData(userId: string): Promise<DashboardData> {
   const supabase: any = createClient()
 
-  const [credits, created, posts, certs, points, members] = await Promise.all([
+  const [credits, created, posts, certs, points, members, terms] = await Promise.all([
     supabase
       .from('project_contributors')
       .select(`contribution_percentage, role_in_project, projects!inner(${PROJECT_FIELDS})`)
@@ -105,6 +107,7 @@ export async function fetchDashboardData(userId: string): Promise<DashboardData>
       .order('issued_at', { ascending: false }),
     supabase.from('task_log_members').select('points').eq('member_id', userId),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    fetchTermsData(supabase),
   ])
 
   // Credited products, plus any the user created without a credit row
@@ -127,6 +130,7 @@ export async function fetchDashboardData(userId: string): Promise<DashboardData>
     certificates: await withBatches(supabase, certs.data || []),
     points: (points.data || []).reduce((sum: number, r: { points: number }) => sum + (r.points || 0), 0),
     memberCount: members.count || 0,
+    terms,
   }
 }
 

@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase'
 import { isDefaultBio } from '@/lib/memberSummary'
 import { isAward, type Award } from '@/lib/awards'
+import { EMPTY_TERMS, fetchTermsData, type TermsData } from '@/lib/terms'
 
 export interface AdminMember {
   id: string
@@ -85,15 +86,16 @@ export interface AdminData {
   templates: { id: string; name: string; description: string | null }[]
   logs: AdminLog[]
   logMembers: { task_log_id: string; member_id: string; points: number }[]
+  terms: TermsData
 }
 
 export const EMPTY_ADMIN: AdminData = {
-  members: [], posts: [], products: [], credits: [], certificates: [], batches: [], templates: [], logs: [], logMembers: [],
+  members: [], posts: [], products: [], credits: [], certificates: [], batches: [], templates: [], logs: [], logMembers: [], terms: EMPTY_TERMS,
 }
 
 export async function fetchAdminData(): Promise<AdminData> {
   const db: any = createClient()
-  const [members, posts, products, credits, certificates, batches, templates, logs, logMembers] = await Promise.all([
+  const [members, posts, products, credits, certificates, batches, templates, logs, logMembers, terms] = await Promise.all([
     db.from('profiles').select('id, full_name, username, role, contest_count, bio, avatar_url, social_links, created_at').order('full_name'),
     db.from('posts').select('id, slug, title, status, category, view_count, upvote_count, published_at, created_at, updated_at, author_id').order('published_at', { ascending: false, nullsFirst: true }),
     db.from('projects').select('id, title, status, featured, created_by, details, demo_url, video_url, thumbnail_url, created_at, thumbnail_image:images!projects_thumbnail_image_id_fkey(public_url)').order('created_at', { ascending: false }),
@@ -103,6 +105,7 @@ export async function fetchAdminData(): Promise<AdminData> {
     db.from('task_templates').select('id, name, description').order('name'),
     db.from('task_logs').select('*'),
     db.from('task_log_members').select('task_log_id, member_id, points'),
+    fetchTermsData(db),
   ])
   return {
     members: members.data || [],
@@ -114,6 +117,7 @@ export async function fetchAdminData(): Promise<AdminData> {
     templates: templates.data || [],
     logs: logs.data || [],
     logMembers: logMembers.data || [],
+    terms,
   }
 }
 

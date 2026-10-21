@@ -108,7 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all members
   const { data: members } = await supabase
     .from('profiles')
-    .select('username, updated_at')
+    .select('id, updated_at')
     .order('created_at', { ascending: false })
 
   const memberPages = (members || []).map((member) => ({

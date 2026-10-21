@@ -7,6 +7,7 @@ import { useAuth } from '@/components/AuthProvider'
 import { CONTAINER_CLASS } from '@/components/editorial'
 import { contestResultsFor } from '@/lib/programs'
 import { activityLine, isDefaultBio, roleTitle } from '@/lib/memberSummary'
+import { generationOf, roleLine } from '@/lib/terms'
 import { formatMonth } from '@/lib/dashboard'
 import { cn } from '@/lib/utils'
 import { useDashboard } from './DashboardContext'
@@ -49,7 +50,11 @@ function IdentityBand({ active }: { active: string }) {
     best ? { rank: best.rank, contest: best.contest.shortName } : null
   )
   const since = profile?.created_at || user?.created_at
-  const kicker = [profile ? roleTitle(profile.bio, profile.role) : null, since ? `Member since ${formatMonth(since)}` : null]
+  const gen = user && data.terms.ready ? generationOf(data.terms, user.id) : null
+  const kicker = [
+    profile && user ? (data.terms.ready ? roleLine(data.terms, user.id) : roleTitle(profile.bio, profile.role)) : null,
+    !gen && since ? `Member since ${formatMonth(since)}` : null,
+  ]
     .filter(Boolean)
     .join(' · ')
 

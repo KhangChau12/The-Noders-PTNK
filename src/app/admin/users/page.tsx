@@ -11,6 +11,8 @@ import { FilterButton } from '@/components/editorial'
 import { MemberAvatar, btnPrimary, btnSecondary, fieldClass, labelClass } from '@/components/dashboard/ui'
 import { AdminMember, pointsByMember, profileGaps } from '@/lib/admin'
 import { roleTitle } from '@/lib/memberSummary'
+import { currentTerm, isAdvisorOnly, roleLine } from '@/lib/terms'
+import { createClient } from '@/lib/supabase'
 import { formatMonth } from '@/lib/dashboard'
 import { SITE_CONFIG } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -35,6 +37,27 @@ function MembersAdmin() {
   const [filter, setFilter] = useState<Filter>(params.get('show') === 'incomplete' ? 'incomplete' : 'all')
   const [q, setQ] = useState('')
   const [menu, setMenu] = useState<string | null>(null)
+  const [resetDone, setResetDone] = useState<{ name: string; email: string | null; password: string } | null>(null)
+  const isFounder = !!user && data.terms.positions.some((p) => p.kind === 'founder' && p.profile_id === user.id)
+  const canReset = (m: AdminMember) => m.id !== user?.id && (m.role !== 'admin' || isFounder)
+
+  const resetPassword = async (m: AdminMember) => {
+    setMenu(null)
+    const ok = await confirm({
+      title: `Reset ${m.full_name}’s password?`,
+      message: 'Their current password stops working right away. You’ll get a new one to send them; they can change it from their dashboard.',
+      confirmText: 'Reset password',
+      cancelText: 'Cancel',
+      variant: 'warning',
+    })
+    if (!ok) return
+    try {
+      const res = await api('/api/admin/users/reset-password', { method: 'POST', body: { id: m.id } })
+      setResetDone({ name: m.full_name || 'them', email: res.email, password: res.password })
+    } catch (e: any) {
+      showToast('error', e.message)
+    }
+  }
   const adding = params.get('add') === '1'
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
@@ -153,10 +176,19 @@ function MembersAdmin() {
                   <MemberAvatar name={m.full_name} src={m.avatar_url} className="h-9 w-9 shrink-0 rounded-full text-xs" />
                   <span className="min-w-0">
                     <Link href={`/members/${m.id}`} className="block truncate font-semibold text-text-primary hover:text-link">{m.full_name}</Link>
-                    <span className="block truncate text-[13px] text-text-tertiary">{roleTitle(m.bio, m.role)}{!g.bio && ' · default bio'}</span>
+                    <span className="block truncate text-[13px] text-text-tertiary">{data.terms.ready ? roleLine(data.terms, m.id, m.role === 'admin' ? 'Core team' : 'Member') : roleTitle(m.bio, m.role)}{!g.bio && ' · no bio'}</span>
                   </span>
                 </span>
                 <span role="cell">
+                  {data.terms.ready ? (
+                    <Link
+                      href="/admin/terms"
+                      title="Admin access follows positions — change it on the Terms page"
+                      className={cn('flex min-h-[34px] w-full items-center rounded-md px-2.5 text-sm', isCore ? 'bg-[#1C2A44] text-on-navy' : 'text-text-tertiary')}
+                    >
+                      {isCore ? 'Admin access' : 'No admin'}
+                    </Link>
+                  ) : (
                   <button
                     type="button"
                     disabled={m.id === user?.id}
@@ -166,6 +198,7 @@ function MembersAdmin() {
                   >
                     {isCore ? 'Core team' : 'Member'} <span aria-hidden="true" className="text-text-disabled">⇄</span>
                   </button>
+                  )}
                 </span>
                 <span role="cell" className="font-mono text-[13px] text-text-tertiary">{formatMonth(m.created_at)}</span>
                 <span role="cell" className={cn('font-mono text-sm md:text-right', posts ? 'text-text-primary' : 'text-text-disabled')}>
@@ -192,7 +225,10 @@ function MembersAdmin() {
                   </button>
                   {menu === m.id && (
                     <div className="absolute right-2 top-[calc(100%-6px)] z-20 flex w-48 flex-col rounded-lg border border-control bg-paper p-1 text-sm shadow-lg">
-                      <Link href={`/members/${m.id}`} className="rounded px-3 py-2 text-text-primary hover:bg-white/[0.05]">View public profile</Link>
+                      {!isAdvisorOnly(data.terms, m.id) && <Link href={`/members/${m.id}`} className="rounded px-3 py-2 text-text-primary hover:bg-white/[0.05]">View public profile</Link>}
+                      {canReset(m) && (
+                        <button type="button" onClick={() => resetPassword(m)} className="rounded px-3 py-2 text-left text-text-primary hover:bg-white/[0.05]">Reset password…</button>
+                      )}
                       {m.id !== user?.id && (
                         <button type="button" onClick={() => remove(m)} className="rounded px-3 py-2 text-left text-[#FF9C85] hover:bg-white/[0.05]">Remove member…</button>
                       )}
@@ -205,9 +241,10 @@ function MembersAdmin() {
           {rows.length === 0 && <p className="border-t border-rule px-2.5 py-6 text-text-tertiary">No members match.</p>}
         </div>
       )}
-      <p className="mt-3.5 text-[13px] text-text-disabled">Profile dots: photo · bio · a link. Role and contest changes save as you make them.</p>
+      <p className="mt-3.5 text-[13px] text-text-disabled">Profile dots: photo · bio · a link. Contest counts save as you change them; admin access follows positions on the Terms page.</p>
 
       {adding && <AddMemberPanel onClose={() => router.replace('/admin/users')} />}
+      {resetDone && <ResetDoneDialog {...resetDone} onClose={() => setResetDone(null)} />}
     </>
   )
 }
@@ -231,10 +268,7 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
   const { showToast } = useToast()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [gen, setGen] = useState(() => {
-    const gens = data.members.map((m) => parseInt(m.bio?.match(/generation\s*(\d+)/i)?.[1] || '0', 10))
-    return String(Math.max(1, ...gens))
-  })
+  const term = currentTerm(data.terms)
   const [role, setRole] = useState<'member' | 'admin'>('member')
   const [password] = useState(makePassword)
   const [busy, setBusy] = useState(false)
@@ -242,7 +276,7 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
   const [copied, setCopied] = useState(false)
 
   let username = usernameFrom(name)
-  if (username && data.members.some((m) => m.username === username)) username = `${username}${gen}`
+  if (username && data.members.some((m) => m.username === username)) username = `${username}${term?.number ?? 2}`
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const first = name.trim().split(/\s+/).pop() || 'there'
   const message = `Hi ${first}, welcome to The Noders!\nSign in at ${SITE_CONFIG.url.replace(/^https?:\/\//, '')}/login\nEmail: ${email}\nPassword: ${password}\nYour dashboard walks you through setting up your profile.`
@@ -251,10 +285,15 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
     if (!name.trim() || !emailOk || !username) return
     setBusy(true)
     try {
-      await api('/api/admin/create-user', {
+      const res = await api('/api/admin/create-user', {
         method: 'POST',
-        body: { email: email.trim(), password, profileData: { full_name: name.trim(), username, role, bio: `Member of Generation ${gen}` } },
+        body: { email: email.trim(), password, profileData: { full_name: name.trim(), username, role: term ? 'member' : role } },
       })
+      // Their term membership is what makes them "Generation N" on the site
+      if (term && res.user?.id) {
+        const { error } = await (createClient() as any).from('positions').insert({ term_id: term.id, kind: 'member', profile_id: res.user.id, sort: 9 })
+        if (error) showToast('error', `Account made, but couldn’t add them to ${term.name}: ${error.message}`)
+      }
       try {
         await navigator.clipboard.writeText(message)
         setCopied(true)
@@ -287,11 +326,12 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
               <label htmlFor="em" className={labelClass}>Email</label>
               <input id="em" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={cn(fieldClass, 'min-h-[44px] bg-ink')} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="gen" className={labelClass}>Generation</label>
-                <input id="gen" inputMode="numeric" value={gen} onChange={(e) => setGen(e.target.value.replace(/\D/g, '').slice(0, 2))} className={cn(fieldClass, 'min-h-[44px] bg-ink font-mono')} />
-              </div>
+            {term ? (
+              <p className="rounded-lg bg-ink px-4 py-3 text-sm text-text-secondary">
+                Joins <b className="text-text-primary">{term.name}</b> as a member. Leadership roles are set on the{' '}
+                <Link href="/admin/terms" className="text-link">Terms</Link> page.
+              </p>
+            ) : (
               <div>
                 <span className={labelClass}>Role</span>
                 <div role="radiogroup" aria-label="Role" className="flex gap-1 rounded-lg bg-ink p-1">
@@ -302,7 +342,7 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
                   ))}
                 </div>
               </div>
-            </div>
+            )}
             <dl className="grid grid-cols-[96px_1fr] gap-x-3 gap-y-2 rounded-lg bg-ink px-4 py-3.5 text-sm">
               <dt className="text-text-tertiary">Username</dt>
               <dd className="font-mono">{username || '—'}</dd>
@@ -334,6 +374,35 @@ function AddMemberPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </aside>
+    </>
+  )
+}
+
+/* ---------- Password reset result ---------- */
+
+function ResetDoneDialog({ name, email, password, onClose }: { name: string; email: string | null; password: string; onClose: () => void }) {
+  const [copied, setCopied] = useState(false)
+  const first = name.trim().split(/\s+/).pop() || 'there'
+  const message = `Hi ${first}, your password for The Noders was reset.\nSign in at ${SITE_CONFIG.url.replace(/^https?:\/\//, '')}/login\n${email ? `Email: ${email}\n` : ''}New password: ${password}\nPlease change it from your dashboard (Profile → Change password).`
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(message)
+      setCopied(true)
+    } catch {}
+  }
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-[rgba(5,8,14,0.6)]" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-labelledby="reset-title" className="fixed left-1/2 top-1/2 z-50 w-[min(480px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 rounded-[14px] border border-[#2A2E37] bg-paper p-[26px] shadow-[0_24px_64px_rgba(0,0,0,0.5)]">
+        <h2 id="reset-title" className="mb-1.5 text-xl font-bold">New password for {name}</h2>
+        <p className="mb-4 text-sm text-text-tertiary">Shown once — copy it now. The old password no longer works.</p>
+        <p className="mb-4 rounded-lg bg-ink px-4 py-3 font-mono text-lg tracking-wide">{password}</p>
+        <pre className="mb-5 whitespace-pre-wrap rounded-lg bg-ink px-4 py-3.5 font-sans text-sm text-text-secondary">{message}</pre>
+        <div className="flex justify-end gap-2.5">
+          <button type="button" onClick={copy} className={btnPrimary}>{copied ? 'Copied ✓' : 'Copy message'}</button>
+          <button type="button" onClick={onClose} className={btnSecondary}>Done</button>
+        </div>
+      </div>
     </>
   )
 }
