@@ -11,7 +11,7 @@ import { MemberAvatar, btnPrimary, btnSecondary, fieldClass } from '@/components
 import { createClient } from '@/lib/supabase'
 import { uploadImage } from '@/lib/upload'
 import { formatDay, formatMonth } from '@/lib/dashboard'
-import { KIND_RANK, departmentsOf, positionLabel, type Position, type PositionKind, type Term } from '@/lib/terms'
+import { KIND_RANK, departmentsOf, isAdvisorOnly, positionLabel, type Position, type PositionKind, type Term } from '@/lib/terms'
 import { cn } from '@/lib/utils'
 
 const db = () => createClient() as any
@@ -287,7 +287,13 @@ function Positions({ term, run }: { term: Term; run: Run }) {
       'Position added'
     ).then((ok) => ok && setWho(''))
   }
-  const notInTerm = sorted.filter((m) => !tp.some((p) => p.profile_id === m.id))
+  const notInTerm = sorted.filter((m) => !tp.some((p) => p.profile_id === m.id) && !isAdvisorOnly(data.terms, m.id))
+  // People from the term before this one who aren't in this term yet
+  const prevTerm = data.terms.terms.find((t) => t.number === term.number - 1)
+  const fromPrev = prevTerm ? notInTerm.filter((m) => data.terms.positions.some((p) => p.term_id === prevTerm.id && p.profile_id === m.id && p.kind !== 'advisor')) : []
+  const [findMember, setFindMember] = useState('')
+  const shown = notInTerm.filter((m) => (m.full_name || '').toLowerCase().includes(findMember.trim().toLowerCase()))
+  const toggle = (id: string) => setAddMembers((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]))
 
   return (
     <>
@@ -326,27 +332,64 @@ function Positions({ term, run }: { term: Term; run: Run }) {
 
       <section>
         <h3 className="mb-1 text-lg font-bold">Members <span className="font-mono text-sm font-normal text-text-tertiary">{members.length}</span></h3>
-        <p className="mb-3 text-sm text-text-tertiary">Leaders above are part of the term too; they don’t need a member row.</p>
-        <ul className="mb-3 flex flex-wrap gap-1.5">
-          {members.map((p) => (
-            <li key={p.id} className="inline-flex items-center gap-1 rounded-full border border-control py-1 pl-3 pr-1 text-[13px]">
-              {memberName(p.profile_id)}
-              <button type="button" onClick={() => run(() => db().from('positions').delete().eq('id', p.id), 'Removed from the term')} aria-label={`Remove ${memberName(p.profile_id)}`} className="h-6 w-6 rounded-full text-text-tertiary hover:text-[#FF9C85]">×</button>
-            </li>
-          ))}
-        </ul>
+        <p className="mb-3 text-sm text-text-tertiary">
+          Everyone else in {term.name}. They show on the Members page under this term. Leaders above already count, so they don’t need adding here.
+        </p>
+        {members.length ? (
+          <ul className="mb-4 flex flex-wrap gap-1.5">
+            {members.map((p) => (
+              <li key={p.id} className="inline-flex items-center gap-1 rounded-full border border-control py-1 pl-3 pr-1 text-[13px]">
+                {memberName(p.profile_id)}
+                <button type="button" onClick={() => run(() => db().from('positions').delete().eq('id', p.id), 'Removed from the term')} aria-label={`Remove ${memberName(p.profile_id)}`} className="h-6 w-6 rounded-full text-text-tertiary hover:text-[#FF9C85]">×</button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mb-4 rounded-lg border border-dashed border-control px-4 py-3 text-sm text-text-tertiary">No members in {term.name} yet.</p>
+        )}
         {notInTerm.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-paper p-3">
-            <select multiple value={addMembers} onChange={(e) => setAddMembers(Array.from(e.target.selectedOptions).map((o) => o.value))} aria-label="Add members to this term" className={cn(fieldClass, 'min-h-[96px] flex-auto py-1.5 text-sm')}>
-              {notInTerm.map((m) => <option key={m.id} value={m.id}>{m.full_name}</option>)}
-            </select>
+          <div className="rounded-lg bg-paper p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <span className="text-sm font-semibold">Add people to {term.name}</span>
+              <div className="flex flex-wrap items-center gap-3">
+                {fromPrev.length > 0 && prevTerm && (
+                  <button type="button" onClick={() => setAddMembers(Array.from(new Set([...addMembers, ...fromPrev.map((m) => m.id)])))} className="text-sm font-semibold text-link hover:text-text-primary">
+                    Select everyone from {prevTerm.name} ({fromPrev.length})
+                  </button>
+                )}
+                {addMembers.length > 0 && (
+                  <button type="button" onClick={() => setAddMembers([])} className="text-sm text-text-tertiary hover:text-text-primary">Clear</button>
+                )}
+              </div>
+            </div>
+            {notInTerm.length > 8 && (
+              <input type="search" value={findMember} onChange={(e) => setFindMember(e.target.value)} placeholder="Find a name" aria-label="Find a member" className={cn(fieldClass, 'mb-3 min-h-[38px] bg-ink text-sm')} />
+            )}
+            <div role="group" aria-label="People not in this term" className="flex flex-wrap gap-1.5">
+              {shown.map((m) => {
+                const on = addMembers.includes(m.id)
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => toggle(m.id)}
+                    className={cn('min-h-[34px] rounded-full border px-3 text-[13px] transition-colors', on ? 'border-[#4A6BA8] bg-navy text-white' : 'border-dashed border-control text-text-secondary hover:border-text-tertiary hover:text-text-primary')}
+                  >
+                    {on ? '✓ ' : '+ '}
+                    {m.full_name}
+                  </button>
+                )
+              })}
+              {!shown.length && <span className="text-sm text-text-tertiary">No one matches.</span>}
+            </div>
             <button
               type="button"
               disabled={!addMembers.length}
-              onClick={() => run(() => db().from('positions').insert(addMembers.map((id) => ({ term_id: term.id, kind: 'member', profile_id: id, sort: 9 }))), `${addMembers.length} added`).then((ok) => ok && setAddMembers([]))}
-              className={btnSecondary}
+              onClick={() => run(() => db().from('positions').insert(addMembers.map((id) => ({ term_id: term.id, kind: 'member', profile_id: id, sort: 9 }))), `${addMembers.length} added to ${term.name}`).then((ok) => ok && setAddMembers([]))}
+              className={cn(btnPrimary, 'mt-4')}
             >
-              Add {addMembers.length || ''} to {term.name}
+              {addMembers.length ? `Add ${addMembers.length} to ${term.name}` : 'Pick people to add'}
             </button>
           </div>
         )}
