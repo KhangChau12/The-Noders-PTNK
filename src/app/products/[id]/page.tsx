@@ -122,6 +122,7 @@ export default function ProjectDetailPage() {
                   [&_p]:mb-4 [&_div]:mb-3
                   [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1.5
                   [&_strong]:font-semibold [&_strong]:text-text-primary
+                  [&_code]:rounded [&_code]:bg-paper [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[14px] [&_code]:text-text-primary
                   [&_a]:text-link [&_a]:underline [&_a]:underline-offset-[3px]
                   [&_blockquote]:my-6 [&_blockquote]:border-l-[3px] [&_blockquote]:border-link [&_blockquote]:pl-5 [&_blockquote]:text-text-primary"
                 dangerouslySetInnerHTML={{ __html: details }}

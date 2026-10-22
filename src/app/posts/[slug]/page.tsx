@@ -328,11 +328,7 @@ export default function PostDetailPage() {
   }, [blocks, lang])
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loading size="lg" text="Loading post..." />
-      </div>
-    )
+    return <Loading text="Loading post" />
   }
 
   if (error || !post) {

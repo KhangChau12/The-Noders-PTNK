@@ -1,7 +1,7 @@
-import ProjectsClient from '@/components/ProjectsClient'
+import ProjectsClient, { type ProductListItem } from '@/components/ProjectsClient'
 import { createClient } from '@/lib/supabase'
 
-async function getInitialProjects() {
+async function getInitialProjects(): Promise<ProductListItem[]> {
   try {
     const supabase = createClient()
     const { data: projects, error } = await supabase
@@ -28,7 +28,6 @@ async function getInitialProjects() {
         )
       `)
       .order('created_at', { ascending: false })
-      .limit(20)
 
     if (error) return []
     return projects?.map(p => ({ ...p, contributors: p.project_contributors || [] })) || []

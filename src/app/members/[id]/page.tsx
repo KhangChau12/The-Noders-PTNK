@@ -138,11 +138,7 @@ export default function MemberProfilePage() {
   }, [contributions, posts, results])
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loading />
-      </div>
-    )
+    return <Loading text="Loading profile" />
   }
 
   if (error || !member || (terms.ready && isAdvisorOnly(terms, member.id))) {

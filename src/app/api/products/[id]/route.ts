@@ -139,17 +139,20 @@ export async function PUT(
     }
 
     // Update contributors if provided (only owners can do this)
+    // The editor sends everyone except the creator. The creator's own row is found
+    // by user id, not by role: existing rows store the creator as 'Contributor'.
     if (isOwner && contributors && Array.isArray(contributors)) {
-      // Delete existing contributors (except creator)
-      await supabase
+      const others = contributors.filter((c: any) => c.user_id && c.user_id !== user.id)
+
+      const { error: deleteError } = await supabase
         .from('project_contributors')
         .delete()
         .eq('project_id', id)
-        .neq('role_in_project', 'Creator')
+        .neq('user_id', user.id)
+      if (deleteError) console.error('Error clearing contributors:', deleteError)
 
-      // Add new contributors
-      if (contributors.length > 0) {
-        const contributorData = contributors.map((c: any) => ({
+      if (others.length > 0) {
+        const contributorData = others.map((c: any) => ({
           project_id: id,
           user_id: c.user_id,
           contribution_percentage: c.contribution_percentage || 0,
@@ -166,15 +169,19 @@ export async function PUT(
         }
       }
 
-      // Update creator's contribution percentage
-      const totalContribPercentage = contributors.reduce((sum: number, c: any) => sum + (c.contribution_percentage || 0), 0)
-      const creatorPercentage = Math.max(0, 100 - totalContribPercentage)
-
-      await supabase
+      // The creator keeps whatever share is left, and always keeps a credit row
+      const othersTotal = others.reduce((sum: number, c: any) => sum + (c.contribution_percentage || 0), 0)
+      const creatorPercentage = Math.max(0, 100 - othersTotal)
+      const { data: creatorRow } = await supabase
         .from('project_contributors')
-        .update({ contribution_percentage: creatorPercentage })
+        .select('id')
         .eq('project_id', id)
-        .eq('role_in_project', 'Creator')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      const { error: creatorError } = creatorRow
+        ? await supabase.from('project_contributors').update({ contribution_percentage: creatorPercentage }).eq('id', creatorRow.id)
+        : await supabase.from('project_contributors').insert({ project_id: id, user_id: user.id, contribution_percentage: creatorPercentage, role_in_project: 'Creator' })
+      if (creatorError) console.error('Error saving creator credit:', creatorError)
     }
 
     revalidatePath('/products')

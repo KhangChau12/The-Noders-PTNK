@@ -14,7 +14,7 @@ interface LoadingProps {
 /** Page-level: thin progress bar + a generic skeleton. */
 export function Loading({ className, text = 'Loading' }: LoadingProps) {
   return (
-    <div aria-busy="true" className={cn('min-h-[60vh]', className)}>
+    <div aria-busy="true" className={cn('min-h-[60vh] w-full', className)}>
       <LoadBar />
       <span className="sr-only" role="status">{text}</span>
       <DetailSkeleton />
