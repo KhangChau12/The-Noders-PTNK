@@ -16,6 +16,7 @@ const TABS = [
   { href: '/admin/posts', label: 'Posts', count: 'posts' },
   { href: '/admin/certificates', label: 'Certificates', count: 'certificates' },
   { href: '/admin/activity', label: 'Club points', count: 'logs' },
+  { href: '/admin/network', label: 'Network', count: null },
 ] as const
 
 export function AdminFrame({ children }: { children: ReactNode }) {
