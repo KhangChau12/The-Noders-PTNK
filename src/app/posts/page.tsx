@@ -635,7 +635,7 @@ export default function PostsPage() {
 
           {!loading && !error && posts.length > 0 && (
             <>
-              <ul className="border-b border-rule">
+              <ul data-stagger className="border-b border-rule">
                 {posts.map((post) => (
                   <PostRow key={post.id} post={post} />
                 ))}

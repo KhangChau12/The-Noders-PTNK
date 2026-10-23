@@ -211,12 +211,13 @@ export function ContestDetail({ contest }: { contest: Contest }) {
           {contest.raceTakeaway && <p className="mb-8 max-w-[760px] text-[17px] text-text-secondary">{contest.raceTakeaway}</p>}
 
           <ol
+            data-stagger
             className={cn('grid gap-1 text-[13px]', twoRounds ? 'mb-10' : 'mt-8')}
             style={{ gridTemplateColumns: contest.timeline.map((p) => `${(p.span / totalSpan) * 100}fr`).join(' ') }}
           >
             {contest.timeline.map((p) => (
               <li key={p.label} className="min-w-0">
-                <div className={cn('h-1.5 rounded-[3px]', TONE[p.tone])} />
+                <div className={cn('bar-grow h-1.5 rounded-[3px]', TONE[p.tone])} />
                 <div className="mt-2 truncate text-text-secondary" title={`${p.label} · ${p.dates}`}>
                   {p.label} · {p.dates}
                 </div>

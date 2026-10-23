@@ -43,7 +43,7 @@ export default function EducationPage() {
 
           {COURSES.map((course) => (
             <div key={course.slug} className="mb-16 last:mb-0">
-              <article className="rounded-xl bg-paper p-6 sm:p-8 lg:p-10">
+              <article data-reveal className="rounded-xl bg-paper p-6 sm:p-8 lg:p-10">
                 <div className="flex flex-wrap items-center gap-x-14 gap-y-10">
                   <div className="relative aspect-video min-w-0 flex-[1_1_440px] overflow-hidden rounded-lg">
                     <Image src={course.coverImage} alt={course.coverAlt} fill sizes="(max-width: 1024px) 100vw, 560px" className="object-cover" />
@@ -90,7 +90,7 @@ export default function EducationPage() {
               <p className="mb-6 text-[15px] text-text-secondary">
                 Each session: concept first, then a hands-on notebook. Slides and recordings are on each session page.
               </p>
-              <ol className="border-b border-rule">
+              <ol data-stagger className="border-b border-rule">
                 {course.sessions.map((s) => (
                   <li key={s.n} className="border-t border-rule">
                     <Link href={`/education/${course.slug}/session/${s.n}`} className="group flex flex-wrap gap-x-10 gap-y-3 py-[26px]">

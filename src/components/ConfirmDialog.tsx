@@ -70,13 +70,13 @@ function ConfirmDialog({ options, onClose }: { options: ConfirmOptions; onClose:
   return (
     <>
       <div className="fixed inset-0 z-[70] bg-[rgba(5,8,14,0.6)]" onClick={() => onClose(false)} />
-      <div className="pointer-events-none fixed inset-0 z-[71] flex items-center justify-center p-4">
+      <div className="pointer-events-none fixed inset-0 z-[71] flex items-end justify-center sm:items-center sm:p-4">
         <div
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="confirm-title"
           aria-describedby="confirm-body"
-          className="pointer-events-auto w-full max-w-[440px] animate-[slideUp_0.18s_ease-out] rounded-[14px] border border-[#2A2E37] bg-paper px-[26px] pb-[22px] pt-[26px] shadow-[0_24px_64px_rgba(0,0,0,0.5)]"
+          className="dialog-pop pointer-events-auto w-full max-w-[440px] rounded-t-[16px] border border-[#2A2E37] bg-paper px-[26px] pb-[max(22px,env(safe-area-inset-bottom))] pt-[26px] sm:rounded-[14px] sm:pb-[22px] shadow-[0_24px_64px_rgba(0,0,0,0.5)]"
         >
           <h2 id="confirm-title" className="mb-2 text-xl font-bold">{title}</h2>
           <p id="confirm-body" className="mb-[22px] text-[15px] text-text-secondary">{message}</p>

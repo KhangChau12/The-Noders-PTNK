@@ -7,6 +7,7 @@ import { ConfirmProvider } from '@/components/ConfirmDialog'
 import { LanguageProvider } from '@/components/LanguageProvider'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { Motion } from '@/components/Motion'
 import { SITE_CONFIG } from '@/lib/constants'
 
 // Be Vietnam Pro carries the whole UI (full Vietnamese diacritics support);
@@ -98,6 +99,7 @@ export default function RootLayout({
                   {children}
                 </main>
                 <Footer />
+                <Motion />
               </LanguageProvider>
             </AuthProvider>
           </ConfirmProvider>

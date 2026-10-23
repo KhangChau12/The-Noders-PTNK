@@ -79,10 +79,10 @@ export function MembersDirectory({ members }: { members: DirectoryMember[] }) {
         </div>
       </div>
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {people.map((m) => (
           <li key={m.id}>
-            <Link href={`/members/${m.id}`} className="group grid grid-cols-[48px_1fr] items-center gap-3.5 rounded-[10px] bg-[#111318] px-4 py-3.5 transition-colors hover:bg-[#1A1E26]">
+            <Link href={`/members/${m.id}`} className="lift group grid grid-cols-[48px_1fr] items-center gap-3.5 rounded-[10px] bg-[#111318] px-4 py-3.5 transition-colors hover:bg-[#1A1E26]">
               <Avatar src={m.avatar} name={m.name} size="md" className="h-12 w-12" />
               <span className="min-w-0">
                 <span className="block truncate font-bold leading-snug text-text-primary group-hover:text-link transition-colors">{m.name}</span>

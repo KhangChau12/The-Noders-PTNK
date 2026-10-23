@@ -74,7 +74,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) 
       role={isError ? 'alert' : 'status'}
       className={cn(
         'pointer-events-auto flex w-full max-w-[460px] items-start gap-3 rounded-[10px] border py-3 pl-4 pr-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.35)] sm:w-auto sm:min-w-[320px]',
-        'animate-[slideUp_0.2s_ease-out]',
+        'toast-in',
         isError ? 'border-[#6B2A2A] bg-[#2A1714]' : 'border-[#2A2E37] bg-[#1C2027]'
       )}
     >

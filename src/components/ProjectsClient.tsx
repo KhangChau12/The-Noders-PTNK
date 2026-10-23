@@ -112,7 +112,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
         <section aria-label="Featured" className="pt-14 sm:pt-16">
           <Container>
             <div className="grid items-center gap-x-12 gap-y-7 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-              <Link href={`/products/${spot.id}`} className="block">
+              <Link href={`/products/${spot.id}`} className="zoom block">
                 <Shot p={spot} sizes="(max-width: 1024px) 100vw, 700px" className="aspect-[16/9.5] rounded-xl" priority />
               </Link>
               <div className="min-w-0">
@@ -148,9 +148,9 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
             </div>
 
             {more.length > 0 && (
-              <div className="mt-12 grid gap-6 md:grid-cols-2 lg:gap-8">
+              <div data-stagger className="mt-12 grid gap-6 md:grid-cols-2 lg:gap-8">
                 {more.map((p) => (
-                  <article key={p.id} className="grid gap-5 rounded-[14px] bg-paper p-[18px] sm:grid-cols-2">
+                  <article key={p.id} className="lift zoom grid gap-5 rounded-[14px] bg-paper p-[18px] sm:grid-cols-2">
                     <Link href={`/products/${p.id}`} className="block">
                       <Shot p={p} sizes="(max-width: 768px) 100vw, 300px" className="aspect-[16/10] rounded-lg" />
                     </Link>
@@ -208,12 +208,12 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: P
           </div>
 
           {rows.length ? (
-            <ul className="border-b border-rule">
+            <ul data-stagger key={`${show}-${sort}`} className="swap-in border-b border-rule">
               {rows.map((p) => {
                 const people = makersOf(p)
                 return (
                   <li key={p.id} className="grid gap-x-8 gap-y-4 border-t border-rule py-[22px] sm:grid-cols-[200px_minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)_250px] lg:items-center">
-                    <Link href={`/products/${p.id}`} className="block">
+                    <Link href={`/products/${p.id}`} className="zoom block">
                       <Shot p={p} sizes="(max-width: 640px) 100vw, 220px" className="aspect-[16/10] rounded-lg" />
                     </Link>
                     <div className="flex min-w-0 flex-col gap-1.5">

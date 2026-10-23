@@ -72,7 +72,7 @@ export default function ContestPage() {
           <SectionTitle id="how" className="mb-8 !text-[26px] sm:!text-[34px]">
             How every contest runs
           </SectionTitle>
-          <ol className="grid grid-cols-1 gap-x-12 md:grid-cols-3">
+          <ol data-stagger className="grid grid-cols-1 gap-x-12 md:grid-cols-3">
             {PHASES.map((phase) => (
               <li key={phase.n} className="flex flex-col gap-2 border-t-2 border-link pt-5 pb-2">
                 <span className="text-sm font-semibold text-link">

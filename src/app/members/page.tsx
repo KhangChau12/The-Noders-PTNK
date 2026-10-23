@@ -187,11 +187,11 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
           <Container>
             <SectionTitle className="mb-2">{term.name} leadership</SectionTitle>
             <p className="mb-7 text-text-secondary">President and the heads of each department{term.starts_on ? ` since ${formatMonth(term.starts_on)}` : ''}. Reach out to whoever owns the area you care about.</p>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div data-stagger className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {leaders.map((p) => {
                 const x = person(p)
                 return (
-                  <Link key={p.id} href={x.href || '#'} className="group grid grid-cols-[56px_1fr] items-center gap-4 rounded-xl bg-paper px-5 py-[18px] transition-colors hover:bg-[#1A1E26]">
+                  <Link key={p.id} href={x.href || '#'} className="lift group grid grid-cols-[56px_1fr] items-center gap-4 rounded-xl bg-paper px-5 py-[18px] transition-colors hover:bg-[#1A1E26]">
                     <Face src={x.avatar} name={x.name} className="h-14 w-14 rounded-full" />
                     <span className="min-w-0">
                       <span className="block text-[13px] font-semibold text-link">{positionLabel(p, terms)}</span>
@@ -210,9 +210,9 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         <section className="pt-20">
           <Container>
             <SectionTitle className="mb-7">Who leads what</SectionTitle>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div data-stagger className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {legacyLeads.map((m) => (
-                <Link key={m.id} href={`/members/${m.id}`} className="grid grid-cols-[56px_1fr] items-center gap-4 rounded-xl bg-paper px-5 py-[18px] hover:bg-[#1A1E26]">
+                <Link key={m.id} href={`/members/${m.id}`} className="lift grid grid-cols-[56px_1fr] items-center gap-4 rounded-xl bg-paper px-5 py-[18px] hover:bg-[#1A1E26]">
                   <Face src={m.avatar_url} name={m.name} className="h-14 w-14 rounded-full" />
                   <span className="min-w-0">
                     <span className="block text-[13px] font-semibold text-link">{m.title}</span>
@@ -236,7 +236,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
           <Container>
             <SectionTitle className="mb-2">Alumni</SectionTitle>
             <p className="mb-6 text-text-secondary">Members of earlier terms. Their roles stay on their profiles.</p>
-            <ul className="grid gap-x-4 gap-y-2 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
+            <ul data-stagger className="grid gap-x-4 gap-y-2 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
               {alumni.map((m) => (
                 <li key={m.id} className="border-b border-rule">
                   <Link href={`/members/${m.id}`} className="flex items-center gap-3 py-2.5 font-semibold text-text-primary hover:text-link">

@@ -276,7 +276,7 @@ export default async function HomePage() {
       <section className="pt-20 sm:pt-28">
         <Container>
           <SectionTitle className="mb-12 max-w-[640px]">Three things we do, and proof that we do them.</SectionTitle>
-          <div className="grid grid-cols-1 gap-x-12 md:grid-cols-3">
+          <div data-stagger className="grid grid-cols-1 gap-x-12 md:grid-cols-3">
             {pillars.map((p) => (
               <div key={p.title} className="flex flex-col gap-3.5 border-t-2 border-link pt-[22px] pb-8">
                 <h3 className="text-2xl font-bold tracking-[-0.015em] text-text-primary">{p.title}</h3>
@@ -344,9 +344,9 @@ export default async function HomePage() {
         <section className="pt-20 sm:pt-28">
           <Container>
             <SectionHeader title="Recently shipped" href="/products" linkLabel={`All ${projectsCount} products`} />
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div data-stagger className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
               {projects.map((p) => (
-                <Link key={p.id} href={`/products/${p.id}`} className="group flex flex-col gap-3">
+                <Link key={p.id} href={`/products/${p.id}`} className="zoom group flex flex-col gap-3">
                   <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-paper">
                     {projectImage(p) && (
                       <Image
@@ -412,7 +412,7 @@ export default async function HomePage() {
                   Core team
                 </p>
               </div>
-              <ul className="grid min-w-0 flex-[2_1_560px] grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-8">
+              <ul data-stagger className="grid min-w-0 flex-[2_1_560px] grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-8">
                 {members.map((m) => (
                   <li key={m.id} className="flex items-center gap-2.5 border-t border-rule py-3 text-[15px]">
                     <span

@@ -66,8 +66,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, user, profile,
 
       <nav aria-label="Main" className="overflow-y-auto px-5 pt-3">
         <ul>
-          {NAVIGATION_ITEMS.map((item) => (
-            <li key={item.href} className="border-b border-rule">
+          {NAVIGATION_ITEMS.map((item, i) => (
+            <li key={item.href} className="stagger-in border-b border-rule" style={{ ['--rv-i' as string]: i }}>
               <Link
                 href={item.href}
                 onClick={onClose}

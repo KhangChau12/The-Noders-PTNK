@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { FilterButton } from '@/components/editorial'
 import type { ResultRow } from '@/lib/programs'
 
 const fmt = (v: number | null) => (v == null ? '—' : v.toFixed(4))
@@ -56,9 +55,14 @@ export function Leaderboard({
             />
           </label>
           {teams && (
-            <div role="group" aria-label="Ranking" className="flex gap-2">
-              <FilterButton active={!isIndiv} onClick={() => setTab('team')}>Teams</FilterButton>
-              <FilterButton active={isIndiv} onClick={() => setTab('indiv')}>Individuals</FilterButton>
+            <div role="group" aria-label="Ranking" className="relative grid grid-cols-2 rounded-md border border-control p-0.5 text-sm font-medium">
+              {/* The highlight slides between the two options */}
+              <span aria-hidden="true" className={cn('absolute inset-y-0.5 left-0.5 w-[calc(50%-2px)] rounded-[5px] bg-navy transition-transform duration-300 ease-out motion-reduce:transition-none', isIndiv && 'translate-x-full')} />
+              {([['team', 'Teams'], ['indiv', 'Individuals']] as const).map(([v, l]) => (
+                <button key={v} type="button" aria-pressed={tab === v} onClick={() => setTab(v)} className={cn('relative min-h-[36px] px-3.5 transition-colors', tab === v ? 'text-white' : 'text-text-secondary hover:text-text-primary')}>
+                  {l}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -76,7 +80,7 @@ export function Leaderboard({
               <th scope="col" className="py-3.5 text-right font-medium">Subs</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={tab} className="swap-in">
             {rows.map((r) => (
               <tr key={`${r.name}-${r.rank}`} className="border-t border-[#2A2E37]">
                 <td className={cn('py-[11px] font-mono', r.rank <= 3 ? 'text-link' : 'text-text-tertiary')}>

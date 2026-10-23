@@ -111,7 +111,7 @@ export function Header() {
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute top-full right-0 mt-2 min-w-[13rem] py-1.5 bg-paper border border-control rounded-lg shadow-xl z-50">
+                  <div className="menu-pop absolute top-full right-0 mt-2 min-w-[13rem] py-1.5 bg-paper border border-control rounded-lg shadow-xl z-50">
                     <div className="px-4 py-2 border-b border-rule mb-1">
                       <p className="text-xs font-medium text-text-primary truncate">{displayName}</p>
                       <p className="text-xs text-text-tertiary truncate">{user.email}</p>
