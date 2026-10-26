@@ -1,5 +1,5 @@
-import { Loading } from '@/components/Loading'
+import { MemberSkeleton } from '@/components/skeletons'
 
-export default function MemberLoading() {
-  return <Loading text="Loading profile" />
+export default function Loading() {
+  return <MemberSkeleton />
 }

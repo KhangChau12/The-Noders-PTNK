@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { useMember } from '@/lib/hooks'
 import { postQueries } from '@/lib/queries'
-import { Loading } from '@/components/Loading'
+import { MemberSkeleton } from '@/components/skeletons'
 import { Avatar } from '@/components/Avatar'
 import { useToast } from '@/components/Toast'
 import { Breadcrumb, Container, FilterButton, NavyFacts, PrimaryLink } from '@/components/editorial'
@@ -138,7 +138,7 @@ export default function MemberProfilePage() {
   }, [contributions, posts, results])
 
   if (loading) {
-    return <Loading text="Loading profile" />
+    return <MemberSkeleton />
   }
 
   if (error || !member || (terms.ready && isAdvisorOnly(terms, member.id))) {

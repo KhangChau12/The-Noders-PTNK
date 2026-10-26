@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Loading } from '@/components/Loading'
+import { PostSkeleton } from '@/components/skeletons'
 import { Avatar } from '@/components/Avatar'
 import { useAuth } from '@/components/AuthProvider'
 import { useLanguage } from '@/components/LanguageProvider'
@@ -328,7 +328,7 @@ export default function PostDetailPage() {
   }, [blocks, lang])
 
   if (loading) {
-    return <Loading text="Loading post" />
+    return <PostSkeleton />
   }
 
   if (error || !post) {

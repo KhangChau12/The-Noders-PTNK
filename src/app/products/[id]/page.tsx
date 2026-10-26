@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useProject, useProjects } from '@/lib/hooks'
-import { Loading } from '@/components/Loading'
+import { ProductSkeleton } from '@/components/skeletons'
 import { Avatar } from '@/components/Avatar'
 import {
   Breadcrumb,
@@ -46,7 +46,7 @@ export default function ProjectDetailPage() {
   const { project, loading, error } = useProject(params.id as string)
   const { projects: all } = useProjects({})
 
-  if (loading) return <Loading />
+  if (loading) return <ProductSkeleton />
 
   if (error || !project) {
     return (
