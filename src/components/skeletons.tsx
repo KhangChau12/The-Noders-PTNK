@@ -26,7 +26,7 @@ const Col = ({ gap, className, children }: { gap: number; className?: string; ch
 const Lines = ({ ws, h = 16, gap = 10, navy }: { ws: W[]; h?: number; gap?: number; navy?: boolean }) => (
   <Col gap={gap}>{ws.map((w, i) => (navy ? <N key={i} w={w} h={h} /> : <B key={i} w={w} h={h} />))}</Col>
 )
-const Card = ({ className, children }: { className?: string; children: ReactNode }) => <div className={cn('rounded-[14px] bg-paper/60 p-[22px]', className)}>{children}</div>
+const Card = ({ className, children }: { className?: string; children: ReactNode }) => <div className={cn('rounded-[14px] bg-[#111318] p-[22px]', className)}>{children}</div>
 
 function Shell({ label, children }: { label: string; children: ReactNode }) {
   return (

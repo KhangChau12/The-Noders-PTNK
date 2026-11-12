@@ -40,6 +40,7 @@ interface HomePost {
   title: string
   slug: string
   category: string
+  summary: string | null
   reading_time: number | null
   published_at: string | null
   created_at: string
@@ -69,6 +70,7 @@ const POST_FIELDS = `
   title,
   slug,
   category,
+  summary,
   reading_time,
   published_at,
   created_at,
@@ -98,8 +100,9 @@ async function getHomeData() {
         .from('posts')
         .select(POST_FIELDS)
         .eq('status', 'published')
+        .eq('category', 'Community Activities')
         .order('published_at', { ascending: false })
-        .limit(6),
+        .limit(4),
       supabase.from('profiles').select('id, full_name, username, role').order('full_name', { ascending: true }),
     ])
 
@@ -272,6 +275,43 @@ export default async function HomePage() {
         </Container>
       </section>
 
+      {/* Community activities — the club's most important recaps, shown first */}
+      {posts.length > 0 && (
+        <section className="pt-20 sm:pt-28">
+          <Container>
+            <SectionHeader
+              title="Community activities"
+              href={`/posts?category=${encodeURIComponent('Community Activities')}`}
+              linkLabel="All activities"
+            />
+            <div data-stagger className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              {posts.map((post) => (
+                <Link key={post.id} href={`/posts/${post.slug}`} className="zoom group flex flex-col gap-3">
+                  <div className="relative aspect-video overflow-hidden rounded-lg bg-paper">
+                    {post.thumbnail_image?.public_url && (
+                      <Image
+                        src={post.thumbnail_image.public_url}
+                        alt={post.thumbnail_image.alt_text || cleanTitle(post.title)}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <Mono className="mt-1.5">{formatDate(post.published_at || post.created_at)}</Mono>
+                  <h3 className="text-[19px] font-bold leading-snug tracking-[-0.01em] text-text-primary group-hover:text-link transition-colors">
+                    {cleanTitle(post.title)}
+                  </h3>
+                  {post.summary && (
+                    <p className="text-[15px] leading-relaxed text-text-secondary line-clamp-3">{post.summary}</p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
       {/* What we do */}
       <section className="pt-20 sm:pt-28">
         <Container>
@@ -368,30 +408,6 @@ export default async function HomePage() {
                 </Link>
               ))}
             </div>
-          </Container>
-        </section>
-      )}
-
-      {/* Writing */}
-      {posts.length > 0 && (
-        <section className="pt-20 sm:pt-28">
-          <Container>
-            <SectionHeader title="Writing" href="/posts" linkLabel="All posts" className="mb-5" />
-            <ul className="border-b border-rule">
-              {posts.slice(0, 5).map((post) => (
-                <li key={post.id} className="border-t border-rule">
-                  <Link href={`/posts/${post.slug}`} className="group flex flex-wrap items-baseline gap-x-8 gap-y-1.5 py-[22px]">
-                    <Mono className="flex-[0_0_120px]">{formatDate(post.published_at || post.created_at)}</Mono>
-                    <span className="min-w-0 flex-[1_1_480px] text-[19px] font-semibold leading-snug tracking-[-0.01em] text-text-primary group-hover:text-link transition-colors">
-                      {cleanTitle(post.title)}
-                    </span>
-                    <span className="text-sm text-text-tertiary">
-                      {[post.author?.full_name, post.reading_time ? `${post.reading_time} min` : null].filter(Boolean).join(' · ')}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </Container>
         </section>
       )}
